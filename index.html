@@ -366,6 +366,11 @@ canvas { display: block; width: 100%; height: 100%; }
       Tip: enable <em>Avg</em> for a smoother reading while making adjustments.
     </p>
     <button class="close-btn" onclick="toggleInfo()">Got it</button>
+    <p style="margin-top:12px;text-align:center;font-size:11px;color:var(--tx2)">
+      <a href="privacy.html" style="color:var(--acc)">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/ooverstreet/Owen" style="color:var(--acc)">Source Code</a>
+    </p>
   </div>
 </div>
 
@@ -991,7 +996,9 @@ applyTheme(currentTheme);
 buildDeltaGrid();
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  // Register with explicit scope for GitHub Pages deployment at /Owen/
+  const base = location.pathname.replace(/\/[^/]*$/, '/');
+  navigator.serviceWorker.register(base + 'sw.js', { scope: base }).catch(() => {});
 }
 </script>
 </body>
