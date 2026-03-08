@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="90" fill="#0a0a18"/>
+  <!-- Purple glow circle -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#7c3aed" stroke-width="3" opacity=".4"/>
+  <!-- Headphones -->
+  <path d="M256 130 C168 130 100 198 100 286 L100 320 C100 337 114 350 130 350 L160 350 C176 350 190 337 190 320 L190 286 C190 254 220 228 256 228 C292 228 322 254 322 286 L322 320 C322 337 336 350 352 350 L382 350 C398 350 412 337 412 320 L412 286 C412 198 344 130 256 130Z"
+        fill="none" stroke="#a855f7" stroke-width="18" stroke-linecap="round"/>
+  <!-- Left ear cup -->
+  <rect x="90" y="278" width="110" height="84" rx="22" fill="#7c3aed"/>
+  <!-- Right ear cup -->
+  <rect x="312" y="278" width="110" height="84" rx="22" fill="#7c3aed"/>
+  <!-- Sound waves from center -->
+  <path d="M220 290 Q256 260 292 290" fill="none" stroke="#06b6d4" stroke-width="8" stroke-linecap="round" opacity=".9"/>
+  <path d="M206 316 Q256 276 306 316" fill="none" stroke="#06b6d4" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+</svg>

@@ -1,0 +1,46 @@
+{
+  "id": "/Owen/ear-train/",
+  "name": "EQ Hero — Ear Training",
+  "short_name": "EQ Hero",
+  "description": "Train your ears to identify frequencies. Addictive daily ear training game for audiophiles and musicians. Level up from Beginner to Master.",
+  "start_url": "/Owen/ear-train/",
+  "scope": "/Owen/ear-train/",
+  "display": "standalone",
+  "background_color": "#0a0a18",
+  "theme_color": "#0a0a18",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["games", "music", "education"],
+  "icons": [
+    {
+      "src": "/Owen/ear-train/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/Owen/ear-train/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Owen/ear-train/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Owen/ear-train/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Owen/ear-train/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
