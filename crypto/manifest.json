@@ -1,0 +1,21 @@
+{
+  "id": "/Owen/crypto/",
+  "name": "Crypto Signal",
+  "short_name": "Crypto Signal",
+  "description": "Real-time crypto technical analysis signals. RSI, MACD, Bollinger Bands, EMA, VWAP — live BUY/SELL/HOLD signals for intraday trading.",
+  "start_url": "/Owen/crypto/",
+  "scope": "/Owen/crypto/",
+  "display": "standalone",
+  "background_color": "#060610",
+  "theme_color": "#060610",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    { "src": "/Owen/crypto/icon.svg",             "sizes": "any",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/Owen/crypto/icon-192.png",         "sizes": "192x192", "type": "image/png",     "purpose": "any" },
+    { "src": "/Owen/crypto/icon-512.png",         "sizes": "512x512", "type": "image/png",     "purpose": "any" },
+    { "src": "/Owen/crypto/icon-maskable-192.png","sizes": "192x192", "type": "image/png",     "purpose": "maskable" },
+    { "src": "/Owen/crypto/icon-maskable-512.png","sizes": "512x512", "type": "image/png",     "purpose": "maskable" }
+  ]
+}

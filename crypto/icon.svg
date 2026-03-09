@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="90" fill="#060610"/>
+  <!-- Chart background grid -->
+  <line x1="60" y1="120" x2="60" y2="400" stroke="#1e1e3a" stroke-width="1.5"/>
+  <line x1="60" y1="400" x2="460" y2="400" stroke="#1e1e3a" stroke-width="1.5"/>
+  <!-- Candlesticks -->
+  <!-- Red candle -->
+  <line x1="120" y1="160" x2="120" y2="230" stroke="#ff3358" stroke-width="3"/>
+  <rect x="105" y="175" width="30" height="40" rx="3" fill="#ff3358"/>
+  <!-- Green candle -->
+  <line x1="200" y1="200" x2="200" y2="330" stroke="#00e87a" stroke-width="3"/>
+  <rect x="185" y="220" width="30" height="60" rx="3" fill="#00e87a"/>
+  <!-- Red candle -->
+  <line x1="280" y1="180" x2="280" y2="300" stroke="#ff3358" stroke-width="3"/>
+  <rect x="265" y="200" width="30" height="50" rx="3" fill="#ff3358"/>
+  <!-- Big green candle -->
+  <line x1="360" y1="140" x2="360" y2="320" stroke="#00e87a" stroke-width="3"/>
+  <rect x="345" y="160" width="30" height="120" rx="3" fill="#00e87a"/>
+  <!-- EMA line -->
+  <path d="M80,320 C120,310 160,290 200,260 C240,230 280,240 320,220 C360,200 400,175 440,155"
+        fill="none" stroke="#00b4ff" stroke-width="4" stroke-linecap="round"/>
+  <!-- BUY signal arrow -->
+  <circle cx="200" cy="310" r="20" fill="rgba(0,232,122,.25)" stroke="#00e87a" stroke-width="2"/>
+  <text x="200" y="316" font-family="sans-serif" font-size="16" font-weight="900" text-anchor="middle" fill="#00e87a">‘</text>
+</svg>
