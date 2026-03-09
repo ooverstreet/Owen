@@ -157,6 +157,94 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 #disc-card li{font-size:11px;color:var(--tx2);line-height:1.7;margin-bottom:3px;}
 #disc-ok{width:100%;height:42px;border-radius:8px;border:none;background:var(--acc);color:#000;font-size:13px;font-weight:700;cursor:pointer;}
 
+/* ── Bot status bar ───────────────────────────────────────────── */
+#bot-bar{
+  display:flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--p1);border-bottom:1px solid var(--bord);flex-shrink:0;
+}
+.bdot{width:6px;height:6px;border-radius:50%;background:var(--tx3);flex-shrink:0;}
+.bdot.paper{background:var(--yel);box-shadow:0 0 5px var(--yel);}
+.bdot.live{background:var(--grn);box-shadow:0 0 5px var(--grn);}
+.bdot.off{background:var(--tx3);}
+#bot-status-txt{font-size:10px;font-weight:700;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;}
+#bot-pnl-txt{font-size:10px;font-variant-numeric:tabular-nums;color:var(--tx2);}
+#bot-pnl-txt.pos{color:var(--grn);}#bot-pnl-txt.neg{color:var(--red);}
+#bot-bar-spacer{flex:1;}
+#bot-open-btn{
+  height:24px;padding:0 10px;border-radius:12px;border:1px solid var(--bord2);
+  background:var(--p2);color:var(--tx2);font-size:10px;font-weight:700;cursor:pointer;
+  white-space:nowrap;
+}
+#bot-open-btn.configured{border-color:var(--acc);color:var(--acc);}
+
+/* ── Bot drawer ────────────────────────────────────────────────── */
+#bot-drawer{
+  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+  background:var(--bg);transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#bot-drawer.open{transform:translateY(0);}
+#bd-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--bord);flex-shrink:0;
+  padding-top:max(12px,env(safe-area-inset-top));
+}
+#bd-hdr h2{font-size:16px;font-weight:800;color:var(--acc);}
+#bd-close{width:32px;height:32px;border-radius:6px;border:1px solid var(--bord);background:var(--p2);color:var(--tx2);cursor:pointer;font-size:16px;}
+#bd-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px;}
+
+/* Bot setup card */
+.bd-card{background:var(--p2);border:1px solid var(--bord);border-radius:12px;padding:14px;}
+.bd-card h3{font-size:13px;font-weight:700;color:var(--tx1);margin-bottom:10px;}
+.bd-card p{font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:10px;}
+.bd-input{
+  width:100%;height:40px;border-radius:8px;border:1px solid var(--bord2);
+  background:var(--bg);color:var(--tx1);padding:0 12px;font-size:13px;
+  margin-bottom:8px;outline:none;
+}
+.bd-input::placeholder{color:var(--tx3);}
+.bd-btn{
+  width:100%;height:40px;border-radius:8px;border:none;cursor:pointer;
+  font-size:13px;font-weight:700;transition:opacity .15s;
+}
+.bd-btn:active{opacity:.8;}
+.bd-btn.primary{background:var(--acc);color:#000;}
+.bd-btn.green{background:var(--grn);color:#000;}
+.bd-btn.red{background:var(--red);color:#fff;}
+.bd-btn.yellow{background:var(--yel);color:#000;}
+.bd-btn.ghost{background:var(--p1);color:var(--tx2);border:1px solid var(--bord);}
+
+/* Stats row */
+.bd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.bds{background:var(--p1);border:1px solid var(--bord);border-radius:8px;padding:8px;text-align:center;}
+.bds .bv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
+.bds .bl{font-size:9px;color:var(--tx2);margin-top:2px;letter-spacing:.3px;text-transform:uppercase;}
+.bv.pos{color:var(--grn);}.bv.neg{color:var(--red);}
+
+/* Position card */
+.pos-card{background:var(--p1);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;margin-bottom:6px;}
+.pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.pc-coin{font-size:13px;font-weight:800;color:var(--tx1);}
+.pc-side{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.pc-side.BUY{background:rgba(0,232,122,.15);color:var(--grn);}
+.pc-side.SELL{background:rgba(255,51,88,.15);color:var(--red);}
+.pc-rows{display:flex;gap:12px;font-size:11px;color:var(--tx2);flex-wrap:wrap;}
+.pc-rows b{color:var(--tx1);}
+.pc-pnl{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;}
+
+/* Trade row */
+.tr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bord);}
+.tr-row:last-child{border-bottom:none;}
+.tr-left{display:flex;flex-direction:column;gap:1px;}
+.tr-coin{font-size:12px;font-weight:700;color:var(--tx1);}
+.tr-detail{font-size:10px;color:var(--tx2);}
+.tr-pnl{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.tr-pnl.pos{color:var(--grn);}.tr-pnl.neg{color:var(--red);}
+
+/* Error badge */
+#bd-error{background:rgba(255,51,88,.12);border:1px solid rgba(255,51,88,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--red);display:none;}
+
 /* ── History ──────────────────────────────────────────────────── */
 #hist-btn{position:absolute;top:8px;right:8px;z-index:5;width:30px;height:30px;border-radius:7px;border:1px solid var(--bord2);background:rgba(12,12,30,.8);color:var(--tx2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 #hist-drawer{position:absolute;inset:0;background:var(--bg);z-index:15;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
@@ -214,6 +302,15 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
   </div>
 </div>
 
+<!-- Bot status bar -->
+<div id="bot-bar">
+  <div class="bdot off" id="bdot"></div>
+  <span id="bot-status-txt">BOT: NOT CONNECTED</span>
+  <span id="bot-pnl-txt"></span>
+  <div id="bot-bar-spacer"></div>
+  <button id="bot-open-btn" onclick="openBotDrawer()">&#129302; Setup Bot</button>
+</div>
+
 <!-- Timeframe + theme bar -->
 <div id="tf-bar">
   <button class="tf-btn" onclick="setTF('1m',this)">1M</button>
@@ -264,6 +361,66 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 <!-- Coin bar -->
 <div id="coin-bar"></div>
 
+</div><!-- #app -->
+
+<!-- ══ BOT DRAWER ════════════════════════════════════════════════ -->
+<div id="bot-drawer">
+  <div id="bd-hdr">
+    <h2>&#129302; Trading Bot</h2>
+    <button id="bd-close" onclick="closeBotDrawer()">&#10005;</button>
+  </div>
+  <div id="bd-body">
+
+    <!-- Error banner -->
+    <div id="bd-error"></div>
+
+    <!-- Setup / connection card -->
+    <div class="bd-card" id="bd-setup-card">
+      <h3>&#128279; Connect to Railway Backend</h3>
+      <p>Paste your Railway deployment URL and the APP_TOKEN password you set in Railway environment variables.</p>
+      <input class="bd-input" id="bd-url"  placeholder="https://your-bot.up.railway.app" type="url">
+      <input class="bd-input" id="bd-pass" placeholder="Your APP_TOKEN password" type="password">
+      <button class="bd-btn primary" onclick="connectBot()">Test Connection</button>
+    </div>
+
+    <!-- Stats (shown when connected) -->
+    <div id="bd-stats-section" style="display:none">
+      <div class="bd-stats" id="bd-stats-grid">
+        <div class="bds"><div class="bv" id="bds-bal">$—</div><div class="bl">Balance</div></div>
+        <div class="bds"><div class="bv" id="bds-pnl">$—</div><div class="bl">Total P&L</div></div>
+        <div class="bds"><div class="bv" id="bds-wr">—</div><div class="bl">Win Rate</div></div>
+      </div>
+    </div>
+
+    <!-- Trading toggle (shown when connected) -->
+    <div class="bd-card" id="bd-controls-card" style="display:none">
+      <h3>&#127918; Auto-Trading Controls</h3>
+      <p id="bd-mode-txt" style="font-size:11px;color:var(--yel);margin-bottom:10px;">&#128196; PAPER TRADING MODE — no real money</p>
+      <button class="bd-btn green" id="bd-toggle-btn" onclick="toggleBot()">&#9654; Enable Auto-Trading</button>
+      <div style="height:8px"></div>
+      <button class="bd-btn red" onclick="killBot()">&#9940; KILL SWITCH — Close All Positions</button>
+      <div style="height:8px"></div>
+      <button class="bd-btn ghost" onclick="resetPaper()" id="bd-reset-btn">&#8635; Reset Paper Balance</button>
+    </div>
+
+    <!-- Active positions -->
+    <div class="bd-card" id="bd-positions-card" style="display:none">
+      <h3>&#128202; Open Positions</h3>
+      <div id="bd-positions-list"><p style="font-size:12px;color:var(--tx2)">No open positions.</p></div>
+    </div>
+
+    <!-- Recent trades -->
+    <div class="bd-card" id="bd-trades-card" style="display:none">
+      <h3>&#128203; Recent Trades</h3>
+      <div id="bd-trades-list"><p style="font-size:12px;color:var(--tx2)">No trades yet.</p></div>
+    </div>
+
+    <!-- Disconnect -->
+    <div id="bd-disconnect-section" style="display:none">
+      <button class="bd-btn ghost" onclick="disconnectBot()">&#215; Disconnect Bot</button>
+    </div>
+
+  </div>
 </div>
 <script>
 'use strict';
@@ -880,6 +1037,262 @@ setInterval(fetchAllTickers, 15000);
 if ('serviceWorker' in navigator) {
   const base=location.pathname.replace(/\/[^/]*$/,'/');
   navigator.serviceWorker.register(base+'sw.js',{scope:base}).catch(()=>{});
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PHASE 2 — TRADING BOT DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+const BOT = {
+  url:      localStorage.getItem('bot-url')  || '',
+  token:    localStorage.getItem('bot-token')|| '',
+  connected: false,
+  polling:  null,
+  status:   null,
+};
+
+// ── Bot API helper ────────────────────────────────────────────────
+async function botFetch(method, path, body) {
+  if (!BOT.url || !BOT.token) throw new Error('Bot not configured');
+  const res = await fetch(BOT.url.replace(/\/$/, '') + path, {
+    method,
+    headers: { 'x-app-token': BOT.token, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
+  return d;
+}
+
+// ── Drawer open/close ─────────────────────────────────────────────
+function openBotDrawer() {
+  document.getElementById('bot-drawer').classList.add('open');
+  if (BOT.url) {
+    document.getElementById('bd-url').value  = BOT.url;
+    document.getElementById('bd-pass').value = BOT.token;
+  }
+  if (BOT.connected) refreshBotDash();
+}
+function closeBotDrawer() {
+  document.getElementById('bot-drawer').classList.remove('open');
+}
+
+// ── Connect ───────────────────────────────────────────────────────
+async function connectBot() {
+  const url   = document.getElementById('bd-url').value.trim();
+  const token = document.getElementById('bd-pass').value.trim();
+  if (!url || !token) { showBotError('Enter both the Railway URL and your APP_TOKEN password.'); return; }
+  BOT.url   = url;
+  BOT.token = token;
+  showBotError('');
+  try {
+    const status = await botFetch('GET', '/api/status');
+    BOT.connected = true;
+    BOT.status    = status;
+    localStorage.setItem('bot-url',   url);
+    localStorage.setItem('bot-token', token);
+    showBotDash(status);
+    startBotPolling();
+  } catch(e) {
+    showBotError('Connection failed: ' + e.message + '\n\nCheck that:\n• Your Railway URL is correct\n• The server is running (check Railway logs)\n• The APP_TOKEN matches');
+  }
+}
+
+function disconnectBot() {
+  BOT.connected = false;
+  stopBotPolling();
+  localStorage.removeItem('bot-url');
+  localStorage.removeItem('bot-token');
+  BOT.url = BOT.token = '';
+  hideBotDash();
+  updateBotBar(null);
+}
+
+// ── Dashboard render ──────────────────────────────────────────────
+function showBotDash(status) {
+  document.getElementById('bd-setup-card').style.display = 'none';
+  document.getElementById('bd-stats-section').style.display = 'block';
+  document.getElementById('bd-controls-card').style.display = 'block';
+  document.getElementById('bd-positions-card').style.display = 'block';
+  document.getElementById('bd-trades-card').style.display = 'block';
+  document.getElementById('bd-disconnect-section').style.display = 'block';
+  updateBotDash(status);
+}
+function hideBotDash() {
+  ['bd-stats-section','bd-controls-card','bd-positions-card','bd-trades-card','bd-disconnect-section']
+    .forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('bd-setup-card').style.display = 'block';
+  document.getElementById('bd-url').value = '';
+  document.getElementById('bd-pass').value = '';
+}
+
+function updateBotDash(status) {
+  if (!status) return;
+  const pnl    = status.pnl || {};
+  const isPaper = status.paperMode;
+
+  // Stats
+  const bal = isPaper ? status.paperBalance : null;
+  document.getElementById('bds-bal').textContent = bal != null ? '$' + bal.toFixed(2) : '—';
+  const totalPnl = pnl.total || 0;
+  const pnlEl = document.getElementById('bds-pnl');
+  pnlEl.textContent  = (totalPnl >= 0 ? '+' : '') + '$' + totalPnl.toFixed(2);
+  pnlEl.className    = 'bv ' + (totalPnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('bds-wr').textContent = pnl.winRate != null ? pnl.winRate + '%' : '—';
+
+  // Mode label
+  document.getElementById('bd-mode-txt').textContent =
+    isPaper ? '📄 PAPER TRADING — simulated positions, no real money'
+            : '💰 LIVE TRADING — real money, real orders on Coinbase';
+  document.getElementById('bd-mode-txt').style.color = isPaper ? 'var(--yel)' : 'var(--red)';
+  document.getElementById('bd-reset-btn').style.display = isPaper ? 'block' : 'none';
+
+  // Toggle button
+  const tb = document.getElementById('bd-toggle-btn');
+  if (status.tradingEnabled) {
+    tb.textContent = '⏸ Disable Auto-Trading';
+    tb.className   = 'bd-btn yellow';
+  } else {
+    tb.textContent = '▶ Enable Auto-Trading';
+    tb.className   = 'bd-btn green';
+  }
+
+  // Status bar
+  updateBotBar(status);
+}
+
+function renderPositions(positions) {
+  const list  = document.getElementById('bd-positions-list');
+  const coins = Object.keys(positions || {});
+  if (!coins.length) { list.innerHTML = '<p style="font-size:12px;color:var(--tx2)">No open positions.</p>'; return; }
+  const fmtPx = v => v >= 1000 ? '$' + v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '$' + v.toFixed(4);
+  list.innerHTML = coins.map(coin => {
+    const p = positions[coin];
+    const pnlCls = p.pnl >= 0 ? 'pos' : 'neg';
+    return `<div class="pos-card">
+      <div class="pc-top">
+        <span class="pc-coin">${coin}</span>
+        <span class="pc-side ${p.side}">${p.side}</span>
+        <span class="pc-pnl ${pnlCls}">${p.pnl >= 0 ? '+' : ''}$${p.pnl?.toFixed(2) || '—'} (${p.pnlPct >= 0 ? '+' : ''}${p.pnlPct?.toFixed(2) || '—'}%)</span>
+      </div>
+      <div class="pc-rows">
+        <span>Entry <b>${fmtPx(p.entry)}</b></span>
+        <span>Now <b>${fmtPx(p.currentPrice || p.entry)}</b></span>
+        <span>TP <b>${fmtPx(p.tp)}</b></span>
+        <span>SL <b>${fmtPx(p.sl)}</b></span>
+        <span>Size <b>$${p.size}</b></span>
+      </div>
+      <div style="margin-top:6px"><button class="bd-btn red" style="height:30px;font-size:11px;width:auto;padding:0 14px" onclick="manualClose('${coin}')">Close Position</button></div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrades(trades) {
+  const list = document.getElementById('bd-trades-list');
+  if (!trades?.length) { list.innerHTML = '<p style="font-size:12px;color:var(--tx2)">No trades yet.</p>'; return; }
+  const fmtPx = v => v >= 1000 ? '$' + v.toLocaleString('en-US',{maximumFractionDigits:0}) : '$' + v.toFixed(4);
+  list.innerHTML = trades.slice(0,15).map(t => {
+    const pnlCls = t.pnl >= 0 ? 'pos' : 'neg';
+    const dt = new Date(t.closed || t.opened);
+    const tm = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) + ' ' + dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<div class="tr-row">
+      <div class="tr-left">
+        <span class="tr-coin">${t.coin} · ${t.side}</span>
+        <span class="tr-detail">${fmtPx(t.entry)} → ${fmtPx(t.exit || t.entry)} · ${t.reason || ''} · ${tm}</span>
+      </div>
+      <span class="tr-pnl ${pnlCls}">${t.pnl >= 0 ? '+' : ''}$${t.pnl?.toFixed(2) || '—'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Bot status bar (above TF bar) ─────────────────────────────────
+function updateBotBar(status) {
+  const dot = document.getElementById('bdot');
+  const lbl = document.getElementById('bot-status-txt');
+  const pnl = document.getElementById('bot-pnl-txt');
+  const btn = document.getElementById('bot-open-btn');
+
+  if (!status) {
+    dot.className = 'bdot off'; lbl.textContent = 'BOT: NOT CONNECTED';
+    pnl.textContent = ''; btn.className = 'bot-open-btn'; btn.innerHTML = '&#129302; Setup Bot';
+    return;
+  }
+  const isPaper = status.paperMode;
+  const on      = status.tradingEnabled;
+  dot.className = on ? (isPaper ? 'bdot paper' : 'bdot live') : 'bdot off';
+  lbl.textContent = on ? (isPaper ? 'BOT: PAPER ON' : 'BOT: LIVE ON') : (isPaper ? 'BOT: PAPER OFF' : 'BOT: LIVE OFF');
+
+  const totalPnl = status.pnl?.total || 0;
+  pnl.textContent  = 'P&L: ' + (totalPnl >= 0 ? '+' : '') + '$' + totalPnl.toFixed(2);
+  pnl.className    = 'bot-pnl-txt ' + (totalPnl >= 0 ? 'pos' : 'neg');
+  btn.className    = 'bot-open-btn configured';
+  btn.innerHTML    = '&#129302; Dashboard';
+}
+
+function showBotError(msg) {
+  const el = document.getElementById('bd-error');
+  if (!msg) { el.style.display = 'none'; el.textContent = ''; return; }
+  el.style.display = 'block';
+  el.textContent = msg;
+}
+
+// ── Bot actions ───────────────────────────────────────────────────
+async function toggleBot() {
+  try { const s = await botFetch('POST', '/api/toggle'); BOT.status = { ...BOT.status, tradingEnabled: s.tradingEnabled }; updateBotDash(BOT.status); }
+  catch(e) { showBotError('Toggle failed: ' + e.message); }
+}
+
+async function killBot() {
+  if (!confirm('Close ALL open positions now?')) return;
+  try { await botFetch('POST', '/api/kill'); await refreshBotDash(); }
+  catch(e) { showBotError('Kill switch failed: ' + e.message); }
+}
+
+async function manualClose(coin) {
+  if (!confirm(`Close ${coin} position now?`)) return;
+  try { await botFetch('POST', `/api/close/${coin}`); await refreshBotDash(); }
+  catch(e) { showBotError('Close failed: ' + e.message); }
+}
+
+async function resetPaper() {
+  if (!confirm('Reset paper balance to starting amount? This clears trade history.')) return;
+  try { await botFetch('POST', '/api/reset-paper'); await refreshBotDash(); }
+  catch(e) { showBotError('Reset failed: ' + e.message); }
+}
+
+// ── Polling ───────────────────────────────────────────────────────
+async function refreshBotDash() {
+  try {
+    const [status, positions, trades] = await Promise.all([
+      botFetch('GET', '/api/status'),
+      botFetch('GET', '/api/positions'),
+      botFetch('GET', '/api/trades'),
+    ]);
+    BOT.status = status;
+    updateBotDash(status);
+    renderPositions(positions);
+    renderTrades(trades);
+    showBotError('');
+  } catch(e) {
+    if (e.message.includes('401')) { showBotError('Authentication failed. Check your APP_TOKEN.'); }
+    else { showBotError('Refresh failed: ' + e.message); }
+  }
+}
+
+function startBotPolling() {
+  stopBotPolling();
+  BOT.polling = setInterval(refreshBotDash, 10000); // every 10s
+}
+function stopBotPolling() {
+  if (BOT.polling) { clearInterval(BOT.polling); BOT.polling = null; }
+}
+
+// ── Auto-connect on load if previously configured ─────────────────
+if (BOT.url && BOT.token) {
+  botFetch('GET', '/api/status').then(status => {
+    BOT.connected = true; BOT.status = status;
+    updateBotBar(status);
+    startBotPolling();
+  }).catch(() => { BOT.connected = false; updateBotBar(null); });
 }
 </script>
 </body>
