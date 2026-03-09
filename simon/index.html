@@ -149,53 +149,64 @@ html,body{width:100%;height:100%;background:#000008;overflow:hidden;color:#e0f0f
 /* ── Pads area ─────────────────────────────────────────────────── */
 #pads-area{
   flex:1;display:flex;align-items:center;justify-content:center;
-  padding:10px;min-height:0;
+  padding:20px;min-height:0;overflow:visible;
 }
 #btn-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
-  width:min(88vw,min(88vh - 200px, 400px));
-  aspect-ratio:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  /* Width drives everything — pads enforce their own square via aspect-ratio */
+  width:min(78vw, 42vh, 340px);
 }
-#btn-grid.g3{grid-template-columns:1fr 1fr 1fr;aspect-ratio:1.5;}
+#btn-grid.g3{grid-template-columns:1fr 1fr 1fr;width:min(90vw, 55vh, 420px);}
 
 /* ── Simon pad ─────────────────────────────────────────────────── */
 .pad{
-  border-radius:50%;position:relative;cursor:pointer;
+  /* SQUARE enforced here — border-radius:50% then gives a true circle */
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:50%;
+  position:relative;cursor:pointer;overflow:visible;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   transition:transform .08s;
-  /* Base dim state */
   border:2px solid var(--neon);
   background:radial-gradient(circle at 38% 35%, rgba(255,255,255,.06), var(--dim) 70%);
-  box-shadow:inset 0 0 20px rgba(0,0,0,.5), 0 0 4px var(--neon);
+  box-shadow:inset 0 0 20px rgba(0,0,0,.5), 0 0 6px var(--neon);
 }
 .pad:active{transform:scale(.91);}
 
-/* Outer spinning ring */
+/* Outer spinning ring — always present, faint when idle */
 .pad::before{
-  content:'';position:absolute;inset:-8px;border-radius:50%;
-  border:2px solid transparent;
-  border-top-color:var(--neon);border-right-color:var(--neon);
-  opacity:0;transition:opacity .15s;
-  animation:spin 1.2s linear infinite;
+  content:'';position:absolute;
+  inset:-10px;border-radius:50%;
+  border:2px solid var(--neon);
+  opacity:.12;transition:opacity .2s;
+  animation:spin 3s linear infinite;
 }
-/* Inner glow ring */
+/* Second spinning ring, faster, opposite direction */
 .pad::after{
-  content:'';position:absolute;inset:-16px;border-radius:50%;
-  border:1px solid var(--neon);opacity:0;transition:opacity .15s;
-  animation:spin 2s linear infinite reverse;
+  content:'';position:absolute;
+  inset:-20px;border-radius:50%;
+  border:1.5px dashed var(--neon);
+  opacity:0;transition:opacity .2s;
+  animation:spin 1.8s linear infinite reverse;
 }
-.pad.lit::before,.pad.lit::after{opacity:1;}
+.pad.lit::before{opacity:1;border-width:3px;
+  box-shadow:0 0 12px var(--neon);}
+.pad.lit::after{opacity:.7;}
 
-/* Lit (active) state */
+/* Lit (active) state — VERY bright */
 .pad.lit{
-  background:radial-gradient(circle at 38% 35%, rgba(255,255,255,.35), var(--bright) 60%);
-  border-color:var(--neon);transform:scale(1.03);
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.5), var(--bright) 55%);
+  border-color:#fff;border-width:3px;
+  transform:scale(1.06);
   box-shadow:
-    0 0 20px var(--neon),
-    0 0 45px var(--neon),
-    0 0 90px rgba(var(--neon-rgb),.4),
-    inset 0 0 35px rgba(255,255,255,.25);
-  filter:brightness(1.15);
+    0 0 25px var(--neon),
+    0 0 55px var(--neon),
+    0 0 100px rgba(var(--neon-rgb),.5),
+    0 0 160px rgba(var(--neon-rgb),.2),
+    inset 0 0 40px rgba(255,255,255,.35);
+  filter:brightness(1.2);
 }
 .pad.lit .pad-icon{filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 16px var(--neon));}
 
