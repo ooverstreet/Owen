@@ -1,0 +1,21 @@
+{
+  "id": "/Owen/simon/",
+  "name": "Freq Simon",
+  "short_name": "Freq Simon",
+  "description": "Addictive Simon Says game with frequency tones. Listen, remember, repeat. 6 frequency buttons, 3 game modes, infinite fun.",
+  "start_url": "/Owen/simon/",
+  "scope": "/Owen/simon/",
+  "display": "standalone",
+  "background_color": "#080810",
+  "theme_color": "#080810",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["games", "music", "entertainment"],
+  "icons": [
+    { "src": "/Owen/simon/icon.svg",             "sizes": "any",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/Owen/simon/icon-192.png",         "sizes": "192x192", "type": "image/png",     "purpose": "any" },
+    { "src": "/Owen/simon/icon-512.png",         "sizes": "512x512", "type": "image/png",     "purpose": "any" },
+    { "src": "/Owen/simon/icon-maskable-192.png","sizes": "192x192", "type": "image/png",     "purpose": "maskable" },
+    { "src": "/Owen/simon/icon-maskable-512.png","sizes": "512x512", "type": "image/png",     "purpose": "maskable" }
+  ]
+}
