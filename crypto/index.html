@@ -58,6 +58,12 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 .cdot.dead{background:var(--red);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 #lu{font-size:9px;color:var(--tx3);}
+#bot-open-top-btn{
+  height:22px;padding:0 9px;border-radius:12px;border:1px solid var(--bord2);
+  background:var(--p2);color:var(--tx2);font-size:9px;font-weight:700;cursor:pointer;
+  white-space:nowrap;
+}
+#bot-open-top-btn.configured{border-color:var(--acc);color:var(--acc);}
 
 /* ── Theme + TF bar ──────────────────────────────────────────── */
 #tf-bar{
@@ -299,6 +305,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
   <div id="hdr-right">
     <div id="conn-row"><div class="cdot" id="cdot"></div><span id="conn-lbl">CONNECTING</span></div>
     <div id="lu"></div>
+    <button id="bot-open-top-btn" onclick="openBotDrawer()">&#129302; Setup Bot</button>
   </div>
 </div>
 
@@ -1210,10 +1217,17 @@ function updateBotBar(status) {
   const lbl = document.getElementById('bot-status-txt');
   const pnl = document.getElementById('bot-pnl-txt');
   const btn = document.getElementById('bot-open-btn');
+  const topBtn = document.getElementById('bot-open-top-btn');
 
   if (!status) {
     dot.className = 'bdot off'; lbl.textContent = 'BOT: NOT CONNECTED';
-    pnl.textContent = ''; btn.className = 'bot-open-btn'; btn.innerHTML = '&#129302; Setup Bot';
+    pnl.textContent = '';
+    btn.className = 'bot-open-btn';
+    btn.innerHTML = '&#129302; Setup Bot';
+    if (topBtn) {
+      topBtn.className = '';
+      topBtn.innerHTML = '&#129302; Setup Bot';
+    }
     return;
   }
   const isPaper = status.paperMode;
@@ -1226,6 +1240,10 @@ function updateBotBar(status) {
   pnl.className    = 'bot-pnl-txt ' + (totalPnl >= 0 ? 'pos' : 'neg');
   btn.className    = 'bot-open-btn configured';
   btn.innerHTML    = '&#129302; Dashboard';
+  if (topBtn) {
+    topBtn.className = 'configured';
+    topBtn.innerHTML = '&#129302; Dashboard';
+  }
 }
 
 function showBotError(msg) {
