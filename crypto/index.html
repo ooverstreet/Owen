@@ -1057,17 +1057,69 @@ const BOT = {
   status:   null,
 };
 
+function normalizeBotUrl(input) {
+  let raw = (input || '').trim();
+  if (!raw) throw new Error('Enter your Railway backend URL.');
+  if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (e) {
+    throw new Error('Invalid URL format. Use https://your-service.up.railway.app');
+  }
+
+  // Allow users to paste /api or /api/status and normalize to service base URL.
+  const cleanPath = parsed.pathname
+    .replace(/\/+$/, '')
+    .replace(/\/api(?:\/status)?$/i, '');
+  parsed.pathname = cleanPath || '';
+  parsed.search = '';
+  parsed.hash = '';
+
+  return parsed.toString().replace(/\/$/, '');
+}
+
 // ── Bot API helper ────────────────────────────────────────────────
 async function botFetch(method, path, body) {
   if (!BOT.url || !BOT.token) throw new Error('Bot not configured');
-  const res = await fetch(BOT.url.replace(/\/$/, '') + path, {
-    method,
-    headers: { 'x-app-token': BOT.token, 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const d = await res.json();
-  if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
-  return d;
+  let res;
+  try {
+    res = await fetch(BOT.url.replace(/\/$/, '') + path, {
+      method,
+      headers: { 'x-app-token': BOT.token, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    throw new Error('Could not reach bot URL. Check network and Railway service URL.');
+  }
+
+  const contentType = (res.headers.get('content-type') || '').toLowerCase();
+  const text = await res.text();
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      const bodyStart = text.trimStart();
+      const looksHtml = contentType.includes('text/html') || bodyStart.startsWith('<!DOCTYPE') || bodyStart.startsWith('<html');
+      if (looksHtml) {
+        throw new Error('Bot URL returned HTML instead of API JSON. Use your Railway backend service URL (not a website/homepage URL).');
+      }
+      throw new Error(`Bot returned invalid JSON (HTTP ${res.status}).`);
+    }
+  }
+
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized (401): APP_TOKEN is incorrect.');
+    const apiMsg = data && (data.error || data.message);
+    throw new Error(apiMsg || `HTTP ${res.status}`);
+  }
+
+  if (!data || typeof data !== 'object') {
+    throw new Error('Bot response was empty or invalid.');
+  }
+  return data;
 }
 
 // ── Drawer open/close ─────────────────────────────────────────────
@@ -1088,19 +1140,24 @@ async function connectBot() {
   const url   = document.getElementById('bd-url').value.trim();
   const token = document.getElementById('bd-pass').value.trim();
   if (!url || !token) { showBotError('Enter both the Railway URL and your APP_TOKEN password.'); return; }
-  BOT.url   = url;
+  try {
+    BOT.url = normalizeBotUrl(url);
+  } catch (e) {
+    showBotError(e.message);
+    return;
+  }
   BOT.token = token;
   showBotError('');
   try {
     const status = await botFetch('GET', '/api/status');
     BOT.connected = true;
     BOT.status    = status;
-    localStorage.setItem('bot-url',   url);
+    localStorage.setItem('bot-url',   BOT.url);
     localStorage.setItem('bot-token', token);
     showBotDash(status);
     startBotPolling();
   } catch(e) {
-    showBotError('Connection failed: ' + e.message + '\n\nCheck that:\n• Your Railway URL is correct\n• The server is running (check Railway logs)\n• The APP_TOKEN matches');
+    showBotError('Connection failed: ' + e.message + '\n\nCheck that:\n• Your Railway URL is the backend service URL\n• The service is running (check Railway logs)\n• The APP_TOKEN matches');
   }
 }
 
@@ -1306,6 +1363,7 @@ function stopBotPolling() {
 
 // ── Auto-connect on load if previously configured ─────────────────
 if (BOT.url && BOT.token) {
+  try { BOT.url = normalizeBotUrl(BOT.url); } catch(e) {}
   botFetch('GET', '/api/status').then(status => {
     BOT.connected = true; BOT.status = status;
     updateBotBar(status);
