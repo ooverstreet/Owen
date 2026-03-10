@@ -10,7 +10,7 @@ const fs       = require('fs');
 const path     = require('path');
 const crypto   = require('crypto');
 const jwt      = require('jsonwebtoken');
-const fetch    = require('node-fetch');
+const fetch    = (...args) => globalThis.fetch(...args);
 
 const app  = express();
 app.use(cors());
