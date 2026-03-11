@@ -1072,7 +1072,7 @@ function normalizeBotUrl(input) {
   // Allow users to paste /api or /api/status and normalize to service base URL.
   const cleanPath = parsed.pathname
     .replace(/\/+$/, '')
-    .replace(/\/api(?:\/status)?$/i, '');
+    .replace(/\/(?:health|api(?:\/status)?)$/i, '');
   parsed.pathname = cleanPath || '';
   parsed.search = '';
   parsed.hash = '';
