@@ -28,6 +28,10 @@ const CFG = {
   dailyLossLimit: parseFloat(process.env.DAILY_LOSS_LIMIT) || 50,
   timeframe:      process.env.TIMEFRAME       || '15m',
   watchedCoins:   (process.env.WATCHED_COINS  || 'BTC-USD,ETH-USD,SOL-USD').split(',').map(s => s.trim()),
+  activeMode:     process.env.ACTIVE_MODE     !== 'false',
+  minConfidence:  parseInt(process.env.MIN_CONFIDENCE)     || 35,
+  entryCooldownMin: parseInt(process.env.ENTRY_COOLDOWN_MIN) || 8,
+  longOnlyLive:   process.env.LONG_ONLY_LIVE  !== 'false',
   cbKeyName:      process.env.CB_KEY_NAME     || '',
   cbPrivateKey:   (process.env.CB_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
@@ -49,6 +53,7 @@ let ST = {
   positions:      {},   // { 'BTC-USD': { side, size, entry, tp, sl, opened, reason } }
   trades:         [],   // completed trade objects
   signals:        {},   // latest signal per coin
+  lastEntryAt:    {},   // timestamp by coin for cooldown throttling
   dailyLoss:      0,
   dailyStart:     new Date().toDateString(),
   tradingEnabled: false,
@@ -267,11 +272,15 @@ function generateSignal(candles) {
 // POSITION MANAGEMENT
 // ══════════════════════════════════════════════════════════════════
 async function openPosition(coin, signal) {
-  if (Object.keys(ST.positions).length >= CFG.maxPositions) return;
-  if (ST.positions[coin]) return;
+  if (Object.keys(ST.positions).length >= CFG.maxPositions) return false;
+  if (ST.positions[coin]) return false;
 
   const price = await fetchPrice(coin);
   const side  = signal.label.includes('BUY') ? 'BUY' : 'SELL';
+  if (!CFG.paperMode && CFG.longOnlyLive && side === 'SELL') {
+    console.log(`ℹ️  Skipping ${coin} SELL entry in live mode (LONG_ONLY_LIVE=true)`);
+    return false;
+  }
   const risk  = RISK[CFG.timeframe] || RISK['15m'];
   const tp    = side === 'BUY' ? price * (1 + risk.tp) : price * (1 - risk.tp);
   const sl    = side === 'BUY' ? price * (1 - risk.sl) : price * (1 + risk.sl);
@@ -279,7 +288,7 @@ async function openPosition(coin, signal) {
   if (CFG.paperMode) {
     if (ST.paperBalance < CFG.tradeSize) {
       console.log(`⚠️  Insufficient paper balance ($${ST.paperBalance.toFixed(2)}) for $${CFG.tradeSize} trade`);
-      return;
+      return false;
     }
     ST.paperBalance -= CFG.tradeSize;
   } else {
@@ -287,7 +296,7 @@ async function openPosition(coin, signal) {
     catch(e) {
       console.error(`❌ Order failed for ${coin}:`, e.message);
       ST.errors.push({ time: Date.now(), coin, msg: e.message });
-      return;
+      return false;
     }
   }
 
@@ -298,6 +307,7 @@ async function openPosition(coin, signal) {
   const mode = CFG.paperMode ? '📄 PAPER' : '💰 LIVE';
   console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
   saveState();
+  return true;
 }
 
 async function closePosition(coin, reason) {
@@ -376,8 +386,22 @@ async function runCycle() {
       // Entry logic — only when auto-trading is on
       if (ST.tradingEnabled && signal) {
         const hasPos = !!ST.positions[coin];
-        if (!hasPos && (signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL')) {
-          await openPosition(coin, signal);
+        const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
+        const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
+        const confidenceOk = signal.confidence >= CFG.minConfidence;
+        const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
+        const lastEntryAt = ST.lastEntryAt[coin] || 0;
+        const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
+
+        const shouldOpen = !hasPos && (
+          CFG.activeMode
+            ? (isDirectional && confidenceOk && cooledDown)
+            : isStrong
+        );
+
+        if (shouldOpen) {
+          const opened = await openPosition(coin, signal);
+          if (opened) ST.lastEntryAt[coin] = Date.now();
         } else if (hasPos) {
           const pos = ST.positions[coin];
           const shouldClose = (pos.side === 'BUY'  && (signal.label === 'STRONG_SELL' || signal.label === 'SELL'))
@@ -440,6 +464,10 @@ app.get('/api/status', auth, async (req, res) => {
   res.json({
     paperMode:      CFG.paperMode,
     tradingEnabled: ST.tradingEnabled,
+    activeMode:     CFG.activeMode,
+    minConfidence:  CFG.minConfidence,
+    entryCooldownMin: CFG.entryCooldownMin,
+    longOnlyLive:   CFG.longOnlyLive,
     watchedCoins:   CFG.watchedCoins,
     timeframe:      CFG.timeframe,
     tradeSize:      CFG.tradeSize,
@@ -530,13 +558,31 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 
 // ── Update config at runtime ──────────────────────────────────────
 app.post('/api/config', auth, (req, res) => {
-  const { tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe } = req.body;
+  const {
+    tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
+    activeMode, minConfidence, entryCooldownMin, longOnlyLive,
+  } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
   if (dailyLossLimit !== undefined) CFG.dailyLossLimit = +dailyLossLimit;
   if (watchedCoins   !== undefined) CFG.watchedCoins   = watchedCoins;
   if (timeframe      !== undefined) CFG.timeframe      = timeframe;
-  res.json({ ok: true, tradeSize: CFG.tradeSize, maxPositions: CFG.maxPositions, dailyLossLimit: CFG.dailyLossLimit, watchedCoins: CFG.watchedCoins, timeframe: CFG.timeframe });
+  if (activeMode     !== undefined) CFG.activeMode     = !!activeMode;
+  if (minConfidence  !== undefined) CFG.minConfidence  = +minConfidence;
+  if (entryCooldownMin !== undefined) CFG.entryCooldownMin = +entryCooldownMin;
+  if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
+  res.json({
+    ok: true,
+    tradeSize: CFG.tradeSize,
+    maxPositions: CFG.maxPositions,
+    dailyLossLimit: CFG.dailyLossLimit,
+    watchedCoins: CFG.watchedCoins,
+    timeframe: CFG.timeframe,
+    activeMode: CFG.activeMode,
+    minConfidence: CFG.minConfidence,
+    entryCooldownMin: CFG.entryCooldownMin,
+    longOnlyLive: CFG.longOnlyLive,
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -551,5 +597,7 @@ app.listen(PORT, () => {
   console.log(`👁   Watching:   ${CFG.watchedCoins.join(', ')}`);
   console.log(`⏱   Timeframe:  ${CFG.timeframe} | Trade size: $${CFG.tradeSize}`);
   console.log(`🛡   Daily loss limit: $${CFG.dailyLossLimit}`);
+  console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
+  console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
   console.log('════════════════════════════════════════\n');
 });
