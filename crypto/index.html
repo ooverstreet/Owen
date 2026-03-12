@@ -403,6 +403,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
     <div class="bd-card" id="bd-controls-card" style="display:none">
       <h3>&#127918; Auto-Trading Controls</h3>
       <p id="bd-mode-txt" style="font-size:11px;color:var(--yel);margin-bottom:10px;">&#128196; PAPER TRADING MODE — no real money</p>
+      <p id="bd-mode-meta" style="font-size:10px;color:var(--tx2);margin:-4px 0 10px 0;letter-spacing:.2px;">⚙ Strategy: —</p>
       <button class="bd-btn green" id="bd-toggle-btn" onclick="toggleBot()">&#9654; Enable Auto-Trading</button>
       <div style="height:8px"></div>
       <button class="bd-btn red" onclick="killBot()">&#9940; KILL SWITCH — Close All Positions</button>
@@ -1209,6 +1210,10 @@ function updateBotDash(status) {
     isPaper ? '📄 PAPER TRADING — simulated positions, no real money'
             : '💰 LIVE TRADING — real money, real orders on Coinbase';
   document.getElementById('bd-mode-txt').style.color = isPaper ? 'var(--yel)' : 'var(--red)';
+  const strategy = status.activeMode === undefined
+    ? '⚙ Strategy: classic mode'
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m`;
+  document.getElementById('bd-mode-meta').textContent = strategy;
   document.getElementById('bd-reset-btn').style.display = isPaper ? 'block' : 'none';
 
   // Toggle button
