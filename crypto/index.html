@@ -58,6 +58,12 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 .cdot.dead{background:var(--red);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 #lu{font-size:9px;color:var(--tx3);}
+#bot-open-top-btn{
+  height:22px;padding:0 9px;border-radius:12px;border:1px solid var(--bord2);
+  background:var(--p2);color:var(--tx2);font-size:9px;font-weight:700;cursor:pointer;
+  white-space:nowrap;
+}
+#bot-open-top-btn.configured{border-color:var(--acc);color:var(--acc);}
 
 /* ── Theme + TF bar ──────────────────────────────────────────── */
 #tf-bar{
@@ -216,7 +222,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 .bd-btn.ghost{background:var(--p1);color:var(--tx2);border:1px solid var(--bord);}
 
 /* Stats row */
-.bd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.bd-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .bds{background:var(--p1);border:1px solid var(--bord);border-radius:8px;padding:8px;text-align:center;}
 .bds .bv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
 .bds .bl{font-size:9px;color:var(--tx2);margin-top:2px;letter-spacing:.3px;text-transform:uppercase;}
@@ -299,6 +305,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
   <div id="hdr-right">
     <div id="conn-row"><div class="cdot" id="cdot"></div><span id="conn-lbl">CONNECTING</span></div>
     <div id="lu"></div>
+    <button id="bot-open-top-btn" onclick="openBotDrawer()">&#129302; Setup Bot</button>
   </div>
 </div>
 
@@ -386,7 +393,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
     <!-- Stats (shown when connected) -->
     <div id="bd-stats-section" style="display:none">
       <div class="bd-stats" id="bd-stats-grid">
-        <div class="bds"><div class="bv" id="bds-bal">$—</div><div class="bl">Balance</div></div>
+        <div class="bds"><div class="bv" id="bds-bal">$—</div><div class="bl">Free Cash</div></div>
+        <div class="bds"><div class="bv" id="bds-eq">$—</div><div class="bl">Equity</div></div>
         <div class="bds"><div class="bv" id="bds-pnl">$—</div><div class="bl">Total P&L</div></div>
         <div class="bds"><div class="bv" id="bds-wr">—</div><div class="bl">Win Rate</div></div>
       </div>
@@ -396,6 +404,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
     <div class="bd-card" id="bd-controls-card" style="display:none">
       <h3>&#127918; Auto-Trading Controls</h3>
       <p id="bd-mode-txt" style="font-size:11px;color:var(--yel);margin-bottom:10px;">&#128196; PAPER TRADING MODE — no real money</p>
+      <p id="bd-mode-meta" style="font-size:10px;color:var(--tx2);margin:-4px 0 10px 0;letter-spacing:.2px;">⚙ Strategy: —</p>
       <button class="bd-btn green" id="bd-toggle-btn" onclick="toggleBot()">&#9654; Enable Auto-Trading</button>
       <div style="height:8px"></div>
       <button class="bd-btn red" onclick="killBot()">&#9940; KILL SWITCH — Close All Positions</button>
@@ -487,6 +496,7 @@ const COINS = [
   { id:'LTC-USD',  short:'LTC',  name:'Litecoin'  },
   { id:'LINK-USD', short:'LINK', name:'Chainlink' },
   { id:'MATIC-USD',short:'MATIC',name:'Polygon'   },
+  { id:'TAO-USD',  short:'TAO',  name:'Bittensor' },
 ];
 
 const CB_REST = 'https://api.exchange.coinbase.com';
@@ -1050,17 +1060,69 @@ const BOT = {
   status:   null,
 };
 
+function normalizeBotUrl(input) {
+  let raw = (input || '').trim();
+  if (!raw) throw new Error('Enter your Railway backend URL.');
+  if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (e) {
+    throw new Error('Invalid URL format. Use https://your-service.up.railway.app');
+  }
+
+  // Allow users to paste /api or /api/status and normalize to service base URL.
+  const cleanPath = parsed.pathname
+    .replace(/\/+$/, '')
+    .replace(/\/(?:health|api(?:\/status)?)$/i, '');
+  parsed.pathname = cleanPath || '';
+  parsed.search = '';
+  parsed.hash = '';
+
+  return parsed.toString().replace(/\/$/, '');
+}
+
 // ── Bot API helper ────────────────────────────────────────────────
 async function botFetch(method, path, body) {
   if (!BOT.url || !BOT.token) throw new Error('Bot not configured');
-  const res = await fetch(BOT.url.replace(/\/$/, '') + path, {
-    method,
-    headers: { 'x-app-token': BOT.token, 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const d = await res.json();
-  if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
-  return d;
+  let res;
+  try {
+    res = await fetch(BOT.url.replace(/\/$/, '') + path, {
+      method,
+      headers: { 'x-app-token': BOT.token, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    throw new Error('Could not reach bot URL. Check network and Railway service URL.');
+  }
+
+  const contentType = (res.headers.get('content-type') || '').toLowerCase();
+  const text = await res.text();
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      const bodyStart = text.trimStart();
+      const looksHtml = contentType.includes('text/html') || bodyStart.startsWith('<!DOCTYPE') || bodyStart.startsWith('<html');
+      if (looksHtml) {
+        throw new Error('Bot URL returned HTML instead of API JSON. Use your Railway backend service URL (not a website/homepage URL).');
+      }
+      throw new Error(`Bot returned invalid JSON (HTTP ${res.status}).`);
+    }
+  }
+
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized (401): APP_TOKEN is incorrect.');
+    const apiMsg = data && (data.error || data.message);
+    throw new Error(apiMsg || `HTTP ${res.status}`);
+  }
+
+  if (!data || typeof data !== 'object') {
+    throw new Error('Bot response was empty or invalid.');
+  }
+  return data;
 }
 
 // ── Drawer open/close ─────────────────────────────────────────────
@@ -1081,19 +1143,24 @@ async function connectBot() {
   const url   = document.getElementById('bd-url').value.trim();
   const token = document.getElementById('bd-pass').value.trim();
   if (!url || !token) { showBotError('Enter both the Railway URL and your APP_TOKEN password.'); return; }
-  BOT.url   = url;
+  try {
+    BOT.url = normalizeBotUrl(url);
+  } catch (e) {
+    showBotError(e.message);
+    return;
+  }
   BOT.token = token;
   showBotError('');
   try {
     const status = await botFetch('GET', '/api/status');
     BOT.connected = true;
     BOT.status    = status;
-    localStorage.setItem('bot-url',   url);
+    localStorage.setItem('bot-url',   BOT.url);
     localStorage.setItem('bot-token', token);
     showBotDash(status);
     startBotPolling();
   } catch(e) {
-    showBotError('Connection failed: ' + e.message + '\n\nCheck that:\n• Your Railway URL is correct\n• The server is running (check Railway logs)\n• The APP_TOKEN matches');
+    showBotError('Connection failed: ' + e.message + '\n\nCheck that:\n• Your Railway URL is the backend service URL\n• The service is running (check Railway logs)\n• The APP_TOKEN matches');
   }
 }
 
@@ -1134,6 +1201,14 @@ function updateBotDash(status) {
   const bal = isPaper ? status.paperBalance : null;
   document.getElementById('bds-bal').textContent = bal != null ? '$' + bal.toFixed(2) : '—';
   const totalPnl = pnl.total || 0;
+  const eqEl = document.getElementById('bds-eq');
+  const equity = status.equity != null
+    ? status.equity
+    : (status.startBalance != null ? status.startBalance + totalPnl : null);
+  eqEl.textContent = equity != null ? '$' + equity.toFixed(2) : '—';
+  eqEl.className = 'bv ' + (equity != null && status.startBalance != null
+    ? (equity >= status.startBalance ? 'pos' : 'neg')
+    : '');
   const pnlEl = document.getElementById('bds-pnl');
   pnlEl.textContent  = (totalPnl >= 0 ? '+' : '') + '$' + totalPnl.toFixed(2);
   pnlEl.className    = 'bv ' + (totalPnl >= 0 ? 'pos' : 'neg');
@@ -1144,6 +1219,13 @@ function updateBotDash(status) {
     isPaper ? '📄 PAPER TRADING — simulated positions, no real money'
             : '💰 LIVE TRADING — real money, real orders on Coinbase';
   document.getElementById('bd-mode-txt').style.color = isPaper ? 'var(--yel)' : 'var(--red)';
+  const regimeTxt = status.regimeFilter === false
+    ? 'regime off'
+    : `regime on · ema gap ${status.minEmaGapPct ?? '—'}% · atr ${status.minAtrPct ?? '—'}%`;
+  const strategy = status.activeMode === undefined
+    ? '⚙ Strategy: classic mode'
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${regimeTxt}`;
+  document.getElementById('bd-mode-meta').textContent = strategy;
   document.getElementById('bd-reset-btn').style.display = isPaper ? 'block' : 'none';
 
   // Toggle button
@@ -1210,10 +1292,17 @@ function updateBotBar(status) {
   const lbl = document.getElementById('bot-status-txt');
   const pnl = document.getElementById('bot-pnl-txt');
   const btn = document.getElementById('bot-open-btn');
+  const topBtn = document.getElementById('bot-open-top-btn');
 
   if (!status) {
     dot.className = 'bdot off'; lbl.textContent = 'BOT: NOT CONNECTED';
-    pnl.textContent = ''; btn.className = 'bot-open-btn'; btn.innerHTML = '&#129302; Setup Bot';
+    pnl.textContent = '';
+    btn.className = 'bot-open-btn';
+    btn.innerHTML = '&#129302; Setup Bot';
+    if (topBtn) {
+      topBtn.className = '';
+      topBtn.innerHTML = '&#129302; Setup Bot';
+    }
     return;
   }
   const isPaper = status.paperMode;
@@ -1226,6 +1315,10 @@ function updateBotBar(status) {
   pnl.className    = 'bot-pnl-txt ' + (totalPnl >= 0 ? 'pos' : 'neg');
   btn.className    = 'bot-open-btn configured';
   btn.innerHTML    = '&#129302; Dashboard';
+  if (topBtn) {
+    topBtn.className = 'configured';
+    topBtn.innerHTML = '&#129302; Dashboard';
+  }
 }
 
 function showBotError(msg) {
@@ -1288,6 +1381,7 @@ function stopBotPolling() {
 
 // ── Auto-connect on load if previously configured ─────────────────
 if (BOT.url && BOT.token) {
+  try { BOT.url = normalizeBotUrl(BOT.url); } catch(e) {}
   botFetch('GET', '/api/status').then(status => {
     BOT.connected = true; BOT.status = status;
     updateBotBar(status);
