@@ -509,6 +509,53 @@ function getReservedCapital() {
   return Object.values(ST.positions).reduce((sum, pos) => sum + (+pos.size || 0), 0);
 }
 
+function csvEscape(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (!/[",\n]/.test(s)) return s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function tradesToCSV(trades) {
+  const cols = [
+    'closedAt',
+    'openedAt',
+    'coin',
+    'side',
+    'signal',
+    'reason',
+    'sizeUsd',
+    'entry',
+    'exit',
+    'pnlUsd',
+    'pnlPct',
+    'confidence',
+    'durationMin',
+  ];
+  const lines = [cols.join(',')];
+
+  for (const t of trades) {
+    const durationMin = (t.closed && t.opened) ? ((t.closed - t.opened) / 60000) : null;
+    const row = [
+      t.closed ? new Date(t.closed).toISOString() : '',
+      t.opened ? new Date(t.opened).toISOString() : '',
+      t.coin || '',
+      t.side || '',
+      t.signal || '',
+      t.reason || '',
+      t.size,
+      t.entry,
+      t.exit,
+      t.pnl,
+      t.pnlPct,
+      t.confidence,
+      durationMin != null ? +durationMin.toFixed(2) : '',
+    ];
+    lines.push(row.map(csvEscape).join(','));
+  }
+  return lines.join('\n');
+}
+
 // ══════════════════════════════════════════════════════════════════
 // EXPRESS ROUTES
 // ══════════════════════════════════════════════════════════════════
@@ -568,6 +615,17 @@ app.get('/api/positions', auth, async (_, res) => {
 
 // ── Trade history ─────────────────────────────────────────────────
 app.get('/api/trades', auth, (_, res) => res.json(ST.trades.slice(0, 50)));
+
+// ── Trade history CSV export ──────────────────────────────────────
+app.get('/api/trades.csv', auth, (req, res) => {
+  const qLimit = parseInt(req.query.limit, 10);
+  const limit = Number.isFinite(qLimit) ? Math.min(Math.max(qLimit, 1), 1000) : 200;
+  const csv = tradesToCSV(ST.trades.slice(0, limit));
+  const stamp = new Date().toISOString().slice(0, 10);
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="trades-${stamp}.csv"`);
+  res.send(csv);
+});
 
 // ── Recent errors ─────────────────────────────────────────────────
 app.get('/api/errors', auth, (_, res) => res.json(ST.errors.slice(0, 20)));
