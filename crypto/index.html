@@ -222,7 +222,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
 .bd-btn.ghost{background:var(--p1);color:var(--tx2);border:1px solid var(--bord);}
 
 /* Stats row */
-.bd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.bd-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .bds{background:var(--p1);border:1px solid var(--bord);border-radius:8px;padding:8px;text-align:center;}
 .bds .bv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
 .bds .bl{font-size:9px;color:var(--tx2);margin-top:2px;letter-spacing:.3px;text-transform:uppercase;}
@@ -393,7 +393,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
     <!-- Stats (shown when connected) -->
     <div id="bd-stats-section" style="display:none">
       <div class="bd-stats" id="bd-stats-grid">
-        <div class="bds"><div class="bv" id="bds-bal">$—</div><div class="bl">Balance</div></div>
+        <div class="bds"><div class="bv" id="bds-bal">$—</div><div class="bl">Free Cash</div></div>
+        <div class="bds"><div class="bv" id="bds-eq">$—</div><div class="bl">Equity</div></div>
         <div class="bds"><div class="bv" id="bds-pnl">$—</div><div class="bl">Total P&L</div></div>
         <div class="bds"><div class="bv" id="bds-wr">—</div><div class="bl">Win Rate</div></div>
       </div>
@@ -1200,6 +1201,14 @@ function updateBotDash(status) {
   const bal = isPaper ? status.paperBalance : null;
   document.getElementById('bds-bal').textContent = bal != null ? '$' + bal.toFixed(2) : '—';
   const totalPnl = pnl.total || 0;
+  const eqEl = document.getElementById('bds-eq');
+  const equity = status.equity != null
+    ? status.equity
+    : (status.startBalance != null ? status.startBalance + totalPnl : null);
+  eqEl.textContent = equity != null ? '$' + equity.toFixed(2) : '—';
+  eqEl.className = 'bv ' + (equity != null && status.startBalance != null
+    ? (equity >= status.startBalance ? 'pos' : 'neg')
+    : '');
   const pnlEl = document.getElementById('bds-pnl');
   pnlEl.textContent  = (totalPnl >= 0 ? '+' : '') + '$' + totalPnl.toFixed(2);
   pnlEl.className    = 'bv ' + (totalPnl >= 0 ? 'pos' : 'neg');
@@ -1210,9 +1219,12 @@ function updateBotDash(status) {
     isPaper ? '📄 PAPER TRADING — simulated positions, no real money'
             : '💰 LIVE TRADING — real money, real orders on Coinbase';
   document.getElementById('bd-mode-txt').style.color = isPaper ? 'var(--yel)' : 'var(--red)';
+  const regimeTxt = status.regimeFilter === false
+    ? 'regime off'
+    : `regime on · ema gap ${status.minEmaGapPct ?? '—'}% · atr ${status.minAtrPct ?? '—'}%`;
   const strategy = status.activeMode === undefined
     ? '⚙ Strategy: classic mode'
-    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m`;
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${regimeTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
   document.getElementById('bd-reset-btn').style.display = isPaper ? 'block' : 'none';
 

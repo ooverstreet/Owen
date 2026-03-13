@@ -31,6 +31,9 @@ const CFG = {
   activeMode:     process.env.ACTIVE_MODE     !== 'false',
   minConfidence:  parseInt(process.env.MIN_CONFIDENCE)     || 35,
   entryCooldownMin: parseInt(process.env.ENTRY_COOLDOWN_MIN) || 8,
+  regimeFilter:   process.env.REGIME_FILTER   !== 'false',
+  minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
+  minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
   longOnlyLive:   process.env.LONG_ONLY_LIVE  !== 'false',
   cbKeyName:      process.env.CB_KEY_NAME     || '',
   cbPrivateKey:   (process.env.CB_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
@@ -225,15 +228,56 @@ function calcVWAP(candles) {
   return cv > 0 ? ct / cv : null;
 }
 
+function calcATRPercent(candles, p = 14) {
+  if (candles.length < p + 1) return null;
+  let sumTr = 0;
+  for (let i = candles.length - p; i < candles.length; i++) {
+    const c = candles[i], prev = candles[i - 1];
+    const tr = Math.max(
+      c.high - c.low,
+      Math.abs(c.high - prev.close),
+      Math.abs(c.low - prev.close)
+    );
+    sumTr += tr;
+  }
+  const atr = sumTr / p;
+  const cur = candles[candles.length - 1].close;
+  return cur > 0 ? (atr / cur) * 100 : null;
+}
+
+function passRegimeFilter(signal) {
+  if (!CFG.regimeFilter) return { ok: true, reason: 'disabled' };
+  const ind = signal.indicators || {};
+  const emaGapPct = ind.emaGapPct ?? 0;
+  const atrPct = ind.atrPct ?? 0;
+  const side = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
+
+  if (emaGapPct < CFG.minEmaGapPct) {
+    return { ok: false, reason: `emaGap ${emaGapPct.toFixed(3)}% < ${CFG.minEmaGapPct}%` };
+  }
+  if (atrPct < CFG.minAtrPct) {
+    return { ok: false, reason: `atr ${atrPct.toFixed(3)}% < ${CFG.minAtrPct}%` };
+  }
+  if (side === 'BUY' && !(ind.ema9 > ind.ema21)) {
+    return { ok: false, reason: 'BUY signal not aligned with EMA trend' };
+  }
+  if (side === 'SELL' && !(ind.ema9 < ind.ema21)) {
+    return { ok: false, reason: 'SELL signal not aligned with EMA trend' };
+  }
+  return { ok: true, reason: 'ok' };
+}
+
 function generateSignal(candles) {
   if (candles.length < 35) return null;
   const closes = candles.map(c => c.close), cur = closes[closes.length - 1];
   const rsi = calcRSI(closes), macd = calcMACD(closes), bbPos = calcBBPos(closes);
   const vwap = calcVWAP(candles);
+  const atrPct = calcATRPercent(candles);
   const e9 = calcEMA(closes, 9), e21 = calcEMA(closes, 21);
   const ema9 = e9[e9.length - 1], ema21 = e21[e21.length - 1];
   const ema9p = e9[e9.length - 2] || ema9, ema21p = e21[e21.length - 2] || ema21;
   const emaCross = ema9 > ema21 && ema9p <= ema21p ? 'golden' : ema9 < ema21 && ema9p >= ema21p ? 'death' : null;
+  const emaGapPct = cur > 0 ? Math.abs((ema9 - ema21) / cur) * 100 : 0;
 
   let score = 0;
   if (rsi !== null) {
@@ -264,7 +308,17 @@ function generateSignal(candles) {
     price:  cur,
     tp: label.includes('BUY') ? +(cur * (1 + risk.tp)).toFixed(6) : +(cur * (1 - risk.tp)).toFixed(6),
     sl: label.includes('BUY') ? +(cur * (1 - risk.sl)).toFixed(6) : +(cur * (1 + risk.sl)).toFixed(6),
-    indicators: { rsi: rsi ? +rsi.toFixed(1) : null, macdHist: macd ? +macd.hist.toFixed(4) : null, bbPos: bbPos ? +bbPos.toFixed(3) : null, emaCross, vwap: vwap ? +vwap.toFixed(4) : null },
+    indicators: {
+      rsi: rsi ? +rsi.toFixed(1) : null,
+      macdHist: macd ? +macd.hist.toFixed(4) : null,
+      bbPos: bbPos !== null ? +bbPos.toFixed(3) : null,
+      emaCross,
+      ema9,
+      ema21,
+      emaGapPct: +emaGapPct.toFixed(4),
+      atrPct: atrPct !== null ? +atrPct.toFixed(4) : null,
+      vwap: vwap ? +vwap.toFixed(4) : null,
+    },
   };
 }
 
@@ -381,7 +435,8 @@ async function runCycle() {
       // Fetch fresh signal
       const candles = await fetchCandles(coin, CFG.timeframe);
       const signal  = generateSignal(candles);
-      if (signal) ST.signals[coin] = { ...signal, updatedAt: Date.now() };
+      const regime = signal ? passRegimeFilter(signal) : { ok: true, reason: 'n/a' };
+      if (signal) ST.signals[coin] = { ...signal, regime, updatedAt: Date.now() };
 
       // Entry logic — only when auto-trading is on
       if (ST.tradingEnabled && signal) {
@@ -395,8 +450,8 @@ async function runCycle() {
 
         const shouldOpen = !hasPos && (
           CFG.activeMode
-            ? (isDirectional && confidenceOk && cooledDown)
-            : isStrong
+            ? (isDirectional && confidenceOk && cooledDown && regime.ok)
+            : (isStrong && regime.ok)
         );
 
         if (shouldOpen) {
@@ -450,6 +505,10 @@ async function getLivePnL() {
   };
 }
 
+function getReservedCapital() {
+  return Object.values(ST.positions).reduce((sum, pos) => sum + (+pos.size || 0), 0);
+}
+
 // ══════════════════════════════════════════════════════════════════
 // EXPRESS ROUTES
 // ══════════════════════════════════════════════════════════════════
@@ -461,18 +520,25 @@ app.get('/health', (_, res) => res.json({ ok: true, uptime: Math.floor(process.u
 // ── Status ────────────────────────────────────────────────────────
 app.get('/api/status', auth, async (req, res) => {
   const pnl = await getLivePnL();
+  const reservedCapital = getReservedCapital();
+  const equity = CFG.paperMode ? +(ST.startBalance + (pnl.total || 0)).toFixed(2) : null;
   res.json({
     paperMode:      CFG.paperMode,
     tradingEnabled: ST.tradingEnabled,
     activeMode:     CFG.activeMode,
     minConfidence:  CFG.minConfidence,
     entryCooldownMin: CFG.entryCooldownMin,
+    regimeFilter:   CFG.regimeFilter,
+    minEmaGapPct:   CFG.minEmaGapPct,
+    minAtrPct:      CFG.minAtrPct,
     longOnlyLive:   CFG.longOnlyLive,
     watchedCoins:   CFG.watchedCoins,
     timeframe:      CFG.timeframe,
     tradeSize:      CFG.tradeSize,
     paperBalance:   +ST.paperBalance.toFixed(2),
+    reservedCapital: +reservedCapital.toFixed(2),
     startBalance:   ST.startBalance,
+    equity,
     dailyLoss:      +ST.dailyLoss.toFixed(2),
     dailyLossLimit: CFG.dailyLossLimit,
     lastCycleAt:    ST.lastCycleAt,
@@ -560,7 +626,7 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
-    activeMode, minConfidence, entryCooldownMin, longOnlyLive,
+    activeMode, minConfidence, entryCooldownMin, regimeFilter, minEmaGapPct, minAtrPct, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
@@ -570,6 +636,9 @@ app.post('/api/config', auth, (req, res) => {
   if (activeMode     !== undefined) CFG.activeMode     = !!activeMode;
   if (minConfidence  !== undefined) CFG.minConfidence  = +minConfidence;
   if (entryCooldownMin !== undefined) CFG.entryCooldownMin = +entryCooldownMin;
+  if (regimeFilter   !== undefined) CFG.regimeFilter   = !!regimeFilter;
+  if (minEmaGapPct   !== undefined) CFG.minEmaGapPct   = +minEmaGapPct;
+  if (minAtrPct      !== undefined) CFG.minAtrPct      = +minAtrPct;
   if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
   res.json({
     ok: true,
@@ -581,6 +650,9 @@ app.post('/api/config', auth, (req, res) => {
     activeMode: CFG.activeMode,
     minConfidence: CFG.minConfidence,
     entryCooldownMin: CFG.entryCooldownMin,
+    regimeFilter: CFG.regimeFilter,
+    minEmaGapPct: CFG.minEmaGapPct,
+    minAtrPct: CFG.minAtrPct,
     longOnlyLive: CFG.longOnlyLive,
   });
 });
@@ -598,6 +670,7 @@ app.listen(PORT, () => {
   console.log(`⏱   Timeframe:  ${CFG.timeframe} | Trade size: $${CFG.tradeSize}`);
   console.log(`🛡   Daily loss limit: $${CFG.dailyLossLimit}`);
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
+  console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}%`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
   console.log('════════════════════════════════════════\n');
 });
