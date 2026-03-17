@@ -405,6 +405,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--tx1);font-fami
       <h3>&#127918; Auto-Trading Controls</h3>
       <p id="bd-mode-txt" style="font-size:11px;color:var(--yel);margin-bottom:10px;">&#128196; PAPER TRADING MODE — no real money</p>
       <p id="bd-mode-meta" style="font-size:10px;color:var(--tx2);margin:-4px 0 10px 0;letter-spacing:.2px;">⚙ Strategy: —</p>
+      <p id="bd-activity-meta" style="font-size:10px;color:var(--tx3);margin:-5px 0 10px 0;line-height:1.35;">🕒 Last trade: — · ⛔ Last block: —</p>
       <button class="bd-btn green" id="bd-toggle-btn" onclick="toggleBot()">&#9654; Enable Auto-Trading</button>
       <div style="height:8px"></div>
       <button class="bd-btn red" onclick="killBot()">&#9940; KILL SWITCH — Close All Positions</button>
@@ -1226,6 +1227,15 @@ function updateBotDash(status) {
     ? '⚙ Strategy: classic mode'
     : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${regimeTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
+
+  const fmtTs = ts => ts
+    ? new Date(ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+    : 'none';
+  const lb = status.lastBlocked || null;
+  const blockTxt = lb
+    ? `${lb.coin || '—'} · ${lb.reason || 'blocked'}${lb.at ? ' @ ' + new Date(lb.at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : ''}`
+    : 'none';
+  document.getElementById('bd-activity-meta').textContent = `🕒 Last trade: ${fmtTs(status.lastTradeAt)} · ⛔ Last block: ${blockTxt}`;
   document.getElementById('bd-reset-btn').style.display = isPaper ? 'block' : 'none';
 
   // Toggle button

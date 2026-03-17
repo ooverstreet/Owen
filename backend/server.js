@@ -57,6 +57,8 @@ let ST = {
   trades:         [],   // completed trade objects
   signals:        {},   // latest signal per coin
   lastEntryAt:    {},   // timestamp by coin for cooldown throttling
+  lastTradeAt:    null, // last open/close event time
+  lastBlocked:    null, // latest blocked-entry explanation
   dailyLoss:      0,
   dailyStart:     new Date().toDateString(),
   tradingEnabled: false,
@@ -358,6 +360,8 @@ async function openPosition(coin, signal) {
     coin, side, size: CFG.tradeSize, entry: price, tp: +tp.toFixed(6), sl: +sl.toFixed(6),
     signal: signal.label, confidence: signal.confidence, opened: Date.now(),
   };
+  ST.lastTradeAt = Date.now();
+  ST.lastBlocked = null;
   const mode = CFG.paperMode ? '📄 PAPER' : '💰 LIVE';
   console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
   saveState();
@@ -392,6 +396,7 @@ async function closePosition(coin, reason) {
   ST.trades.unshift(trade);
   if (ST.trades.length > 100) ST.trades.pop();
   delete ST.positions[coin];
+  ST.lastTradeAt = Date.now();
 
   const sign = pnl >= 0 ? '+' : '';
   console.log(`${CFG.paperMode ? '📄 PAPER' : '💰 LIVE'} CLOSE ${pos.side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | PnL: ${sign}$${pnl.toFixed(2)} (${reason})`);
@@ -447,6 +452,7 @@ async function runCycle() {
         const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
         const lastEntryAt = ST.lastEntryAt[coin] || 0;
         const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
+        let blockReason = null;
 
         const shouldOpen = !hasPos && (
           CFG.activeMode
@@ -462,6 +468,28 @@ async function runCycle() {
           const shouldClose = (pos.side === 'BUY'  && (signal.label === 'STRONG_SELL' || signal.label === 'SELL'))
                            || (pos.side === 'SELL' && (signal.label === 'STRONG_BUY'  || signal.label === 'BUY'));
           if (shouldClose) await closePosition(coin, 'SIGNAL_REVERSAL');
+        } else {
+          if (CFG.activeMode) {
+            if (!isDirectional) blockReason = `Signal ${signal.label} (needs BUY/SELL)`;
+            else if (!confidenceOk) blockReason = `Confidence ${signal.confidence}% < ${CFG.minConfidence}%`;
+            else if (!cooledDown) {
+              const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
+              const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
+              blockReason = `Cooldown active (${minsRemaining}m remaining)`;
+            } else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
+          } else {
+            if (!isStrong) blockReason = `Classic mode: waiting STRONG_* (got ${signal.label})`;
+            else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
+          }
+          if (blockReason) {
+            ST.lastBlocked = {
+              coin,
+              label: signal.label,
+              confidence: signal.confidence,
+              reason: blockReason,
+              at: Date.now(),
+            };
+          }
         }
       }
     } catch(e) {
@@ -588,6 +616,8 @@ app.get('/api/status', auth, async (req, res) => {
     equity,
     dailyLoss:      +ST.dailyLoss.toFixed(2),
     dailyLossLimit: CFG.dailyLossLimit,
+    lastTradeAt:    ST.lastTradeAt,
+    lastBlocked:    ST.lastBlocked,
     lastCycleAt:    ST.lastCycleAt,
     positionCount:  Object.keys(ST.positions).length,
     errorCount:     ST.errors.length,
