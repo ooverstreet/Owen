@@ -31,6 +31,8 @@ const CFG = {
   activeMode:     process.env.ACTIVE_MODE     !== 'false',
   minConfidence:  parseInt(process.env.MIN_CONFIDENCE)     || 35,
   entryCooldownMin: parseInt(process.env.ENTRY_COOLDOWN_MIN) || 8,
+  buyScoreThreshold: parseFloat(process.env.BUY_SCORE_THRESHOLD) || 0.28,
+  strongScoreThreshold: parseFloat(process.env.STRONG_SCORE_THRESHOLD) || 0.55,
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
@@ -301,8 +303,10 @@ function generateSignal(candles) {
 
   const norm = Math.max(-1, Math.min(1, score / 9));
   const risk = RISK[CFG.timeframe] || RISK['15m'];
-  const label = norm > 0.55 ? 'STRONG_BUY' : norm > 0.28 ? 'BUY'
-              : norm < -0.55 ? 'STRONG_SELL' : norm < -0.28 ? 'SELL' : 'HOLD';
+  const buyT = Math.max(0.01, Math.min(0.95, Math.abs(CFG.buyScoreThreshold)));
+  const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(CFG.strongScoreThreshold)));
+  const label = norm > strongT ? 'STRONG_BUY' : norm > buyT ? 'BUY'
+              : norm < -strongT ? 'STRONG_SELL' : norm < -buyT ? 'SELL' : 'HOLD';
   return {
     label,
     confidence: Math.round(Math.abs(norm) * 100),
@@ -603,6 +607,8 @@ app.get('/api/status', auth, async (req, res) => {
     activeMode:     CFG.activeMode,
     minConfidence:  CFG.minConfidence,
     entryCooldownMin: CFG.entryCooldownMin,
+    buyScoreThreshold: CFG.buyScoreThreshold,
+    strongScoreThreshold: CFG.strongScoreThreshold,
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
     minAtrPct:      CFG.minAtrPct,
@@ -693,7 +699,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · Regime=${CFG.regimeFilter ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Regime=${CFG.regimeFilter ? 'on' : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -717,6 +723,8 @@ app.get('/api/signals/summary', auth, (req, res) => {
       activeMode: CFG.activeMode,
       minConfidence: CFG.minConfidence,
       entryCooldownMin: CFG.entryCooldownMin,
+      buyScoreThreshold: CFG.buyScoreThreshold,
+      strongScoreThreshold: CFG.strongScoreThreshold,
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
@@ -813,7 +821,7 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
-    activeMode, minConfidence, entryCooldownMin, regimeFilter, minEmaGapPct, minAtrPct, longOnlyLive,
+    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, regimeFilter, minEmaGapPct, minAtrPct, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
@@ -823,6 +831,8 @@ app.post('/api/config', auth, (req, res) => {
   if (activeMode     !== undefined) CFG.activeMode     = !!activeMode;
   if (minConfidence  !== undefined) CFG.minConfidence  = +minConfidence;
   if (entryCooldownMin !== undefined) CFG.entryCooldownMin = +entryCooldownMin;
+  if (buyScoreThreshold !== undefined) CFG.buyScoreThreshold = +buyScoreThreshold;
+  if (strongScoreThreshold !== undefined) CFG.strongScoreThreshold = +strongScoreThreshold;
   if (regimeFilter   !== undefined) CFG.regimeFilter   = !!regimeFilter;
   if (minEmaGapPct   !== undefined) CFG.minEmaGapPct   = +minEmaGapPct;
   if (minAtrPct      !== undefined) CFG.minAtrPct      = +minAtrPct;
@@ -837,6 +847,8 @@ app.post('/api/config', auth, (req, res) => {
     activeMode: CFG.activeMode,
     minConfidence: CFG.minConfidence,
     entryCooldownMin: CFG.entryCooldownMin,
+    buyScoreThreshold: CFG.buyScoreThreshold,
+    strongScoreThreshold: CFG.strongScoreThreshold,
     regimeFilter: CFG.regimeFilter,
     minEmaGapPct: CFG.minEmaGapPct,
     minAtrPct: CFG.minAtrPct,
@@ -857,6 +869,7 @@ app.listen(PORT, () => {
   console.log(`⏱   Timeframe:  ${CFG.timeframe} | Trade size: $${CFG.tradeSize}`);
   console.log(`🛡   Daily loss limit: $${CFG.dailyLossLimit}`);
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
+  console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}%`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
   console.log('════════════════════════════════════════\n');

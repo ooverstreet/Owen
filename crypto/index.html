@@ -1223,9 +1223,12 @@ function updateBotDash(status) {
   const regimeTxt = status.regimeFilter === false
     ? 'regime off'
     : `regime on · ema gap ${status.minEmaGapPct ?? '—'}% · atr ${status.minAtrPct ?? '—'}%`;
+  const signalTxt = (status.buyScoreThreshold != null && status.strongScoreThreshold != null)
+    ? `buy>${status.buyScoreThreshold} · strong>${status.strongScoreThreshold}`
+    : 'default signal thresholds';
   const strategy = status.activeMode === undefined
     ? '⚙ Strategy: classic mode'
-    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${regimeTxt}`;
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${regimeTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
 
   const fmtTs = ts => ts
