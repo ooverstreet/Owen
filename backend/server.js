@@ -628,6 +628,105 @@ app.get('/api/status', auth, async (req, res) => {
 // ── Signals ───────────────────────────────────────────────────────
 app.get('/api/signals', auth, (_, res) => res.json(ST.signals));
 
+// ── Signals summary (human-readable) ──────────────────────────────
+app.get('/api/signals/summary', auth, (req, res) => {
+  const now = Date.now();
+  const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
+  const positions = ST.positions || {};
+  const signals = Object.entries(ST.signals || {}).map(([coin, s]) => {
+    const label = s?.label || '—';
+    const confidence = Number.isFinite(s?.confidence) ? s.confidence : null;
+    const regime = s?.regime || { ok: true, reason: 'n/a' };
+    const hasPos = !!positions[coin];
+    const isStrong = label === 'STRONG_BUY' || label === 'STRONG_SELL';
+    const isDirectional = label === 'BUY' || label === 'SELL' || isStrong;
+    const confidenceOk = confidence !== null ? confidence >= CFG.minConfidence : false;
+    const lastEntryAt = ST.lastEntryAt?.[coin] || 0;
+    const cooledDown = now - lastEntryAt >= cooldownMs;
+
+    let status = 'watching';
+    let reason = 'waiting';
+    if (hasPos) {
+      status = 'in_position';
+      reason = 'already in position';
+    } else if (!isDirectional) {
+      status = 'blocked';
+      reason = `signal ${label} (needs BUY/SELL)`;
+    } else if (!confidenceOk) {
+      status = 'blocked';
+      reason = `confidence ${confidence}% < ${CFG.minConfidence}%`;
+    } else if (!cooledDown) {
+      const mins = Math.max(1, Math.ceil((cooldownMs - (now - lastEntryAt)) / 60000));
+      status = 'blocked';
+      reason = `cooldown active (${mins}m remaining)`;
+    } else if (!regime.ok) {
+      status = 'blocked';
+      reason = `regime blocked: ${regime.reason}`;
+    } else if (!CFG.activeMode && !isStrong) {
+      status = 'blocked';
+      reason = `classic mode: waiting STRONG_* (got ${label})`;
+    } else {
+      status = 'entry_ready';
+      reason = 'eligible for entry';
+    }
+
+    return {
+      coin,
+      label,
+      confidence,
+      price: s?.price ?? null,
+      regimeOk: !!regime.ok,
+      regimeReason: regime.reason || 'n/a',
+      status,
+      reason,
+      updatedAt: s?.updatedAt || null,
+    };
+  });
+
+  signals.sort((a, b) => a.coin.localeCompare(b.coin));
+
+  const counts = signals.reduce((acc, s) => {
+    acc[s.status] = (acc[s.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const lines = [];
+  lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
+  lines.push(
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · Regime=${CFG.regimeFilter ? 'on' : 'off'}`
+  );
+  lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
+  for (const s of signals) {
+    const conf = s.confidence != null ? `${s.confidence}%` : '—';
+    const px = s.price != null ? `$${Number(s.price).toFixed(4)}` : '—';
+    lines.push(`${s.coin.padEnd(8)} ${String(s.label).padEnd(12)} conf=${conf.padEnd(4)} price=${px} | ${s.status} | ${s.reason}`);
+  }
+
+  const wantsText = String(req.query.format || '').toLowerCase() === 'text'
+    || String(req.query.format || '').toLowerCase() === 'txt'
+    || String(req.headers.accept || '').includes('text/plain');
+
+  if (wantsText) {
+    res.type('text/plain').send(lines.join('\n'));
+    return;
+  }
+
+  res.json({
+    generatedAt: now,
+    mode: {
+      activeMode: CFG.activeMode,
+      minConfidence: CFG.minConfidence,
+      entryCooldownMin: CFG.entryCooldownMin,
+      regimeFilter: CFG.regimeFilter,
+      minEmaGapPct: CFG.minEmaGapPct,
+      minAtrPct: CFG.minAtrPct,
+    },
+    counts,
+    signals,
+    text: lines.join('\n'),
+  });
+});
+
 // ── Positions (with live P&L) ─────────────────────────────────────
 app.get('/api/positions', auth, async (_, res) => {
   const enriched = {};
