@@ -1226,9 +1226,12 @@ function updateBotDash(status) {
   const signalTxt = (status.buyScoreThreshold != null && status.strongScoreThreshold != null)
     ? `buy>${status.buyScoreThreshold} · strong>${status.strongScoreThreshold}`
     : 'default signal thresholds';
+  const policyTxt = isPaper
+    ? (status.longOnlyPaper ? 'paper long-only' : 'paper buy/sell')
+    : (status.longOnlyLive ? 'live long-only' : 'live buy/sell');
   const strategy = status.activeMode === undefined
     ? '⚙ Strategy: classic mode'
-    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${regimeTxt}`;
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${regimeTxt} · ${policyTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
 
   const fmtTs = ts => ts

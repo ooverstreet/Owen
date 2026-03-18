@@ -36,6 +36,7 @@ const CFG = {
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
+  longOnlyPaper:  process.env.LONG_ONLY_PAPER === 'true',
   longOnlyLive:   process.env.LONG_ONLY_LIVE  !== 'false',
   cbKeyName:      process.env.CB_KEY_NAME     || '',
   cbPrivateKey:   (process.env.CB_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
@@ -371,8 +372,16 @@ async function openPosition(coin, signal) {
 
   const price = await fetchPrice(coin);
   const side  = signal.label.includes('BUY') ? 'BUY' : 'SELL';
-  if (!CFG.paperMode && CFG.longOnlyLive && side === 'SELL') {
-    console.log(`ℹ️  Skipping ${coin} SELL entry in live mode (LONG_ONLY_LIVE=true)`);
+  const sellBlocked = side === 'SELL' && (
+    (CFG.paperMode && CFG.longOnlyPaper) ||
+    (!CFG.paperMode && CFG.longOnlyLive)
+  );
+  if (sellBlocked) {
+    const policyVar = CFG.paperMode ? 'LONG_ONLY_PAPER' : 'LONG_ONLY_LIVE';
+    const modeLabel = CFG.paperMode ? 'paper' : 'live';
+    const reason = `${policyVar}=true blocks new SELL entries`;
+    ST.lastBlocked = { coin, label: signal.label, confidence: signal.confidence, reason, at: Date.now() };
+    console.log(`ℹ️  Skipping ${coin} SELL entry in ${modeLabel} mode (${policyVar}=true)`);
     return false;
   }
   const risk  = RISK[CFG.timeframe] || RISK['15m'];
@@ -646,6 +655,7 @@ app.get('/api/status', auth, async (req, res) => {
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
     minAtrPct:      CFG.minAtrPct,
+    longOnlyPaper:  CFG.longOnlyPaper,
     longOnlyLive:   CFG.longOnlyLive,
     watchedCoins:   CFG.watchedCoins,
     timeframe:      CFG.timeframe,
@@ -855,7 +865,7 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
-    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, regimeFilter, minEmaGapPct, minAtrPct, longOnlyLive,
+    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, regimeFilter, minEmaGapPct, minAtrPct, longOnlyPaper, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
@@ -870,6 +880,7 @@ app.post('/api/config', auth, (req, res) => {
   if (regimeFilter   !== undefined) CFG.regimeFilter   = !!regimeFilter;
   if (minEmaGapPct   !== undefined) CFG.minEmaGapPct   = +minEmaGapPct;
   if (minAtrPct      !== undefined) CFG.minAtrPct      = +minAtrPct;
+  if (longOnlyPaper  !== undefined) CFG.longOnlyPaper  = !!longOnlyPaper;
   if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
   res.json({
     ok: true,
@@ -886,6 +897,7 @@ app.post('/api/config', auth, (req, res) => {
     regimeFilter: CFG.regimeFilter,
     minEmaGapPct: CFG.minEmaGapPct,
     minAtrPct: CFG.minAtrPct,
+    longOnlyPaper: CFG.longOnlyPaper,
     longOnlyLive: CFG.longOnlyLive,
   });
 });
@@ -905,6 +917,7 @@ app.listen(PORT, () => {
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
   console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}%`);
+  console.log(`📌  Paper policy: ${CFG.longOnlyPaper ? 'LONG ONLY' : 'ALLOW BUY/SELL'} | Live policy: ${CFG.longOnlyLive ? 'LONG ONLY' : 'ALLOW BUY/SELL'}`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
   console.log('════════════════════════════════════════\n');
 });
