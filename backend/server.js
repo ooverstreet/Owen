@@ -101,14 +101,50 @@ function auth(req, res, next) {
 const CB_PUB = 'https://api.exchange.coinbase.com';
 const CB_ADV = 'https://api.coinbase.com';
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchJSONWithRetry(url, opts = {}) {
+  const attempts = Math.max(1, opts.attempts ?? 3);
+  const timeoutMs = Math.max(1000, opts.timeoutMs ?? 10000);
+  const method = opts.method || 'GET';
+  let lastErr = null;
+
+  for (let i = 0; i < attempts; i++) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: opts.headers,
+        body: opts.body,
+        signal: ctl.signal,
+      });
+      clearTimeout(timer);
+      const text = await res.text();
+      let json = null;
+      try { json = text ? JSON.parse(text) : null; } catch (e) {}
+      if (!res.ok) {
+        const msg = json?.error || json?.message || json?.error_details || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return json;
+    } catch (e) {
+      clearTimeout(timer);
+      lastErr = e;
+      if (i < attempts - 1) await sleep(250 * (i + 1));
+    }
+  }
+  throw lastErr || new Error('fetch failed');
+}
+
 async function fetchCandles(productId, tf) {
   const gran = TF_GRAN[tf] || 900;
   const end  = new Date();
   const start = new Date(end.getTime() - gran * 280 * 1000);
   const url  = `${CB_PUB}/products/${productId}/candles?granularity=${gran}&start=${start.toISOString()}&end=${end.toISOString()}`;
-  const res  = await fetch(url);
-  if (!res.ok) throw new Error(`Candles fetch failed: HTTP ${res.status}`);
-  const raw  = await res.json();
+  const raw  = await fetchJSONWithRetry(url, { attempts: 3, timeoutMs: 12000 });
   if (!Array.isArray(raw) || raw.length < 2) throw new Error('Insufficient candle data');
   // Coinbase returns newest first → reverse to oldest first
   return raw.reverse().map(c => ({
@@ -117,8 +153,7 @@ async function fetchCandles(productId, tf) {
 }
 
 async function fetchPrice(productId) {
-  const res = await fetch(`${CB_PUB}/products/${productId}/ticker`);
-  const d   = await res.json();
+  const d   = await fetchJSONWithRetry(`${CB_PUB}/products/${productId}/ticker`, { attempts: 3, timeoutMs: 9000 });
   if (!d.price) throw new Error(`No price data for ${productId}`);
   return +d.price;
 }
@@ -150,14 +185,13 @@ function makeCBJWT(method, path) {
 
 async function cbRequest(method, path, body) {
   const token = makeCBJWT(method, path);
-  const res   = await fetch(`${CB_ADV}${path}`, {
+  return fetchJSONWithRetry(`${CB_ADV}${path}`, {
     method,
+    attempts: 2,
+    timeoutMs: 12000,
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const d = await res.json();
-  if (!res.ok) throw new Error(d.message || d.error_details || `HTTP ${res.status}`);
-  return d;
 }
 
 async function getCBBalance(currency = 'USD') {
