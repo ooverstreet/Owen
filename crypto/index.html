@@ -1222,7 +1222,7 @@ function updateBotDash(status) {
   document.getElementById('bd-mode-txt').style.color = isPaper ? 'var(--yel)' : 'var(--red)';
   const regimeTxt = status.regimeFilter === false
     ? 'regime off'
-    : `regime on · ema gap ${status.minEmaGapPct ?? '—'}% · atr ${status.minAtrPct ?? '—'}%`;
+    : `regime on · ema gap ${status.minEmaGapPct ?? '—'}% · atr ${status.minAtrPct ?? '—'}% · align ${status.regimeRequireEmaAlignment === false ? 'off' : 'on'}`;
   const signalTxt = (status.buyScoreThreshold != null && status.strongScoreThreshold != null)
     ? `buy>${status.buyScoreThreshold} · strong>${status.strongScoreThreshold}`
     : 'default signal thresholds';

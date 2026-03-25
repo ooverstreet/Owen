@@ -36,6 +36,7 @@ const CFG = {
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
+  regimeRequireEmaAlignment: process.env.REGIME_REQUIRE_EMA_ALIGNMENT !== 'false',
   longOnlyPaper:  process.env.LONG_ONLY_PAPER === 'true',
   longOnlyLive:   process.env.LONG_ONLY_LIVE  !== 'false',
   cbKeyName:      process.env.CB_KEY_NAME     || '',
@@ -297,11 +298,13 @@ function passRegimeFilter(signal) {
   if (atrPct < CFG.minAtrPct) {
     return { ok: false, reason: `atr ${atrPct.toFixed(3)}% < ${CFG.minAtrPct}%` };
   }
-  if (side === 'BUY' && !(ind.ema9 > ind.ema21)) {
-    return { ok: false, reason: 'BUY signal not aligned with EMA trend' };
-  }
-  if (side === 'SELL' && !(ind.ema9 < ind.ema21)) {
-    return { ok: false, reason: 'SELL signal not aligned with EMA trend' };
+  if (CFG.regimeRequireEmaAlignment) {
+    if (side === 'BUY' && !(ind.ema9 > ind.ema21)) {
+      return { ok: false, reason: 'BUY signal not aligned with EMA trend' };
+    }
+    if (side === 'SELL' && !(ind.ema9 < ind.ema21)) {
+      return { ok: false, reason: 'SELL signal not aligned with EMA trend' };
+    }
   }
   return { ok: true, reason: 'ok' };
 }
@@ -655,6 +658,7 @@ app.get('/api/status', auth, async (req, res) => {
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
     minAtrPct:      CFG.minAtrPct,
+    regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     longOnlyPaper:  CFG.longOnlyPaper,
     longOnlyLive:   CFG.longOnlyLive,
     watchedCoins:   CFG.watchedCoins,
@@ -743,7 +747,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Regime=${CFG.regimeFilter ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -772,6 +776,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
+      regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     },
     counts,
     signals,
@@ -865,7 +870,7 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
-    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, regimeFilter, minEmaGapPct, minAtrPct, longOnlyPaper, longOnlyLive,
+    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
@@ -880,6 +885,7 @@ app.post('/api/config', auth, (req, res) => {
   if (regimeFilter   !== undefined) CFG.regimeFilter   = !!regimeFilter;
   if (minEmaGapPct   !== undefined) CFG.minEmaGapPct   = +minEmaGapPct;
   if (minAtrPct      !== undefined) CFG.minAtrPct      = +minAtrPct;
+  if (regimeRequireEmaAlignment !== undefined) CFG.regimeRequireEmaAlignment = !!regimeRequireEmaAlignment;
   if (longOnlyPaper  !== undefined) CFG.longOnlyPaper  = !!longOnlyPaper;
   if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
   res.json({
@@ -897,6 +903,7 @@ app.post('/api/config', auth, (req, res) => {
     regimeFilter: CFG.regimeFilter,
     minEmaGapPct: CFG.minEmaGapPct,
     minAtrPct: CFG.minAtrPct,
+    regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     longOnlyPaper: CFG.longOnlyPaper,
     longOnlyLive: CFG.longOnlyLive,
   });
@@ -916,7 +923,7 @@ app.listen(PORT, () => {
   console.log(`🛡   Daily loss limit: $${CFG.dailyLossLimit}`);
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
   console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
-  console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}%`);
+  console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
   console.log(`📌  Paper policy: ${CFG.longOnlyPaper ? 'LONG ONLY' : 'ALLOW BUY/SELL'} | Live policy: ${CFG.longOnlyLive ? 'LONG ONLY' : 'ALLOW BUY/SELL'}`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
   console.log('════════════════════════════════════════\n');
