@@ -1226,12 +1226,16 @@ function updateBotDash(status) {
   const signalTxt = (status.buyScoreThreshold != null && status.strongScoreThreshold != null)
     ? `buy>${status.buyScoreThreshold} · strong>${status.strongScoreThreshold}`
     : 'default signal thresholds';
+  const dipTxt = status.dipBuyEnabled
+    ? `dip on ${status.minDipPct ?? '—'}%/${status.dipLookbackCandles ?? '—'}c`
+    : 'dip off';
+  const closeTxt = `sig close min $${(status.signalCloseMinProfitUsd ?? 0).toFixed ? (status.signalCloseMinProfitUsd ?? 0).toFixed(2) : status.signalCloseMinProfitUsd ?? 0}`;
   const policyTxt = isPaper
     ? (status.longOnlyPaper ? 'paper long-only' : 'paper buy/sell')
     : (status.longOnlyLive ? 'live long-only' : 'live buy/sell');
   const strategy = status.activeMode === undefined
     ? '⚙ Strategy: classic mode'
-    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${regimeTxt} · ${policyTxt}`;
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${dipTxt} · ${closeTxt} · ${regimeTxt} · ${policyTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
 
   const fmtTs = ts => ts
