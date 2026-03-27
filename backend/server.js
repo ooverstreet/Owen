@@ -36,7 +36,9 @@ const CFG = {
   dipBuyEnabled:  process.env.DIP_BUY_ENABLED === 'true',
   dipLookbackCandles: parseInt(process.env.DIP_LOOKBACK_CANDLES) || 6,
   minDipPct:      parseFloat(process.env.MIN_DIP_PCT)      || 0.25,
+  minTakeProfitUsd: parseFloat(process.env.MIN_TAKE_PROFIT_USD) || 0,
   signalCloseMinProfitUsd: parseFloat(process.env.SIGNAL_CLOSE_MIN_PROFIT_USD) || 0,
+  paperDisableStopLoss: process.env.PAPER_DISABLE_STOP_LOSS === 'true',
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
@@ -423,8 +425,16 @@ async function openPosition(coin, signal) {
     return false;
   }
   const risk  = RISK[CFG.timeframe] || RISK['15m'];
-  const tp    = side === 'BUY' ? price * (1 + risk.tp) : price * (1 - risk.tp);
+  let tp      = side === 'BUY' ? price * (1 + risk.tp) : price * (1 - risk.tp);
   const sl    = side === 'BUY' ? price * (1 - risk.sl) : price * (1 + risk.sl);
+  if (CFG.minTakeProfitUsd > 0 && CFG.tradeSize > 0) {
+    const minMovePct = CFG.minTakeProfitUsd / CFG.tradeSize;
+    if (side === 'BUY') {
+      tp = Math.max(tp, price * (1 + minMovePct));
+    } else {
+      tp = Math.min(tp, price * (1 - minMovePct));
+    }
+  }
 
   if (CFG.paperMode) {
     if (ST.paperBalance < CFG.tradeSize) {
@@ -492,12 +502,13 @@ async function checkExits(coin) {
   const pos = ST.positions[coin];
   if (!pos) return;
   const price = await fetchPrice(coin);
+  const stopLossDisabled = CFG.paperMode && CFG.paperDisableStopLoss;
   if (pos.side === 'BUY') {
     if (price >= pos.tp) { await closePosition(coin, 'TAKE_PROFIT'); return; }
-    if (price <= pos.sl) { await closePosition(coin, 'STOP_LOSS');   return; }
+    if (!stopLossDisabled && price <= pos.sl) { await closePosition(coin, 'STOP_LOSS'); return; }
   } else {
     if (price <= pos.tp) { await closePosition(coin, 'TAKE_PROFIT'); return; }
-    if (price >= pos.sl) { await closePosition(coin, 'STOP_LOSS');   return; }
+    if (!stopLossDisabled && price >= pos.sl) { await closePosition(coin, 'STOP_LOSS'); return; }
   }
 }
 
@@ -713,7 +724,9 @@ app.get('/api/status', auth, async (req, res) => {
     dipBuyEnabled:   CFG.dipBuyEnabled,
     dipLookbackCandles: CFG.dipLookbackCandles,
     minDipPct:       CFG.minDipPct,
+    minTakeProfitUsd: CFG.minTakeProfitUsd,
     signalCloseMinProfitUsd: CFG.signalCloseMinProfitUsd,
+    paperDisableStopLoss: CFG.paperDisableStopLoss,
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
     minAtrPct:      CFG.minAtrPct,
@@ -809,7 +822,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -838,7 +851,9 @@ app.get('/api/signals/summary', auth, (req, res) => {
       dipBuyEnabled: CFG.dipBuyEnabled,
       dipLookbackCandles: CFG.dipLookbackCandles,
       minDipPct: CFG.minDipPct,
+      minTakeProfitUsd: CFG.minTakeProfitUsd,
       signalCloseMinProfitUsd: CFG.signalCloseMinProfitUsd,
+      paperDisableStopLoss: CFG.paperDisableStopLoss,
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
@@ -936,7 +951,7 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
-    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, signalCloseMinProfitUsd, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
+    activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
@@ -951,7 +966,9 @@ app.post('/api/config', auth, (req, res) => {
   if (dipBuyEnabled  !== undefined) CFG.dipBuyEnabled  = !!dipBuyEnabled;
   if (dipLookbackCandles !== undefined) CFG.dipLookbackCandles = +dipLookbackCandles;
   if (minDipPct      !== undefined) CFG.minDipPct      = +minDipPct;
+  if (minTakeProfitUsd !== undefined) CFG.minTakeProfitUsd = +minTakeProfitUsd;
   if (signalCloseMinProfitUsd !== undefined) CFG.signalCloseMinProfitUsd = +signalCloseMinProfitUsd;
+  if (paperDisableStopLoss !== undefined) CFG.paperDisableStopLoss = !!paperDisableStopLoss;
   if (regimeFilter   !== undefined) CFG.regimeFilter   = !!regimeFilter;
   if (minEmaGapPct   !== undefined) CFG.minEmaGapPct   = +minEmaGapPct;
   if (minAtrPct      !== undefined) CFG.minAtrPct      = +minAtrPct;
@@ -973,7 +990,9 @@ app.post('/api/config', auth, (req, res) => {
     dipBuyEnabled: CFG.dipBuyEnabled,
     dipLookbackCandles: CFG.dipLookbackCandles,
     minDipPct: CFG.minDipPct,
+    minTakeProfitUsd: CFG.minTakeProfitUsd,
     signalCloseMinProfitUsd: CFG.signalCloseMinProfitUsd,
+    paperDisableStopLoss: CFG.paperDisableStopLoss,
     regimeFilter: CFG.regimeFilter,
     minEmaGapPct: CFG.minEmaGapPct,
     minAtrPct: CFG.minAtrPct,
@@ -998,7 +1017,7 @@ app.listen(PORT, () => {
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
   console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
   console.log(`🪙  Dip filter: ${CFG.dipBuyEnabled ? 'ON' : 'OFF'} | Min dip: ${CFG.minDipPct}% | Lookback: ${CFG.dipLookbackCandles} candles`);
-  console.log(`💵  Signal close min profit: $${CFG.signalCloseMinProfitUsd}`);
+  console.log(`💵  TP floor: $${CFG.minTakeProfitUsd} | Signal close min profit: $${CFG.signalCloseMinProfitUsd} | Paper stop-loss: ${CFG.paperDisableStopLoss ? 'OFF' : 'ON'}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
   console.log(`📌  Paper policy: ${CFG.longOnlyPaper ? 'LONG ONLY' : 'ALLOW BUY/SELL'} | Live policy: ${CFG.longOnlyLive ? 'LONG ONLY' : 'ALLOW BUY/SELL'}`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);

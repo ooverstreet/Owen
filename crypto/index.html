@@ -1229,7 +1229,7 @@ function updateBotDash(status) {
   const dipTxt = status.dipBuyEnabled
     ? `dip on ${status.minDipPct ?? '—'}%/${status.dipLookbackCandles ?? '—'}c`
     : 'dip off';
-  const closeTxt = `sig close min $${(status.signalCloseMinProfitUsd ?? 0).toFixed ? (status.signalCloseMinProfitUsd ?? 0).toFixed(2) : status.signalCloseMinProfitUsd ?? 0}`;
+  const closeTxt = `tp floor $${Number(status.minTakeProfitUsd ?? 0).toFixed(2)} · sig close min $${Number(status.signalCloseMinProfitUsd ?? 0).toFixed(2)} · paper SL ${status.paperDisableStopLoss ? 'off' : 'on'}`;
   const policyTxt = isPaper
     ? (status.longOnlyPaper ? 'paper long-only' : 'paper buy/sell')
     : (status.longOnlyLive ? 'live long-only' : 'live buy/sell');
