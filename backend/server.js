@@ -24,6 +24,9 @@ const CFG = {
   paperMode:      process.env.PAPER_MODE      !== 'false',
   paperBalance:   parseFloat(process.env.PAPER_BALANCE)    || 1000,
   tradeSize:      parseFloat(process.env.TRADE_SIZE)       || 50,
+  tradeSizePct:   parseFloat(process.env.TRADE_SIZE_PCT)   || 0,
+  tradeSizeMinUsd: parseFloat(process.env.TRADE_SIZE_MIN_USD) || 0,
+  tradeSizeMaxUsd: parseFloat(process.env.TRADE_SIZE_MAX_USD) || 0,
   maxPositions:   parseInt(process.env.MAX_POSITIONS)      || 2,
   dailyLossLimit: parseFloat(process.env.DAILY_LOSS_LIMIT) || 50,
   timeframe:      process.env.TIMEFRAME       || '15m',
@@ -410,6 +413,12 @@ async function openPosition(coin, signal) {
   if (Object.keys(ST.positions).length >= CFG.maxPositions) return false;
   if (ST.positions[coin]) return false;
 
+  const usdSize = await resolveTradeSizeUsd();
+  if (!Number.isFinite(usdSize) || usdSize <= 0) {
+    ST.lastBlocked = { coin, label: signal.label, confidence: signal.confidence, reason: 'Computed trade size is invalid', at: Date.now() };
+    return false;
+  }
+
   const price = await fetchPrice(coin);
   const side  = signal.label.includes('BUY') ? 'BUY' : 'SELL';
   const sellBlocked = side === 'SELL' && (
@@ -427,8 +436,8 @@ async function openPosition(coin, signal) {
   const risk  = RISK[CFG.timeframe] || RISK['15m'];
   let tp      = side === 'BUY' ? price * (1 + risk.tp) : price * (1 - risk.tp);
   const sl    = side === 'BUY' ? price * (1 - risk.sl) : price * (1 + risk.sl);
-  if (CFG.minTakeProfitUsd > 0 && CFG.tradeSize > 0) {
-    const minMovePct = CFG.minTakeProfitUsd / CFG.tradeSize;
+  if (CFG.minTakeProfitUsd > 0 && usdSize > 0) {
+    const minMovePct = CFG.minTakeProfitUsd / usdSize;
     if (side === 'BUY') {
       tp = Math.max(tp, price * (1 + minMovePct));
     } else {
@@ -437,13 +446,13 @@ async function openPosition(coin, signal) {
   }
 
   if (CFG.paperMode) {
-    if (ST.paperBalance < CFG.tradeSize) {
-      console.log(`⚠️  Insufficient paper balance ($${ST.paperBalance.toFixed(2)}) for $${CFG.tradeSize} trade`);
+    if (ST.paperBalance < usdSize) {
+      console.log(`⚠️  Insufficient paper balance ($${ST.paperBalance.toFixed(2)}) for $${usdSize.toFixed(2)} trade`);
       return false;
     }
-    ST.paperBalance -= CFG.tradeSize;
+    ST.paperBalance -= usdSize;
   } else {
-    try { await placeCBOrder(coin, side, CFG.tradeSize); }
+    try { await placeCBOrder(coin, side, usdSize); }
     catch(e) {
       console.error(`❌ Order failed for ${coin}:`, e.message);
       ST.errors.push({ time: Date.now(), coin, msg: e.message });
@@ -452,13 +461,13 @@ async function openPosition(coin, signal) {
   }
 
   ST.positions[coin] = {
-    coin, side, size: CFG.tradeSize, entry: price, tp: +tp.toFixed(6), sl: +sl.toFixed(6),
+    coin, side, size: +usdSize.toFixed(2), entry: price, tp: +tp.toFixed(6), sl: +sl.toFixed(6),
     signal: signal.label, confidence: signal.confidence, opened: Date.now(),
   };
   ST.lastTradeAt = Date.now();
   ST.lastBlocked = null;
   const mode = CFG.paperMode ? '📄 PAPER' : '💰 LIVE';
-  console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
+  console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | Size:$${usdSize.toFixed(2)} TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
   saveState();
   return true;
 }
@@ -653,6 +662,19 @@ function getReservedCapital() {
   return Object.values(ST.positions).reduce((sum, pos) => sum + (+pos.size || 0), 0);
 }
 
+async function resolveTradeSizeUsd() {
+  // Percent-based sizing takes precedence when configured.
+  if (CFG.tradeSizePct > 0) {
+    const pct = CFG.tradeSizePct / 100;
+    const basis = CFG.paperMode ? ST.paperBalance : await getCBBalance('USD');
+    let size = basis * pct;
+    if (CFG.tradeSizeMinUsd > 0) size = Math.max(size, CFG.tradeSizeMinUsd);
+    if (CFG.tradeSizeMaxUsd > 0) size = Math.min(size, CFG.tradeSizeMaxUsd);
+    return +size.toFixed(2);
+  }
+  return +CFG.tradeSize;
+}
+
 function csvEscape(v) {
   if (v === null || v === undefined) return '';
   const s = String(v);
@@ -736,6 +758,9 @@ app.get('/api/status', auth, async (req, res) => {
     watchedCoins:   CFG.watchedCoins,
     timeframe:      CFG.timeframe,
     tradeSize:      CFG.tradeSize,
+    tradeSizePct:   CFG.tradeSizePct,
+    tradeSizeMinUsd: CFG.tradeSizeMinUsd,
+    tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
     paperBalance:   +ST.paperBalance.toFixed(2),
     reservedCapital: +reservedCapital.toFixed(2),
     startBalance:   ST.startBalance,
@@ -854,6 +879,10 @@ app.get('/api/signals/summary', auth, (req, res) => {
       minTakeProfitUsd: CFG.minTakeProfitUsd,
       signalCloseMinProfitUsd: CFG.signalCloseMinProfitUsd,
       paperDisableStopLoss: CFG.paperDisableStopLoss,
+      tradeSize: CFG.tradeSize,
+      tradeSizePct: CFG.tradeSizePct,
+      tradeSizeMinUsd: CFG.tradeSizeMinUsd,
+      tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
@@ -950,10 +979,13 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 // ── Update config at runtime ──────────────────────────────────────
 app.post('/api/config', auth, (req, res) => {
   const {
-    tradeSize, maxPositions, dailyLossLimit, watchedCoins, timeframe,
+    tradeSize, tradeSizePct, tradeSizeMinUsd, tradeSizeMaxUsd, maxPositions, dailyLossLimit, watchedCoins, timeframe,
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
+  if (tradeSizePct   !== undefined) CFG.tradeSizePct   = +tradeSizePct;
+  if (tradeSizeMinUsd !== undefined) CFG.tradeSizeMinUsd = +tradeSizeMinUsd;
+  if (tradeSizeMaxUsd !== undefined) CFG.tradeSizeMaxUsd = +tradeSizeMaxUsd;
   if (maxPositions   !== undefined) CFG.maxPositions   = +maxPositions;
   if (dailyLossLimit !== undefined) CFG.dailyLossLimit = +dailyLossLimit;
   if (watchedCoins   !== undefined) CFG.watchedCoins   = watchedCoins;
@@ -978,6 +1010,9 @@ app.post('/api/config', auth, (req, res) => {
   res.json({
     ok: true,
     tradeSize: CFG.tradeSize,
+    tradeSizePct: CFG.tradeSizePct,
+    tradeSizeMinUsd: CFG.tradeSizeMinUsd,
+    tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
     maxPositions: CFG.maxPositions,
     dailyLossLimit: CFG.dailyLossLimit,
     watchedCoins: CFG.watchedCoins,

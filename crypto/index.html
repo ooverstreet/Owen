@@ -1226,6 +1226,9 @@ function updateBotDash(status) {
   const signalTxt = (status.buyScoreThreshold != null && status.strongScoreThreshold != null)
     ? `buy>${status.buyScoreThreshold} · strong>${status.strongScoreThreshold}`
     : 'default signal thresholds';
+  const sizeTxt = status.tradeSizePct && status.tradeSizePct > 0
+    ? `size ${status.tradeSizePct}% (${status.tradeSizeMinUsd ?? 0}-${status.tradeSizeMaxUsd ?? 0})`
+    : `size $${status.tradeSize ?? '—'}`;
   const dipTxt = status.dipBuyEnabled
     ? `dip on ${status.minDipPct ?? '—'}%/${status.dipLookbackCandles ?? '—'}c`
     : 'dip off';
@@ -1235,7 +1238,7 @@ function updateBotDash(status) {
     : (status.longOnlyLive ? 'live long-only' : 'live buy/sell');
   const strategy = status.activeMode === undefined
     ? '⚙ Strategy: classic mode'
-    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${signalTxt} · ${dipTxt} · ${closeTxt} · ${regimeTxt} · ${policyTxt}`;
+    : `⚙ Strategy: ${status.activeMode ? 'active' : 'classic'} · min conf ${status.minConfidence ?? '—'}% · cooldown ${status.entryCooldownMin ?? '—'}m · ${sizeTxt} · ${signalTxt} · ${dipTxt} · ${closeTxt} · ${regimeTxt} · ${policyTxt}`;
   document.getElementById('bd-mode-meta').textContent = strategy;
 
   const fmtTs = ts => ts
