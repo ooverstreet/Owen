@@ -42,6 +42,10 @@ const CFG = {
   minTakeProfitUsd: parseFloat(process.env.MIN_TAKE_PROFIT_USD) || 0,
   signalCloseMinProfitUsd: parseFloat(process.env.SIGNAL_CLOSE_MIN_PROFIT_USD) || 0,
   paperDisableStopLoss: process.env.PAPER_DISABLE_STOP_LOSS === 'true',
+  walletSignalEnabled: process.env.WALLET_SIGNAL_ENABLED === 'true',
+  walletSignalMode:    process.env.WALLET_SIGNAL_MODE || 'off', // off | filter | boost
+  walletSignalThreshold: parseFloat(process.env.WALLET_SIGNAL_THRESHOLD) || 0.2,
+  walletSignalBoostPct: parseFloat(process.env.WALLET_SIGNAL_BOOST_PCT) || 20,
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
@@ -78,6 +82,10 @@ let ST = {
   lastCycleAt:    null,
   errors:         [],
 };
+
+if (!ST.walletSignals || typeof ST.walletSignals !== 'object') {
+  ST.walletSignals = { updatedAt: null, coins: {} };
+}
 
 function saveState() {
   try { fs.writeFileSync(STATE_FILE, JSON.stringify(ST, null, 2)); } catch(e) {}
@@ -349,6 +357,22 @@ function passDipFilter(candles, side) {
   return { ok: true, reason: 'n/a', movePct: null };
 }
 
+function passWalletFlowGate(coin, signal) {
+  if (!CFG.walletSignalEnabled) return { ok: true, reason: 'disabled', score: null };
+  const rec = ST.walletSignals?.coins?.[coin];
+  if (!rec) return { ok: false, reason: 'no wallet signal for coin', score: null };
+  const score = Number(rec.score);
+  if (!Number.isFinite(score)) return { ok: false, reason: 'wallet score missing/invalid', score: null };
+  const side = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
+  if (side === 'BUY' && score < CFG.walletSignalThreshold) {
+    return { ok: false, reason: `wallet score ${score.toFixed(3)} < ${CFG.walletSignalThreshold}`, score };
+  }
+  if (side === 'SELL' && score > -CFG.walletSignalThreshold) {
+    return { ok: false, reason: `wallet score ${score.toFixed(3)} > -${CFG.walletSignalThreshold}`, score };
+  }
+  return { ok: true, reason: 'ok', score };
+}
+
 function generateSignal(candles) {
   if (candles.length < 35) return null;
   const closes = candles.map(c => c.close), cur = closes[closes.length - 1];
@@ -556,6 +580,7 @@ async function runCycle() {
         const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
         const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
         const confidenceOk = signal.confidence >= CFG.minConfidence;
+        const flowGate = passWalletFlowGate(coin, signal);
         const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
         const lastEntryAt = ST.lastEntryAt[coin] || 0;
         const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
@@ -563,8 +588,8 @@ async function runCycle() {
 
         const shouldOpen = !hasPos && (
           CFG.activeMode
-            ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok)
-            : (isStrong && regime.ok && dip.ok)
+            ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && flowGate.ok)
+            : (isStrong && regime.ok && dip.ok && flowGate.ok)
         );
 
         if (shouldOpen) {
@@ -600,10 +625,12 @@ async function runCycle() {
               const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
               blockReason = `Cooldown active (${minsRemaining}m remaining)`;
             } else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+            else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
             else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
           } else {
             if (!isStrong) blockReason = `Classic mode: waiting STRONG_* (got ${signal.label})`;
             else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+            else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
             else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
           }
           if (blockReason) {
@@ -735,6 +762,7 @@ app.get('/api/status', auth, async (req, res) => {
   const pnl = await getLivePnL();
   const reservedCapital = getReservedCapital();
   const equity = CFG.paperMode ? +(ST.startBalance + (pnl.total || 0)).toFixed(2) : null;
+  const effectiveTradeSizeUsd = await resolveTradeSizeUsd();
   res.json({
     paperMode:      CFG.paperMode,
     tradingEnabled: ST.tradingEnabled,
@@ -761,6 +789,7 @@ app.get('/api/status', auth, async (req, res) => {
     tradeSizePct:   CFG.tradeSizePct,
     tradeSizeMinUsd: CFG.tradeSizeMinUsd,
     tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
+    effectiveTradeSizeUsd,
     paperBalance:   +ST.paperBalance.toFixed(2),
     reservedCapital: +reservedCapital.toFixed(2),
     startBalance:   ST.startBalance,
@@ -778,6 +807,55 @@ app.get('/api/status', auth, async (req, res) => {
 
 // ── Signals ───────────────────────────────────────────────────────
 app.get('/api/signals', auth, (_, res) => res.json(ST.signals));
+
+app.get('/api/wallet-signal/status', auth, (_, res) => {
+  res.json({
+    enabled: CFG.walletSignalEnabled,
+    mode: CFG.walletSignalMode,
+    threshold: CFG.walletSignalThreshold,
+    boostPct: CFG.walletSignalBoostPct,
+    source: ST.walletSignals?.source || 'manual',
+    updatedAt: ST.walletSignals?.updatedAt || null,
+    coinCount: Object.keys(ST.walletSignals?.coins || {}).length,
+    message: 'Phase-1 scaffold active. Post coin scores to /api/wallet-signals.',
+  });
+});
+
+// ── Wallet-signal summary (phase-1 scaffold) ─────────────────────
+app.get('/api/wallet-signals', auth, (_, res) => {
+  const updatedAt = ST.walletSignals?.updatedAt || null;
+  const ageMin = updatedAt ? Math.round((Date.now() - updatedAt) / 60000) : null;
+  res.json({
+    enabled: CFG.walletSignalEnabled,
+    mode: CFG.walletSignalMode,
+    threshold: CFG.walletSignalThreshold,
+    boostPct: CFG.walletSignalBoostPct,
+    ageMinutes: ageMin,
+    updatedAt,
+    coins: ST.walletSignals?.coins || {},
+  });
+});
+
+// ── Wallet signal ingest (phase-1 scaffold endpoint) ─────────────
+app.post('/api/wallet-signals', auth, (req, res) => {
+  const coins = req.body?.coins;
+  if (!coins || typeof coins !== 'object') {
+    return res.status(400).json({ error: 'Body must contain { coins: { \"BTC-USD\": { flowZ, score, sampleWallets } } }' });
+  }
+  const sanitized = {};
+  for (const [coin, v] of Object.entries(coins)) {
+    sanitized[coin] = {
+      flowZ: Number(v?.flowZ) || 0,
+      score: Number(v?.score) || 0,
+      sampleWallets: Number(v?.sampleWallets) || 0,
+      source: String(v?.source || 'manual'),
+      updatedAt: Date.now(),
+    };
+  }
+  ST.walletSignals = { source: 'manual', updatedAt: Date.now(), coins: sanitized };
+  saveState();
+  res.json({ ok: true, updatedAt: ST.walletSignals.updatedAt, count: Object.keys(sanitized).length });
+});
 
 // ── Signals summary (human-readable) ──────────────────────────────
 app.get('/api/signals/summary', auth, (req, res) => {
@@ -847,7 +925,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -1047,7 +1125,10 @@ app.listen(PORT, () => {
   console.log(`📡  Listening on port ${PORT}`);
   console.log(`📊  Mode:       ${CFG.paperMode ? '📄 PAPER TRADING (safe)' : '💰 LIVE TRADING'}`);
   console.log(`👁   Watching:   ${CFG.watchedCoins.join(', ')}`);
-  console.log(`⏱   Timeframe:  ${CFG.timeframe} | Trade size: $${CFG.tradeSize}`);
+  const sizeCfg = CFG.tradeSizePct > 0
+    ? `${CFG.tradeSizePct}% (min:$${CFG.tradeSizeMinUsd || 0}, max:$${CFG.tradeSizeMaxUsd || 0})`
+    : `$${CFG.tradeSize}`;
+  console.log(`⏱   Timeframe:  ${CFG.timeframe} | Trade size: ${sizeCfg}`);
   console.log(`🛡   Daily loss limit: $${CFG.dailyLossLimit}`);
   console.log(`⚙️   Active mode: ${CFG.activeMode ? 'ON' : 'OFF'} | Min confidence: ${CFG.minConfidence}% | Cooldown: ${CFG.entryCooldownMin}m`);
   console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
