@@ -869,15 +869,25 @@ app.get('/api/signals/summary', auth, (req, res) => {
     const hasPos = !!positions[coin];
     const isStrong = label === 'STRONG_BUY' || label === 'STRONG_SELL';
     const isDirectional = label === 'BUY' || label === 'SELL' || isStrong;
+    const side = label.includes('BUY') ? 'BUY' : label.includes('SELL') ? 'SELL' : 'HOLD';
     const confidenceOk = confidence !== null ? confidence >= CFG.minConfidence : false;
     const lastEntryAt = ST.lastEntryAt?.[coin] || 0;
     const cooledDown = now - lastEntryAt >= cooldownMs;
+    const sellPolicyBlocked = side === 'SELL' && (
+      (CFG.paperMode && CFG.longOnlyPaper) ||
+      (!CFG.paperMode && CFG.longOnlyLive)
+    );
 
     let status = 'watching';
     let reason = 'waiting';
     if (hasPos) {
       status = 'in_position';
       reason = 'already in position';
+    } else if (sellPolicyBlocked) {
+      status = 'blocked';
+      reason = CFG.paperMode
+        ? 'policy: LONG_ONLY_PAPER blocks SELL entries'
+        : 'policy: LONG_ONLY_LIVE blocks SELL entries';
     } else if (!isDirectional) {
       status = 'blocked';
       reason = `signal ${label} (needs BUY/SELL)`;
