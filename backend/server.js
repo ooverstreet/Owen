@@ -749,6 +749,39 @@ function tradesToCSV(trades) {
   return lines.join('\n');
 }
 
+function computeTradeMetrics(trades) {
+  const pnls = trades.map(t => Number(t.pnl || 0));
+  const n = pnls.length;
+  const wins = pnls.filter(v => v > 0);
+  const losses = pnls.filter(v => v < 0);
+  const totalPnl = pnls.reduce((a, b) => a + b, 0);
+  const avgPnl = n ? totalPnl / n : 0;
+  const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : 0;
+  const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / losses.length : 0;
+  const winRate = n ? (wins.length / n) * 100 : null;
+  const profitFactor = losses.length ? (wins.reduce((a, b) => a + b, 0) / Math.abs(losses.reduce((a, b) => a + b, 0))) : null;
+
+  // Max drawdown on cumulative realized PnL (chronological order).
+  let cumulative = 0, peak = 0, maxDrawdown = 0;
+  for (const p of pnls) {
+    cumulative += p;
+    peak = Math.max(peak, cumulative);
+    maxDrawdown = Math.max(maxDrawdown, peak - cumulative);
+  }
+
+  return {
+    tradeCount: n,
+    totalPnl: +totalPnl.toFixed(4),
+    expectancy: +avgPnl.toFixed(4),
+    avgPnl: +avgPnl.toFixed(4),
+    winRate: winRate == null ? null : +winRate.toFixed(2),
+    avgWin: +avgWin.toFixed(4),
+    avgLoss: +avgLoss.toFixed(4),
+    profitFactor: profitFactor == null ? null : +profitFactor.toFixed(4),
+    maxDrawdown: +maxDrawdown.toFixed(4),
+  };
+}
+
 // ══════════════════════════════════════════════════════════════════
 // EXPRESS ROUTES
 // ══════════════════════════════════════════════════════════════════
@@ -1000,6 +1033,61 @@ app.get('/api/positions', auth, async (_, res) => {
 // ── Trade history ─────────────────────────────────────────────────
 app.get('/api/trades', auth, (_, res) => res.json(ST.trades.slice(0, 50)));
 
+// ── Rolling trade metrics ─────────────────────────────────────────
+app.get('/api/metrics/rolling', auth, (_, res) => {
+  const requested = [10, 30, 50];
+  const history = [...(ST.trades || [])]
+    .filter(t => Number.isFinite(+t.pnl))
+    .sort((a, b) => (a.closed || 0) - (b.closed || 0)); // oldest -> newest
+
+  const calc = (slice) => {
+    const pnls = slice.map(t => +t.pnl);
+    const wins = pnls.filter(p => p > 0);
+    const losses = pnls.filter(p => p < 0);
+    const total = pnls.reduce((a, b) => a + b, 0);
+    const count = pnls.length;
+    const winRate = count ? (wins.length / count) * 100 : null;
+    const avgPnl = count ? total / count : null;
+    const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : null;
+    const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / losses.length : null;
+    const profitFactor = losses.length
+      ? wins.reduce((a, b) => a + b, 0) / Math.abs(losses.reduce((a, b) => a + b, 0))
+      : (wins.length ? null : null);
+
+    let eq = 0, peak = 0, maxDD = 0;
+    for (const p of pnls) {
+      eq += p;
+      if (eq > peak) peak = eq;
+      const dd = peak - eq;
+      if (dd > maxDD) maxDD = dd;
+    }
+
+    return {
+      count,
+      totalPnl: +total.toFixed(4),
+      winRate: winRate == null ? null : +winRate.toFixed(2),
+      expectancy: avgPnl == null ? null : +avgPnl.toFixed(4),
+      avgWin: avgWin == null ? null : +avgWin.toFixed(4),
+      avgLoss: avgLoss == null ? null : +avgLoss.toFixed(4),
+      profitFactor: profitFactor == null ? null : +profitFactor.toFixed(4),
+      maxDrawdown: +maxDD.toFixed(4),
+      from: slice[0]?.closed || null,
+      to: slice[slice.length - 1]?.closed || null,
+    };
+  };
+
+  const windows = {};
+  for (const n of requested) {
+    const slice = history.slice(-n);
+    windows[`last${n}`] = calc(slice);
+  }
+
+  res.json({
+    totalTrades: history.length,
+    windows,
+  });
+});
+
 // ── Trade history CSV export ──────────────────────────────────────
 app.get('/api/trades.csv', auth, (req, res) => {
   const qLimit = parseInt(req.query.limit, 10);
@@ -1009,6 +1097,23 @@ app.get('/api/trades.csv', auth, (req, res) => {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="trades-${stamp}.csv"`);
   res.send(csv);
+});
+
+// ── Rolling performance metrics ────────────────────────────────────
+app.get('/api/performance/rolling', auth, (_, res) => {
+  // ST.trades is newest-first. For metrics, compute in chronological order.
+  const allChrono = [...ST.trades].reverse();
+  const windows = [10, 30, 50].map(w => {
+    const slice = allChrono.slice(-w);
+    return { window: w, ...computeTradeMetrics(slice) };
+  });
+
+  const overall = computeTradeMetrics(allChrono);
+  res.json({
+    updatedAt: Date.now(),
+    overall,
+    windows,
+  });
 });
 
 // ── Recent errors ─────────────────────────────────────────────────
