@@ -46,6 +46,14 @@ const CFG = {
   walletSignalMode:    process.env.WALLET_SIGNAL_MODE || 'off', // off | filter | boost
   walletSignalThreshold: parseFloat(process.env.WALLET_SIGNAL_THRESHOLD) || 0.2,
   walletSignalBoostPct: parseFloat(process.env.WALLET_SIGNAL_BOOST_PCT) || 20,
+  feeBps:          parseFloat(process.env.FEE_BPS) || 10,
+  slippageEntryBps: parseFloat(process.env.SLIPPAGE_BPS_ENTRY) || 3,
+  slippageExitBps:  parseFloat(process.env.SLIPPAGE_BPS_EXIT) || 3,
+  atrTrailEnabled: process.env.ATR_TRAIL_ENABLED !== 'false',
+  atrTrailMult:    parseFloat(process.env.ATR_TRAIL_MULT) || 1.2,
+  breakEvenTriggerR: parseFloat(process.env.BREAK_EVEN_TRIGGER_R) || 0.6,
+  breakEvenOffsetBps: parseFloat(process.env.BREAK_EVEN_OFFSET_BPS) || 2,
+  loopIntervalSec: parseInt(process.env.LOOP_INTERVAL_SEC, 10) || 60,
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
   minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
@@ -55,6 +63,19 @@ const CFG = {
   cbKeyName:      process.env.CB_KEY_NAME     || '',
   cbPrivateKey:   (process.env.CB_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
+
+function clamp(n, min, max, fallback) {
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+CFG.feeBps = clamp(CFG.feeBps, 0, 1000, 10);
+CFG.slippageEntryBps = clamp(CFG.slippageEntryBps, 0, 1000, 3);
+CFG.slippageExitBps = clamp(CFG.slippageExitBps, 0, 1000, 3);
+CFG.atrTrailMult = clamp(CFG.atrTrailMult, 0, 10, 1.2);
+CFG.breakEvenTriggerR = clamp(CFG.breakEvenTriggerR, 0, 10, 0.6);
+CFG.breakEvenOffsetBps = clamp(CFG.breakEvenOffsetBps, 0, 500, 2);
+CFG.loopIntervalSec = Math.round(clamp(CFG.loopIntervalSec, 5, 300, 60));
 
 const TF_GRAN = { '1m':60, '5m':300, '15m':900, '1h':3600, '4h':21600 };
 const RISK    = {
@@ -373,6 +394,42 @@ function passWalletFlowGate(coin, signal) {
   return { ok: true, reason: 'ok', score };
 }
 
+function bpsToFraction(bps) {
+  return Math.max(0, Number(bps) || 0) / 10000;
+}
+
+function safeNum(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function applySlippagePrice(markPrice, side, bps, phase) {
+  const frac = bpsToFraction(bps);
+  const adverse = (
+    (phase === 'entry' && side === 'BUY') ||
+    (phase === 'exit' && side === 'SELL')
+  );
+  return adverse ? markPrice * (1 + frac) : markPrice * (1 - frac);
+}
+
+function estimatePositionPnl(pos, exitMarkPrice, exitSlippageBps = CFG.slippageExitBps) {
+  if (!pos || !Number.isFinite(+pos.entry) || !Number.isFinite(+pos.size) || !Number.isFinite(exitMarkPrice)) {
+    return { gross: 0, fees: 0, net: 0, exitPrice: null };
+  }
+  const side = pos.side === 'SELL' ? 'SELL' : 'BUY';
+  const entry = +pos.entry;
+  const size = +pos.size;
+  const exitPrice = applySlippagePrice(exitMarkPrice, side, exitSlippageBps, 'exit');
+  const gross = side === 'BUY'
+    ? ((exitPrice - entry) / entry) * size
+    : ((entry - exitPrice) / entry) * size;
+  const entryFee = safeNum(pos.feeEntryUsd, 0);
+  const exitFee = size * bpsToFraction(CFG.feeBps);
+  const fees = entryFee + exitFee;
+  const net = gross - fees;
+  return { gross, fees, net, exitPrice };
+}
+
 function generateSignal(candles) {
   if (candles.length < 35) return null;
   const closes = candles.map(c => c.close), cur = closes[closes.length - 1];
@@ -443,7 +500,7 @@ async function openPosition(coin, signal) {
     return false;
   }
 
-  const price = await fetchPrice(coin);
+  const markPrice = await fetchPrice(coin);
   const side  = signal.label.includes('BUY') ? 'BUY' : 'SELL';
   const sellBlocked = side === 'SELL' && (
     (CFG.paperMode && CFG.longOnlyPaper) ||
@@ -457,15 +514,16 @@ async function openPosition(coin, signal) {
     console.log(`ℹ️  Skipping ${coin} SELL entry in ${modeLabel} mode (${policyVar}=true)`);
     return false;
   }
-  const risk  = RISK[CFG.timeframe] || RISK['15m'];
-  let tp      = side === 'BUY' ? price * (1 + risk.tp) : price * (1 - risk.tp);
-  const sl    = side === 'BUY' ? price * (1 - risk.sl) : price * (1 + risk.sl);
+  const risk = RISK[CFG.timeframe] || RISK['15m'];
+  const entry = applySlippagePrice(markPrice, side, CFG.slippageEntryBps, 'entry');
+  let tp = side === 'BUY' ? entry * (1 + risk.tp) : entry * (1 - risk.tp);
+  let sl = side === 'BUY' ? entry * (1 - risk.sl) : entry * (1 + risk.sl);
   if (CFG.minTakeProfitUsd > 0 && usdSize > 0) {
     const minMovePct = CFG.minTakeProfitUsd / usdSize;
     if (side === 'BUY') {
-      tp = Math.max(tp, price * (1 + minMovePct));
+      tp = Math.max(tp, entry * (1 + minMovePct));
     } else {
-      tp = Math.min(tp, price * (1 - minMovePct));
+      tp = Math.min(tp, entry * (1 - minMovePct));
     }
   }
 
@@ -484,14 +542,32 @@ async function openPosition(coin, signal) {
     }
   }
 
+  const feeEntryUsd = usdSize * bpsToFraction(CFG.feeBps);
   ST.positions[coin] = {
-    coin, side, size: +usdSize.toFixed(2), entry: price, tp: +tp.toFixed(6), sl: +sl.toFixed(6),
-    signal: signal.label, confidence: signal.confidence, opened: Date.now(),
+    coin,
+    side,
+    size: +usdSize.toFixed(2),
+    entry: +entry.toFixed(6),
+    entryMark: +markPrice.toFixed(6),
+    tp: +tp.toFixed(6),
+    sl: +sl.toFixed(6),
+    signal: signal.label,
+    confidence: signal.confidence,
+    opened: Date.now(),
+    atrPctAtEntry: Number(signal?.indicators?.atrPct) || null,
+    initialRiskPct: +(Math.abs(entry - sl) / entry).toFixed(6),
+    peakPrice: +entry.toFixed(6),
+    troughPrice: +entry.toFixed(6),
+    breakEvenArmed: false,
+    trailStopUpdates: 0,
+    feeEntryUsd: +feeEntryUsd.toFixed(6),
+    feesPaidUsd: +feeEntryUsd.toFixed(6),
+    slippageEntryBps: CFG.slippageEntryBps,
   };
   ST.lastTradeAt = Date.now();
   ST.lastBlocked = null;
   const mode = CFG.paperMode ? '📄 PAPER' : '💰 LIVE';
-  console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | Size:$${usdSize.toFixed(2)} TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
+  console.log(`${mode} OPEN  ${side.padEnd(4)} ${coin} @ fill $${entry.toFixed(4)} (mark $${markPrice.toFixed(4)}) | Size:$${usdSize.toFixed(2)} TP:$${tp.toFixed(4)} SL:$${sl.toFixed(4)}`);
   saveState();
   return true;
 }
@@ -500,10 +576,12 @@ async function closePosition(coin, reason) {
   const pos = ST.positions[coin];
   if (!pos) return;
 
-  const price = await fetchPrice(coin);
-  const pnl   = pos.side === 'BUY'
-    ? (price - pos.entry) / pos.entry * pos.size
-    : (pos.entry - price) / pos.entry * pos.size;
+  const markPrice = await fetchPrice(coin);
+  const pnlBreakdown = estimatePositionPnl(pos, markPrice, CFG.slippageExitBps);
+  const grossPnl = pnlBreakdown.gross;
+  const totalFees = pnlBreakdown.fees;
+  const pnl = pnlBreakdown.net;
+  const exit = pnlBreakdown.exitPrice || markPrice;
 
   if (CFG.paperMode) {
     ST.paperBalance += pos.size + pnl;
@@ -520,21 +598,92 @@ async function closePosition(coin, reason) {
 
   if (pnl < 0) ST.dailyLoss += Math.abs(pnl);
 
-  const trade = { ...pos, exit: price, pnl: +pnl.toFixed(4), pnlPct: +((pnl / pos.size) * 100).toFixed(2), reason, closed: Date.now() };
+  const trade = {
+    ...pos,
+    exit: +exit.toFixed(6),
+    exitMark: +markPrice.toFixed(6),
+    grossPnl: +grossPnl.toFixed(4),
+    feesUsd: +totalFees.toFixed(4),
+    pnl: +pnl.toFixed(4),
+    pnlPct: +((pnl / pos.size) * 100).toFixed(2),
+    feeBps: CFG.feeBps,
+    slippageExitBps: CFG.slippageExitBps,
+    reason,
+    closed: Date.now(),
+  };
   ST.trades.unshift(trade);
   if (ST.trades.length > 100) ST.trades.pop();
   delete ST.positions[coin];
   ST.lastTradeAt = Date.now();
 
   const sign = pnl >= 0 ? '+' : '';
-  console.log(`${CFG.paperMode ? '📄 PAPER' : '💰 LIVE'} CLOSE ${pos.side.padEnd(4)} ${coin} @ $${price.toFixed(4)} | PnL: ${sign}$${pnl.toFixed(2)} (${reason})`);
+  console.log(`${CFG.paperMode ? '📄 PAPER' : '💰 LIVE'} CLOSE ${pos.side.padEnd(4)} ${coin} @ fill $${exit.toFixed(4)} (mark $${markPrice.toFixed(4)}) | Gross:${grossPnl >= 0 ? '+' : ''}$${grossPnl.toFixed(2)} Fees:$${totalFees.toFixed(2)} Net:${sign}$${pnl.toFixed(2)} (${reason})`);
   saveState();
+}
+
+function updateDynamicStops(pos, markPrice) {
+  if (!pos || !Number.isFinite(+pos.entry) || !Number.isFinite(markPrice)) return false;
+  let changed = false;
+  const side = pos.side === 'SELL' ? 'SELL' : 'BUY';
+
+  if (CFG.atrTrailEnabled && Number(pos.atrPctAtEntry) > 0 && CFG.atrTrailMult > 0) {
+    const trailPct = (Number(pos.atrPctAtEntry) / 100) * CFG.atrTrailMult;
+    if (trailPct > 0) {
+      if (side === 'BUY') {
+        const peak = Math.max(Number(pos.peakPrice || pos.entry), markPrice);
+        if (!Number.isFinite(pos.peakPrice) || peak !== pos.peakPrice) {
+          pos.peakPrice = +peak.toFixed(6);
+          changed = true;
+        }
+        const trailSl = peak * (1 - trailPct);
+        if (trailSl > pos.sl) {
+          pos.sl = +trailSl.toFixed(6);
+          pos.trailStopUpdates = (pos.trailStopUpdates || 0) + 1;
+          changed = true;
+        }
+      } else {
+        const trough = Math.min(Number(pos.troughPrice || pos.entry), markPrice);
+        if (!Number.isFinite(pos.troughPrice) || trough !== pos.troughPrice) {
+          pos.troughPrice = +trough.toFixed(6);
+          changed = true;
+        }
+        const trailSl = trough * (1 + trailPct);
+        if (trailSl < pos.sl) {
+          pos.sl = +trailSl.toFixed(6);
+          pos.trailStopUpdates = (pos.trailStopUpdates || 0) + 1;
+          changed = true;
+        }
+      }
+    }
+  }
+
+  if (!pos.breakEvenArmed && Number(pos.initialRiskPct) > 0 && CFG.breakEvenTriggerR > 0) {
+    const movePct = side === 'BUY'
+      ? (markPrice - pos.entry) / pos.entry
+      : (pos.entry - markPrice) / pos.entry;
+    const rNow = movePct / Number(pos.initialRiskPct);
+    if (rNow >= CFG.breakEvenTriggerR) {
+      const beOffset = bpsToFraction(CFG.breakEvenOffsetBps);
+      const beSl = side === 'BUY'
+        ? pos.entry * (1 + beOffset)
+        : pos.entry * (1 - beOffset);
+      if ((side === 'BUY' && beSl > pos.sl) || (side === 'SELL' && beSl < pos.sl)) {
+        pos.sl = +beSl.toFixed(6);
+        changed = true;
+      }
+      pos.breakEvenArmed = true;
+      changed = true;
+    }
+  }
+
+  return changed;
 }
 
 async function checkExits(coin) {
   const pos = ST.positions[coin];
   if (!pos) return;
   const price = await fetchPrice(coin);
+  if (updateDynamicStops(pos, price)) saveState();
   const stopLossDisabled = CFG.paperMode && CFG.paperDisableStopLoss;
   if (pos.side === 'BUY') {
     if (price >= pos.tp) { await closePosition(coin, 'TAKE_PROFIT'); return; }
@@ -546,117 +695,130 @@ async function checkExits(coin) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// MONITOR LOOP  (runs every 60 seconds)
+// MONITOR LOOP  (runs every LOOP_INTERVAL_SEC)
 // ══════════════════════════════════════════════════════════════════
 let monitorTimer = null;
+let runCycleInProgress = false;
 
 async function runCycle() {
-  checkDailyReset();
-  ST.lastCycleAt = Date.now();
+  if (runCycleInProgress) return;
+  runCycleInProgress = true;
+  try {
+    checkDailyReset();
+    ST.lastCycleAt = Date.now();
 
-  // Hard stop if daily loss limit is hit
-  if (ST.dailyLoss >= CFG.dailyLossLimit && ST.tradingEnabled) {
-    ST.tradingEnabled = false;
-    console.log(`🛑 Daily loss limit ($${CFG.dailyLossLimit}) reached — auto-trading paused`);
-    saveState();
-  }
+    // Hard stop if daily loss limit is hit
+    if (ST.dailyLoss >= CFG.dailyLossLimit && ST.tradingEnabled) {
+      ST.tradingEnabled = false;
+      console.log(`🛑 Daily loss limit ($${CFG.dailyLossLimit}) reached — auto-trading paused`);
+      saveState();
+    }
 
-  for (const coin of CFG.watchedCoins) {
-    try {
-      // Always check exits regardless of trading toggle
-      if (ST.positions[coin]) await checkExits(coin);
+    for (const coin of CFG.watchedCoins) {
+      try {
+        // Always check exits regardless of trading toggle
+        if (ST.positions[coin]) await checkExits(coin);
 
-      // Fetch fresh signal
-      const candles = await fetchCandles(coin, CFG.timeframe);
-      const signal  = generateSignal(candles);
-      const regime = signal ? passRegimeFilter(signal) : { ok: true, reason: 'n/a' };
-      const sideHint = signal ? (signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD') : 'HOLD';
-      const dip = signal ? passDipFilter(candles, sideHint) : { ok: true, reason: 'n/a', movePct: null };
-      if (signal) ST.signals[coin] = { ...signal, regime, dip, updatedAt: Date.now() };
+        // Fetch fresh signal
+        const candles = await fetchCandles(coin, CFG.timeframe);
+        const signal  = generateSignal(candles);
+        const regime = signal ? passRegimeFilter(signal) : { ok: true, reason: 'n/a' };
+        const sideHint = signal ? (signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD') : 'HOLD';
+        const dip = signal ? passDipFilter(candles, sideHint) : { ok: true, reason: 'n/a', movePct: null };
+        if (signal) ST.signals[coin] = { ...signal, regime, dip, updatedAt: Date.now() };
 
-      // Entry logic — only when auto-trading is on
-      if (ST.tradingEnabled && signal) {
-        const hasPos = !!ST.positions[coin];
-        const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
-        const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
-        const confidenceOk = signal.confidence >= CFG.minConfidence;
-        const flowGate = passWalletFlowGate(coin, signal);
-        const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
-        const lastEntryAt = ST.lastEntryAt[coin] || 0;
-        const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
-        let blockReason = null;
+        // Entry logic — only when auto-trading is on
+        if (ST.tradingEnabled && signal) {
+          const hasPos = !!ST.positions[coin];
+          const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
+          const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
+          const confidenceOk = signal.confidence >= CFG.minConfidence;
+          const flowGate = passWalletFlowGate(coin, signal);
+          const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
+          const lastEntryAt = ST.lastEntryAt[coin] || 0;
+          const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
+          let blockReason = null;
 
-        const shouldOpen = !hasPos && (
-          CFG.activeMode
-            ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && flowGate.ok)
-            : (isStrong && regime.ok && dip.ok && flowGate.ok)
-        );
+          const shouldOpen = !hasPos && (
+            CFG.activeMode
+              ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && flowGate.ok)
+              : (isStrong && regime.ok && dip.ok && flowGate.ok)
+          );
 
-        if (shouldOpen) {
-          const opened = await openPosition(coin, signal);
-          if (opened) ST.lastEntryAt[coin] = Date.now();
-        } else if (hasPos) {
-          const pos = ST.positions[coin];
-          const shouldClose = (pos.side === 'BUY'  && (signal.label === 'STRONG_SELL' || signal.label === 'SELL'))
-                           || (pos.side === 'SELL' && (signal.label === 'STRONG_BUY'  || signal.label === 'BUY'));
-          if (shouldClose) {
-            const mark = signal.price || pos.entry;
-            const pnlUsd = pos.side === 'BUY'
-              ? (mark - pos.entry) / pos.entry * pos.size
-              : (pos.entry - mark) / pos.entry * pos.size;
-            if (CFG.signalCloseMinProfitUsd > 0 && pnlUsd < CFG.signalCloseMinProfitUsd) {
+          if (shouldOpen) {
+            const opened = await openPosition(coin, signal);
+            if (opened) ST.lastEntryAt[coin] = Date.now();
+          } else if (hasPos) {
+            const pos = ST.positions[coin];
+            const shouldClose = (pos.side === 'BUY'  && (signal.label === 'STRONG_SELL' || signal.label === 'SELL'))
+                             || (pos.side === 'SELL' && (signal.label === 'STRONG_BUY'  || signal.label === 'BUY'));
+            if (shouldClose) {
+              const mark = signal.price || pos.entry;
+              const pnlPreview = estimatePositionPnl(pos, mark, CFG.slippageExitBps);
+              const pnlUsd = pnlPreview.net;
+              if (CFG.signalCloseMinProfitUsd > 0 && pnlUsd < CFG.signalCloseMinProfitUsd) {
+                ST.lastBlocked = {
+                  coin,
+                  label: signal.label,
+                  confidence: signal.confidence,
+                  reason: `Signal close blocked: net pnl $${pnlUsd.toFixed(2)} < $${CFG.signalCloseMinProfitUsd.toFixed(2)}`,
+                  at: Date.now(),
+                };
+              } else {
+                await closePosition(coin, 'SIGNAL_REVERSAL');
+              }
+            }
+          } else {
+            if (CFG.activeMode) {
+              if (!isDirectional) blockReason = `Signal ${signal.label} (needs BUY/SELL)`;
+              else if (!confidenceOk) blockReason = `Confidence ${signal.confidence}% < ${CFG.minConfidence}%`;
+              else if (!cooledDown) {
+                const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
+                const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
+                blockReason = `Cooldown active (${minsRemaining}m remaining)`;
+              } else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+              else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
+              else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
+            } else {
+              if (!isStrong) blockReason = `Classic mode: waiting STRONG_* (got ${signal.label})`;
+              else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+              else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
+              else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
+            }
+            if (blockReason) {
               ST.lastBlocked = {
                 coin,
                 label: signal.label,
                 confidence: signal.confidence,
-                reason: `Signal close blocked: pnl $${pnlUsd.toFixed(2)} < $${CFG.signalCloseMinProfitUsd.toFixed(2)}`,
+                reason: blockReason,
                 at: Date.now(),
               };
-            } else {
-              await closePosition(coin, 'SIGNAL_REVERSAL');
             }
           }
-        } else {
-          if (CFG.activeMode) {
-            if (!isDirectional) blockReason = `Signal ${signal.label} (needs BUY/SELL)`;
-            else if (!confidenceOk) blockReason = `Confidence ${signal.confidence}% < ${CFG.minConfidence}%`;
-            else if (!cooledDown) {
-              const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
-              const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
-              blockReason = `Cooldown active (${minsRemaining}m remaining)`;
-            } else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
-            else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
-            else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
-          } else {
-            if (!isStrong) blockReason = `Classic mode: waiting STRONG_* (got ${signal.label})`;
-            else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
-            else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
-            else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
-          }
-          if (blockReason) {
-            ST.lastBlocked = {
-              coin,
-              label: signal.label,
-              confidence: signal.confidence,
-              reason: blockReason,
-              at: Date.now(),
-            };
-          }
         }
+      } catch(e) {
+        console.error(`⚠️  Cycle error [${coin}]:`, e.message);
+        ST.errors.push({ time: Date.now(), coin, msg: e.message });
+        if (ST.errors.length > 25) ST.errors.shift();
       }
-    } catch(e) {
-      console.error(`⚠️  Cycle error [${coin}]:`, e.message);
-      ST.errors.push({ time: Date.now(), coin, msg: e.message });
-      if (ST.errors.length > 25) ST.errors.shift();
     }
+  } finally {
+    runCycleInProgress = false;
   }
 }
 
 function startMonitor() {
   if (monitorTimer) return;
-  console.log(`🔄 Monitor starting — checking every 60s on [${CFG.watchedCoins.join(', ')}]`);
+  console.log(`🔄 Monitor starting — checking every ${CFG.loopIntervalSec}s on [${CFG.watchedCoins.join(', ')}]`);
   runCycle(); // immediate first run
-  monitorTimer = setInterval(runCycle, 60 * 1000);
+  monitorTimer = setInterval(runCycle, CFG.loopIntervalSec * 1000);
+}
+
+function restartMonitorInterval() {
+  if (!monitorTimer) return;
+  clearInterval(monitorTimer);
+  monitorTimer = setInterval(runCycle, CFG.loopIntervalSec * 1000);
+  console.log(`🔁 Monitor interval updated to ${CFG.loopIntervalSec}s`);
 }
 startMonitor();
 
@@ -665,23 +827,49 @@ startMonitor();
 // ══════════════════════════════════════════════════════════════════
 async function getLivePnL() {
   let unrealized = 0;
+  let unrealizedGross = 0;
+  let unrealizedFees = 0;
   for (const [coin, pos] of Object.entries(ST.positions)) {
     try {
       const price = await fetchPrice(coin);
-      unrealized += pos.side === 'BUY'
-        ? (price - pos.entry) / pos.entry * pos.size
-        : (pos.entry - price) / pos.entry * pos.size;
+      const est = estimatePositionPnl(pos, price, CFG.slippageExitBps);
+      unrealized += est.net;
+      unrealizedGross += est.gross;
+      unrealizedFees += est.fees;
     } catch(e) {}
   }
-  const realized = ST.trades.reduce((a, t) => a + (t.pnl || 0), 0);
+  const realized = ST.trades.reduce((a, t) => a + safeNum(t.pnl, 0), 0);
+  const realizedGross = ST.trades.reduce((a, t) => a + safeNum(t.grossPnl, safeNum(t.pnl, 0)), 0);
+  const realizedFees = ST.trades.reduce((a, t) => a + safeNum(t.feesUsd, 0), 0);
   const wins     = ST.trades.filter(t => t.pnl > 0).length;
   const total    = ST.trades.length;
+  const totalGross = unrealizedGross + realizedGross;
+  const totalFees = unrealizedFees + realizedFees;
   return {
     unrealized: +unrealized.toFixed(2),
+    unrealizedGross: +unrealizedGross.toFixed(2),
+    unrealizedFees: +unrealizedFees.toFixed(2),
     realized:   +realized.toFixed(2),
+    realizedGross: +realizedGross.toFixed(2),
+    realizedFees: +realizedFees.toFixed(2),
     total:      +(unrealized + realized).toFixed(2),
+    totalGross: +totalGross.toFixed(2),
+    totalFees: +totalFees.toFixed(2),
     winRate:    total > 0 ? +((wins / total) * 100).toFixed(1) : null,
     tradeCount: total,
+  };
+}
+
+function getRuntimeSettings() {
+  return {
+    feeBps: CFG.feeBps,
+    slippageEntryBps: CFG.slippageEntryBps,
+    slippageExitBps: CFG.slippageExitBps,
+    atrTrailEnabled: CFG.atrTrailEnabled,
+    atrTrailMult: CFG.atrTrailMult,
+    breakEvenTriggerR: CFG.breakEvenTriggerR,
+    breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    loopIntervalSec: CFG.loopIntervalSec,
   };
 }
 
@@ -718,10 +906,20 @@ function tradesToCSV(trades) {
     'signal',
     'reason',
     'sizeUsd',
+    'entryMark',
     'entry',
+    'exitMark',
     'exit',
-    'pnlUsd',
+    'grossPnlUsd',
+    'feesUsd',
+    'netPnlUsd',
     'pnlPct',
+    'feeBps',
+    'entrySlipBps',
+    'exitSlipBps',
+    'atrPctAtEntry',
+    'trailStopUpdates',
+    'breakEvenArmed',
     'confidence',
     'durationMin',
   ];
@@ -737,10 +935,20 @@ function tradesToCSV(trades) {
       t.signal || '',
       t.reason || '',
       t.size,
+      t.entryMark,
       t.entry,
+      t.exitMark,
       t.exit,
+      t.grossPnl,
+      t.feesUsd,
       t.pnl,
       t.pnlPct,
+      t.feeBps,
+      t.slippageEntryBps,
+      t.slippageExitBps,
+      t.atrPctAtEntry,
+      t.trailStopUpdates,
+      t.breakEvenArmed,
       t.confidence,
       durationMin != null ? +durationMin.toFixed(2) : '',
     ];
@@ -750,12 +958,17 @@ function tradesToCSV(trades) {
 }
 
 function computeTradeMetrics(trades) {
-  const pnls = trades.map(t => Number(t.pnl || 0));
+  const pnls = trades.map(t => safeNum(t.pnl, 0));
+  const grossPnls = trades.map(t => safeNum(t.grossPnl, safeNum(t.pnl, 0)));
+  const fees = trades.map(t => safeNum(t.feesUsd, 0));
   const n = pnls.length;
   const wins = pnls.filter(v => v > 0);
   const losses = pnls.filter(v => v < 0);
   const totalPnl = pnls.reduce((a, b) => a + b, 0);
+  const totalGrossPnl = grossPnls.reduce((a, b) => a + b, 0);
+  const totalFees = fees.reduce((a, b) => a + b, 0);
   const avgPnl = n ? totalPnl / n : 0;
+  const avgGrossPnl = n ? totalGrossPnl / n : 0;
   const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : 0;
   const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / losses.length : 0;
   const winRate = n ? (wins.length / n) * 100 : null;
@@ -772,13 +985,60 @@ function computeTradeMetrics(trades) {
   return {
     tradeCount: n,
     totalPnl: +totalPnl.toFixed(4),
+    totalGrossPnl: +totalGrossPnl.toFixed(4),
+    totalFees: +totalFees.toFixed(4),
     expectancy: +avgPnl.toFixed(4),
+    grossExpectancy: +avgGrossPnl.toFixed(4),
     avgPnl: +avgPnl.toFixed(4),
     winRate: winRate == null ? null : +winRate.toFixed(2),
     avgWin: +avgWin.toFixed(4),
     avgLoss: +avgLoss.toFixed(4),
     profitFactor: profitFactor == null ? null : +profitFactor.toFixed(4),
     maxDrawdown: +maxDrawdown.toFixed(4),
+  };
+}
+
+function calcRollingWindow(slice) {
+  const pnls = slice.map(t => safeNum(t.pnl, 0));
+  const grossPnls = slice.map(t => safeNum(t.grossPnl, safeNum(t.pnl, 0)));
+  const fees = slice.map(t => safeNum(t.feesUsd, 0));
+  const wins = pnls.filter(p => p > 0);
+  const losses = pnls.filter(p => p < 0);
+  const total = pnls.reduce((a, b) => a + b, 0);
+  const totalGross = grossPnls.reduce((a, b) => a + b, 0);
+  const totalFees = fees.reduce((a, b) => a + b, 0);
+  const count = pnls.length;
+  const winRate = count ? (wins.length / count) * 100 : null;
+  const avgPnl = count ? total / count : null;
+  const avgGross = count ? totalGross / count : null;
+  const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : null;
+  const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / losses.length : null;
+  const profitFactor = losses.length
+    ? wins.reduce((a, b) => a + b, 0) / Math.abs(losses.reduce((a, b) => a + b, 0))
+    : null;
+
+  let eq = 0, peak = 0, maxDD = 0;
+  for (const p of pnls) {
+    eq += p;
+    if (eq > peak) peak = eq;
+    const dd = peak - eq;
+    if (dd > maxDD) maxDD = dd;
+  }
+
+  return {
+    count,
+    totalPnl: +total.toFixed(4),
+    totalGrossPnl: +totalGross.toFixed(4),
+    totalFees: +totalFees.toFixed(4),
+    winRate: winRate == null ? null : +winRate.toFixed(2),
+    expectancy: avgPnl == null ? null : +avgPnl.toFixed(4),
+    grossExpectancy: avgGross == null ? null : +avgGross.toFixed(4),
+    avgWin: avgWin == null ? null : +avgWin.toFixed(4),
+    avgLoss: avgLoss == null ? null : +avgLoss.toFixed(4),
+    profitFactor: profitFactor == null ? null : +profitFactor.toFixed(4),
+    maxDrawdown: +maxDD.toFixed(4),
+    from: slice[0]?.closed || null,
+    to: slice[slice.length - 1]?.closed || null,
   };
 }
 
@@ -796,6 +1056,7 @@ app.get('/api/status', auth, async (req, res) => {
   const reservedCapital = getReservedCapital();
   const equity = CFG.paperMode ? +(ST.startBalance + (pnl.total || 0)).toFixed(2) : null;
   const effectiveTradeSizeUsd = await resolveTradeSizeUsd();
+  const runtime = getRuntimeSettings();
   res.json({
     paperMode:      CFG.paperMode,
     tradingEnabled: ST.tradingEnabled,
@@ -822,6 +1083,15 @@ app.get('/api/status', auth, async (req, res) => {
     tradeSizePct:   CFG.tradeSizePct,
     tradeSizeMinUsd: CFG.tradeSizeMinUsd,
     tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
+    feeBps: CFG.feeBps,
+    slippageEntryBps: CFG.slippageEntryBps,
+    slippageExitBps: CFG.slippageExitBps,
+    atrTrailEnabled: CFG.atrTrailEnabled,
+    atrTrailMult: CFG.atrTrailMult,
+    breakEvenTriggerR: CFG.breakEvenTriggerR,
+    breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    loopIntervalSec: CFG.loopIntervalSec,
+    runtime,
     effectiveTradeSizeUsd,
     paperBalance:   +ST.paperBalance.toFixed(2),
     reservedCapital: +reservedCapital.toFixed(2),
@@ -968,7 +1238,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -1004,6 +1274,14 @@ app.get('/api/signals/summary', auth, (req, res) => {
       tradeSizePct: CFG.tradeSizePct,
       tradeSizeMinUsd: CFG.tradeSizeMinUsd,
       tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
+      feeBps: CFG.feeBps,
+      slippageEntryBps: CFG.slippageEntryBps,
+      slippageExitBps: CFG.slippageExitBps,
+      atrTrailEnabled: CFG.atrTrailEnabled,
+      atrTrailMult: CFG.atrTrailMult,
+      breakEvenTriggerR: CFG.breakEvenTriggerR,
+      breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+      loopIntervalSec: CFG.loopIntervalSec,
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
@@ -1021,10 +1299,17 @@ app.get('/api/positions', auth, async (_, res) => {
   for (const [coin, pos] of Object.entries(ST.positions)) {
     try {
       const price = await fetchPrice(coin);
-      const pnl   = pos.side === 'BUY'
-        ? (price - pos.entry) / pos.entry * pos.size
-        : (pos.entry - price) / pos.entry * pos.size;
-      enriched[coin] = { ...pos, currentPrice: price, pnl: +pnl.toFixed(2), pnlPct: +((pnl / pos.size) * 100).toFixed(2) };
+      const est = estimatePositionPnl(pos, price, CFG.slippageExitBps);
+      const pnl = est.net;
+      enriched[coin] = {
+        ...pos,
+        currentPrice: price,
+        estExitPrice: est.exitPrice != null ? +est.exitPrice.toFixed(6) : null,
+        grossPnl: +est.gross.toFixed(4),
+        feesUsd: +est.fees.toFixed(4),
+        pnl: +pnl.toFixed(4),
+        pnlPct: +((pnl / pos.size) * 100).toFixed(2),
+      };
     } catch(e) { enriched[coin] = pos; }
   }
   res.json(enriched);
@@ -1040,50 +1325,16 @@ app.get('/api/metrics/rolling', auth, (_, res) => {
     .filter(t => Number.isFinite(+t.pnl))
     .sort((a, b) => (a.closed || 0) - (b.closed || 0)); // oldest -> newest
 
-  const calc = (slice) => {
-    const pnls = slice.map(t => +t.pnl);
-    const wins = pnls.filter(p => p > 0);
-    const losses = pnls.filter(p => p < 0);
-    const total = pnls.reduce((a, b) => a + b, 0);
-    const count = pnls.length;
-    const winRate = count ? (wins.length / count) * 100 : null;
-    const avgPnl = count ? total / count : null;
-    const avgWin = wins.length ? wins.reduce((a, b) => a + b, 0) / wins.length : null;
-    const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / losses.length : null;
-    const profitFactor = losses.length
-      ? wins.reduce((a, b) => a + b, 0) / Math.abs(losses.reduce((a, b) => a + b, 0))
-      : (wins.length ? null : null);
-
-    let eq = 0, peak = 0, maxDD = 0;
-    for (const p of pnls) {
-      eq += p;
-      if (eq > peak) peak = eq;
-      const dd = peak - eq;
-      if (dd > maxDD) maxDD = dd;
-    }
-
-    return {
-      count,
-      totalPnl: +total.toFixed(4),
-      winRate: winRate == null ? null : +winRate.toFixed(2),
-      expectancy: avgPnl == null ? null : +avgPnl.toFixed(4),
-      avgWin: avgWin == null ? null : +avgWin.toFixed(4),
-      avgLoss: avgLoss == null ? null : +avgLoss.toFixed(4),
-      profitFactor: profitFactor == null ? null : +profitFactor.toFixed(4),
-      maxDrawdown: +maxDD.toFixed(4),
-      from: slice[0]?.closed || null,
-      to: slice[slice.length - 1]?.closed || null,
-    };
-  };
-
   const windows = {};
   for (const n of requested) {
     const slice = history.slice(-n);
-    windows[`last${n}`] = calc(slice);
+    windows[`last${n}`] = calcRollingWindow(slice);
   }
+  const overall = calcRollingWindow(history);
 
   res.json({
     totalTrades: history.length,
+    overall,
     windows,
   });
 });
@@ -1171,9 +1422,11 @@ app.get('/api/cb-balance', auth, async (_, res) => {
 
 // ── Update config at runtime ──────────────────────────────────────
 app.post('/api/config', auth, (req, res) => {
+  const priorLoopIntervalSec = CFG.loopIntervalSec;
   const {
     tradeSize, tradeSizePct, tradeSizeMinUsd, tradeSizeMaxUsd, maxPositions, dailyLossLimit, watchedCoins, timeframe,
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
+    feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, loopIntervalSec,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (tradeSizePct   !== undefined) CFG.tradeSizePct   = +tradeSizePct;
@@ -1200,6 +1453,16 @@ app.post('/api/config', auth, (req, res) => {
   if (regimeRequireEmaAlignment !== undefined) CFG.regimeRequireEmaAlignment = !!regimeRequireEmaAlignment;
   if (longOnlyPaper  !== undefined) CFG.longOnlyPaper  = !!longOnlyPaper;
   if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
+  // Runtime execution settings
+  if (feeBps !== undefined) CFG.feeBps = clamp(+feeBps, 0, 1000, CFG.feeBps);
+  if (slippageEntryBps !== undefined) CFG.slippageEntryBps = clamp(+slippageEntryBps, 0, 1000, CFG.slippageEntryBps);
+  if (slippageExitBps !== undefined) CFG.slippageExitBps = clamp(+slippageExitBps, 0, 1000, CFG.slippageExitBps);
+  if (atrTrailEnabled !== undefined) CFG.atrTrailEnabled = !!atrTrailEnabled;
+  if (atrTrailMult !== undefined) CFG.atrTrailMult = clamp(+atrTrailMult, 0, 10, CFG.atrTrailMult);
+  if (breakEvenTriggerR !== undefined) CFG.breakEvenTriggerR = clamp(+breakEvenTriggerR, 0, 10, CFG.breakEvenTriggerR);
+  if (breakEvenOffsetBps !== undefined) CFG.breakEvenOffsetBps = clamp(+breakEvenOffsetBps, 0, 500, CFG.breakEvenOffsetBps);
+  if (loopIntervalSec !== undefined) CFG.loopIntervalSec = Math.round(clamp(+loopIntervalSec, 5, 300, CFG.loopIntervalSec));
+  if (CFG.loopIntervalSec !== priorLoopIntervalSec) restartMonitorInterval();
   res.json({
     ok: true,
     tradeSize: CFG.tradeSize,
@@ -1227,6 +1490,14 @@ app.post('/api/config', auth, (req, res) => {
     regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     longOnlyPaper: CFG.longOnlyPaper,
     longOnlyLive: CFG.longOnlyLive,
+    feeBps: CFG.feeBps,
+    slippageEntryBps: CFG.slippageEntryBps,
+    slippageExitBps: CFG.slippageExitBps,
+    atrTrailEnabled: CFG.atrTrailEnabled,
+    atrTrailMult: CFG.atrTrailMult,
+    breakEvenTriggerR: CFG.breakEvenTriggerR,
+    breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    loopIntervalSec: CFG.loopIntervalSec,
   });
 });
 
@@ -1249,6 +1520,9 @@ app.listen(PORT, () => {
   console.log(`🎚   Signal thresholds: BUY>${CFG.buyScoreThreshold} | STRONG>${CFG.strongScoreThreshold}`);
   console.log(`🪙  Dip filter: ${CFG.dipBuyEnabled ? 'ON' : 'OFF'} | Min dip: ${CFG.minDipPct}% | Lookback: ${CFG.dipLookbackCandles} candles`);
   console.log(`💵  TP floor: $${CFG.minTakeProfitUsd} | Signal close min profit: $${CFG.signalCloseMinProfitUsd} | Paper stop-loss: ${CFG.paperDisableStopLoss ? 'OFF' : 'ON'}`);
+  console.log(`💸  Fees/Slippage: fee ${CFG.feeBps}bps | entry slip ${CFG.slippageEntryBps}bps | exit slip ${CFG.slippageExitBps}bps`);
+  console.log(`🧷  Exit controls: ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
+  console.log(`⚡  Loop interval: ${CFG.loopIntervalSec}s`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
   console.log(`📌  Paper policy: ${CFG.longOnlyPaper ? 'LONG ONLY' : 'ALLOW BUY/SELL'} | Live policy: ${CFG.longOnlyLive ? 'LONG ONLY' : 'ALLOW BUY/SELL'}`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
