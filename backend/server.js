@@ -83,6 +83,7 @@ const RISK    = {
   '1m':{ tp:.008, sl:.004 }, '5m':{ tp:.015, sl:.007 },
   '15m':{ tp:.025, sl:.012 }, '1h':{ tp:.04, sl:.02 }, '4h':{ tp:.07, sl:.035 },
 };
+const BACKTEST_MAX_DAYS_BY_TF = { '1m': 10, '5m': 60, '15m': 180, '1h': 730, '4h': 1460 };
 
 // ══════════════════════════════════════════════════════════════════
 // STATE  (persisted to disk on every trade)
@@ -1046,6 +1047,656 @@ function calcRollingWindow(slice) {
   };
 }
 
+function parseBoolParam(v, fallback) {
+  if (v === undefined || v === null || v === '') return fallback;
+  const s = String(v).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(s)) return true;
+  if (['0', 'false', 'no', 'off'].includes(s)) return false;
+  return fallback;
+}
+
+function parseNumParam(v, fallback, min = null, max = null) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  let out = n;
+  if (min !== null) out = Math.max(min, out);
+  if (max !== null) out = Math.min(max, out);
+  return out;
+}
+
+function parseCsvList(v, fallback = []) {
+  if (v === undefined || v === null || String(v).trim() === '') return fallback;
+  return String(v).split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function normalizeTimeframe(tf) {
+  return TF_GRAN[tf] ? tf : CFG.timeframe;
+}
+
+function getRiskForTimeframe(tf) {
+  return RISK[normalizeTimeframe(tf)] || RISK['15m'];
+}
+
+function buildBacktestConfigFromQuery(q = {}) {
+  const timeframe = normalizeTimeframe(q.timeframe || CFG.timeframe);
+  const watchedCoins = parseCsvList(q.coins || q.watchedCoins, CFG.watchedCoins).slice(0, 16);
+  const tradeSizeUsd = parseNumParam(
+    q.tradeSizeUsd ?? q.tradeSize ?? q.size,
+    CFG.tradeSizePct > 0 ? Math.max(CFG.tradeSizeMinUsd || 0, CFG.tradeSize || 50) : CFG.tradeSize,
+    1,
+    50000
+  );
+
+  return {
+    name: String(q.name || 'custom'),
+    timeframe,
+    watchedCoins,
+    candles: Math.round(parseNumParam(q.candles, 700, 120, 2200)),
+    startBalance: parseNumParam(q.startBalance, 1000, 100, 1000000),
+    maxPositions: Math.round(parseNumParam(q.maxPositions, CFG.maxPositions, 1, 20)),
+    dailyLossLimit: parseNumParam(q.dailyLossLimit, CFG.dailyLossLimit, 0, 100000),
+    activeMode: parseBoolParam(q.activeMode, CFG.activeMode),
+    minConfidence: Math.round(parseNumParam(q.minConfidence, CFG.minConfidence, 0, 100)),
+    entryCooldownMin: Math.round(parseNumParam(q.entryCooldownMin, CFG.entryCooldownMin, 0, 240)),
+    buyScoreThreshold: parseNumParam(q.buyScoreThreshold, CFG.buyScoreThreshold, 0.01, 0.95),
+    strongScoreThreshold: parseNumParam(q.strongScoreThreshold, CFG.strongScoreThreshold, 0.02, 0.99),
+    dipBuyEnabled: parseBoolParam(q.dipBuyEnabled, CFG.dipBuyEnabled),
+    dipLookbackCandles: Math.round(parseNumParam(q.dipLookbackCandles, CFG.dipLookbackCandles, 2, 60)),
+    minDipPct: parseNumParam(q.minDipPct, CFG.minDipPct, 0, 50),
+    minTakeProfitUsd: parseNumParam(q.minTakeProfitUsd, CFG.minTakeProfitUsd, 0, 10000),
+    signalCloseMinProfitUsd: parseNumParam(q.signalCloseMinProfitUsd, CFG.signalCloseMinProfitUsd, 0, 10000),
+    paperDisableStopLoss: parseBoolParam(q.paperDisableStopLoss, CFG.paperDisableStopLoss),
+    regimeFilter: parseBoolParam(q.regimeFilter, CFG.regimeFilter),
+    minEmaGapPct: parseNumParam(q.minEmaGapPct, CFG.minEmaGapPct, 0, 20),
+    minAtrPct: parseNumParam(q.minAtrPct, CFG.minAtrPct, 0, 20),
+    regimeRequireEmaAlignment: parseBoolParam(q.regimeRequireEmaAlignment, CFG.regimeRequireEmaAlignment),
+    longOnlyPaper: parseBoolParam(q.longOnlyPaper, CFG.longOnlyPaper),
+    tradeSizeUsd,
+    feeBps: parseNumParam(q.feeBps, CFG.feeBps, 0, 1000),
+    slippageEntryBps: parseNumParam(q.slippageEntryBps, CFG.slippageEntryBps, 0, 1000),
+    slippageExitBps: parseNumParam(q.slippageExitBps, CFG.slippageExitBps, 0, 1000),
+    atrTrailEnabled: parseBoolParam(q.atrTrailEnabled, CFG.atrTrailEnabled),
+    atrTrailMult: parseNumParam(q.atrTrailMult, CFG.atrTrailMult, 0, 10),
+    breakEvenTriggerR: parseNumParam(q.breakEvenTriggerR, CFG.breakEvenTriggerR, 0, 10),
+    breakEvenOffsetBps: parseNumParam(q.breakEvenOffsetBps, CFG.breakEvenOffsetBps, 0, 500),
+  };
+}
+
+function passRegimeFilterForConfig(signal, cfg) {
+  if (!cfg.regimeFilter) return { ok: true, reason: 'disabled' };
+  const ind = signal.indicators || {};
+  const emaGapPct = ind.emaGapPct ?? 0;
+  const atrPct = ind.atrPct ?? 0;
+  const side = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
+
+  if (emaGapPct < cfg.minEmaGapPct) {
+    return { ok: false, reason: `emaGap ${emaGapPct.toFixed(3)}% < ${cfg.minEmaGapPct}%` };
+  }
+  if (atrPct < cfg.minAtrPct) {
+    return { ok: false, reason: `atr ${atrPct.toFixed(3)}% < ${cfg.minAtrPct}%` };
+  }
+  if (cfg.regimeRequireEmaAlignment) {
+    if (side === 'BUY' && !(ind.ema9 > ind.ema21)) return { ok: false, reason: 'BUY signal not aligned with EMA trend' };
+    if (side === 'SELL' && !(ind.ema9 < ind.ema21)) return { ok: false, reason: 'SELL signal not aligned with EMA trend' };
+  }
+  return { ok: true, reason: 'ok' };
+}
+
+function passDipFilterForConfig(candles, side, cfg) {
+  if (!cfg.dipBuyEnabled) return { ok: true, reason: 'disabled', movePct: null };
+  const lb = Math.max(2, cfg.dipLookbackCandles || 2);
+  if (!candles || candles.length < lb + 1) return { ok: false, reason: 'insufficient candles', movePct: null };
+
+  const hist = candles.slice(-(lb + 1), -1);
+  const closes = hist.map(c => c.close);
+  const cur = candles[candles.length - 1].close;
+  const windowHigh = Math.max(...closes);
+  const windowLow = Math.min(...closes);
+
+  if (side === 'BUY') {
+    const dipPct = windowHigh > 0 ? ((windowHigh - cur) / windowHigh) * 100 : 0;
+    if (dipPct < cfg.minDipPct) return { ok: false, reason: `dip ${dipPct.toFixed(3)}% < ${cfg.minDipPct}%`, movePct: +dipPct.toFixed(4) };
+    return { ok: true, reason: 'ok', movePct: +dipPct.toFixed(4) };
+  }
+  if (side === 'SELL') {
+    const rallyPct = windowLow > 0 ? ((cur - windowLow) / windowLow) * 100 : 0;
+    if (rallyPct < cfg.minDipPct) return { ok: false, reason: `rally ${rallyPct.toFixed(3)}% < ${cfg.minDipPct}%`, movePct: +rallyPct.toFixed(4) };
+    return { ok: true, reason: 'ok', movePct: +rallyPct.toFixed(4) };
+  }
+  return { ok: true, reason: 'n/a', movePct: null };
+}
+
+function generateSignalForConfig(candles, cfg) {
+  if (candles.length < 35) return null;
+  const closes = candles.map(c => c.close), cur = closes[closes.length - 1];
+  const rsi = calcRSI(closes), macd = calcMACD(closes), bbPos = calcBBPos(closes);
+  const vwap = calcVWAP(candles);
+  const atrPct = calcATRPercent(candles);
+  const e9 = calcEMA(closes, 9), e21 = calcEMA(closes, 21);
+  const ema9 = e9[e9.length - 1], ema21 = e21[e21.length - 1];
+  const ema9p = e9[e9.length - 2] || ema9, ema21p = e21[e21.length - 2] || ema21;
+  const emaCross = ema9 > ema21 && ema9p <= ema21p ? 'golden' : ema9 < ema21 && ema9p >= ema21p ? 'death' : null;
+  const emaGapPct = cur > 0 ? Math.abs((ema9 - ema21) / cur) * 100 : 0;
+
+  let score = 0;
+  if (rsi !== null) {
+    if (rsi < 25) score += 2.5; else if (rsi < 35) score += 1.8; else if (rsi < 45) score += 0.8;
+    else if (rsi > 75) score -= 2.5; else if (rsi > 65) score -= 1.8; else if (rsi > 55) score -= 0.8;
+  }
+  if (macd) {
+    if (macd.cross === 'bull') score += 2; else if (macd.cross === 'bear') score -= 2;
+    else if (macd.hist > 0) score += macd.hist > macd.prevHist ? 0.8 : 0.3;
+    else score -= Math.abs(macd.hist) > Math.abs(macd.prevHist) ? 0.8 : 0.3;
+  }
+  if (bbPos !== null) {
+    if (bbPos < 0.1) score += 1.8; else if (bbPos < 0.25) score += 1;
+    else if (bbPos > 0.9) score -= 1.8; else if (bbPos > 0.75) score -= 1;
+  }
+  if (emaCross === 'golden') score += 1.5; else if (emaCross === 'death') score -= 1.5;
+  else score += ema9 > ema21 ? 0.5 : -0.5;
+  if (vwap && cur) score += cur > vwap ? 0.6 : -0.6;
+
+  const norm = Math.max(-1, Math.min(1, score / 9));
+  const risk = getRiskForTimeframe(cfg.timeframe);
+  const buyT = Math.max(0.01, Math.min(0.95, Math.abs(cfg.buyScoreThreshold)));
+  const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(cfg.strongScoreThreshold)));
+  const label = norm > strongT ? 'STRONG_BUY' : norm > buyT ? 'BUY'
+    : norm < -strongT ? 'STRONG_SELL' : norm < -buyT ? 'SELL' : 'HOLD';
+  return {
+    label,
+    confidence: Math.round(Math.abs(norm) * 100),
+    score: +norm.toFixed(3),
+    price: cur,
+    tp: label.includes('BUY') ? +(cur * (1 + risk.tp)).toFixed(6) : +(cur * (1 - risk.tp)).toFixed(6),
+    sl: label.includes('BUY') ? +(cur * (1 - risk.sl)).toFixed(6) : +(cur * (1 + risk.sl)).toFixed(6),
+    indicators: {
+      rsi: rsi ? +rsi.toFixed(1) : null,
+      macdHist: macd ? +macd.hist.toFixed(4) : null,
+      bbPos: bbPos !== null ? +bbPos.toFixed(3) : null,
+      emaCross,
+      ema9,
+      ema21,
+      emaGapPct: +emaGapPct.toFixed(4),
+      atrPct: atrPct !== null ? +atrPct.toFixed(4) : null,
+      vwap: vwap ? +vwap.toFixed(4) : null,
+    },
+  };
+}
+
+function estimatePositionPnlWithConfig(pos, exitMarkPrice, cfg) {
+  if (!pos || !Number.isFinite(+pos.entry) || !Number.isFinite(+pos.size) || !Number.isFinite(exitMarkPrice)) {
+    return { gross: 0, fees: 0, net: 0, exitPrice: null };
+  }
+  const side = pos.side === 'SELL' ? 'SELL' : 'BUY';
+  const entry = +pos.entry;
+  const size = +pos.size;
+  const exitPrice = applySlippagePrice(exitMarkPrice, side, cfg.slippageExitBps, 'exit');
+  const gross = side === 'BUY'
+    ? ((exitPrice - entry) / entry) * size
+    : ((entry - exitPrice) / entry) * size;
+  const entryFee = safeNum(pos.feeEntryUsd, 0);
+  const exitFee = size * bpsToFraction(cfg.feeBps);
+  const fees = entryFee + exitFee;
+  const net = gross - fees;
+  return { gross, fees, net, exitPrice };
+}
+
+function updateDynamicStopsForConfig(pos, markPrice, cfg) {
+  if (!pos || !Number.isFinite(+pos.entry) || !Number.isFinite(markPrice)) return false;
+  let changed = false;
+  const side = pos.side === 'SELL' ? 'SELL' : 'BUY';
+
+  if (cfg.atrTrailEnabled && Number(pos.atrPctAtEntry) > 0 && cfg.atrTrailMult > 0) {
+    const trailPct = (Number(pos.atrPctAtEntry) / 100) * cfg.atrTrailMult;
+    if (trailPct > 0) {
+      if (side === 'BUY') {
+        const peak = Math.max(Number(pos.peakPrice || pos.entry), markPrice);
+        if (!Number.isFinite(pos.peakPrice) || peak !== pos.peakPrice) {
+          pos.peakPrice = +peak.toFixed(6);
+          changed = true;
+        }
+        const trailSl = peak * (1 - trailPct);
+        if (trailSl > pos.sl) {
+          pos.sl = +trailSl.toFixed(6);
+          pos.trailStopUpdates = (pos.trailStopUpdates || 0) + 1;
+          changed = true;
+        }
+      } else {
+        const trough = Math.min(Number(pos.troughPrice || pos.entry), markPrice);
+        if (!Number.isFinite(pos.troughPrice) || trough !== pos.troughPrice) {
+          pos.troughPrice = +trough.toFixed(6);
+          changed = true;
+        }
+        const trailSl = trough * (1 + trailPct);
+        if (trailSl < pos.sl) {
+          pos.sl = +trailSl.toFixed(6);
+          pos.trailStopUpdates = (pos.trailStopUpdates || 0) + 1;
+          changed = true;
+        }
+      }
+    }
+  }
+
+  if (!pos.breakEvenArmed && Number(pos.initialRiskPct) > 0 && cfg.breakEvenTriggerR > 0) {
+    const movePct = side === 'BUY'
+      ? (markPrice - pos.entry) / pos.entry
+      : (pos.entry - markPrice) / pos.entry;
+    const rNow = movePct / Number(pos.initialRiskPct);
+    if (rNow >= cfg.breakEvenTriggerR) {
+      const beOffset = bpsToFraction(cfg.breakEvenOffsetBps);
+      const beSl = side === 'BUY'
+        ? pos.entry * (1 + beOffset)
+        : pos.entry * (1 - beOffset);
+      if ((side === 'BUY' && beSl > pos.sl) || (side === 'SELL' && beSl < pos.sl)) {
+        pos.sl = +beSl.toFixed(6);
+        changed = true;
+      }
+      pos.breakEvenArmed = true;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function summarizeTradesByCoin(trades) {
+  const byCoin = {};
+  for (const t of trades) {
+    if (!byCoin[t.coin]) byCoin[t.coin] = [];
+    byCoin[t.coin].push(t);
+  }
+  return Object.entries(byCoin)
+    .map(([coin, coinTrades]) => ({
+      coin,
+      ...computeTradeMetrics(coinTrades),
+    }))
+    .sort((a, b) => (b.totalPnl || 0) - (a.totalPnl || 0));
+}
+
+function scoreBacktestOutcome(result) {
+  const m = result?.metrics || {};
+  const trades = safeNum(m.tradeCount, 0);
+  const score =
+    safeNum(m.totalPnl, 0) +
+    safeNum(m.expectancy, 0) * 40 +
+    safeNum(m.profitFactor, 0) * 8 +
+    safeNum(m.winRate, 0) * 0.15 -
+    safeNum(m.maxDrawdown, 0) * 0.6 -
+    Math.max(0, 20 - trades) * 0.5;
+  return +score.toFixed(4);
+}
+
+function runSingleBacktest(cfg, historyByCoin, opts = {}) {
+  const coins = (cfg.watchedCoins || []).filter(c => Array.isArray(historyByCoin[c]) && historyByCoin[c].length > 40);
+  if (!coins.length) return { ok: false, error: 'No valid coin history for backtest' };
+
+  const minLen = Math.min(...coins.map(c => historyByCoin[c].length));
+  const warmup = Math.max(35, cfg.dipLookbackCandles + 2);
+  const startIndex = Math.max(warmup, Math.floor(parseNumParam(opts.startIndex, warmup, warmup, minLen - 1)));
+  const endIndex = Math.max(startIndex + 1, Math.min(minLen, Math.floor(parseNumParam(opts.endIndex, minLen, startIndex + 1, minLen))));
+  const forceCloseAtEnd = parseBoolParam(opts.forceCloseAtEnd, true);
+
+  let balance = cfg.startBalance;
+  const positions = {};
+  const lastEntryAt = {};
+  const trades = [];
+  const equityCurve = [];
+  let dailyLoss = 0;
+  let dayKey = null;
+  let pausedByDailyLoss = false;
+  let blockedByDailyLossCount = 0;
+  const blockCounts = { confidence: 0, cooldown: 0, regime: 0, dip: 0, policy: 0, hold: 0 };
+
+  const closeSimPosition = (coin, markPrice, reason, atMs) => {
+    const pos = positions[coin];
+    if (!pos) return null;
+    const est = estimatePositionPnlWithConfig(pos, markPrice, cfg);
+    const pnl = est.net;
+    balance += pos.size + pnl;
+    if (pnl < 0) {
+      dailyLoss += Math.abs(pnl);
+      if (cfg.dailyLossLimit > 0 && dailyLoss >= cfg.dailyLossLimit) pausedByDailyLoss = true;
+    }
+    const trade = {
+      ...pos,
+      exit: +(est.exitPrice || markPrice).toFixed(6),
+      exitMark: +markPrice.toFixed(6),
+      grossPnl: +est.gross.toFixed(4),
+      feesUsd: +est.fees.toFixed(4),
+      pnl: +pnl.toFixed(4),
+      pnlPct: +((pnl / pos.size) * 100).toFixed(2),
+      reason,
+      closed: atMs,
+    };
+    trades.push(trade);
+    delete positions[coin];
+    return trade;
+  };
+
+  for (let i = startIndex; i < endIndex; i++) {
+    for (const coin of coins) {
+      const series = historyByCoin[coin];
+      const bar = series[i];
+      if (!bar) continue;
+      const tsMs = bar.time * 1000;
+      const curDay = new Date(tsMs).toDateString();
+      if (dayKey !== curDay) {
+        dayKey = curDay;
+        dailyLoss = 0;
+        pausedByDailyLoss = false;
+      }
+
+      const markPrice = bar.close;
+      const hasPos = !!positions[coin];
+
+      if (hasPos) {
+        const pos = positions[coin];
+        updateDynamicStopsForConfig(pos, markPrice, cfg);
+        const stopLossDisabled = !!cfg.paperDisableStopLoss;
+        if (pos.side === 'BUY') {
+          if (markPrice >= pos.tp) { closeSimPosition(coin, markPrice, 'TAKE_PROFIT', tsMs); continue; }
+          if (!stopLossDisabled && markPrice <= pos.sl) { closeSimPosition(coin, markPrice, 'STOP_LOSS', tsMs); continue; }
+        } else {
+          if (markPrice <= pos.tp) { closeSimPosition(coin, markPrice, 'TAKE_PROFIT', tsMs); continue; }
+          if (!stopLossDisabled && markPrice >= pos.sl) { closeSimPosition(coin, markPrice, 'STOP_LOSS', tsMs); continue; }
+        }
+      }
+
+      const candles = series.slice(0, i + 1);
+      const signal = generateSignalForConfig(candles, cfg);
+      if (!signal) continue;
+      const sideHint = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
+      const regime = passRegimeFilterForConfig(signal, cfg);
+      const dip = passDipFilterForConfig(candles, sideHint, cfg);
+      const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
+      const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
+      const confidenceOk = signal.confidence >= cfg.minConfidence;
+      const cooldownMs = Math.max(0, cfg.entryCooldownMin) * 60 * 1000;
+      const cooledDown = tsMs - (lastEntryAt[coin] || 0) >= cooldownMs;
+      const side = sideHint;
+      const sellPolicyBlocked = side === 'SELL' && cfg.longOnlyPaper;
+
+      if (positions[coin]) {
+        const pos = positions[coin];
+        const shouldClose = (pos.side === 'BUY' && (signal.label === 'SELL' || signal.label === 'STRONG_SELL'))
+          || (pos.side === 'SELL' && (signal.label === 'BUY' || signal.label === 'STRONG_BUY'));
+        if (shouldClose) {
+          const preview = estimatePositionPnlWithConfig(pos, markPrice, cfg);
+          if (cfg.signalCloseMinProfitUsd <= 0 || preview.net >= cfg.signalCloseMinProfitUsd) {
+            closeSimPosition(coin, markPrice, 'SIGNAL_REVERSAL', tsMs);
+          }
+        }
+        continue;
+      }
+
+      if (pausedByDailyLoss) {
+        blockedByDailyLossCount += 1;
+        continue;
+      }
+
+      const shouldOpen = cfg.activeMode
+        ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok)
+        : (isStrong && cooledDown && regime.ok && dip.ok);
+
+      if (!shouldOpen) {
+        if (!isDirectional) blockCounts.hold += 1;
+        else if (!confidenceOk) blockCounts.confidence += 1;
+        else if (!cooledDown) blockCounts.cooldown += 1;
+        else if (!dip.ok) blockCounts.dip += 1;
+        else if (!regime.ok) blockCounts.regime += 1;
+        continue;
+      }
+      if (sellPolicyBlocked) {
+        blockCounts.policy += 1;
+        continue;
+      }
+      if (Object.keys(positions).length >= cfg.maxPositions) continue;
+
+      const size = cfg.tradeSizeUsd;
+      if (!Number.isFinite(size) || size <= 0 || balance < size) continue;
+      const entry = applySlippagePrice(markPrice, side, cfg.slippageEntryBps, 'entry');
+      const risk = getRiskForTimeframe(cfg.timeframe);
+      let tp = side === 'BUY' ? entry * (1 + risk.tp) : entry * (1 - risk.tp);
+      let sl = side === 'BUY' ? entry * (1 - risk.sl) : entry * (1 + risk.sl);
+      if (cfg.minTakeProfitUsd > 0) {
+        const minMovePct = cfg.minTakeProfitUsd / size;
+        tp = side === 'BUY'
+          ? Math.max(tp, entry * (1 + minMovePct))
+          : Math.min(tp, entry * (1 - minMovePct));
+      }
+
+      balance -= size;
+      const feeEntryUsd = size * bpsToFraction(cfg.feeBps);
+      positions[coin] = {
+        coin,
+        side,
+        size: +size.toFixed(2),
+        entry: +entry.toFixed(6),
+        entryMark: +markPrice.toFixed(6),
+        tp: +tp.toFixed(6),
+        sl: +sl.toFixed(6),
+        signal: signal.label,
+        confidence: signal.confidence,
+        opened: tsMs,
+        atrPctAtEntry: Number(signal?.indicators?.atrPct) || null,
+        initialRiskPct: +(Math.abs(entry - sl) / entry).toFixed(6),
+        peakPrice: +entry.toFixed(6),
+        troughPrice: +entry.toFixed(6),
+        breakEvenArmed: false,
+        trailStopUpdates: 0,
+        feeEntryUsd: +feeEntryUsd.toFixed(6),
+        slippageEntryBps: cfg.slippageEntryBps,
+        feeBps: cfg.feeBps,
+      };
+      lastEntryAt[coin] = tsMs;
+    }
+
+    let equity = balance;
+    for (const coin of Object.keys(positions)) {
+      const pos = positions[coin];
+      const bar = historyByCoin[coin][i];
+      if (!bar) continue;
+      const est = estimatePositionPnlWithConfig(pos, bar.close, cfg);
+      equity += pos.size + est.net;
+    }
+    equityCurve.push({ t: historyByCoin[coins[0]][i].time * 1000, equity: +equity.toFixed(4) });
+  }
+
+  if (forceCloseAtEnd) {
+    const idx = endIndex - 1;
+    for (const coin of Object.keys(positions)) {
+      const bar = historyByCoin[coin][idx];
+      if (bar) closeSimPosition(coin, bar.close, 'END_OF_TEST', bar.time * 1000);
+    }
+  }
+
+  const metrics = computeTradeMetrics(trades);
+  const finalBalance = +balance.toFixed(4);
+  const roiPct = cfg.startBalance > 0 ? +(((finalBalance - cfg.startBalance) / cfg.startBalance) * 100).toFixed(2) : null;
+  const eqVals = equityCurve.map(p => p.equity);
+  const equitySummary = eqVals.length
+    ? { first: +eqVals[0].toFixed(4), last: +eqVals[eqVals.length - 1].toFixed(4), min: +Math.min(...eqVals).toFixed(4), max: +Math.max(...eqVals).toFixed(4) }
+    : null;
+
+  return {
+    ok: true,
+    config: cfg,
+    coinCount: coins.length,
+    candlesPerCoin: minLen,
+    startIndex,
+    endIndex,
+    blockedByDailyLossCount,
+    blockCounts,
+    tradeCount: trades.length,
+    startBalance: +cfg.startBalance.toFixed(2),
+    finalBalance,
+    roiPct,
+    metrics,
+    equitySummary,
+    perCoin: summarizeTradesByCoin(trades),
+    trades,
+  };
+}
+
+function buildProfileCandidates(baseCfg) {
+  const baseCoins = (baseCfg.watchedCoins || CFG.watchedCoins).slice(0, 10);
+  return [
+    {
+      ...baseCfg,
+      name: 'stability-v1',
+      timeframe: '5m',
+      watchedCoins: baseCoins.slice(0, Math.min(baseCoins.length, 4)),
+      minConfidence: 14,
+      entryCooldownMin: 3,
+      buyScoreThreshold: 0.1,
+      strongScoreThreshold: 0.25,
+      regimeFilter: true,
+      minEmaGapPct: 0.05,
+      minAtrPct: 0.1,
+      regimeRequireEmaAlignment: false,
+      dipBuyEnabled: false,
+      maxPositions: 2,
+      longOnlyPaper: true,
+    },
+    {
+      ...baseCfg,
+      name: 'balanced-v1',
+      timeframe: '5m',
+      watchedCoins: baseCoins.slice(0, Math.min(baseCoins.length, 6)),
+      minConfidence: 12,
+      entryCooldownMin: 2,
+      buyScoreThreshold: 0.09,
+      strongScoreThreshold: 0.22,
+      regimeFilter: true,
+      minEmaGapPct: 0.04,
+      minAtrPct: 0.09,
+      dipBuyEnabled: false,
+      maxPositions: 3,
+      longOnlyPaper: false,
+    },
+    {
+      ...baseCfg,
+      name: 'active-v1',
+      timeframe: '1m',
+      watchedCoins: baseCoins,
+      minConfidence: 11,
+      entryCooldownMin: 1,
+      buyScoreThreshold: 0.08,
+      strongScoreThreshold: 0.2,
+      regimeFilter: true,
+      minEmaGapPct: 0.03,
+      minAtrPct: 0.1,
+      dipBuyEnabled: false,
+      maxPositions: 4,
+      longOnlyPaper: false,
+    },
+  ];
+}
+
+function runWalkForward(cfg, historyByCoin, windowCount = 4) {
+  const coins = (cfg.watchedCoins || []).filter(c => Array.isArray(historyByCoin[c]) && historyByCoin[c].length > 40);
+  if (!coins.length) {
+    return { ok: false, error: 'No valid coin history for walk-forward' };
+  }
+  const minLen = Math.min(...coins.map(c => historyByCoin[c].length));
+  const warmup = Math.max(35, cfg.dipLookbackCandles + 2);
+  const usable = minLen - warmup;
+  const windows = Math.max(2, Math.min(12, Math.round(windowCount)));
+  const segment = Math.floor(usable / windows);
+  if (!Number.isFinite(segment) || segment < 20) {
+    return { ok: false, error: `Not enough data for walk-forward (${usable} usable candles)` };
+  }
+
+  const results = [];
+  for (let i = 0; i < windows; i++) {
+    const start = warmup + i * segment;
+    const end = i === windows - 1 ? minLen : start + segment;
+    const r = runSingleBacktest(cfg, historyByCoin, { startIndex: start, endIndex: end, forceCloseAtEnd: true });
+    const score = scoreBacktestOutcome(r);
+    results.push({
+      window: i + 1,
+      startIndex: start,
+      endIndex: end,
+      score,
+      tradeCount: r.tradeCount,
+      totalPnl: r.metrics?.totalPnl ?? 0,
+      winRate: r.metrics?.winRate ?? null,
+      profitFactor: r.metrics?.profitFactor ?? null,
+      maxDrawdown: r.metrics?.maxDrawdown ?? null,
+      result: r,
+    });
+  }
+
+  const scores = results.map(r => r.score);
+  const positiveWindows = results.filter(r => (r.totalPnl || 0) > 0).length;
+  const allTrades = results.flatMap(r => r.result?.trades || []);
+  const combinedMetrics = computeTradeMetrics(allTrades);
+
+  return {
+    ok: true,
+    windows,
+    segmentSize: segment,
+    positiveWindows,
+    consistencyPct: +((positiveWindows / windows) * 100).toFixed(2),
+    avgScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4),
+    combinedMetrics,
+    windowResults: results.map(r => ({
+      window: r.window,
+      score: r.score,
+      tradeCount: r.tradeCount,
+      totalPnl: r.totalPnl,
+      winRate: r.winRate,
+      profitFactor: r.profitFactor,
+      maxDrawdown: r.maxDrawdown,
+      startIndex: r.startIndex,
+      endIndex: r.endIndex,
+    })),
+  };
+}
+
+async function fetchCandlesHistory(productId, tf, wantedCandles = 700) {
+  const gran = TF_GRAN[tf] || 900;
+  const wanted = Math.max(120, Math.min(2200, Math.round(wantedCandles)));
+  const pageSize = 300;
+  const maxPages = Math.ceil(wanted / pageSize) + 1;
+  let endMs = Date.now();
+  const byTime = new Map();
+
+  for (let page = 0; page < maxPages; page++) {
+    const startMs = endMs - gran * pageSize * 1000;
+    const startIso = new Date(startMs).toISOString();
+    const endIso = new Date(endMs).toISOString();
+    const url = `${CB_PUB}/products/${productId}/candles?granularity=${gran}&start=${startIso}&end=${endIso}`;
+    const raw = await fetchJSONWithRetry(url, { attempts: 2, timeoutMs: 12000 });
+    if (Array.isArray(raw)) {
+      for (const c of raw) {
+        const t = Number(c[0]);
+        if (!Number.isFinite(t)) continue;
+        if (!byTime.has(t)) {
+          byTime.set(t, { time: t, low: +c[1], high: +c[2], open: +c[3], close: +c[4], volume: +c[5] });
+        }
+      }
+    }
+    if (byTime.size >= wanted) break;
+    endMs = startMs - gran * 1000;
+    await sleep(120);
+  }
+
+  return [...byTime.values()].sort((a, b) => a.time - b.time).slice(-wanted);
+}
+
+async function loadBacktestHistory(coins, timeframe, candles) {
+  const out = {};
+  for (const coin of coins) {
+    try {
+      out[coin] = await fetchCandlesHistory(coin, timeframe, candles);
+      await sleep(80);
+    } catch (e) {
+      out[coin] = [];
+    }
+  }
+  return out;
+}
+
 // ══════════════════════════════════════════════════════════════════
 // EXPRESS ROUTES
 // ══════════════════════════════════════════════════════════════════
@@ -1323,6 +1974,88 @@ app.get('/api/positions', auth, async (_, res) => {
 
 // ── Trade history ─────────────────────────────────────────────────
 app.get('/api/trades', auth, (_, res) => res.json(ST.trades.slice(0, 50)));
+
+// ── Backtest (single profile) ──────────────────────────────────────
+app.get('/api/backtest', auth, async (req, res) => {
+  try {
+    const cfg = buildBacktestConfigFromQuery(req.query || {});
+    if (!cfg.watchedCoins.length) {
+      return res.status(400).json({ error: 'No coins configured. Pass ?coins=BTC-USD,ETH-USD' });
+    }
+    const historyByCoin = await loadBacktestHistory(cfg.watchedCoins, cfg.timeframe, cfg.candles);
+    const result = runSingleBacktest(cfg, historyByCoin, { forceCloseAtEnd: true });
+    if (!result.ok) return res.status(400).json(result);
+    res.json({
+      generatedAt: Date.now(),
+      mode: 'single',
+      result,
+      score: scoreBacktestOutcome(result),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'backtest failed' });
+  }
+});
+
+// ── Backtest walk-forward + profile ranking ────────────────────────
+app.get('/api/backtest/walk-forward', auth, async (req, res) => {
+  try {
+    const baseCfg = buildBacktestConfigFromQuery(req.query || {});
+    if (!baseCfg.watchedCoins.length) {
+      return res.status(400).json({ error: 'No coins configured. Pass ?coins=BTC-USD,ETH-USD' });
+    }
+    const windows = Math.round(parseNumParam(req.query.windows, 4, 2, 12));
+    const profileMode = String(req.query.profiles || 'preset').toLowerCase();
+    const candidates = profileMode === 'single'
+      ? [baseCfg]
+      : buildProfileCandidates(baseCfg);
+    const historyCache = {};
+    const loadHistoryForConfig = async (cfg) => {
+      const key = `${cfg.timeframe}::${cfg.candles}::${(cfg.watchedCoins || []).join(',')}`;
+      if (!historyCache[key]) {
+        historyCache[key] = await loadBacktestHistory(cfg.watchedCoins, cfg.timeframe, cfg.candles);
+      }
+      return historyCache[key];
+    };
+
+    const runs = [];
+    for (const c of candidates) {
+      const historyByCoin = await loadHistoryForConfig(c);
+      const walk = runWalkForward(c, historyByCoin, windows);
+      if (!walk.ok) {
+        runs.push({ profile: c.name || 'custom', ok: false, error: walk.error });
+        continue;
+      }
+      const aggregateScore =
+        safeNum(walk.combinedMetrics?.totalPnl, 0) +
+        safeNum(walk.combinedMetrics?.expectancy, 0) * 40 +
+        safeNum(walk.combinedMetrics?.profitFactor, 0) * 8 +
+        safeNum(walk.consistencyPct, 0) * 0.15 -
+        safeNum(walk.combinedMetrics?.maxDrawdown, 0) * 0.6;
+      runs.push({
+        profile: c.name || 'custom',
+        ok: true,
+        score: +aggregateScore.toFixed(4),
+        config: c,
+        walkForward: walk,
+      });
+    }
+
+    const ranked = runs
+      .filter(r => r.ok)
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    res.json({
+      generatedAt: Date.now(),
+      windows,
+      requestedProfiles: candidates.map(c => c.name || 'custom'),
+      bestProfile: ranked[0] || null,
+      ranked,
+      failed: runs.filter(r => !r.ok),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'walk-forward failed' });
+  }
+});
 
 // ── Rolling trade metrics ─────────────────────────────────────────
 app.get('/api/metrics/rolling', auth, (_, res) => {
