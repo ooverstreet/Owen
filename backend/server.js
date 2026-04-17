@@ -22,6 +22,7 @@ app.use(express.json());
 const CFG = {
   appToken:       process.env.APP_TOKEN       || 'changeme',
   paperMode:      process.env.PAPER_MODE      !== 'false',
+  tradingEnabledOnStartup: process.env.TRADING_ENABLED_ON_STARTUP !== 'false',
   paperBalance:   parseFloat(process.env.PAPER_BALANCE)    || 1000,
   tradeSize:      parseFloat(process.env.TRADE_SIZE)       || 50,
   tradeSizePct:   parseFloat(process.env.TRADE_SIZE_PCT)   || 0,
@@ -120,6 +121,9 @@ function loadState() {
   } catch(e) { console.warn('Could not load state:', e.message); }
 }
 loadState();
+if (CFG.tradingEnabledOnStartup) {
+  ST.tradingEnabled = true;
+}
 
 function checkDailyReset() {
   const today = new Date().toDateString();
@@ -1083,6 +1087,7 @@ app.get('/api/status', auth, async (req, res) => {
     tradeSizePct:   CFG.tradeSizePct,
     tradeSizeMinUsd: CFG.tradeSizeMinUsd,
     tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
+    tradingEnabledOnStartup: CFG.tradingEnabledOnStartup,
     feeBps: CFG.feeBps,
     slippageEntryBps: CFG.slippageEntryBps,
     slippageExitBps: CFG.slippageExitBps,
@@ -1274,6 +1279,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
       tradeSizePct: CFG.tradeSizePct,
       tradeSizeMinUsd: CFG.tradeSizeMinUsd,
       tradeSizeMaxUsd: CFG.tradeSizeMaxUsd,
+      tradingEnabledOnStartup: CFG.tradingEnabledOnStartup,
       feeBps: CFG.feeBps,
       slippageEntryBps: CFG.slippageEntryBps,
       slippageExitBps: CFG.slippageExitBps,
@@ -1426,6 +1432,7 @@ app.post('/api/config', auth, (req, res) => {
   const {
     tradeSize, tradeSizePct, tradeSizeMinUsd, tradeSizeMaxUsd, maxPositions, dailyLossLimit, watchedCoins, timeframe,
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
+    tradingEnabledOnStartup,
     feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, loopIntervalSec,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
@@ -1453,6 +1460,7 @@ app.post('/api/config', auth, (req, res) => {
   if (regimeRequireEmaAlignment !== undefined) CFG.regimeRequireEmaAlignment = !!regimeRequireEmaAlignment;
   if (longOnlyPaper  !== undefined) CFG.longOnlyPaper  = !!longOnlyPaper;
   if (longOnlyLive   !== undefined) CFG.longOnlyLive   = !!longOnlyLive;
+  if (tradingEnabledOnStartup !== undefined) CFG.tradingEnabledOnStartup = !!tradingEnabledOnStartup;
   // Runtime execution settings
   if (feeBps !== undefined) CFG.feeBps = clamp(+feeBps, 0, 1000, CFG.feeBps);
   if (slippageEntryBps !== undefined) CFG.slippageEntryBps = clamp(+slippageEntryBps, 0, 1000, CFG.slippageEntryBps);
@@ -1490,6 +1498,7 @@ app.post('/api/config', auth, (req, res) => {
     regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     longOnlyPaper: CFG.longOnlyPaper,
     longOnlyLive: CFG.longOnlyLive,
+    tradingEnabledOnStartup: CFG.tradingEnabledOnStartup,
     feeBps: CFG.feeBps,
     slippageEntryBps: CFG.slippageEntryBps,
     slippageExitBps: CFG.slippageExitBps,
@@ -1510,6 +1519,7 @@ app.listen(PORT, () => {
   console.log(`🤖  Crypto Signal Bot v2.0`);
   console.log(`📡  Listening on port ${PORT}`);
   console.log(`📊  Mode:       ${CFG.paperMode ? '📄 PAPER TRADING (safe)' : '💰 LIVE TRADING'}`);
+  console.log(`🚦  Startup auto-enable: ${CFG.tradingEnabledOnStartup ? 'ON' : 'OFF'}`);
   console.log(`👁   Watching:   ${CFG.watchedCoins.join(', ')}`);
   const sizeCfg = CFG.tradeSizePct > 0
     ? `${CFG.tradeSizePct}% (min:$${CFG.tradeSizeMinUsd || 0}, max:$${CFG.tradeSizeMaxUsd || 0})`
