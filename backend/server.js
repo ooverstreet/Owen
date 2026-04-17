@@ -23,6 +23,10 @@ const CFG = {
   appToken:       process.env.APP_TOKEN       || 'changeme',
   paperMode:      process.env.PAPER_MODE      !== 'false',
   tradingEnabledOnStartup: process.env.TRADING_ENABLED_ON_STARTUP !== 'false',
+  htfFilterEnabled: process.env.HTF_FILTER_ENABLED === 'true',
+  htfTimeframe: process.env.HTF_TIMEFRAME || '1h',
+  htfRequireEmaAlignment: process.env.HTF_REQUIRE_EMA_ALIGNMENT !== 'false',
+  htfMinRsi: Number.isFinite(parseFloat(process.env.HTF_MIN_RSI)) ? parseFloat(process.env.HTF_MIN_RSI) : 50,
   paperBalance:   parseFloat(process.env.PAPER_BALANCE)    || 1000,
   tradeSize:      parseFloat(process.env.TRADE_SIZE)       || 50,
   tradeSizePct:   parseFloat(process.env.TRADE_SIZE_PCT)   || 0,
@@ -77,8 +81,10 @@ CFG.atrTrailMult = clamp(CFG.atrTrailMult, 0, 10, 1.2);
 CFG.breakEvenTriggerR = clamp(CFG.breakEvenTriggerR, 0, 10, 0.6);
 CFG.breakEvenOffsetBps = clamp(CFG.breakEvenOffsetBps, 0, 500, 2);
 CFG.loopIntervalSec = Math.round(clamp(CFG.loopIntervalSec, 5, 300, 60));
+CFG.htfMinRsi = clamp(CFG.htfMinRsi, 0, 100, 50);
 
 const TF_GRAN = { '1m':60, '5m':300, '15m':900, '1h':3600, '4h':21600 };
+CFG.htfTimeframe = TF_GRAN[CFG.htfTimeframe] ? CFG.htfTimeframe : '1h';
 const RISK    = {
   '1m':{ tp:.008, sl:.004 }, '5m':{ tp:.015, sl:.007 },
   '15m':{ tp:.025, sl:.012 }, '1h':{ tp:.04, sl:.02 }, '4h':{ tp:.07, sl:.035 },
@@ -397,6 +403,86 @@ function passWalletFlowGate(coin, signal) {
     return { ok: false, reason: `wallet score ${score.toFixed(3)} > -${CFG.walletSignalThreshold}`, score };
   }
   return { ok: true, reason: 'ok', score };
+}
+
+function computeHtfTrendFromCandles(candles) {
+  if (!Array.isArray(candles) || candles.length < 35) {
+    return { ok: false, reason: 'insufficient candles', side: 'HOLD', rsi: null, ema9: null, ema21: null };
+  }
+  const closes = candles.map(c => c.close);
+  const e9 = calcEMA(closes, 9);
+  const e21 = calcEMA(closes, 21);
+  if (!e9.length || !e21.length) {
+    return { ok: false, reason: 'insufficient ema data', side: 'HOLD', rsi: null, ema9: null, ema21: null };
+  }
+  const ema9 = e9[e9.length - 1];
+  const ema21 = e21[e21.length - 1];
+  const rsi = calcRSI(closes, 14);
+  let side = 'HOLD';
+  if (ema9 > ema21) side = 'BUY';
+  else if (ema9 < ema21) side = 'SELL';
+  return {
+    ok: true,
+    reason: 'ok',
+    side,
+    rsi: Number.isFinite(rsi) ? +rsi.toFixed(2) : null,
+    ema9: +ema9.toFixed(6),
+    ema21: +ema21.toFixed(6),
+    at: candles[candles.length - 1]?.time || null,
+  };
+}
+
+async function getHtfTrendState(coin) {
+  if (!CFG.htfFilterEnabled) return { ok: true, reason: 'disabled', side: 'ANY', rsi: null, timeframe: CFG.htfTimeframe };
+  const candles = await fetchCandles(coin, CFG.htfTimeframe);
+  const state = computeHtfTrendFromCandles(candles);
+  return { ...state, timeframe: CFG.htfTimeframe };
+}
+
+function passHtfFilter(signal, htfState, cfg = CFG) {
+  if (!cfg.htfFilterEnabled) return { ok: true, reason: 'disabled' };
+  if (!signal) return { ok: false, reason: 'missing signal' };
+  if (!htfState?.ok) return { ok: false, reason: `HTF unavailable: ${htfState?.reason || 'unknown'}` };
+
+  const side = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
+  if (side === 'HOLD') return { ok: true, reason: 'n/a' };
+
+  if (cfg.htfRequireEmaAlignment && htfState.side !== side) {
+    return { ok: false, reason: `HTF trend ${htfState.side} != ${side}` };
+  }
+  if (side === 'BUY' && cfg.htfMinRsi > 0) {
+    const htfRsi = Number(htfState.rsi);
+    if (!Number.isFinite(htfRsi)) return { ok: false, reason: 'HTF RSI unavailable' };
+    if (htfRsi < cfg.htfMinRsi) {
+      return { ok: false, reason: `HTF RSI ${htfRsi.toFixed(1)} < ${cfg.htfMinRsi}` };
+    }
+  }
+  return { ok: true, reason: 'ok' };
+}
+
+function getHtfHistoryKey(coin, timeframe) {
+  return `__htf__${coin}::${timeframe}`;
+}
+
+function buildHtfStateForConfig(coin, atIndex, atTimeSec, historyByCoin, cfg) {
+  if (!cfg.htfFilterEnabled) {
+    return { ok: true, reason: 'disabled', side: 'ANY', rsi: null, timeframe: cfg.htfTimeframe };
+  }
+
+  if (cfg.htfTimeframe === cfg.timeframe) {
+    const base = historyByCoin[coin] || [];
+    const candles = base.slice(0, atIndex + 1);
+    const state = computeHtfTrendFromCandles(candles);
+    return { ...state, timeframe: cfg.htfTimeframe };
+  }
+
+  const htfSeries = historyByCoin[getHtfHistoryKey(coin, cfg.htfTimeframe)] || [];
+  if (!htfSeries.length) {
+    return { ok: false, reason: `missing ${cfg.htfTimeframe} history`, side: 'HOLD', rsi: null, timeframe: cfg.htfTimeframe };
+  }
+  const aligned = htfSeries.filter(c => c.time <= atTimeSec);
+  const state = computeHtfTrendFromCandles(aligned);
+  return { ...state, timeframe: cfg.htfTimeframe };
 }
 
 function bpsToFraction(bps) {
@@ -730,7 +816,17 @@ async function runCycle() {
         const regime = signal ? passRegimeFilter(signal) : { ok: true, reason: 'n/a' };
         const sideHint = signal ? (signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD') : 'HOLD';
         const dip = signal ? passDipFilter(candles, sideHint) : { ok: true, reason: 'n/a', movePct: null };
-        if (signal) ST.signals[coin] = { ...signal, regime, dip, updatedAt: Date.now() };
+        const htfState = signal
+          ? (
+            !CFG.htfFilterEnabled
+              ? { ok: true, reason: 'disabled', side: 'ANY', rsi: null, timeframe: CFG.htfTimeframe }
+              : (CFG.htfTimeframe === CFG.timeframe
+                  ? { ...computeHtfTrendFromCandles(candles), timeframe: CFG.htfTimeframe }
+                  : await getHtfTrendState(coin))
+          )
+          : { ok: true, reason: 'n/a', side: 'ANY', rsi: null, timeframe: CFG.htfTimeframe };
+        const htf = signal ? passHtfFilter(signal, htfState) : { ok: true, reason: 'n/a' };
+        if (signal) ST.signals[coin] = { ...signal, regime, dip, htf, htfState, updatedAt: Date.now() };
 
         // Entry logic — only when auto-trading is on
         if (ST.tradingEnabled && signal) {
@@ -746,8 +842,8 @@ async function runCycle() {
 
           const shouldOpen = !hasPos && (
             CFG.activeMode
-              ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && flowGate.ok)
-              : (isStrong && regime.ok && dip.ok && flowGate.ok)
+              ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && htf.ok && flowGate.ok)
+              : (isStrong && cooledDown && regime.ok && dip.ok && htf.ok && flowGate.ok)
           );
 
           if (shouldOpen) {
@@ -782,11 +878,18 @@ async function runCycle() {
                 const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
                 blockReason = `Cooldown active (${minsRemaining}m remaining)`;
               } else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+              else if (!htf.ok) blockReason = `HTF blocked: ${htf.reason}`;
               else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
               else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
             } else {
               if (!isStrong) blockReason = `Classic mode: waiting STRONG_* (got ${signal.label})`;
+              else if (!cooledDown) {
+                const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
+                const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
+                blockReason = `Cooldown active (${minsRemaining}m remaining)`;
+              }
               else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
+              else if (!htf.ok) blockReason = `HTF blocked: ${htf.reason}`;
               else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
               else if (!regime.ok) blockReason = `Regime blocked: ${regime.reason}`;
             }
@@ -875,6 +978,10 @@ function getRuntimeSettings() {
     breakEvenTriggerR: CFG.breakEvenTriggerR,
     breakEvenOffsetBps: CFG.breakEvenOffsetBps,
     loopIntervalSec: CFG.loopIntervalSec,
+    htfFilterEnabled: CFG.htfFilterEnabled,
+    htfTimeframe: CFG.htfTimeframe,
+    htfRequireEmaAlignment: CFG.htfRequireEmaAlignment,
+    htfMinRsi: CFG.htfMinRsi,
   };
 }
 
@@ -1119,6 +1226,10 @@ function buildBacktestConfigFromQuery(q = {}) {
     atrTrailMult: parseNumParam(q.atrTrailMult, CFG.atrTrailMult, 0, 10),
     breakEvenTriggerR: parseNumParam(q.breakEvenTriggerR, CFG.breakEvenTriggerR, 0, 10),
     breakEvenOffsetBps: parseNumParam(q.breakEvenOffsetBps, CFG.breakEvenOffsetBps, 0, 500),
+    htfFilterEnabled: parseBoolParam(q.htfFilterEnabled, CFG.htfFilterEnabled),
+    htfTimeframe: normalizeTimeframe(q.htfTimeframe || CFG.htfTimeframe),
+    htfRequireEmaAlignment: parseBoolParam(q.htfRequireEmaAlignment, CFG.htfRequireEmaAlignment),
+    htfMinRsi: parseNumParam(q.htfMinRsi, CFG.htfMinRsi, 0, 100),
   };
 }
 
@@ -1344,7 +1455,7 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
   let dayKey = null;
   let pausedByDailyLoss = false;
   let blockedByDailyLossCount = 0;
-  const blockCounts = { confidence: 0, cooldown: 0, regime: 0, dip: 0, policy: 0, hold: 0 };
+  const blockCounts = { confidence: 0, cooldown: 0, regime: 0, htf: 0, dip: 0, policy: 0, hold: 0 };
 
   const closeSimPosition = (coin, markPrice, reason, atMs) => {
     const pos = positions[coin];
@@ -1407,6 +1518,8 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       const sideHint = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
       const regime = passRegimeFilterForConfig(signal, cfg);
       const dip = passDipFilterForConfig(candles, sideHint, cfg);
+      const htfState = buildHtfStateForConfig(coin, i, bar.time, historyByCoin, cfg);
+      const htf = passHtfFilter(signal, htfState, cfg);
       const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
       const isDirectional = signal.label === 'BUY' || signal.label === 'SELL' || isStrong;
       const confidenceOk = signal.confidence >= cfg.minConfidence;
@@ -1434,14 +1547,15 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       }
 
       const shouldOpen = cfg.activeMode
-        ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok)
-        : (isStrong && cooledDown && regime.ok && dip.ok);
+        ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && htf.ok)
+        : (isStrong && cooledDown && regime.ok && dip.ok && htf.ok);
 
       if (!shouldOpen) {
         if (!isDirectional) blockCounts.hold += 1;
         else if (!confidenceOk) blockCounts.confidence += 1;
         else if (!cooledDown) blockCounts.cooldown += 1;
         else if (!dip.ok) blockCounts.dip += 1;
+        else if (!htf.ok) blockCounts.htf += 1;
         else if (!regime.ok) blockCounts.regime += 1;
         continue;
       }
@@ -1553,6 +1667,10 @@ function buildProfileCandidates(baseCfg) {
       minEmaGapPct: 0.05,
       minAtrPct: 0.1,
       regimeRequireEmaAlignment: false,
+      htfFilterEnabled: true,
+      htfTimeframe: '1h',
+      htfRequireEmaAlignment: true,
+      htfMinRsi: 50,
       dipBuyEnabled: false,
       maxPositions: 2,
       longOnlyPaper: true,
@@ -1569,6 +1687,10 @@ function buildProfileCandidates(baseCfg) {
       regimeFilter: true,
       minEmaGapPct: 0.04,
       minAtrPct: 0.09,
+      htfFilterEnabled: true,
+      htfTimeframe: '1h',
+      htfRequireEmaAlignment: true,
+      htfMinRsi: 48,
       dipBuyEnabled: false,
       maxPositions: 3,
       longOnlyPaper: false,
@@ -1585,6 +1707,7 @@ function buildProfileCandidates(baseCfg) {
       regimeFilter: true,
       minEmaGapPct: 0.03,
       minAtrPct: 0.1,
+      htfFilterEnabled: false,
       dipBuyEnabled: false,
       maxPositions: 4,
       longOnlyPaper: false,
@@ -1684,7 +1807,8 @@ async function fetchCandlesHistory(productId, tf, wantedCandles = 700) {
   return [...byTime.values()].sort((a, b) => a.time - b.time).slice(-wanted);
 }
 
-async function loadBacktestHistory(coins, timeframe, candles) {
+async function loadBacktestHistory(coins, timeframe, candles, extraTimeframes = []) {
+  const extras = [...new Set((extraTimeframes || []).filter(tf => TF_GRAN[tf] && tf !== timeframe))];
   const out = {};
   for (const coin of coins) {
     try {
@@ -1692,6 +1816,14 @@ async function loadBacktestHistory(coins, timeframe, candles) {
       await sleep(80);
     } catch (e) {
       out[coin] = [];
+    }
+    for (const tf of extras) {
+      try {
+        out[getHtfHistoryKey(coin, tf)] = await fetchCandlesHistory(coin, tf, candles);
+      } catch (e) {
+        out[getHtfHistoryKey(coin, tf)] = [];
+      }
+      await sleep(80);
     }
   }
   return out;
@@ -1732,6 +1864,10 @@ app.get('/api/status', auth, async (req, res) => {
     regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
     longOnlyPaper:  CFG.longOnlyPaper,
     longOnlyLive:   CFG.longOnlyLive,
+    htfFilterEnabled: CFG.htfFilterEnabled,
+    htfTimeframe: CFG.htfTimeframe,
+    htfRequireEmaAlignment: CFG.htfRequireEmaAlignment,
+    htfMinRsi: CFG.htfMinRsi,
     watchedCoins:   CFG.watchedCoins,
     timeframe:      CFG.timeframe,
     tradeSize:      CFG.tradeSize,
@@ -1825,6 +1961,8 @@ app.get('/api/signals/summary', auth, (req, res) => {
     const label = s?.label || '—';
     const confidence = Number.isFinite(s?.confidence) ? s.confidence : null;
     const regime = s?.regime || { ok: true, reason: 'n/a' };
+    const htf = s?.htf || { ok: true, reason: 'n/a' };
+    const htfState = s?.htfState || null;
     const hasPos = !!positions[coin];
     const isStrong = label === 'STRONG_BUY' || label === 'STRONG_SELL';
     const isDirectional = label === 'BUY' || label === 'SELL' || isStrong;
@@ -1860,6 +1998,9 @@ app.get('/api/signals/summary', auth, (req, res) => {
     } else if (CFG.dipBuyEnabled && s?.dip?.ok === false) {
       status = 'blocked';
       reason = `dip filter: ${s.dip.reason}`;
+    } else if (!htf.ok) {
+      status = 'blocked';
+      reason = `htf blocked: ${htf.reason}`;
     } else if (!regime.ok) {
       status = 'blocked';
       reason = `regime blocked: ${regime.reason}`;
@@ -1878,6 +2019,11 @@ app.get('/api/signals/summary', auth, (req, res) => {
       price: s?.price ?? null,
       regimeOk: !!regime.ok,
       regimeReason: regime.reason || 'n/a',
+      htfOk: !!htf.ok,
+      htfReason: htf.reason || 'n/a',
+      htfSide: htfState?.side || null,
+      htfRsi: Number.isFinite(htfState?.rsi) ? htfState.rsi : null,
+      htfTimeframe: htfState?.timeframe || CFG.htfTimeframe,
       status,
       reason,
       updatedAt: s?.updatedAt || null,
@@ -1894,7 +2040,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -1943,6 +2089,10 @@ app.get('/api/signals/summary', auth, (req, res) => {
       minEmaGapPct: CFG.minEmaGapPct,
       minAtrPct: CFG.minAtrPct,
       regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
+      htfFilterEnabled: CFG.htfFilterEnabled,
+      htfTimeframe: CFG.htfTimeframe,
+      htfRequireEmaAlignment: CFG.htfRequireEmaAlignment,
+      htfMinRsi: CFG.htfMinRsi,
     },
     counts,
     signals,
@@ -1982,7 +2132,12 @@ app.get('/api/backtest', auth, async (req, res) => {
     if (!cfg.watchedCoins.length) {
       return res.status(400).json({ error: 'No coins configured. Pass ?coins=BTC-USD,ETH-USD' });
     }
-    const historyByCoin = await loadBacktestHistory(cfg.watchedCoins, cfg.timeframe, cfg.candles);
+    const historyByCoin = await loadBacktestHistory(
+      cfg.watchedCoins,
+      cfg.timeframe,
+      cfg.candles,
+      cfg.htfFilterEnabled ? [cfg.htfTimeframe] : []
+    );
     const result = runSingleBacktest(cfg, historyByCoin, { forceCloseAtEnd: true });
     if (!result.ok) return res.status(400).json(result);
     res.json({
@@ -2010,9 +2165,14 @@ app.get('/api/backtest/walk-forward', auth, async (req, res) => {
       : buildProfileCandidates(baseCfg);
     const historyCache = {};
     const loadHistoryForConfig = async (cfg) => {
-      const key = `${cfg.timeframe}::${cfg.candles}::${(cfg.watchedCoins || []).join(',')}`;
+      const key = `${cfg.timeframe}::${cfg.candles}::${(cfg.watchedCoins || []).join(',')}::htf=${cfg.htfFilterEnabled ? cfg.htfTimeframe : 'off'}`;
       if (!historyCache[key]) {
-        historyCache[key] = await loadBacktestHistory(cfg.watchedCoins, cfg.timeframe, cfg.candles);
+        historyCache[key] = await loadBacktestHistory(
+          cfg.watchedCoins,
+          cfg.timeframe,
+          cfg.candles,
+          cfg.htfFilterEnabled ? [cfg.htfTimeframe] : []
+        );
       }
       return historyCache[key];
     };
@@ -2167,6 +2327,7 @@ app.post('/api/config', auth, (req, res) => {
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
     tradingEnabledOnStartup,
     feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, loopIntervalSec,
+    htfFilterEnabled, htfTimeframe, htfRequireEmaAlignment, htfMinRsi,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
   if (tradeSizePct   !== undefined) CFG.tradeSizePct   = +tradeSizePct;
@@ -2203,6 +2364,10 @@ app.post('/api/config', auth, (req, res) => {
   if (breakEvenTriggerR !== undefined) CFG.breakEvenTriggerR = clamp(+breakEvenTriggerR, 0, 10, CFG.breakEvenTriggerR);
   if (breakEvenOffsetBps !== undefined) CFG.breakEvenOffsetBps = clamp(+breakEvenOffsetBps, 0, 500, CFG.breakEvenOffsetBps);
   if (loopIntervalSec !== undefined) CFG.loopIntervalSec = Math.round(clamp(+loopIntervalSec, 5, 300, CFG.loopIntervalSec));
+  if (htfFilterEnabled !== undefined) CFG.htfFilterEnabled = !!htfFilterEnabled;
+  if (htfTimeframe !== undefined && TF_GRAN[htfTimeframe]) CFG.htfTimeframe = htfTimeframe;
+  if (htfRequireEmaAlignment !== undefined) CFG.htfRequireEmaAlignment = !!htfRequireEmaAlignment;
+  if (htfMinRsi !== undefined) CFG.htfMinRsi = clamp(+htfMinRsi, 0, 100, CFG.htfMinRsi);
   if (CFG.loopIntervalSec !== priorLoopIntervalSec) restartMonitorInterval();
   res.json({
     ok: true,
@@ -2240,6 +2405,10 @@ app.post('/api/config', auth, (req, res) => {
     breakEvenTriggerR: CFG.breakEvenTriggerR,
     breakEvenOffsetBps: CFG.breakEvenOffsetBps,
     loopIntervalSec: CFG.loopIntervalSec,
+    htfFilterEnabled: CFG.htfFilterEnabled,
+    htfTimeframe: CFG.htfTimeframe,
+    htfRequireEmaAlignment: CFG.htfRequireEmaAlignment,
+    htfMinRsi: CFG.htfMinRsi,
   });
 });
 
@@ -2266,6 +2435,7 @@ app.listen(PORT, () => {
   console.log(`💸  Fees/Slippage: fee ${CFG.feeBps}bps | entry slip ${CFG.slippageEntryBps}bps | exit slip ${CFG.slippageExitBps}bps`);
   console.log(`🧷  Exit controls: ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
   console.log(`⚡  Loop interval: ${CFG.loopIntervalSec}s`);
+  console.log(`🛰   HTF filter: ${CFG.htfFilterEnabled ? 'ON' : 'OFF'} | TF ${CFG.htfTimeframe} | EMA align required: ${CFG.htfRequireEmaAlignment ? 'YES' : 'NO'} | min RSI(BUY): ${CFG.htfMinRsi}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
   console.log(`📌  Paper policy: ${CFG.longOnlyPaper ? 'LONG ONLY' : 'ALLOW BUY/SELL'} | Live policy: ${CFG.longOnlyLive ? 'LONG ONLY' : 'ALLOW BUY/SELL'}`);
   console.log(`📌  Live mode policy: ${CFG.longOnlyLive ? 'LONG ONLY (no fresh SELL entries)' : 'ALLOW BUY/SELL entries'}`);
