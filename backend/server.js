@@ -16,6 +16,20 @@ const app  = express();
 app.use(cors());
 app.use(express.json());
 
+function envNum(name, fallback) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === null || String(raw).trim() === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function envInt(name, fallback) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === null || String(raw).trim() === '') return fallback;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 // ══════════════════════════════════════════════════════════════════
 // CONFIGURATION (from Railway environment variables)
 // ══════════════════════════════════════════════════════════════════
@@ -26,42 +40,42 @@ const CFG = {
   htfFilterEnabled: process.env.HTF_FILTER_ENABLED === 'true',
   htfTimeframe: process.env.HTF_TIMEFRAME || '1h',
   htfRequireEmaAlignment: process.env.HTF_REQUIRE_EMA_ALIGNMENT !== 'false',
-  htfMinRsi: Number.isFinite(parseFloat(process.env.HTF_MIN_RSI)) ? parseFloat(process.env.HTF_MIN_RSI) : 50,
-  paperBalance:   parseFloat(process.env.PAPER_BALANCE)    || 1000,
-  tradeSize:      parseFloat(process.env.TRADE_SIZE)       || 50,
-  tradeSizePct:   parseFloat(process.env.TRADE_SIZE_PCT)   || 0,
-  tradeSizeMinUsd: parseFloat(process.env.TRADE_SIZE_MIN_USD) || 0,
-  tradeSizeMaxUsd: parseFloat(process.env.TRADE_SIZE_MAX_USD) || 0,
-  maxPositions:   parseInt(process.env.MAX_POSITIONS)      || 2,
-  dailyLossLimit: parseFloat(process.env.DAILY_LOSS_LIMIT) || 50,
+  htfMinRsi: envNum('HTF_MIN_RSI', 50),
+  paperBalance:   envNum('PAPER_BALANCE', 1000),
+  tradeSize:      envNum('TRADE_SIZE', 50),
+  tradeSizePct:   envNum('TRADE_SIZE_PCT', 0),
+  tradeSizeMinUsd: envNum('TRADE_SIZE_MIN_USD', 0),
+  tradeSizeMaxUsd: envNum('TRADE_SIZE_MAX_USD', 0),
+  maxPositions:   envInt('MAX_POSITIONS', 2),
+  dailyLossLimit: envNum('DAILY_LOSS_LIMIT', 50),
   timeframe:      process.env.TIMEFRAME       || '15m',
   watchedCoins:   (process.env.WATCHED_COINS  || 'BTC-USD,ETH-USD,SOL-USD').split(',').map(s => s.trim()),
   activeMode:     process.env.ACTIVE_MODE     !== 'false',
-  minConfidence:  parseInt(process.env.MIN_CONFIDENCE)     || 35,
-  entryCooldownMin: parseInt(process.env.ENTRY_COOLDOWN_MIN) || 8,
-  buyScoreThreshold: parseFloat(process.env.BUY_SCORE_THRESHOLD) || 0.28,
-  strongScoreThreshold: parseFloat(process.env.STRONG_SCORE_THRESHOLD) || 0.55,
+  minConfidence:  envInt('MIN_CONFIDENCE', 35),
+  entryCooldownMin: envInt('ENTRY_COOLDOWN_MIN', 8),
+  buyScoreThreshold: envNum('BUY_SCORE_THRESHOLD', 0.28),
+  strongScoreThreshold: envNum('STRONG_SCORE_THRESHOLD', 0.55),
   dipBuyEnabled:  process.env.DIP_BUY_ENABLED === 'true',
-  dipLookbackCandles: parseInt(process.env.DIP_LOOKBACK_CANDLES) || 6,
-  minDipPct:      parseFloat(process.env.MIN_DIP_PCT)      || 0.25,
-  minTakeProfitUsd: parseFloat(process.env.MIN_TAKE_PROFIT_USD) || 0,
-  signalCloseMinProfitUsd: parseFloat(process.env.SIGNAL_CLOSE_MIN_PROFIT_USD) || 0,
+  dipLookbackCandles: envInt('DIP_LOOKBACK_CANDLES', 6),
+  minDipPct:      envNum('MIN_DIP_PCT', 0.25),
+  minTakeProfitUsd: envNum('MIN_TAKE_PROFIT_USD', 0),
+  signalCloseMinProfitUsd: envNum('SIGNAL_CLOSE_MIN_PROFIT_USD', 0),
   paperDisableStopLoss: process.env.PAPER_DISABLE_STOP_LOSS === 'true',
   walletSignalEnabled: process.env.WALLET_SIGNAL_ENABLED === 'true',
   walletSignalMode:    process.env.WALLET_SIGNAL_MODE || 'off', // off | filter | boost
-  walletSignalThreshold: parseFloat(process.env.WALLET_SIGNAL_THRESHOLD) || 0.2,
-  walletSignalBoostPct: parseFloat(process.env.WALLET_SIGNAL_BOOST_PCT) || 20,
-  feeBps:          parseFloat(process.env.FEE_BPS) || 10,
-  slippageEntryBps: parseFloat(process.env.SLIPPAGE_BPS_ENTRY) || 3,
-  slippageExitBps:  parseFloat(process.env.SLIPPAGE_BPS_EXIT) || 3,
+  walletSignalThreshold: envNum('WALLET_SIGNAL_THRESHOLD', 0.2),
+  walletSignalBoostPct: envNum('WALLET_SIGNAL_BOOST_PCT', 20),
+  feeBps:          envNum('FEE_BPS', 10),
+  slippageEntryBps: envNum('SLIPPAGE_BPS_ENTRY', 3),
+  slippageExitBps:  envNum('SLIPPAGE_BPS_EXIT', 3),
   atrTrailEnabled: process.env.ATR_TRAIL_ENABLED !== 'false',
-  atrTrailMult:    parseFloat(process.env.ATR_TRAIL_MULT) || 1.2,
-  breakEvenTriggerR: parseFloat(process.env.BREAK_EVEN_TRIGGER_R) || 0.6,
-  breakEvenOffsetBps: parseFloat(process.env.BREAK_EVEN_OFFSET_BPS) || 2,
-  loopIntervalSec: parseInt(process.env.LOOP_INTERVAL_SEC, 10) || 60,
+  atrTrailMult:    envNum('ATR_TRAIL_MULT', 1.2),
+  breakEvenTriggerR: envNum('BREAK_EVEN_TRIGGER_R', 0.6),
+  breakEvenOffsetBps: envNum('BREAK_EVEN_OFFSET_BPS', 2),
+  loopIntervalSec: envInt('LOOP_INTERVAL_SEC', 60),
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
-  minEmaGapPct:   parseFloat(process.env.MIN_EMA_GAP_PCT)  || 0.12,
-  minAtrPct:      parseFloat(process.env.MIN_ATR_PCT)      || 0.35,
+  minEmaGapPct:   envNum('MIN_EMA_GAP_PCT', 0.12),
+  minAtrPct:      envNum('MIN_ATR_PCT', 0.35),
   regimeRequireEmaAlignment: process.env.REGIME_REQUIRE_EMA_ALIGNMENT !== 'false',
   longOnlyPaper:  process.env.LONG_ONLY_PAPER === 'true',
   longOnlyLive:   process.env.LONG_ONLY_LIVE  !== 'false',
