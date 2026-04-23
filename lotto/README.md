@@ -6,6 +6,7 @@ This is a lightweight standalone backend for Florida Lottery picks and analysis 
 
 - `GET /health`
 - `GET /api/lottery/picks`
+- `GET /api/lottery/dashboard`
 
 Auth is required on `/api/lottery/*`:
 
@@ -18,11 +19,25 @@ Example:
 /api/lottery/picks?token=YOUR_APP_TOKEN&game=pick3&profile=blended&sets=5
 ```
 
+Dashboard example (one-tap daily bundle):
+
+```
+/api/lottery/dashboard?token=YOUR_APP_TOKEN&sets=5
+```
+
 ## Query parameters
 
 - `game`: `pick2|pick3|pick4|pick5|cashpop`
 - `profile`: `blended|alltime|5y|12m`
 - `sets`: `1..20`
+
+Dashboard query params:
+
+- `sets`: `1..20` (default `5`)
+- `pick3Profile`: profile for Pick 3 (default `blended`)
+- `pick4Profile`: profile for Pick 4 (default `12m`)
+- `pick5Profile`: profile for Pick 5 (default `5y`)
+- `cashpopProfile`: profile for Cash Pop (default `alltime`)
 
 ## Environment variables
 
@@ -53,3 +68,4 @@ Optional:
 8. Verify:
    - `/health`
    - `/api/lottery/picks?token=YOUR_APP_TOKEN&game=pick3&profile=blended&sets=5`
+   - `/api/lottery/dashboard?token=YOUR_APP_TOKEN&sets=5`
