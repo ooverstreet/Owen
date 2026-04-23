@@ -34,7 +34,9 @@ Optional:
 
 - `PORT` - service port (Railway provides this automatically)
 - `LOTTO_ANALYSIS_FILE` - absolute/relative path to `fl-lottery-analysis.json`
-  - defaults to `../backend/data/fl-lottery-analysis.json`
+  - defaults to `./data/fl-lottery-analysis.json` (inside `lotto/`)
+- `LOTTO_ANALYSIS_URL` - URL to JSON (preferred in Railway if file not bundled)
+  - defaults to this repo raw file on branch `cursor/exchange-and-bot-setup-3f7d`
   - if you want fully independent service data, set this to a file inside `lotto/data/`
 
 ## Railway setup (separate service)
@@ -45,7 +47,9 @@ Optional:
 4. Start command: `npm start`
 5. Add env var:
    - `APP_TOKEN=your_token`
-6. Generate domain (port `3000` if prompted).
-7. Verify:
+6. (Recommended) Add:
+   - `LOTTO_ANALYSIS_URL=https://raw.githubusercontent.com/ooverstreet/Owen/cursor/exchange-and-bot-setup-3f7d/backend/data/fl-lottery-analysis.json`
+7. Generate domain (port `3000` if prompted).
+8. Verify:
    - `/health`
    - `/api/lottery/picks?token=YOUR_APP_TOKEN&game=pick3&profile=blended&sets=5`
