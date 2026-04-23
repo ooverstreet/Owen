@@ -22,6 +22,37 @@ const DEFAULT_DASHBOARD = [
   { game: 'cashpop', profile: 'alltime', sets: 8 },
 ];
 
+function formatPick(game, numbers) {
+  if (!Array.isArray(numbers)) return '';
+  if (game === 'cashpop') return String(numbers[0] ?? '');
+  return numbers.map((n) => String(n)).join('');
+}
+
+function buildPrettyDashboard(dashboards) {
+  return dashboards.map((row) => ({
+    game: row.game,
+    profile: row.profile,
+    sets: row.sets,
+    picks: row.picks.map((p) => formatPick(row.game, p)),
+    topNumbers: row.topWeightedNumbers.slice(0, 5).map((n) => n.value),
+    coverage: row.coverage,
+  }));
+}
+
+function buildTextDashboard(dashboards) {
+  const lines = [];
+  lines.push(`Lottery dashboard @ ${new Date().toISOString()}`);
+  lines.push('');
+  for (const row of dashboards) {
+    lines.push(`${row.game.toUpperCase()}  (${row.profile}, sets=${row.sets})`);
+    lines.push(`Picks: ${row.picks.map((p) => formatPick(row.game, p)).join(', ')}`);
+    lines.push(`Top numbers: ${row.topWeightedNumbers.slice(0, 5).map((n) => n.value).join(', ')}`);
+    lines.push(`Coverage: ${row.coverage.from} -> ${row.coverage.to}`);
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
 async function generatePicks(input, opts) {
   if (ANALYSIS_URL) return generatePicksFromUrl(ANALYSIS_URL, opts);
   return generatePicksFromFile(input, opts);
@@ -55,6 +86,7 @@ app.get('/api/lottery/picks', auth, async (req, res) => {
 
 app.get('/api/lottery/dashboard', auth, async (req, res) => {
   try {
+    const format = String(req.query.format || 'json').toLowerCase();
     const dashboards = await Promise.all(
       DEFAULT_DASHBOARD.map(async (cfg) => {
         const payload = await generatePicks(ANALYSIS_FILE, cfg);
@@ -69,6 +101,15 @@ app.get('/api/lottery/dashboard', auth, async (req, res) => {
         };
       })
     );
+    if (format === 'pretty') {
+      return res.json({
+        generatedAt: new Date().toISOString(),
+        dashboard: buildPrettyDashboard(dashboards),
+      });
+    }
+    if (format === 'text') {
+      return res.type('text/plain').send(buildTextDashboard(dashboards));
+    }
     res.json({
       generatedAt: new Date().toISOString(),
       dashboard: dashboards,
