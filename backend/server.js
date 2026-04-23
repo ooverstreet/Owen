@@ -11,6 +11,7 @@ const path     = require('path');
 const crypto   = require('crypto');
 const jwt      = require('jsonwebtoken');
 const fetch    = (...args) => globalThis.fetch(...args);
+const picker   = require('./scripts/fl-lottery-picker');
 
 const app  = express();
 app.use(cors());
@@ -2300,6 +2301,25 @@ app.get('/api/performance/rolling', auth, (_, res) => {
 
 // ── Recent errors ─────────────────────────────────────────────────
 app.get('/api/errors', auth, (_, res) => res.json(ST.errors.slice(0, 20)));
+
+app.get('/api/lottery/picks', auth, async (req, res) => {
+  try {
+    const game = String(req.query.game || 'pick3').toLowerCase();
+    const strategy = String(req.query.strategy || 'blended').toLowerCase();
+    const sets = Math.max(1, Math.min(20, parseInt(req.query.sets || '5', 10) || 5));
+    const includeDetails = String(req.query.details || '').toLowerCase() === 'true';
+    const analysisPath = path.join(__dirname, 'data', 'fl-lottery-analysis.json');
+    const payload = await picker.generatePicksFromFile(analysisPath, {
+      game,
+      strategy,
+      sets,
+      includeDetails,
+    });
+    return res.json(payload);
+  } catch (err) {
+    return res.status(400).json({ error: err?.message || String(err) });
+  }
+});
 
 // ── Toggle auto-trading ───────────────────────────────────────────
 app.post('/api/toggle', auth, (_, res) => {

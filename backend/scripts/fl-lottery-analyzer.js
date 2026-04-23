@@ -209,11 +209,13 @@ function calcWindowStats(draws, game) {
     uniqueDates,
     avgDrawsPerDate: Number((draws.length / Math.max(uniqueDates, 1)).toFixed(3)),
     repeatFromPriorPct: calcRepeatRate(draws),
+    numberFrequency: withDomain,
     topNumbers: topEntries(withDomain, 10, 'desc'),
     coldNumbers: topEntries(withDomain, 10, 'asc'),
     topCombos: topEntries(comboFreq, 10, 'desc'),
     topSums: topEntries(sumFreq, 10, 'desc'),
     drawTypeDistribution: topEntries(drawTypeFreq, 10, 'desc'),
+    positionFrequency: positionFreq.map((pf) => rangeDomainFrequency(game.domain, pf)),
     positionFrequencies: positionFreq.map((pf) => topEntries(rangeDomainFrequency(game.domain, pf), 10, 'desc')),
   };
 }
