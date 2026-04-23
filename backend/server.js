@@ -68,6 +68,8 @@ const CFG = {
   feeBps:          envNum('FEE_BPS', 10),
   slippageEntryBps: envNum('SLIPPAGE_BPS_ENTRY', 3),
   slippageExitBps:  envNum('SLIPPAGE_BPS_EXIT', 3),
+  tpMult: envNum('TP_MULT', 1),
+  slMult: envNum('SL_MULT', 1),
   atrTrailEnabled: process.env.ATR_TRAIL_ENABLED !== 'false',
   atrTrailMult:    envNum('ATR_TRAIL_MULT', 1.2),
   breakEvenTriggerR: envNum('BREAK_EVEN_TRIGGER_R', 0.6),
@@ -96,6 +98,8 @@ CFG.breakEvenTriggerR = clamp(CFG.breakEvenTriggerR, 0, 10, 0.6);
 CFG.breakEvenOffsetBps = clamp(CFG.breakEvenOffsetBps, 0, 500, 2);
 CFG.loopIntervalSec = Math.round(clamp(CFG.loopIntervalSec, 5, 300, 60));
 CFG.htfMinRsi = clamp(CFG.htfMinRsi, 0, 100, 50);
+CFG.tpMult = clamp(CFG.tpMult, 0.1, 5, 1);
+CFG.slMult = clamp(CFG.slMult, 0.1, 5, 1);
 
 const TF_GRAN = { '1m':60, '5m':300, '15m':900, '1h':3600, '4h':21600 };
 CFG.htfTimeframe = TF_GRAN[CFG.htfTimeframe] ? CFG.htfTimeframe : '1h';
@@ -566,7 +570,7 @@ function generateSignal(candles) {
   if (vwap && cur) score += cur > vwap ? 0.6 : -0.6;
 
   const norm = Math.max(-1, Math.min(1, score / 9));
-  const risk = RISK[CFG.timeframe] || RISK['15m'];
+  const risk = getRiskForTimeframe(CFG.timeframe, CFG.tpMult, CFG.slMult);
   const buyT = Math.max(0.01, Math.min(0.95, Math.abs(CFG.buyScoreThreshold)));
   const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(CFG.strongScoreThreshold)));
   const label = norm > strongT ? 'STRONG_BUY' : norm > buyT ? 'BUY'
@@ -619,7 +623,7 @@ async function openPosition(coin, signal) {
     console.log(`ℹ️  Skipping ${coin} SELL entry in ${modeLabel} mode (${policyVar}=true)`);
     return false;
   }
-  const risk = RISK[CFG.timeframe] || RISK['15m'];
+  const risk = getRiskForTimeframe(CFG.timeframe, CFG.tpMult, CFG.slMult);
   const entry = applySlippagePrice(markPrice, side, CFG.slippageEntryBps, 'entry');
   let tp = side === 'BUY' ? entry * (1 + risk.tp) : entry * (1 - risk.tp);
   let sl = side === 'BUY' ? entry * (1 - risk.sl) : entry * (1 + risk.sl);
@@ -987,6 +991,8 @@ function getRuntimeSettings() {
     feeBps: CFG.feeBps,
     slippageEntryBps: CFG.slippageEntryBps,
     slippageExitBps: CFG.slippageExitBps,
+    tpMult: CFG.tpMult,
+    slMult: CFG.slMult,
     atrTrailEnabled: CFG.atrTrailEnabled,
     atrTrailMult: CFG.atrTrailMult,
     breakEvenTriggerR: CFG.breakEvenTriggerR,
@@ -1194,8 +1200,14 @@ function normalizeTimeframe(tf) {
   return TF_GRAN[tf] ? tf : CFG.timeframe;
 }
 
-function getRiskForTimeframe(tf) {
-  return RISK[normalizeTimeframe(tf)] || RISK['15m'];
+function getRiskForTimeframe(tf, tpMult = CFG.tpMult, slMult = CFG.slMult) {
+  const base = RISK[normalizeTimeframe(tf)] || RISK['15m'];
+  const tpScale = clamp(Number(tpMult), 0.1, 5, 1);
+  const slScale = clamp(Number(slMult), 0.1, 5, 1);
+  return {
+    tp: base.tp * tpScale,
+    sl: base.sl * slScale,
+  };
 }
 
 function buildBacktestConfigFromQuery(q = {}) {
@@ -1240,6 +1252,8 @@ function buildBacktestConfigFromQuery(q = {}) {
     atrTrailMult: parseNumParam(q.atrTrailMult, CFG.atrTrailMult, 0, 10),
     breakEvenTriggerR: parseNumParam(q.breakEvenTriggerR, CFG.breakEvenTriggerR, 0, 10),
     breakEvenOffsetBps: parseNumParam(q.breakEvenOffsetBps, CFG.breakEvenOffsetBps, 0, 500),
+    tpMult: parseNumParam(q.tpMult, CFG.tpMult, 0.1, 5),
+    slMult: parseNumParam(q.slMult, CFG.slMult, 0.1, 5),
     htfFilterEnabled: parseBoolParam(q.htfFilterEnabled, CFG.htfFilterEnabled),
     htfTimeframe: normalizeTimeframe(q.htfTimeframe || CFG.htfTimeframe),
     htfRequireEmaAlignment: parseBoolParam(q.htfRequireEmaAlignment, CFG.htfRequireEmaAlignment),
@@ -1322,7 +1336,7 @@ function generateSignalForConfig(candles, cfg) {
   if (vwap && cur) score += cur > vwap ? 0.6 : -0.6;
 
   const norm = Math.max(-1, Math.min(1, score / 9));
-  const risk = getRiskForTimeframe(cfg.timeframe);
+  const risk = getRiskForTimeframe(cfg.timeframe, cfg.tpMult, cfg.slMult);
   const buyT = Math.max(0.01, Math.min(0.95, Math.abs(cfg.buyScoreThreshold)));
   const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(cfg.strongScoreThreshold)));
   const label = norm > strongT ? 'STRONG_BUY' : norm > buyT ? 'BUY'
@@ -1582,7 +1596,7 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       const size = cfg.tradeSizeUsd;
       if (!Number.isFinite(size) || size <= 0 || balance < size) continue;
       const entry = applySlippagePrice(markPrice, side, cfg.slippageEntryBps, 'entry');
-      const risk = getRiskForTimeframe(cfg.timeframe);
+      const risk = getRiskForTimeframe(cfg.timeframe, cfg.tpMult, cfg.slMult);
       let tp = side === 'BUY' ? entry * (1 + risk.tp) : entry * (1 - risk.tp);
       let sl = side === 'BUY' ? entry * (1 - risk.sl) : entry * (1 + risk.sl);
       if (cfg.minTakeProfitUsd > 0) {
@@ -1876,6 +1890,8 @@ app.get('/api/status', auth, async (req, res) => {
     minEmaGapPct:   CFG.minEmaGapPct,
     minAtrPct:      CFG.minAtrPct,
     regimeRequireEmaAlignment: CFG.regimeRequireEmaAlignment,
+    tpMult: CFG.tpMult,
+    slMult: CFG.slMult,
     longOnlyPaper:  CFG.longOnlyPaper,
     longOnlyLive:   CFG.longOnlyLive,
     htfFilterEnabled: CFG.htfFilterEnabled,
@@ -2054,7 +2070,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · TPx=${CFG.tpMult} · SLx=${CFG.slMult} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
   );
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
@@ -2098,6 +2114,8 @@ app.get('/api/signals/summary', auth, (req, res) => {
       atrTrailMult: CFG.atrTrailMult,
       breakEvenTriggerR: CFG.breakEvenTriggerR,
       breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+      tpMult: CFG.tpMult,
+      slMult: CFG.slMult,
       loopIntervalSec: CFG.loopIntervalSec,
       regimeFilter: CFG.regimeFilter,
       minEmaGapPct: CFG.minEmaGapPct,
@@ -2340,7 +2358,7 @@ app.post('/api/config', auth, (req, res) => {
     tradeSize, tradeSizePct, tradeSizeMinUsd, tradeSizeMaxUsd, maxPositions, dailyLossLimit, watchedCoins, timeframe,
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
     tradingEnabledOnStartup,
-    feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, loopIntervalSec,
+    feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, tpMult, slMult, loopIntervalSec,
     htfFilterEnabled, htfTimeframe, htfRequireEmaAlignment, htfMinRsi,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
@@ -2377,6 +2395,8 @@ app.post('/api/config', auth, (req, res) => {
   if (atrTrailMult !== undefined) CFG.atrTrailMult = clamp(+atrTrailMult, 0, 10, CFG.atrTrailMult);
   if (breakEvenTriggerR !== undefined) CFG.breakEvenTriggerR = clamp(+breakEvenTriggerR, 0, 10, CFG.breakEvenTriggerR);
   if (breakEvenOffsetBps !== undefined) CFG.breakEvenOffsetBps = clamp(+breakEvenOffsetBps, 0, 500, CFG.breakEvenOffsetBps);
+  if (tpMult !== undefined) CFG.tpMult = clamp(+tpMult, 0.1, 5, CFG.tpMult);
+  if (slMult !== undefined) CFG.slMult = clamp(+slMult, 0.1, 5, CFG.slMult);
   if (loopIntervalSec !== undefined) CFG.loopIntervalSec = Math.round(clamp(+loopIntervalSec, 5, 300, CFG.loopIntervalSec));
   if (htfFilterEnabled !== undefined) CFG.htfFilterEnabled = !!htfFilterEnabled;
   if (htfTimeframe !== undefined && TF_GRAN[htfTimeframe]) CFG.htfTimeframe = htfTimeframe;
@@ -2418,6 +2438,8 @@ app.post('/api/config', auth, (req, res) => {
     atrTrailMult: CFG.atrTrailMult,
     breakEvenTriggerR: CFG.breakEvenTriggerR,
     breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    tpMult: CFG.tpMult,
+    slMult: CFG.slMult,
     loopIntervalSec: CFG.loopIntervalSec,
     htfFilterEnabled: CFG.htfFilterEnabled,
     htfTimeframe: CFG.htfTimeframe,
@@ -2447,7 +2469,7 @@ app.listen(PORT, () => {
   console.log(`🪙  Dip filter: ${CFG.dipBuyEnabled ? 'ON' : 'OFF'} | Min dip: ${CFG.minDipPct}% | Lookback: ${CFG.dipLookbackCandles} candles`);
   console.log(`💵  TP floor: $${CFG.minTakeProfitUsd} | Signal close min profit: $${CFG.signalCloseMinProfitUsd} | Paper stop-loss: ${CFG.paperDisableStopLoss ? 'OFF' : 'ON'}`);
   console.log(`💸  Fees/Slippage: fee ${CFG.feeBps}bps | entry slip ${CFG.slippageEntryBps}bps | exit slip ${CFG.slippageExitBps}bps`);
-  console.log(`🧷  Exit controls: ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
+  console.log(`🧷  Exit controls: TPx ${CFG.tpMult} | SLx ${CFG.slMult} | ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
   console.log(`⚡  Loop interval: ${CFG.loopIntervalSec}s`);
   console.log(`🛰   HTF filter: ${CFG.htfFilterEnabled ? 'ON' : 'OFF'} | TF ${CFG.htfTimeframe} | EMA align required: ${CFG.htfRequireEmaAlignment ? 'YES' : 'NO'} | min RSI(BUY): ${CFG.htfMinRsi}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
