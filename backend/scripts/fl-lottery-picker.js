@@ -205,10 +205,12 @@ async function generatePicksFromFile(inputPath, options = {}) {
   return makeSets(gameEntry, profile, sets);
 }
 
-main().catch((err) => {
-  console.error(err?.stack || err?.message || String(err));
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err?.stack || err?.message || String(err));
+    process.exit(1);
+  });
+}
 
 module.exports = {
   generatePicksFromFile,
