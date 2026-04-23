@@ -3,3 +3,5 @@ package.json
 package-lock.json
 !/backend/package.json
 !/backend/package-lock.json
+!/lotto/package.json
+!/lotto/package-lock.json
