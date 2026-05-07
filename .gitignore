@@ -5,3 +5,5 @@ package-lock.json
 !/backend/package-lock.json
 !/lotto/package.json
 !/lotto/package-lock.json
+!/tellit-api/package.json
+!/tellit-api/package-lock.json
