@@ -7,6 +7,22 @@ const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const { z } = require('zod');
 
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason);
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down');
+});
+
+process.on('beforeExit', (code) => {
+  console.warn(`Process beforeExit with code ${code}`);
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
@@ -390,6 +406,7 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, HOST, () => {
+  console.log(`Tellit API boot timestamp: ${new Date().toISOString()}`);
   console.log(`Tellit API listening on ${HOST}:${PORT}`);
   console.log(`Supabase configured: ${Boolean(supabase)}`);
   console.log(`SUPABASE_URL present: ${Boolean(SUPABASE_URL)}`);
