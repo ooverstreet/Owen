@@ -16,13 +16,21 @@ const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const REPORT_PHOTOS_BUCKET = process.env.REPORT_PHOTOS_BUCKET || 'report-photos';
 
+let supabase = null;
+let supabaseInitError = null;
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.warn('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing. API calls will fail until set.');
+  supabaseInitError = 'SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing';
+  console.warn(`${supabaseInitError}. API calls will fail until set.`);
+} else {
+  try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  } catch (e) {
+    supabaseInitError = e?.message || 'Supabase client failed to initialize';
+    console.error('Supabase initialization error:', e);
+  }
 }
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
 
 const issueTypeEnum = z.enum([
   'accident',
@@ -97,7 +105,14 @@ function toApiError(res, status, message, details) {
   });
 }
 
+function ensureSupabase(res) {
+  if (supabase) return true;
+  toApiError(res, 503, 'Supabase is not configured', supabaseInitError || 'Missing configuration');
+  return false;
+}
+
 async function requireUser(req, res, next) {
+  if (!ensureSupabase(res)) return;
   const token = parseBearerToken(req);
   if (!token) return toApiError(res, 401, 'Missing bearer token');
   const { data, error } = await supabase.auth.getUser(token);
@@ -123,10 +138,16 @@ app.get('/', (_req, res) => {
 });
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, uptime: Math.floor(process.uptime()) });
+  res.json({
+    ok: true,
+    uptime: Math.floor(process.uptime()),
+    supabaseConfigured: Boolean(supabase),
+    ...(supabase ? {} : { supabaseError: supabaseInitError }),
+  });
 });
 
 app.get('/v1/reports', async (req, res) => {
+  if (!ensureSupabase(res)) return;
   const lat = req.query.lat !== undefined ? Number(req.query.lat) : null;
   const lng = req.query.lng !== undefined ? Number(req.query.lng) : null;
   const radiusKm = req.query.radiusKm !== undefined ? Number(req.query.radiusKm) : 8;
@@ -170,6 +191,7 @@ app.get('/v1/reports', async (req, res) => {
 });
 
 app.get('/v1/reports/:reportId', async (req, res) => {
+  if (!ensureSupabase(res)) return;
   const reportId = Number(req.params.reportId);
   if (!Number.isInteger(reportId) || reportId <= 0) return toApiError(res, 400, 'Invalid reportId');
 
@@ -268,6 +290,7 @@ app.delete('/v1/reports/:reportId/confirm', requireUser, async (req, res) => {
 });
 
 app.post('/v1/reports/:reportId/resolve', requireUser, requireModerator, async (req, res) => {
+  if (!ensureSupabase(res)) return;
   const reportId = Number(req.params.reportId);
   if (!Number.isInteger(reportId) || reportId <= 0) return toApiError(res, 400, 'Invalid reportId');
   const schema = z.object({
