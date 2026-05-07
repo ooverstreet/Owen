@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || '0.0.0.0';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const REPORT_PHOTOS_BUCKET = process.env.REPORT_PHOTOS_BUCKET || 'report-photos';
@@ -388,6 +389,9 @@ app.use((err, _req, res, _next) => {
   toApiError(res, 500, 'Internal server error');
 });
 
-app.listen(PORT, () => {
-  console.log(`Tellit API listening on port ${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Tellit API listening on ${HOST}:${PORT}`);
+  console.log(`Supabase configured: ${Boolean(supabase)}`);
+  console.log(`SUPABASE_URL present: ${Boolean(SUPABASE_URL)}`);
+  console.log(`SUPABASE_SERVICE_ROLE_KEY present: ${Boolean(SUPABASE_SERVICE_ROLE_KEY)}`);
 });
