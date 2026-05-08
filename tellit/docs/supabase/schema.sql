@@ -180,7 +180,21 @@ left join (
 where r.status = 'open'
   and (r.expires_at is null or r.expires_at > now());
 
-grant select on public.report_feed to anon, authenticated;
+-- API grants
+-- The backend uses SUPABASE_SERVICE_ROLE_KEY, so it needs explicit privileges.
+grant usage on schema public to anon, authenticated, service_role;
+grant select on public.report_feed to anon, authenticated, service_role;
+
+-- Because report_feed uses security_invoker=true, service_role must also be able
+-- to read the underlying relations referenced by the view.
+grant select on public.reports to service_role;
+grant select on public.profiles to service_role;
+grant select on public.report_confirmations to service_role;
+
+-- Backend endpoints also write to these tables with service_role credentials.
+grant insert, update on public.reports to service_role;
+grant select, insert, delete on public.report_confirmations to service_role;
+grant insert on public.report_status_events to service_role;
 
 -- SECURITY DEFINER helper used by RLS checks.
 create or replace function public.is_moderator()
