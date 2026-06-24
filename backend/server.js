@@ -75,6 +75,12 @@ const CFG = {
   atrTrailMult:    envNum('ATR_TRAIL_MULT', 1.2),
   breakEvenTriggerR: envNum('BREAK_EVEN_TRIGGER_R', 0.6),
   breakEvenOffsetBps: envNum('BREAK_EVEN_OFFSET_BPS', 2),
+  minNetEdgeUsd: envNum('MIN_NET_EDGE_USD', 0.06),
+  minEdgeToCostRatio: envNum('MIN_EDGE_TO_COST_RATIO', 2.0),
+  reversalConfirmCycles: envInt('REVERSAL_CONFIRM_CYCLES', 2),
+  minHoldMinutes: envInt('MIN_HOLD_MINUTES', 8),
+  postStopCooldownMin: envInt('POST_STOP_COOLDOWN_MIN', 20),
+  minTrendQuality: envNum('MIN_TREND_QUALITY', 0.22),
   loopIntervalSec: envInt('LOOP_INTERVAL_SEC', 60),
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   envNum('MIN_EMA_GAP_PCT', 0.12),
@@ -97,6 +103,12 @@ CFG.slippageExitBps = clamp(CFG.slippageExitBps, 0, 1000, 3);
 CFG.atrTrailMult = clamp(CFG.atrTrailMult, 0, 10, 1.2);
 CFG.breakEvenTriggerR = clamp(CFG.breakEvenTriggerR, 0, 10, 0.6);
 CFG.breakEvenOffsetBps = clamp(CFG.breakEvenOffsetBps, 0, 500, 2);
+CFG.minNetEdgeUsd = clamp(CFG.minNetEdgeUsd, 0, 100, 0.06);
+CFG.minEdgeToCostRatio = clamp(CFG.minEdgeToCostRatio, 0.5, 10, 2.0);
+CFG.reversalConfirmCycles = Math.round(clamp(CFG.reversalConfirmCycles, 1, 5, 2));
+CFG.minHoldMinutes = Math.round(clamp(CFG.minHoldMinutes, 0, 240, 8));
+CFG.postStopCooldownMin = Math.round(clamp(CFG.postStopCooldownMin, 0, 240, 20));
+CFG.minTrendQuality = clamp(CFG.minTrendQuality, 0, 5, 0.22);
 CFG.loopIntervalSec = Math.round(clamp(CFG.loopIntervalSec, 5, 300, 60));
 CFG.htfMinRsi = clamp(CFG.htfMinRsi, 0, 100, 50);
 CFG.tpMult = clamp(CFG.tpMult, 0.1, 5, 1);
@@ -109,6 +121,15 @@ const RISK    = {
   '15m':{ tp:.025, sl:.012 }, '1h':{ tp:.04, sl:.02 }, '4h':{ tp:.07, sl:.035 },
 };
 const BACKTEST_MAX_DAYS_BY_TF = { '1m': 10, '5m': 60, '15m': 180, '1h': 730, '4h': 1460 };
+
+function createGuardStats() {
+  return {
+    blockedByEdgeGate: 0,
+    blockedByPostStopCooldown: 0,
+    blockedByReversalGuard: 0,
+    blockedByTrendQuality: 0,
+  };
+}
 
 // ══════════════════════════════════════════════════════════════════
 // STATE  (persisted to disk on every trade)
@@ -124,15 +145,30 @@ let ST = {
   lastEntryAt:    {},   // timestamp by coin for cooldown throttling
   lastTradeAt:    null, // last open/close event time
   lastBlocked:    null, // latest blocked-entry explanation
+  lastStopLossAt: {},
+  reversalSignalStreak: {},
   dailyLoss:      0,
   dailyStart:     new Date().toDateString(),
   tradingEnabled: false,
   lastCycleAt:    null,
+  guardStats:     createGuardStats(),
   errors:         [],
 };
 
 if (!ST.walletSignals || typeof ST.walletSignals !== 'object') {
   ST.walletSignals = { updatedAt: null, coins: {} };
+}
+if (!ST.lastStopLossAt || typeof ST.lastStopLossAt !== 'object') {
+  ST.lastStopLossAt = {};
+}
+if (!ST.reversalSignalStreak || typeof ST.reversalSignalStreak !== 'object') {
+  ST.reversalSignalStreak = {};
+}
+if (!ST.guardStats || typeof ST.guardStats !== 'object') {
+  ST.guardStats = createGuardStats();
+}
+for (const [k, v] of Object.entries(createGuardStats())) {
+  if (!Number.isFinite(Number(ST.guardStats[k]))) ST.guardStats[k] = v;
 }
 
 function saveState() {
@@ -513,6 +549,12 @@ function safeNum(v, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function bumpGuardStat(key) {
+  if (!ST.guardStats || typeof ST.guardStats !== 'object') ST.guardStats = createGuardStats();
+  if (!Number.isFinite(Number(ST.guardStats[key]))) ST.guardStats[key] = 0;
+  ST.guardStats[key] += 1;
+}
+
 function applySlippagePrice(markPrice, side, bps, phase) {
   const frac = bpsToFraction(bps);
   const adverse = (
@@ -538,6 +580,81 @@ function estimatePositionPnl(pos, exitMarkPrice, exitSlippageBps = CFG.slippageE
   const fees = entryFee + exitFee;
   const net = gross - fees;
   return { gross, fees, net, exitPrice };
+}
+
+function estimateRoundTripCostUsd(sizeUsd, feeBps, entrySlipBps, exitSlipBps) {
+  const size = Math.max(0, safeNum(sizeUsd, 0));
+  if (size <= 0) return 0;
+  const feeCost = size * bpsToFraction(feeBps) * 2;
+  const slippageCost = size * (bpsToFraction(entrySlipBps) + bpsToFraction(exitSlipBps));
+  return feeCost + slippageCost;
+}
+
+function evaluateEntryEdgeGate({
+  sizeUsd,
+  entryPrice,
+  tpPrice,
+  side,
+  feeBps,
+  entrySlipBps,
+  exitSlipBps,
+  minNetEdgeUsd,
+  minEdgeToCostRatio,
+}) {
+  if (!Number.isFinite(sizeUsd) || sizeUsd <= 0 || !Number.isFinite(entryPrice) || entryPrice <= 0 || !Number.isFinite(tpPrice)) {
+    return { ok: false, reason: 'invalid edge inputs', grossTpUsd: 0, netTpUsd: 0, estimatedCostUsd: 0, edgeToCostRatio: 0 };
+  }
+  const grossPct = side === 'BUY'
+    ? (tpPrice - entryPrice) / entryPrice
+    : (entryPrice - tpPrice) / entryPrice;
+  const grossTpUsd = sizeUsd * grossPct;
+  const estimatedCostUsd = estimateRoundTripCostUsd(sizeUsd, feeBps, entrySlipBps, exitSlipBps);
+  const netTpUsd = grossTpUsd - estimatedCostUsd;
+  const ratio = estimatedCostUsd > 0 ? grossTpUsd / estimatedCostUsd : 999;
+  if (netTpUsd < minNetEdgeUsd) {
+    return {
+      ok: false,
+      reason: `edge gate: netTP $${netTpUsd.toFixed(4)} < min $${minNetEdgeUsd.toFixed(4)}`,
+      grossTpUsd,
+      netTpUsd,
+      estimatedCostUsd,
+      edgeToCostRatio: ratio,
+    };
+  }
+  if (ratio < minEdgeToCostRatio) {
+    return {
+      ok: false,
+      reason: `edge gate: TP/cost ${ratio.toFixed(3)} < ${minEdgeToCostRatio}`,
+      grossTpUsd,
+      netTpUsd,
+      estimatedCostUsd,
+      edgeToCostRatio: ratio,
+    };
+  }
+  return {
+    ok: true,
+    reason: 'ok',
+    grossTpUsd,
+    netTpUsd,
+    estimatedCostUsd,
+    edgeToCostRatio: ratio,
+  };
+}
+
+function passTrendQuality(signal, cfg = CFG) {
+  const minQ = safeNum(cfg.minTrendQuality, 0);
+  if (minQ <= 0) return { ok: true, reason: 'disabled', ratio: null };
+  const ind = signal?.indicators || {};
+  const emaGapPct = Number(ind.emaGapPct);
+  const atrPct = Number(ind.atrPct);
+  if (!Number.isFinite(emaGapPct) || !Number.isFinite(atrPct) || atrPct <= 0) {
+    return { ok: false, reason: 'trend quality unavailable', ratio: null };
+  }
+  const ratio = emaGapPct / atrPct;
+  if (ratio < minQ) {
+    return { ok: false, reason: `trend quality ${ratio.toFixed(3)} < ${minQ}`, ratio: +ratio.toFixed(4) };
+  }
+  return { ok: true, reason: 'ok', ratio: +ratio.toFixed(4) };
 }
 
 function generateSignal(candles) {
@@ -636,6 +753,28 @@ async function openPosition(coin, signal) {
       tp = Math.min(tp, entry * (1 - minMovePct));
     }
   }
+  const edgeGate = evaluateEntryEdgeGate({
+    sizeUsd: usdSize,
+    entryPrice: entry,
+    tpPrice: tp,
+    side,
+    feeBps: CFG.feeBps,
+    entrySlipBps: CFG.slippageEntryBps,
+    exitSlipBps: CFG.slippageExitBps,
+    minNetEdgeUsd: CFG.minNetEdgeUsd,
+    minEdgeToCostRatio: CFG.minEdgeToCostRatio,
+  });
+  if (!edgeGate.ok) {
+    ST.lastBlocked = {
+      coin,
+      label: signal.label,
+      confidence: signal.confidence,
+      reason: edgeGate.reason,
+      at: Date.now(),
+    };
+    bumpGuardStat('blockedByEdgeGate');
+    return false;
+  }
 
   if (CFG.paperMode) {
     if (ST.paperBalance < usdSize) {
@@ -723,6 +862,10 @@ async function closePosition(coin, reason) {
   };
   ST.trades.unshift(trade);
   if (ST.trades.length > 100) ST.trades.pop();
+  if (reason === 'STOP_LOSS') {
+    ST.lastStopLossAt[coin] = Date.now();
+  }
+  delete ST.reversalSignalStreak[coin];
   delete ST.positions[coin];
   ST.lastTradeAt = Date.now();
 
@@ -835,6 +978,7 @@ async function runCycle() {
         const regime = signal ? passRegimeFilter(signal) : { ok: true, reason: 'n/a' };
         const sideHint = signal ? (signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD') : 'HOLD';
         const dip = signal ? passDipFilter(candles, sideHint) : { ok: true, reason: 'n/a', movePct: null };
+        const trendQuality = signal ? passTrendQuality(signal) : { ok: true, reason: 'n/a', ratio: null };
         const htfState = signal
           ? (
             !CFG.htfFilterEnabled
@@ -845,7 +989,7 @@ async function runCycle() {
           )
           : { ok: true, reason: 'n/a', side: 'ANY', rsi: null, timeframe: CFG.htfTimeframe };
         const htf = signal ? passHtfFilter(signal, htfState) : { ok: true, reason: 'n/a' };
-        if (signal) ST.signals[coin] = { ...signal, regime, dip, htf, htfState, updatedAt: Date.now() };
+        if (signal) ST.signals[coin] = { ...signal, regime, dip, trendQuality, htf, htfState, updatedAt: Date.now() };
 
         // Entry logic — only when auto-trading is on
         if (ST.tradingEnabled && signal) {
@@ -857,12 +1001,15 @@ async function runCycle() {
           const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
           const lastEntryAt = ST.lastEntryAt[coin] || 0;
           const cooledDown = Date.now() - lastEntryAt >= cooldownMs;
+          const postStopCooldownMs = Math.max(0, CFG.postStopCooldownMin) * 60 * 1000;
+          const lastStopLossAt = ST.lastStopLossAt[coin] || 0;
+          const postStopCooled = !lastStopLossAt || (Date.now() - lastStopLossAt >= postStopCooldownMs);
           let blockReason = null;
 
           const shouldOpen = !hasPos && (
             CFG.activeMode
-              ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && htf.ok && flowGate.ok)
-              : (isStrong && cooledDown && regime.ok && dip.ok && htf.ok && flowGate.ok)
+              ? (isDirectional && confidenceOk && cooledDown && postStopCooled && trendQuality.ok && regime.ok && dip.ok && htf.ok && flowGate.ok)
+              : (isStrong && cooledDown && postStopCooled && trendQuality.ok && regime.ok && dip.ok && htf.ok && flowGate.ok)
           );
 
           if (shouldOpen) {
@@ -873,6 +1020,30 @@ async function runCycle() {
             const shouldClose = (pos.side === 'BUY'  && (signal.label === 'STRONG_SELL' || signal.label === 'SELL'))
                              || (pos.side === 'SELL' && (signal.label === 'STRONG_BUY'  || signal.label === 'BUY'));
             if (shouldClose) {
+              const reversalSide = signal.label.includes('BUY') ? 'BUY' : 'SELL';
+              const prev = ST.reversalSignalStreak[coin] || { side: null, count: 0 };
+              const nextStreak = prev.side === reversalSide ? prev.count + 1 : 1;
+              ST.reversalSignalStreak[coin] = { side: reversalSide, count: nextStreak, updatedAt: Date.now() };
+              const holdMs = Date.now() - safeNum(pos.opened, Date.now());
+              const minHoldMs = Math.max(0, CFG.minHoldMinutes) * 60 * 1000;
+              if (holdMs < minHoldMs || nextStreak < CFG.reversalConfirmCycles) {
+                const holdLeftMin = holdMs < minHoldMs
+                  ? Math.max(1, Math.ceil((minHoldMs - holdMs) / 60000))
+                  : 0;
+                const confirmLeft = Math.max(0, CFG.reversalConfirmCycles - nextStreak);
+                const guardParts = [];
+                if (holdLeftMin > 0) guardParts.push(`min hold ${holdLeftMin}m remaining`);
+                if (confirmLeft > 0) guardParts.push(`reversal confirm ${nextStreak}/${CFG.reversalConfirmCycles}`);
+                ST.lastBlocked = {
+                  coin,
+                  label: signal.label,
+                  confidence: signal.confidence,
+                  reason: `Reversal guard: ${guardParts.join(', ') || 'waiting'}`,
+                  at: Date.now(),
+                };
+                bumpGuardStat('blockedByReversalGuard');
+                continue;
+              }
               const mark = signal.price || pos.entry;
               const pnlPreview = estimatePositionPnl(pos, mark, CFG.slippageExitBps);
               const pnlUsd = pnlPreview.net;
@@ -887,6 +1058,8 @@ async function runCycle() {
               } else {
                 await closePosition(coin, 'SIGNAL_REVERSAL');
               }
+            } else {
+              delete ST.reversalSignalStreak[coin];
             }
           } else {
             if (CFG.activeMode) {
@@ -896,6 +1069,13 @@ async function runCycle() {
                 const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
                 const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
                 blockReason = `Cooldown active (${minsRemaining}m remaining)`;
+              } else if (!postStopCooled) {
+                const minsRemaining = Math.max(1, Math.ceil((postStopCooldownMs - (Date.now() - lastStopLossAt)) / 60000));
+                blockReason = `Post-stop cooldown active (${minsRemaining}m remaining)`;
+                bumpGuardStat('blockedByPostStopCooldown');
+              } else if (!trendQuality.ok) {
+                blockReason = `Trend quality blocked: ${trendQuality.reason}`;
+                bumpGuardStat('blockedByTrendQuality');
               } else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
               else if (!htf.ok) blockReason = `HTF blocked: ${htf.reason}`;
               else if (!flowGate.ok) blockReason = `Wallet flow: ${flowGate.reason}`;
@@ -906,6 +1086,15 @@ async function runCycle() {
                 const msRemaining = Math.max(0, cooldownMs - (Date.now() - lastEntryAt));
                 const minsRemaining = Math.max(1, Math.ceil(msRemaining / 60000));
                 blockReason = `Cooldown active (${minsRemaining}m remaining)`;
+              }
+              else if (!postStopCooled) {
+                const minsRemaining = Math.max(1, Math.ceil((postStopCooldownMs - (Date.now() - lastStopLossAt)) / 60000));
+                blockReason = `Post-stop cooldown active (${minsRemaining}m remaining)`;
+                bumpGuardStat('blockedByPostStopCooldown');
+              }
+              else if (!trendQuality.ok) {
+                blockReason = `Trend quality blocked: ${trendQuality.reason}`;
+                bumpGuardStat('blockedByTrendQuality');
               }
               else if (!dip.ok) blockReason = `Dip filter: ${dip.reason}`;
               else if (!htf.ok) blockReason = `HTF blocked: ${htf.reason}`;
@@ -998,6 +1187,12 @@ function getRuntimeSettings() {
     atrTrailMult: CFG.atrTrailMult,
     breakEvenTriggerR: CFG.breakEvenTriggerR,
     breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    minNetEdgeUsd: CFG.minNetEdgeUsd,
+    minEdgeToCostRatio: CFG.minEdgeToCostRatio,
+    reversalConfirmCycles: CFG.reversalConfirmCycles,
+    minHoldMinutes: CFG.minHoldMinutes,
+    postStopCooldownMin: CFG.postStopCooldownMin,
+    minTrendQuality: CFG.minTrendQuality,
     loopIntervalSec: CFG.loopIntervalSec,
     htfFilterEnabled: CFG.htfFilterEnabled,
     htfTimeframe: CFG.htfTimeframe,
@@ -1253,6 +1448,12 @@ function buildBacktestConfigFromQuery(q = {}) {
     atrTrailMult: parseNumParam(q.atrTrailMult, CFG.atrTrailMult, 0, 10),
     breakEvenTriggerR: parseNumParam(q.breakEvenTriggerR, CFG.breakEvenTriggerR, 0, 10),
     breakEvenOffsetBps: parseNumParam(q.breakEvenOffsetBps, CFG.breakEvenOffsetBps, 0, 500),
+    minNetEdgeUsd: parseNumParam(q.minNetEdgeUsd, CFG.minNetEdgeUsd, 0, 100),
+    minEdgeToCostRatio: parseNumParam(q.minEdgeToCostRatio, CFG.minEdgeToCostRatio, 0.5, 10),
+    reversalConfirmCycles: Math.round(parseNumParam(q.reversalConfirmCycles, CFG.reversalConfirmCycles, 1, 5)),
+    minHoldMinutes: Math.round(parseNumParam(q.minHoldMinutes, CFG.minHoldMinutes, 0, 240)),
+    postStopCooldownMin: Math.round(parseNumParam(q.postStopCooldownMin, CFG.postStopCooldownMin, 0, 240)),
+    minTrendQuality: parseNumParam(q.minTrendQuality, CFG.minTrendQuality, 0, 5),
     tpMult: parseNumParam(q.tpMult, CFG.tpMult, 0.1, 5),
     slMult: parseNumParam(q.slMult, CFG.slMult, 0.1, 5),
     htfFilterEnabled: parseBoolParam(q.htfFilterEnabled, CFG.htfFilterEnabled),
@@ -1484,7 +1685,21 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
   let dayKey = null;
   let pausedByDailyLoss = false;
   let blockedByDailyLossCount = 0;
-  const blockCounts = { confidence: 0, cooldown: 0, regime: 0, htf: 0, dip: 0, policy: 0, hold: 0 };
+  const blockCounts = {
+    confidence: 0,
+    cooldown: 0,
+    postStopCooldown: 0,
+    trendQuality: 0,
+    edgeGate: 0,
+    reversalGuard: 0,
+    regime: 0,
+    htf: 0,
+    dip: 0,
+    policy: 0,
+    hold: 0,
+  };
+  const lastStopLossAt = {};
+  const reversalSignalStreak = {};
 
   const closeSimPosition = (coin, markPrice, reason, atMs) => {
     const pos = positions[coin];
@@ -1508,6 +1723,10 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       closed: atMs,
     };
     trades.push(trade);
+    if (reason === 'STOP_LOSS') {
+      lastStopLossAt[coin] = atMs;
+    }
+    delete reversalSignalStreak[coin];
     delete positions[coin];
     return trade;
   };
@@ -1547,6 +1766,7 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       const sideHint = signal.label.includes('BUY') ? 'BUY' : signal.label.includes('SELL') ? 'SELL' : 'HOLD';
       const regime = passRegimeFilterForConfig(signal, cfg);
       const dip = passDipFilterForConfig(candles, sideHint, cfg);
+      const trendQuality = passTrendQuality(signal, cfg);
       const htfState = buildHtfStateForConfig(coin, i, bar.time, historyByCoin, cfg);
       const htf = passHtfFilter(signal, htfState, cfg);
       const isStrong = signal.label === 'STRONG_BUY' || signal.label === 'STRONG_SELL';
@@ -1554,6 +1774,8 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       const confidenceOk = signal.confidence >= cfg.minConfidence;
       const cooldownMs = Math.max(0, cfg.entryCooldownMin) * 60 * 1000;
       const cooledDown = tsMs - (lastEntryAt[coin] || 0) >= cooldownMs;
+      const postStopCooldownMs = Math.max(0, cfg.postStopCooldownMin || 0) * 60 * 1000;
+      const postStopCooled = !(lastStopLossAt[coin]) || (tsMs - lastStopLossAt[coin] >= postStopCooldownMs);
       const side = sideHint;
       const sellPolicyBlocked = side === 'SELL' && cfg.longOnlyPaper;
 
@@ -1562,10 +1784,22 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
         const shouldClose = (pos.side === 'BUY' && (signal.label === 'SELL' || signal.label === 'STRONG_SELL'))
           || (pos.side === 'SELL' && (signal.label === 'BUY' || signal.label === 'STRONG_BUY'));
         if (shouldClose) {
+          const reversalSide = signal.label.includes('BUY') ? 'BUY' : 'SELL';
+          const prev = reversalSignalStreak[coin] || { side: null, count: 0 };
+          const nextStreak = prev.side === reversalSide ? prev.count + 1 : 1;
+          reversalSignalStreak[coin] = { side: reversalSide, count: nextStreak };
+          const minHoldMs = Math.max(0, cfg.minHoldMinutes || 0) * 60 * 1000;
+          const holdMs = tsMs - safeNum(pos.opened, tsMs);
+          if (holdMs < minHoldMs || nextStreak < Math.max(1, cfg.reversalConfirmCycles || 1)) {
+            blockCounts.reversalGuard += 1;
+            continue;
+          }
           const preview = estimatePositionPnlWithConfig(pos, markPrice, cfg);
           if (cfg.signalCloseMinProfitUsd <= 0 || preview.net >= cfg.signalCloseMinProfitUsd) {
             closeSimPosition(coin, markPrice, 'SIGNAL_REVERSAL', tsMs);
           }
+        } else {
+          delete reversalSignalStreak[coin];
         }
         continue;
       }
@@ -1576,13 +1810,15 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
       }
 
       const shouldOpen = cfg.activeMode
-        ? (isDirectional && confidenceOk && cooledDown && regime.ok && dip.ok && htf.ok)
-        : (isStrong && cooledDown && regime.ok && dip.ok && htf.ok);
+        ? (isDirectional && confidenceOk && cooledDown && postStopCooled && trendQuality.ok && regime.ok && dip.ok && htf.ok)
+        : (isStrong && cooledDown && postStopCooled && trendQuality.ok && regime.ok && dip.ok && htf.ok);
 
       if (!shouldOpen) {
         if (!isDirectional) blockCounts.hold += 1;
         else if (!confidenceOk) blockCounts.confidence += 1;
         else if (!cooledDown) blockCounts.cooldown += 1;
+        else if (!postStopCooled) blockCounts.postStopCooldown += 1;
+        else if (!trendQuality.ok) blockCounts.trendQuality += 1;
         else if (!dip.ok) blockCounts.dip += 1;
         else if (!htf.ok) blockCounts.htf += 1;
         else if (!regime.ok) blockCounts.regime += 1;
@@ -1605,6 +1841,21 @@ function runSingleBacktest(cfg, historyByCoin, opts = {}) {
         tp = side === 'BUY'
           ? Math.max(tp, entry * (1 + minMovePct))
           : Math.min(tp, entry * (1 - minMovePct));
+      }
+      const edgeGate = evaluateEntryEdgeGate({
+        sizeUsd: size,
+        entryPrice: entry,
+        tpPrice: tp,
+        side,
+        feeBps: cfg.feeBps,
+        entrySlipBps: cfg.slippageEntryBps,
+        exitSlipBps: cfg.slippageExitBps,
+        minNetEdgeUsd: cfg.minNetEdgeUsd,
+        minEdgeToCostRatio: cfg.minEdgeToCostRatio,
+      });
+      if (!edgeGate.ok) {
+        blockCounts.edgeGate += 1;
+        continue;
       }
 
       balance -= size;
@@ -1886,6 +2137,12 @@ app.get('/api/status', auth, async (req, res) => {
     minDipPct:       CFG.minDipPct,
     minTakeProfitUsd: CFG.minTakeProfitUsd,
     signalCloseMinProfitUsd: CFG.signalCloseMinProfitUsd,
+    minNetEdgeUsd: CFG.minNetEdgeUsd,
+    minEdgeToCostRatio: CFG.minEdgeToCostRatio,
+    reversalConfirmCycles: CFG.reversalConfirmCycles,
+    minHoldMinutes: CFG.minHoldMinutes,
+    postStopCooldownMin: CFG.postStopCooldownMin,
+    minTrendQuality: CFG.minTrendQuality,
     paperDisableStopLoss: CFG.paperDisableStopLoss,
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
@@ -1924,6 +2181,7 @@ app.get('/api/status', auth, async (req, res) => {
     dailyLossLimit: CFG.dailyLossLimit,
     lastTradeAt:    ST.lastTradeAt,
     lastBlocked:    ST.lastBlocked,
+    guardCounts:    { ...createGuardStats(), ...(ST.guardStats || {}) },
     lastCycleAt:    ST.lastCycleAt,
     positionCount:  Object.keys(ST.positions).length,
     errorCount:     ST.errors.length,
@@ -1987,6 +2245,7 @@ app.post('/api/wallet-signals', auth, (req, res) => {
 app.get('/api/signals/summary', auth, (req, res) => {
   const now = Date.now();
   const cooldownMs = Math.max(0, CFG.entryCooldownMin) * 60 * 1000;
+  const postStopCooldownMs = Math.max(0, CFG.postStopCooldownMin) * 60 * 1000;
   const positions = ST.positions || {};
   const signals = Object.entries(ST.signals || {}).map(([coin, s]) => {
     const label = s?.label || '—';
@@ -2001,6 +2260,9 @@ app.get('/api/signals/summary', auth, (req, res) => {
     const confidenceOk = confidence !== null ? confidence >= CFG.minConfidence : false;
     const lastEntryAt = ST.lastEntryAt?.[coin] || 0;
     const cooledDown = now - lastEntryAt >= cooldownMs;
+    const lastStopLossAt = ST.lastStopLossAt?.[coin] || 0;
+    const postStopCooled = !lastStopLossAt || now - lastStopLossAt >= postStopCooldownMs;
+    const trendQuality = s?.trendQuality || { ok: true, reason: 'n/a', ratio: null };
     const sellPolicyBlocked = side === 'SELL' && (
       (CFG.paperMode && CFG.longOnlyPaper) ||
       (!CFG.paperMode && CFG.longOnlyLive)
@@ -2026,6 +2288,13 @@ app.get('/api/signals/summary', auth, (req, res) => {
       const mins = Math.max(1, Math.ceil((cooldownMs - (now - lastEntryAt)) / 60000));
       status = 'blocked';
       reason = `cooldown active (${mins}m remaining)`;
+    } else if (!postStopCooled) {
+      const mins = Math.max(1, Math.ceil((postStopCooldownMs - (now - lastStopLossAt)) / 60000));
+      status = 'blocked';
+      reason = `post-stop cooldown (${mins}m remaining)`;
+    } else if (!trendQuality.ok) {
+      status = 'blocked';
+      reason = `trend quality blocked: ${trendQuality.reason}`;
     } else if (CFG.dipBuyEnabled && s?.dip?.ok === false) {
       status = 'blocked';
       reason = `dip filter: ${s.dip.reason}`;
@@ -2055,6 +2324,9 @@ app.get('/api/signals/summary', auth, (req, res) => {
       htfSide: htfState?.side || null,
       htfRsi: Number.isFinite(htfState?.rsi) ? htfState.rsi : null,
       htfTimeframe: htfState?.timeframe || CFG.htfTimeframe,
+      trendQualityOk: !!trendQuality.ok,
+      trendQualityRatio: Number.isFinite(Number(trendQuality?.ratio)) ? Number(trendQuality.ratio) : null,
+      trendQualityReason: trendQuality.reason || 'n/a',
       status,
       reason,
       updatedAt: s?.updatedAt || null,
@@ -2067,12 +2339,14 @@ app.get('/api/signals/summary', auth, (req, res) => {
     acc[s.status] = (acc[s.status] || 0) + 1;
     return acc;
   }, {});
+  const guardCounts = { ...createGuardStats(), ...(ST.guardStats || {}) };
 
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
     `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · TPx=${CFG.tpMult} · SLx=${CFG.slMult} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
   );
+  lines.push(`V3 guards: edge=${guardCounts.blockedByEdgeGate || 0}, postStop=${guardCounts.blockedByPostStopCooldown || 0}, reversal=${guardCounts.blockedByReversalGuard || 0}, trendQuality=${guardCounts.blockedByTrendQuality || 0}`);
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
   for (const s of signals) {
     const conf = s.confidence != null ? `${s.confidence}%` : '—';
@@ -2126,8 +2400,15 @@ app.get('/api/signals/summary', auth, (req, res) => {
       htfTimeframe: CFG.htfTimeframe,
       htfRequireEmaAlignment: CFG.htfRequireEmaAlignment,
       htfMinRsi: CFG.htfMinRsi,
+      minNetEdgeUsd: CFG.minNetEdgeUsd,
+      minEdgeToCostRatio: CFG.minEdgeToCostRatio,
+      reversalConfirmCycles: CFG.reversalConfirmCycles,
+      minHoldMinutes: CFG.minHoldMinutes,
+      postStopCooldownMin: CFG.postStopCooldownMin,
+      minTrendQuality: CFG.minTrendQuality,
     },
     counts,
+    guardCounts,
     signals,
     text: lines.join('\n'),
   });
@@ -2356,6 +2637,12 @@ app.post('/api/reset-paper', auth, (_, res) => {
   ST.startBalance = CFG.paperBalance;
   ST.trades = [];
   ST.positions = {};
+  ST.lastEntryAt = {};
+  ST.lastStopLossAt = {};
+  ST.reversalSignalStreak = {};
+  ST.guardStats = createGuardStats();
+  ST.lastBlocked = null;
+  ST.lastTradeAt = null;
   ST.dailyLoss = 0;
   saveState();
   console.log('📄 Paper balance reset to $' + CFG.paperBalance);
@@ -2378,7 +2665,7 @@ app.post('/api/config', auth, (req, res) => {
     tradeSize, tradeSizePct, tradeSizeMinUsd, tradeSizeMaxUsd, maxPositions, dailyLossLimit, watchedCoins, timeframe,
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
     tradingEnabledOnStartup,
-    feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, tpMult, slMult, loopIntervalSec,
+    feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, minNetEdgeUsd, minEdgeToCostRatio, reversalConfirmCycles, minHoldMinutes, postStopCooldownMin, minTrendQuality, tpMult, slMult, loopIntervalSec,
     htfFilterEnabled, htfTimeframe, htfRequireEmaAlignment, htfMinRsi,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
@@ -2415,6 +2702,12 @@ app.post('/api/config', auth, (req, res) => {
   if (atrTrailMult !== undefined) CFG.atrTrailMult = clamp(+atrTrailMult, 0, 10, CFG.atrTrailMult);
   if (breakEvenTriggerR !== undefined) CFG.breakEvenTriggerR = clamp(+breakEvenTriggerR, 0, 10, CFG.breakEvenTriggerR);
   if (breakEvenOffsetBps !== undefined) CFG.breakEvenOffsetBps = clamp(+breakEvenOffsetBps, 0, 500, CFG.breakEvenOffsetBps);
+  if (minNetEdgeUsd !== undefined) CFG.minNetEdgeUsd = clamp(+minNetEdgeUsd, 0, 100, CFG.minNetEdgeUsd);
+  if (minEdgeToCostRatio !== undefined) CFG.minEdgeToCostRatio = clamp(+minEdgeToCostRatio, 0.5, 10, CFG.minEdgeToCostRatio);
+  if (reversalConfirmCycles !== undefined) CFG.reversalConfirmCycles = Math.round(clamp(+reversalConfirmCycles, 1, 5, CFG.reversalConfirmCycles));
+  if (minHoldMinutes !== undefined) CFG.minHoldMinutes = Math.round(clamp(+minHoldMinutes, 0, 240, CFG.minHoldMinutes));
+  if (postStopCooldownMin !== undefined) CFG.postStopCooldownMin = Math.round(clamp(+postStopCooldownMin, 0, 240, CFG.postStopCooldownMin));
+  if (minTrendQuality !== undefined) CFG.minTrendQuality = clamp(+minTrendQuality, 0, 5, CFG.minTrendQuality);
   if (tpMult !== undefined) CFG.tpMult = clamp(+tpMult, 0.1, 5, CFG.tpMult);
   if (slMult !== undefined) CFG.slMult = clamp(+slMult, 0.1, 5, CFG.slMult);
   if (loopIntervalSec !== undefined) CFG.loopIntervalSec = Math.round(clamp(+loopIntervalSec, 5, 300, CFG.loopIntervalSec));
@@ -2458,6 +2751,12 @@ app.post('/api/config', auth, (req, res) => {
     atrTrailMult: CFG.atrTrailMult,
     breakEvenTriggerR: CFG.breakEvenTriggerR,
     breakEvenOffsetBps: CFG.breakEvenOffsetBps,
+    minNetEdgeUsd: CFG.minNetEdgeUsd,
+    minEdgeToCostRatio: CFG.minEdgeToCostRatio,
+    reversalConfirmCycles: CFG.reversalConfirmCycles,
+    minHoldMinutes: CFG.minHoldMinutes,
+    postStopCooldownMin: CFG.postStopCooldownMin,
+    minTrendQuality: CFG.minTrendQuality,
     tpMult: CFG.tpMult,
     slMult: CFG.slMult,
     loopIntervalSec: CFG.loopIntervalSec,
@@ -2490,6 +2789,7 @@ app.listen(PORT, () => {
   console.log(`💵  TP floor: $${CFG.minTakeProfitUsd} | Signal close min profit: $${CFG.signalCloseMinProfitUsd} | Paper stop-loss: ${CFG.paperDisableStopLoss ? 'OFF' : 'ON'}`);
   console.log(`💸  Fees/Slippage: fee ${CFG.feeBps}bps | entry slip ${CFG.slippageEntryBps}bps | exit slip ${CFG.slippageExitBps}bps`);
   console.log(`🧷  Exit controls: TPx ${CFG.tpMult} | SLx ${CFG.slMult} | ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
+  console.log(`🧪  V3 guards: edge >= $${CFG.minNetEdgeUsd} & TP/cost >= ${CFG.minEdgeToCostRatio} | reversal ${CFG.reversalConfirmCycles} cycles + ${CFG.minHoldMinutes}m hold | post-stop cooldown ${CFG.postStopCooldownMin}m | trend quality >= ${CFG.minTrendQuality}`);
   console.log(`⚡  Loop interval: ${CFG.loopIntervalSec}s`);
   console.log(`🛰   HTF filter: ${CFG.htfFilterEnabled ? 'ON' : 'OFF'} | TF ${CFG.htfTimeframe} | EMA align required: ${CFG.htfRequireEmaAlignment ? 'YES' : 'NO'} | min RSI(BUY): ${CFG.htfMinRsi}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
