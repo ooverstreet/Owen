@@ -1265,6 +1265,19 @@ function updateBotDash(status) {
   updateBotBar(status);
 }
 
+function fmtTradeTs(ts) {
+  if (!ts) return '—';
+  const dt = new Date(ts);
+  if (Number.isNaN(dt.getTime())) return '—';
+  return dt.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 function renderPositions(positions) {
   const list  = document.getElementById('bd-positions-list');
   const coins = Object.keys(positions || {});
@@ -1285,6 +1298,7 @@ function renderPositions(positions) {
         <span>TP <b>${fmtPx(p.tp)}</b></span>
         <span>SL <b>${fmtPx(p.sl)}</b></span>
         <span>Size <b>$${p.size}</b></span>
+        <span>Opened <b>${fmtTradeTs(p.opened)}</b></span>
       </div>
       <div style="margin-top:6px"><button class="bd-btn red" style="height:30px;font-size:11px;width:auto;padding:0 14px" onclick="manualClose('${coin}')">Close Position</button></div>
     </div>`;
@@ -1297,12 +1311,13 @@ function renderTrades(trades) {
   const fmtPx = v => v >= 1000 ? '$' + v.toLocaleString('en-US',{maximumFractionDigits:0}) : '$' + v.toFixed(4);
   list.innerHTML = trades.slice(0,15).map(t => {
     const pnlCls = t.pnl >= 0 ? 'pos' : 'neg';
-    const dt = new Date(t.closed || t.opened);
-    const tm = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) + ' ' + dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const openedAt = fmtTradeTs(t.opened);
+    const closedAt = t.closed ? fmtTradeTs(t.closed) : 'Open';
     return `<div class="tr-row">
       <div class="tr-left">
         <span class="tr-coin">${t.coin} · ${t.side}</span>
-        <span class="tr-detail">${fmtPx(t.entry)} → ${fmtPx(t.exit || t.entry)} · ${t.reason || ''} · ${tm}</span>
+        <span class="tr-detail">${fmtPx(t.entry)} → ${fmtPx(t.exit || t.entry)} · ${t.reason || '—'}</span>
+        <span class="tr-detail">Opened: ${openedAt} · Closed: ${closedAt}</span>
       </div>
       <span class="tr-pnl ${pnlCls}">${t.pnl >= 0 ? '+' : ''}$${t.pnl?.toFixed(2) || '—'}</span>
     </div>`;
