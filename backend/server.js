@@ -81,6 +81,8 @@ const CFG = {
   minHoldMinutes: envInt('MIN_HOLD_MINUTES', 8),
   postStopCooldownMin: envInt('POST_STOP_COOLDOWN_MIN', 20),
   minTrendQuality: envNum('MIN_TREND_QUALITY', 0.22),
+  candlePatternEnabled: process.env.CANDLE_PATTERN_ENABLED !== 'false',
+  candlePatternWeight: envNum('CANDLE_PATTERN_WEIGHT', 0.8),
   loopIntervalSec: envInt('LOOP_INTERVAL_SEC', 60),
   regimeFilter:   process.env.REGIME_FILTER   !== 'false',
   minEmaGapPct:   envNum('MIN_EMA_GAP_PCT', 0.12),
@@ -109,6 +111,7 @@ CFG.reversalConfirmCycles = Math.round(clamp(CFG.reversalConfirmCycles, 1, 5, 2)
 CFG.minHoldMinutes = Math.round(clamp(CFG.minHoldMinutes, 0, 240, 8));
 CFG.postStopCooldownMin = Math.round(clamp(CFG.postStopCooldownMin, 0, 240, 20));
 CFG.minTrendQuality = clamp(CFG.minTrendQuality, 0, 5, 0.22);
+CFG.candlePatternWeight = clamp(CFG.candlePatternWeight, 0, 3, 0.8);
 CFG.loopIntervalSec = Math.round(clamp(CFG.loopIntervalSec, 5, 300, 60));
 CFG.htfMinRsi = clamp(CFG.htfMinRsi, 0, 100, 50);
 CFG.tpMult = clamp(CFG.tpMult, 0.1, 5, 1);
@@ -389,6 +392,96 @@ function calcATRPercent(candles, p = 14) {
   return cur > 0 ? (atr / cur) * 100 : null;
 }
 
+function evaluateCandlestickPatterns(candles) {
+  if (!Array.isArray(candles) || candles.length < 3) {
+    return {
+      score: 0,
+      normalized: 0,
+      bias: 'NEUTRAL',
+      strongest: 'NONE',
+      bullish: [],
+      bearish: [],
+    };
+  }
+
+  const c0 = candles[candles.length - 1];
+  const c1 = candles[candles.length - 2];
+  const c2 = candles[candles.length - 3];
+  const bullish = [];
+  const bearish = [];
+  let score = 0;
+
+  const addBull = (name, pts) => {
+    score += pts;
+    bullish.push(name);
+  };
+  const addBear = (name, pts) => {
+    score -= pts;
+    bearish.push(name);
+  };
+
+  const body = c => Math.abs(c.close - c.open);
+  const range = c => Math.max(1e-9, c.high - c.low);
+  const upperWick = c => c.high - Math.max(c.open, c.close);
+  const lowerWick = c => Math.min(c.open, c.close) - c.low;
+  const bodyRatio = c => body(c) / range(c);
+  const isBull = c => c.close > c.open;
+  const isBear = c => c.close < c.open;
+
+  // Two-candle engulfing reversals.
+  if (isBear(c1) && isBull(c0) && c0.open <= c1.close && c0.close >= c1.open) {
+    addBull('BULL_ENGULFING', 0.75);
+  }
+  if (isBull(c1) && isBear(c0) && c0.open >= c1.close && c0.close <= c1.open) {
+    addBear('BEAR_ENGULFING', 0.75);
+  }
+
+  // Single-candle rejection bars.
+  const c0Body = body(c0);
+  const c0Upper = upperWick(c0);
+  const c0Lower = lowerWick(c0);
+  const c0Range = range(c0);
+  if (c0Body > 0 && c0Lower >= c0Body * 2.2 && c0Upper <= c0Body * 0.9 && ((c0.close - c0.low) / c0Range) >= 0.55) {
+    addBull('HAMMER', 0.55);
+  }
+  if (c0Body > 0 && c0Upper >= c0Body * 2.2 && c0Lower <= c0Body * 0.9 && ((c0.close - c0.low) / c0Range) <= 0.45) {
+    addBear('SHOOTING_STAR', 0.55);
+  }
+
+  // Three-candle reversal clusters.
+  if (isBear(c2) && bodyRatio(c2) >= 0.45 && bodyRatio(c1) <= 0.35 && isBull(c0) && c0.close >= (c2.open + c2.close) / 2) {
+    addBull('MORNING_STAR', 0.7);
+  }
+  if (isBull(c2) && bodyRatio(c2) >= 0.45 && bodyRatio(c1) <= 0.35 && isBear(c0) && c0.close <= (c2.open + c2.close) / 2) {
+    addBear('EVENING_STAR', 0.7);
+  }
+
+  if (isBull(c2) && isBull(c1) && isBull(c0) && c2.close < c1.close && c1.close < c0.close) {
+    addBull('THREE_WHITE_SOLDIERS', 0.7);
+  }
+  if (isBear(c2) && isBear(c1) && isBear(c0) && c2.close > c1.close && c1.close > c0.close) {
+    addBear('THREE_BLACK_CROWS', 0.7);
+  }
+
+  const bounded = clamp(score, -2.5, 2.5, 0);
+  const normalized = bounded / 2.5;
+  const strongest = bounded > 0
+    ? (bullish[0] || 'BULLISH_PATTERN')
+    : bounded < 0
+      ? (bearish[0] || 'BEARISH_PATTERN')
+      : 'NONE';
+  const bias = bounded > 0 ? 'BULLISH' : bounded < 0 ? 'BEARISH' : 'NEUTRAL';
+
+  return {
+    score: +bounded.toFixed(4),
+    normalized: +normalized.toFixed(4),
+    bias,
+    strongest,
+    bullish,
+    bearish,
+  };
+}
+
 function passRegimeFilter(signal) {
   if (!CFG.regimeFilter) return { ok: true, reason: 'disabled' };
   const ind = signal.indicators || {};
@@ -663,6 +756,7 @@ function generateSignal(candles) {
   const rsi = calcRSI(closes), macd = calcMACD(closes), bbPos = calcBBPos(closes);
   const vwap = calcVWAP(candles);
   const atrPct = calcATRPercent(candles);
+  const candlePattern = evaluateCandlestickPatterns(candles);
   const e9 = calcEMA(closes, 9), e21 = calcEMA(closes, 21);
   const ema9 = e9[e9.length - 1], ema21 = e21[e21.length - 1];
   const ema9p = e9[e9.length - 2] || ema9, ema21p = e21[e21.length - 2] || ema21;
@@ -686,8 +780,12 @@ function generateSignal(candles) {
   if (emaCross === 'golden') score += 1.5; else if (emaCross === 'death') score -= 1.5;
   else score += ema9 > ema21 ? 0.5 : -0.5;
   if (vwap && cur) score += cur > vwap ? 0.6 : -0.6;
+  if (CFG.candlePatternEnabled && candlePattern.normalized !== 0) {
+    score += candlePattern.normalized * CFG.candlePatternWeight;
+  }
 
-  const norm = Math.max(-1, Math.min(1, score / 9));
+  const scoreScale = 9 + (CFG.candlePatternEnabled ? Math.abs(CFG.candlePatternWeight) : 0);
+  const norm = Math.max(-1, Math.min(1, score / scoreScale));
   const risk = getRiskForTimeframe(CFG.timeframe, CFG.tpMult, CFG.slMult);
   const buyT = Math.max(0.01, Math.min(0.95, Math.abs(CFG.buyScoreThreshold)));
   const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(CFG.strongScoreThreshold)));
@@ -710,6 +808,11 @@ function generateSignal(candles) {
       emaGapPct: +emaGapPct.toFixed(4),
       atrPct: atrPct !== null ? +atrPct.toFixed(4) : null,
       vwap: vwap ? +vwap.toFixed(4) : null,
+      candlePatternBias: candlePattern.bias,
+      candlePatternScore: CFG.candlePatternEnabled ? +candlePattern.normalized.toFixed(4) : 0,
+      candlePatternStrongest: candlePattern.strongest,
+      candlePatternBullish: candlePattern.bullish,
+      candlePatternBearish: candlePattern.bearish,
     },
   };
 }
@@ -1193,6 +1296,8 @@ function getRuntimeSettings() {
     minHoldMinutes: CFG.minHoldMinutes,
     postStopCooldownMin: CFG.postStopCooldownMin,
     minTrendQuality: CFG.minTrendQuality,
+    candlePatternEnabled: CFG.candlePatternEnabled,
+    candlePatternWeight: CFG.candlePatternWeight,
     loopIntervalSec: CFG.loopIntervalSec,
     htfFilterEnabled: CFG.htfFilterEnabled,
     htfTimeframe: CFG.htfTimeframe,
@@ -1454,6 +1559,8 @@ function buildBacktestConfigFromQuery(q = {}) {
     minHoldMinutes: Math.round(parseNumParam(q.minHoldMinutes, CFG.minHoldMinutes, 0, 240)),
     postStopCooldownMin: Math.round(parseNumParam(q.postStopCooldownMin, CFG.postStopCooldownMin, 0, 240)),
     minTrendQuality: parseNumParam(q.minTrendQuality, CFG.minTrendQuality, 0, 5),
+    candlePatternEnabled: parseBoolParam(q.candlePatternEnabled, CFG.candlePatternEnabled),
+    candlePatternWeight: parseNumParam(q.candlePatternWeight, CFG.candlePatternWeight, 0, 3),
     tpMult: parseNumParam(q.tpMult, CFG.tpMult, 0.1, 5),
     slMult: parseNumParam(q.slMult, CFG.slMult, 0.1, 5),
     htfFilterEnabled: parseBoolParam(q.htfFilterEnabled, CFG.htfFilterEnabled),
@@ -1510,9 +1617,12 @@ function passDipFilterForConfig(candles, side, cfg) {
 function generateSignalForConfig(candles, cfg) {
   if (candles.length < 35) return null;
   const closes = candles.map(c => c.close), cur = closes[closes.length - 1];
+  const candlePatternEnabled = cfg.candlePatternEnabled !== undefined ? !!cfg.candlePatternEnabled : CFG.candlePatternEnabled;
+  const candlePatternWeight = clamp(safeNum(cfg.candlePatternWeight, CFG.candlePatternWeight), 0, 3, CFG.candlePatternWeight);
   const rsi = calcRSI(closes), macd = calcMACD(closes), bbPos = calcBBPos(closes);
   const vwap = calcVWAP(candles);
   const atrPct = calcATRPercent(candles);
+  const candlePattern = evaluateCandlestickPatterns(candles);
   const e9 = calcEMA(closes, 9), e21 = calcEMA(closes, 21);
   const ema9 = e9[e9.length - 1], ema21 = e21[e21.length - 1];
   const ema9p = e9[e9.length - 2] || ema9, ema21p = e21[e21.length - 2] || ema21;
@@ -1536,8 +1646,12 @@ function generateSignalForConfig(candles, cfg) {
   if (emaCross === 'golden') score += 1.5; else if (emaCross === 'death') score -= 1.5;
   else score += ema9 > ema21 ? 0.5 : -0.5;
   if (vwap && cur) score += cur > vwap ? 0.6 : -0.6;
+  if (candlePatternEnabled && candlePattern.normalized !== 0) {
+    score += candlePattern.normalized * candlePatternWeight;
+  }
 
-  const norm = Math.max(-1, Math.min(1, score / 9));
+  const scoreScale = 9 + (candlePatternEnabled ? Math.abs(candlePatternWeight) : 0);
+  const norm = Math.max(-1, Math.min(1, score / scoreScale));
   const risk = getRiskForTimeframe(cfg.timeframe, cfg.tpMult, cfg.slMult);
   const buyT = Math.max(0.01, Math.min(0.95, Math.abs(cfg.buyScoreThreshold)));
   const strongT = Math.max(buyT + 0.01, Math.min(0.99, Math.abs(cfg.strongScoreThreshold)));
@@ -1560,6 +1674,11 @@ function generateSignalForConfig(candles, cfg) {
       emaGapPct: +emaGapPct.toFixed(4),
       atrPct: atrPct !== null ? +atrPct.toFixed(4) : null,
       vwap: vwap ? +vwap.toFixed(4) : null,
+      candlePatternBias: candlePattern.bias,
+      candlePatternScore: candlePatternEnabled ? +candlePattern.normalized.toFixed(4) : 0,
+      candlePatternStrongest: candlePattern.strongest,
+      candlePatternBullish: candlePattern.bullish,
+      candlePatternBearish: candlePattern.bearish,
     },
   };
 }
@@ -2143,6 +2262,8 @@ app.get('/api/status', auth, async (req, res) => {
     minHoldMinutes: CFG.minHoldMinutes,
     postStopCooldownMin: CFG.postStopCooldownMin,
     minTrendQuality: CFG.minTrendQuality,
+    candlePatternEnabled: CFG.candlePatternEnabled,
+    candlePatternWeight: CFG.candlePatternWeight,
     paperDisableStopLoss: CFG.paperDisableStopLoss,
     regimeFilter:   CFG.regimeFilter,
     minEmaGapPct:   CFG.minEmaGapPct,
@@ -2263,6 +2384,12 @@ app.get('/api/signals/summary', auth, (req, res) => {
     const lastStopLossAt = ST.lastStopLossAt?.[coin] || 0;
     const postStopCooled = !lastStopLossAt || now - lastStopLossAt >= postStopCooldownMs;
     const trendQuality = s?.trendQuality || { ok: true, reason: 'n/a', ratio: null };
+    const ind = s?.indicators || {};
+    const candlePatternBias = ind?.candlePatternBias || 'NEUTRAL';
+    const candlePatternScore = Number.isFinite(Number(ind?.candlePatternScore)) ? Number(ind.candlePatternScore) : 0;
+    const candlePatternStrongest = ind?.candlePatternStrongest || 'NONE';
+    const candlePatternBullish = Array.isArray(ind?.candlePatternBullish) ? ind.candlePatternBullish : [];
+    const candlePatternBearish = Array.isArray(ind?.candlePatternBearish) ? ind.candlePatternBearish : [];
     const sellPolicyBlocked = side === 'SELL' && (
       (CFG.paperMode && CFG.longOnlyPaper) ||
       (!CFG.paperMode && CFG.longOnlyLive)
@@ -2327,6 +2454,11 @@ app.get('/api/signals/summary', auth, (req, res) => {
       trendQualityOk: !!trendQuality.ok,
       trendQualityRatio: Number.isFinite(Number(trendQuality?.ratio)) ? Number(trendQuality.ratio) : null,
       trendQualityReason: trendQuality.reason || 'n/a',
+      candlePatternBias,
+      candlePatternScore,
+      candlePatternStrongest,
+      candlePatternBullish,
+      candlePatternBearish,
       status,
       reason,
       updatedAt: s?.updatedAt || null,
@@ -2344,7 +2476,7 @@ app.get('/api/signals/summary', auth, (req, res) => {
   const lines = [];
   lines.push(`Signals summary @ ${new Date(now).toISOString()}`);
   lines.push(
-    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · TPx=${CFG.tpMult} · SLx=${CFG.slMult} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
+    `Mode=${CFG.activeMode ? 'active' : 'classic'} · MinConf=${CFG.minConfidence}% · Cooldown=${CFG.entryCooldownMin}m · BuyT=${CFG.buyScoreThreshold} · StrongT=${CFG.strongScoreThreshold} · Dip=${CFG.dipBuyEnabled ? 'on' : 'off'}(${CFG.minDipPct}%/${CFG.dipLookbackCandles}c) · TPMin=$${CFG.minTakeProfitUsd} · TPx=${CFG.tpMult} · SLx=${CFG.slMult} · SigCloseMin=$${CFG.signalCloseMinProfitUsd} · PaperSL=${CFG.paperDisableStopLoss ? 'off' : 'on'} · Size=${CFG.tradeSizePct > 0 ? CFG.tradeSizePct + '% [' + CFG.tradeSizeMinUsd + '-' + CFG.tradeSizeMaxUsd + ']' : '$' + CFG.tradeSize} · Fee=${CFG.feeBps}bps · Slip=${CFG.slippageEntryBps}/${CFG.slippageExitBps}bps · Trail=${CFG.atrTrailEnabled ? `on(${CFG.atrTrailMult}xATR)` : 'off'} · BE=${CFG.breakEvenTriggerR}R/${CFG.breakEvenOffsetBps}bps · Candle=${CFG.candlePatternEnabled ? `on(w=${CFG.candlePatternWeight})` : 'off'} · Loop=${CFG.loopIntervalSec}s · Wallet=${CFG.walletSignalEnabled ? 'on' : 'off'}(thr ${CFG.walletSignalThreshold}) · Regime=${CFG.regimeFilter ? 'on' : 'off'} · Align=${CFG.regimeRequireEmaAlignment ? 'on' : 'off'} · HTF=${CFG.htfFilterEnabled ? `on(${CFG.htfTimeframe},align=${CFG.htfRequireEmaAlignment ? 'on' : 'off'},minRSI=${CFG.htfMinRsi})` : 'off'}`
   );
   lines.push(`V3 guards: edge=${guardCounts.blockedByEdgeGate || 0}, postStop=${guardCounts.blockedByPostStopCooldown || 0}, reversal=${guardCounts.blockedByReversalGuard || 0}, trendQuality=${guardCounts.blockedByTrendQuality || 0}`);
   lines.push(`Counts: entry_ready=${counts.entry_ready || 0}, blocked=${counts.blocked || 0}, in_position=${counts.in_position || 0}, watching=${counts.watching || 0}`);
@@ -2406,6 +2538,8 @@ app.get('/api/signals/summary', auth, (req, res) => {
       minHoldMinutes: CFG.minHoldMinutes,
       postStopCooldownMin: CFG.postStopCooldownMin,
       minTrendQuality: CFG.minTrendQuality,
+      candlePatternEnabled: CFG.candlePatternEnabled,
+      candlePatternWeight: CFG.candlePatternWeight,
     },
     counts,
     guardCounts,
@@ -2666,6 +2800,7 @@ app.post('/api/config', auth, (req, res) => {
     activeMode, minConfidence, entryCooldownMin, buyScoreThreshold, strongScoreThreshold, dipBuyEnabled, dipLookbackCandles, minDipPct, minTakeProfitUsd, signalCloseMinProfitUsd, paperDisableStopLoss, regimeFilter, minEmaGapPct, minAtrPct, regimeRequireEmaAlignment, longOnlyPaper, longOnlyLive,
     tradingEnabledOnStartup,
     feeBps, slippageEntryBps, slippageExitBps, atrTrailEnabled, atrTrailMult, breakEvenTriggerR, breakEvenOffsetBps, minNetEdgeUsd, minEdgeToCostRatio, reversalConfirmCycles, minHoldMinutes, postStopCooldownMin, minTrendQuality, tpMult, slMult, loopIntervalSec,
+    candlePatternEnabled, candlePatternWeight,
     htfFilterEnabled, htfTimeframe, htfRequireEmaAlignment, htfMinRsi,
   } = req.body;
   if (tradeSize      !== undefined) CFG.tradeSize      = +tradeSize;
@@ -2708,6 +2843,8 @@ app.post('/api/config', auth, (req, res) => {
   if (minHoldMinutes !== undefined) CFG.minHoldMinutes = Math.round(clamp(+minHoldMinutes, 0, 240, CFG.minHoldMinutes));
   if (postStopCooldownMin !== undefined) CFG.postStopCooldownMin = Math.round(clamp(+postStopCooldownMin, 0, 240, CFG.postStopCooldownMin));
   if (minTrendQuality !== undefined) CFG.minTrendQuality = clamp(+minTrendQuality, 0, 5, CFG.minTrendQuality);
+  if (candlePatternEnabled !== undefined) CFG.candlePatternEnabled = !!candlePatternEnabled;
+  if (candlePatternWeight !== undefined) CFG.candlePatternWeight = clamp(+candlePatternWeight, 0, 3, CFG.candlePatternWeight);
   if (tpMult !== undefined) CFG.tpMult = clamp(+tpMult, 0.1, 5, CFG.tpMult);
   if (slMult !== undefined) CFG.slMult = clamp(+slMult, 0.1, 5, CFG.slMult);
   if (loopIntervalSec !== undefined) CFG.loopIntervalSec = Math.round(clamp(+loopIntervalSec, 5, 300, CFG.loopIntervalSec));
@@ -2757,6 +2894,8 @@ app.post('/api/config', auth, (req, res) => {
     minHoldMinutes: CFG.minHoldMinutes,
     postStopCooldownMin: CFG.postStopCooldownMin,
     minTrendQuality: CFG.minTrendQuality,
+    candlePatternEnabled: CFG.candlePatternEnabled,
+    candlePatternWeight: CFG.candlePatternWeight,
     tpMult: CFG.tpMult,
     slMult: CFG.slMult,
     loopIntervalSec: CFG.loopIntervalSec,
@@ -2790,6 +2929,7 @@ app.listen(PORT, () => {
   console.log(`💸  Fees/Slippage: fee ${CFG.feeBps}bps | entry slip ${CFG.slippageEntryBps}bps | exit slip ${CFG.slippageExitBps}bps`);
   console.log(`🧷  Exit controls: TPx ${CFG.tpMult} | SLx ${CFG.slMult} | ATR trail ${CFG.atrTrailEnabled ? 'ON' : 'OFF'} x${CFG.atrTrailMult} | break-even ${CFG.breakEvenTriggerR}R @ ${CFG.breakEvenOffsetBps}bps`);
   console.log(`🧪  V3 guards: edge >= $${CFG.minNetEdgeUsd} & TP/cost >= ${CFG.minEdgeToCostRatio} | reversal ${CFG.reversalConfirmCycles} cycles + ${CFG.minHoldMinutes}m hold | post-stop cooldown ${CFG.postStopCooldownMin}m | trend quality >= ${CFG.minTrendQuality}`);
+  console.log(`🕯   Candle patterns: ${CFG.candlePatternEnabled ? 'ON' : 'OFF'} | weight ${CFG.candlePatternWeight}`);
   console.log(`⚡  Loop interval: ${CFG.loopIntervalSec}s`);
   console.log(`🛰   HTF filter: ${CFG.htfFilterEnabled ? 'ON' : 'OFF'} | TF ${CFG.htfTimeframe} | EMA align required: ${CFG.htfRequireEmaAlignment ? 'YES' : 'NO'} | min RSI(BUY): ${CFG.htfMinRsi}`);
   console.log(`🧭  Regime filter: ${CFG.regimeFilter ? 'ON' : 'OFF'} | EMA gap >= ${CFG.minEmaGapPct}% | ATR >= ${CFG.minAtrPct}% | EMA align required: ${CFG.regimeRequireEmaAlignment ? 'YES' : 'NO'}`);
