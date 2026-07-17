@@ -7,6 +7,8 @@
 window.HARBOR_CONFIG = {
   supabaseUrl: 'https://pequbpumggymlslakuwz.supabase.co',
   supabaseAnonKey: 'sb_publishable_nRk3hNTGty6LVbUqcEhwnw_V2bT7F9t',
+  // Used for auth email confirmation / password-reset redirects
+  siteUrl: 'https://ooverstreet.github.io/Owen/harbor/',
   angelFunction: 'harbor-angel',
   groqApiKey: '',
 };
