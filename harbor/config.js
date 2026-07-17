@@ -3,7 +3,7 @@
 //
 // AI Angel:
 // - Preferred: deploy harbor/supabase/functions/harbor-angel + set GROQ_API_KEY as a Supabase secret
-// - Or: paste a Groq key in Harbor → Identity (stored only on that device)
+// - Or: signed-in admins can paste a Groq key under Account → Admin (device only)
 window.HARBOR_CONFIG = {
   supabaseUrl: 'https://pequbpumggymlslakuwz.supabase.co',
   supabaseAnonKey: 'sb_publishable_nRk3hNTGty6LVbUqcEhwnw_V2bT7F9t',
