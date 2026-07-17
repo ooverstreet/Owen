@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v11';
+const CACHE = 'harbor-v12';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
@@ -6,6 +6,7 @@ const URLS  = [
   '/Owen/harbor/icon.svg',
   '/Owen/harbor/config.js',
   '/Owen/harbor/db.js',
+  '/Owen/harbor/angel.js',
 ];
 
 self.addEventListener('install', e => {
@@ -27,9 +28,9 @@ self.addEventListener('fetch', e => {
     || url.pathname.endsWith('/harbor/')
     || url.pathname.endsWith('/harbor/index.html')
     || url.pathname.endsWith('/harbor/config.js')
-    || url.pathname.endsWith('/harbor/db.js');
+    || url.pathname.endsWith('/harbor/db.js')
+    || url.pathname.endsWith('/harbor/angel.js');
 
-  // Always prefer network for app shell so phones don't stick on old Harbor builds
   if (isAppShell) {
     e.respondWith(
       fetch(e.request).then(res => {

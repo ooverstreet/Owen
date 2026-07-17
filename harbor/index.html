@@ -17,6 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
 <script src="./db.js"></script>
+<script src="./angel.js"></script>
 <style>
 :root {
   --mist: #E8F1F4;
@@ -1063,12 +1064,19 @@ function detectTheme(text) {
 }
 
 function craftAngel(text) {
+  if (window.HarborAngel && HarborAngel.craftLocal) return HarborAngel.craftLocal(text);
   const theme = detectTheme(text);
   return {
     theme,
     line: pick(ANGEL_POOL[theme], text.slice(0, 80) + theme),
     note: pick(ANGEL_NOTES, text.length + theme),
+    source: 'local',
   };
+}
+
+async function askAngel(text) {
+  if (window.HarborAngel && HarborAngel.respond) return HarborAngel.respond(text);
+  return craftAngel(text);
 }
 
 function formatWhen(ts) {
@@ -1234,7 +1242,9 @@ async function openThread(id) {
   card.className = `post-card full${post.featured || post.id === FEATURED_POST.id ? ' featured' : ''}`;
   card.innerHTML = postCardHtml(post, true);
   $('#angel-text').textContent = post.angelLine || craftAngel(post.text).line;
-  $('#angel-note').textContent = post.angelNote || ANGEL_NOTES[0];
+  const note = post.angelNote || ANGEL_NOTES[0];
+  const sourceHint = post.angelSource === 'ai' ? ' · Angel AI' : '';
+  $('#angel-note').textContent = note + sourceHint;
   renderReplies(post);
   const feltMap = loadJSON(STORAGE_FELT, {});
   const feltBtn = $('#felt-btn');
@@ -1329,8 +1339,8 @@ function currentAuthor() {
 }
 
 async function persistPost({ text, tags, privatePost }) {
-  const angel = craftAngel(text);
   const author = currentAuthor();
+  const angel = await askAngel(text);
   const post = {
     id: uid(),
     featured: false,
@@ -1339,10 +1349,11 @@ async function persistPost({ text, tags, privatePost }) {
     tags,
     createdAt: Date.now(),
     angelLine: angel.line,
-    angelNote: angel.note,
+    angelNote: angel.note || ANGEL_NOTES[0],
     feltCount: 0,
     private: !!privatePost,
     replies: [],
+    angelSource: angel.source || 'local',
   };
 
   if (!privatePost && window.HarborDB && HarborDB.isReady()) {
@@ -1375,13 +1386,29 @@ async function release(privatePost) {
     $('#username-input').focus();
     return;
   }
-  const tags = Array.from(selectedTags);
-  const post = await persistPost({ text, tags, privatePost });
-  $('#entry').value = '';
-  selectedTags = new Set();
-  renderTagPicker();
-  updateToneAndCrisis();
-  await openThread(post.id);
+
+  const releaseBtn = $('#release-btn');
+  const saveBtn = $('#save-private');
+  const prevRelease = releaseBtn.textContent;
+  const prevSave = saveBtn.textContent;
+  releaseBtn.disabled = true;
+  saveBtn.disabled = true;
+  releaseBtn.textContent = privatePost ? 'Saving…' : 'Angel is listening…';
+
+  try {
+    const tags = Array.from(selectedTags);
+    const post = await persistPost({ text, tags, privatePost });
+    $('#entry').value = '';
+    selectedTags = new Set();
+    renderTagPicker();
+    updateToneAndCrisis();
+    await openThread(post.id);
+  } finally {
+    releaseBtn.disabled = false;
+    saveBtn.disabled = false;
+    releaseBtn.textContent = prevRelease;
+    saveBtn.textContent = prevSave;
+  }
 }
 
 async function addReply() {
@@ -1647,7 +1674,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=11');
+      await navigator.serviceWorker.register('./sw.js?v=12');
     } catch (_) {}
   }
 }
