@@ -614,13 +614,14 @@ body {
     </div>
     <div class="hero-copy">
       <h1 class="brand">Harbor</h1>
-      <p class="lede">A quiet coastal place to set things down — with your name, or anonymously.</p>
+      <p class="lede">A quiet coastal place to set things down — create an account to come ashore.</p>
       <div class="cta-row">
-        <button class="btn btn-primary" id="enter-feed">Enter Harbor</button>
-        <button class="btn btn-ghost" id="home-write">Share something</button>
+        <button class="btn btn-primary" id="home-create" type="button">Create account</button>
+        <button class="btn btn-secondary" id="home-signin" type="button">Sign in</button>
       </div>
-      <p class="privacy-note" id="home-storage-note">First light greets everyone. Cloud sync turns on when Supabase is connected.</p>
-      <p class="privacy-note">You must agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
+      <p class="privacy-note" id="home-storage-note">An account is required. Guests can’t enter or post.</p>
+      <p class="privacy-note">You’ll also agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
+      <p class="privacy-note"><button class="linkish" id="enter-feed" type="button" style="padding:0">Already signed in? Enter Harbor</button></p>
     </div>
   </section>
 
@@ -643,10 +644,10 @@ body {
       <span>I agree to keep Harbor considerate, respectful, and thoughtful.</span>
     </label>
     <div class="actions">
-      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — enter Harbor</button>
+      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — continue</button>
       <button class="btn btn-secondary" id="decline-guidelines" type="button">I do not agree</button>
     </div>
-    <p class="footer-help" id="guidelines-gate-note">Without agreement, you can’t enter the shore, write, or join threads.</p>
+    <p class="footer-help" id="guidelines-gate-note">Without agreement and an account, you can’t enter the shore, write, or join threads.</p>
   </section>
 
   <!-- FEED -->
@@ -758,23 +759,23 @@ body {
   <section id="account" class="screen" aria-label="Account">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="feed">Done</button>
+      <button class="linkish" id="account-done" type="button">Done</button>
     </div>
     <h2 class="section-title">Your account</h2>
-    <p class="section-sub" id="account-sub">Sign in to keep your Harbor name across devices, or stay as a guest below.</p>
+    <p class="section-sub" id="account-sub">Create an account or sign in to enter Harbor. Posting stays anonymous or named — your choice.</p>
 
     <div id="auth-guest" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px">
       <div class="seg" role="group" aria-label="Auth mode">
-        <button type="button" id="auth-mode-signin" class="active">Sign in</button>
-        <button type="button" id="auth-mode-signup">Create account</button>
+        <button type="button" id="auth-mode-signin">Sign in</button>
+        <button type="button" id="auth-mode-signup" class="active">Create account</button>
       </div>
       <input id="auth-email" type="email" autocomplete="email" placeholder="Email"
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
       <input id="auth-password" type="password" autocomplete="current-password" placeholder="Password (6+ characters)"
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
       <input id="auth-display" type="text" maxlength="24" placeholder="Display name (optional)"
-        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none;display:none">
-      <button class="btn btn-primary" id="auth-submit" type="button">Sign in</button>
+        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+      <button class="btn btn-primary" id="auth-submit" type="button">Create account</button>
       <p id="auth-status" style="font-size:.9rem;color:var(--ink-faint);margin:0"></p>
     </div>
 
@@ -934,11 +935,40 @@ let selectedTags = new Set();
 let activeFilter = 'all';
 let currentThreadId = null;
 let draftMode = 'anonymous';
-let pendingAfterGuidelines = 'feed';
-const GATED_SCREENS = new Set(['feed', 'write', 'thread', 'account']);
+let pendingEntry = 'feed';
+let authMode = 'signup';
+const MEMBER_SCREENS = new Set(['feed', 'write', 'thread']);
 
 function hasAgreedGuidelines() {
   return !!(window.HarborMod && HarborMod.guidelinesAccepted());
+}
+
+function isLoggedIn() {
+  return !!(window.HarborAuth && HarborAuth.isLoggedIn && HarborAuth.isLoggedIn());
+}
+
+function setAuthMode(mode) {
+  authMode = mode === 'signin' ? 'signin' : 'signup';
+  const signInBtn = $('#auth-mode-signin');
+  const signUpBtn = $('#auth-mode-signup');
+  if (!signInBtn || !signUpBtn) return;
+  signInBtn.classList.toggle('active', authMode === 'signin');
+  signUpBtn.classList.toggle('active', authMode === 'signup');
+  $('#auth-display').style.display = authMode === 'signup' ? 'block' : 'none';
+  $('#auth-submit').textContent = authMode === 'signup' ? 'Create account' : 'Sign in';
+  $('#auth-password').autocomplete = authMode === 'signup' ? 'new-password' : 'current-password';
+}
+
+function openAccountForEntry(mode = 'signup') {
+  setAuthMode(mode);
+  syncAccountScreen();
+  const status = $('#auth-status');
+  if (status && !isLoggedIn()) {
+    status.textContent = mode === 'signin'
+      ? 'Sign in with your Harbor account to enter.'
+      : 'Create an account to enter Harbor.';
+  }
+  showScreen('account');
 }
 
 function loadJSON(key, fallback) {
@@ -1024,10 +1054,17 @@ function startWhispers() {
 }
 
 function showScreen(name) {
-  if (GATED_SCREENS.has(name) && !hasAgreedGuidelines()) {
-    pendingAfterGuidelines = name;
-    renderGuidelines();
-    name = 'guidelines';
+  if (MEMBER_SCREENS.has(name)) {
+    if (!hasAgreedGuidelines()) {
+      pendingEntry = name;
+      renderGuidelines();
+      name = 'guidelines';
+    } else if (!isLoggedIn()) {
+      pendingEntry = name;
+      setAuthMode(authMode === 'signin' ? 'signin' : 'signup');
+      syncAccountScreen();
+      name = 'account';
+    }
   }
   Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1037,10 +1074,14 @@ function showScreen(name) {
 }
 
 async function enterHarbor(dest = 'feed') {
+  pendingEntry = MEMBER_SCREENS.has(dest) ? dest : 'feed';
   if (!hasAgreedGuidelines()) {
-    pendingAfterGuidelines = dest;
     renderGuidelines();
     showScreen('guidelines');
+    return;
+  }
+  if (!isLoggedIn()) {
+    openAccountForEntry(authMode === 'signin' ? 'signin' : 'signup');
     return;
   }
   if (dest === 'feed') await renderFeed();
@@ -1049,7 +1090,11 @@ async function enterHarbor(dest = 'feed') {
     renderTagPicker();
     updateToneAndCrisis();
   }
-  if (dest === 'account') syncAccountScreen();
+  if (dest === 'account') {
+    syncAccountScreen();
+    showScreen('account');
+    return;
+  }
   showScreen(dest);
 }
 
@@ -1397,8 +1442,8 @@ function syncAccountScreen() {
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
 
   if (!auth.isLoggedIn) {
-    accountSub.textContent = 'Sign in to keep your Harbor name across devices, or stay as a guest below.';
-    if (idNote) idNote.textContent = 'Posting preferences stay on this device unless you sign in.';
+    accountSub.textContent = 'Create an account or sign in to enter Harbor. Guests can’t post or browse the shore.';
+    if (idNote) idNote.textContent = 'An account is required before you can enter.';
   } else {
     $('#auth-user-line').textContent = auth.user?.email || 'Signed in';
     if (auth.isAdmin) {
@@ -1409,7 +1454,7 @@ function syncAccountScreen() {
     } else {
       roleLine.style.display = 'none';
       roleLine.textContent = '';
-      accountSub.textContent = 'Signed in. Choose how you appear on posts.';
+      accountSub.textContent = 'Signed in. Choose how you appear on posts — anonymous is still fine.';
       if (idNote) idNote.textContent = 'You’re signed in. Preferences below apply on this device.';
     }
   }
@@ -1537,6 +1582,12 @@ async function persistPost({ text, tags, privatePost }) {
 }
 
 async function release(privatePost) {
+  if (!isLoggedIn()) {
+    alert('Create an account or sign in before posting.');
+    pendingEntry = 'write';
+    openAccountForEntry('signup');
+    return;
+  }
   const text = $('#entry').value.trim();
   if (!text) {
     $('#entry').focus();
@@ -1554,6 +1605,7 @@ async function release(privatePost) {
   const agreed = $('#write-guidelines-check').checked || (window.HarborMod && HarborMod.guidelinesAccepted());
   if (!agreed) {
     alert('Please agree to Harbor’s guidelines before posting.');
+    pendingEntry = 'write';
     showScreen('guidelines');
     return;
   }
@@ -1586,6 +1638,12 @@ async function release(privatePost) {
 }
 
 async function addReply() {
+  if (!isLoggedIn()) {
+    alert('Create an account or sign in before replying.');
+    pendingEntry = 'thread';
+    openAccountForEntry('signup');
+    return;
+  }
   const text = $('#reply-entry').value.trim();
   if (!text || !currentThreadId) return;
   const blocked = contentBlocked(text);
@@ -1683,14 +1741,39 @@ async function toggleFelt() {
 }
 
 /* events */
-$('#enter-feed').addEventListener('click', () => enterHarbor('feed'));
-$('#home-write').addEventListener('click', () => enterHarbor('write'));
+$('#enter-feed').addEventListener('click', () => {
+  authMode = 'signin';
+  enterHarbor('feed');
+});
+$('#home-create').addEventListener('click', () => {
+  pendingEntry = 'feed';
+  openAccountForEntry('signup');
+});
+$('#home-signin').addEventListener('click', () => {
+  pendingEntry = 'feed';
+  openAccountForEntry('signin');
+});
 $('#home-guidelines').addEventListener('click', () => {
-  pendingAfterGuidelines = 'feed';
+  pendingEntry = 'feed';
   renderGuidelines();
   showScreen('guidelines');
 });
-$('#open-account').addEventListener('click', () => enterHarbor('account'));
+$('#open-account').addEventListener('click', () => {
+  if (!isLoggedIn()) {
+    pendingEntry = 'feed';
+    openAccountForEntry('signin');
+    return;
+  }
+  syncAccountScreen();
+  showScreen('account');
+});
+$('#account-done').addEventListener('click', async () => {
+  if (isLoggedIn() && hasAgreedGuidelines()) {
+    await enterHarbor(pendingEntry || 'feed');
+    return;
+  }
+  showScreen('home');
+});
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
 $('#save-private').addEventListener('click', () => release(true));
@@ -1722,7 +1805,7 @@ $('#pref-named').addEventListener('click', () => {
   $('#pref-username').disabled = false;
   $('#pref-username').focus();
 });
-$('#save-identity').addEventListener('click', () => {
+$('#save-identity').addEventListener('click', async () => {
   const named = $('#pref-named').classList.contains('active');
   const username = $('#pref-username').value.trim().slice(0, 24);
   if (named && !username) {
@@ -1739,27 +1822,15 @@ $('#save-identity').addEventListener('click', () => {
     } catch (_) {}
   }
   showNextWhisper();
-  showScreen('feed');
-  renderFeed();
+  if (isLoggedIn()) {
+    await enterHarbor('feed');
+  } else {
+    showScreen('home');
+  }
 });
 
-let authMode = 'signin';
-$('#auth-mode-signin').addEventListener('click', () => {
-  authMode = 'signin';
-  $('#auth-mode-signin').classList.add('active');
-  $('#auth-mode-signup').classList.remove('active');
-  $('#auth-display').style.display = 'none';
-  $('#auth-submit').textContent = 'Sign in';
-  $('#auth-password').autocomplete = 'current-password';
-});
-$('#auth-mode-signup').addEventListener('click', () => {
-  authMode = 'signup';
-  $('#auth-mode-signup').classList.add('active');
-  $('#auth-mode-signin').classList.remove('active');
-  $('#auth-display').style.display = 'block';
-  $('#auth-submit').textContent = 'Create account';
-  $('#auth-password').autocomplete = 'new-password';
-});
+$('#auth-mode-signin').addEventListener('click', () => setAuthMode('signin'));
+$('#auth-mode-signup').addEventListener('click', () => setAuthMode('signup'));
 $('#auth-submit').addEventListener('click', async () => {
   const email = ($('#auth-email').value || '').trim();
   const password = $('#auth-password').value || '';
@@ -1780,12 +1851,19 @@ $('#auth-submit').addEventListener('click', async () => {
     const state = HarborAuth.getState();
     if (!state.session && authMode === 'signup') {
       status.textContent = 'Account created. If email confirmation is on, check your inbox, then sign in.';
-    } else {
-      status.textContent = state.isAdmin ? 'Welcome, admin.' : 'Welcome ashore.';
+      syncAccountScreen();
+      return;
     }
+    status.textContent = state.isAdmin ? 'Welcome, admin.' : 'Welcome ashore.';
     syncAccountScreen();
     const btn = $('#open-account');
-    if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+    if (btn) btn.textContent = 'Account';
+    if (!hasAgreedGuidelines()) {
+      renderGuidelines();
+      showScreen('guidelines');
+      return;
+    }
+    await enterHarbor(pendingEntry || 'feed');
   } catch (err) {
     status.textContent = err.message || 'Could not authenticate.';
   }
@@ -1795,6 +1873,7 @@ $('#auth-signout').addEventListener('click', async () => {
   syncAccountScreen();
   const btn = $('#open-account');
   if (btn) btn.textContent = 'Sign in';
+  showScreen('home');
 });
 
 $('#report-btn').addEventListener('click', async () => {
@@ -1873,20 +1952,12 @@ $('#admin-ban-btn').addEventListener('click', async () => {
 });
 
 async function continueAfterGuidelines() {
-  const dest = GATED_SCREENS.has(pendingAfterGuidelines) ? pendingAfterGuidelines : 'feed';
   $('#write-guidelines-check').checked = true;
-  if (dest === 'feed') await renderFeed();
-  if (dest === 'write') {
-    syncWriteIdentityUI();
-    renderTagPicker();
-    updateToneAndCrisis();
-  }
-  if (dest === 'account') syncAccountScreen();
-  if (dest === 'thread' && currentThreadId) {
-    await openThread(currentThreadId);
+  if (!isLoggedIn()) {
+    openAccountForEntry(authMode === 'signin' ? 'signin' : 'signup');
     return;
   }
-  showScreen(dest === 'thread' ? 'feed' : dest);
+  await enterHarbor(pendingEntry || 'feed');
 }
 
 $('#accept-guidelines').addEventListener('click', async () => {
@@ -1903,11 +1974,7 @@ $('#accept-guidelines').addEventListener('click', async () => {
 });
 
 function leaveWithoutGuidelines() {
-  if (hasAgreedGuidelines()) {
-    showScreen('home');
-    return;
-  }
-  pendingAfterGuidelines = 'feed';
+  pendingEntry = 'feed';
   showScreen('home');
 }
 
@@ -1939,22 +2006,22 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   el.addEventListener('click', async () => {
     const dest = el.getAttribute('data-go');
     if (dest === 'guidelines') {
-      pendingAfterGuidelines = hasAgreedGuidelines() ? 'feed' : 'feed';
+      pendingEntry = 'feed';
       renderGuidelines();
       showScreen('guidelines');
       return;
     }
-    if (GATED_SCREENS.has(dest) && !hasAgreedGuidelines()) {
-      await enterHarbor(dest);
+    if (dest === 'account') {
+      if (!isLoggedIn()) openAccountForEntry('signin');
+      else {
+        syncAccountScreen();
+        showScreen('account');
+      }
       return;
     }
-    if (dest === 'feed') await renderFeed();
-    if (dest === 'account') syncAccountScreen();
-    if (dest === 'write') {
-      syncWriteIdentityUI();
-      renderTagPicker();
-      updateToneAndCrisis();
-      if (hasAgreedGuidelines()) $('#write-guidelines-check').checked = true;
+    if (MEMBER_SCREENS.has(dest)) {
+      await enterHarbor(dest);
+      return;
     }
     showScreen(dest);
   });
@@ -2048,12 +2115,18 @@ function renderGuidelines() {
     check.checked = agreed;
     check.disabled = agreed;
   }
-  if (acceptBtn) acceptBtn.textContent = agreed ? 'Continue into Harbor' : 'I agree — enter Harbor';
+  if (acceptBtn) {
+    acceptBtn.textContent = agreed
+      ? (isLoggedIn() ? 'Continue into Harbor' : 'Continue to create account')
+      : 'I agree — continue';
+  }
   if (declineBtn) declineBtn.style.display = agreed ? 'none' : '';
   if (gateNote) {
     gateNote.textContent = agreed
-      ? 'You’ve already agreed. You can continue anytime.'
-      : 'Without agreement, you can’t enter the shore, write, or join threads.';
+      ? (isLoggedIn()
+        ? 'You’ve already agreed. You can continue anytime.'
+        : 'Next step: create an account or sign in to enter.')
+      : 'Without agreement and an account, you can’t enter the shore, write, or join threads.';
   }
   if (sub) {
     sub.textContent = agreed
@@ -2080,18 +2153,31 @@ async function boot() {
     $('#write-guidelines-check').checked = true;
   }
   const note = $('#home-storage-note');
-  if (note) note.textContent = cloudStatusText();
+  if (note) {
+    note.textContent = 'An account is required. Guests can’t enter or post.';
+  }
 
   if (window.HarborAuth) {
     try {
       await HarborAuth.init();
+      setAuthMode('signup');
       HarborAuth.onChange(() => {
         syncAccountScreen();
         const btn = $('#open-account');
         if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+        if (!HarborAuth.isLoggedIn()) {
+          const active = document.querySelector('.screen.active');
+          if (active && MEMBER_SCREENS.has(active.id)) showScreen('home');
+        }
+        if (note) {
+          note.textContent = HarborAuth.isLoggedIn()
+            ? cloudStatusText()
+            : 'An account is required. Guests can’t enter or post.';
+        }
       });
       const btn = $('#open-account');
       if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+      if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
     } catch (err) {
       console.warn('Harbor auth init failed', err);
     }
@@ -2111,7 +2197,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=18');
+      await navigator.serviceWorker.register('./sw.js?v=19');
     } catch (_) {}
   }
 }
