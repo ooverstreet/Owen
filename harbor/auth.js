@@ -10,6 +10,19 @@
     return !!(cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase);
   }
 
+  function siteUrl() {
+    if (cfg.siteUrl) return String(cfg.siteUrl).replace(/\/?$/, '/');
+    try {
+      const url = new URL(location.href);
+      // Keep path under /Owen/harbor/ even if opened with index.html or query params
+      const path = url.pathname.replace(/index\.html$/i, '');
+      const base = path.endsWith('/') ? path : path.replace(/\/[^/]*$/, '/');
+      return `${url.origin}${base}`;
+    } catch (_) {
+      return 'https://ooverstreet.github.io/Owen/harbor/';
+    }
+  }
+
   function emit() {
     listeners.forEach((fn) => {
       try { fn(getState()); } catch (_) {}
@@ -29,7 +42,31 @@
 
   async function init() {
     if (!configured()) return getState();
-    client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+
+    // Email confirmation / magic links land with tokens in the URL hash or query
+    try {
+      const url = new URL(location.href);
+      const hasAuthParams = !!(
+        url.searchParams.get('code')
+        || url.hash.includes('access_token')
+        || url.hash.includes('type=signup')
+        || url.hash.includes('type=email')
+      );
+      if (hasAuthParams && client.auth.exchangeCodeForSession) {
+        // PKCE code exchange when present; ignore failures and fall back to getSession
+        if (url.searchParams.get('code')) {
+          await client.auth.exchangeCodeForSession(location.href).catch(() => {});
+        }
+      }
+    } catch (_) {}
+
     const { data } = await client.auth.getSession();
     session = data.session || null;
     if (session?.user) await refreshProfile();
@@ -79,6 +116,7 @@
       email: email.trim(),
       password,
       options: {
+        emailRedirectTo: siteUrl(),
         data: { display_name: displayName || email.split('@')[0] },
       },
     });
@@ -144,6 +182,7 @@
     updateDisplayName,
     onChange,
     accessToken,
+    siteUrl,
     isAdmin: () => getState().isAdmin,
     isLoggedIn: () => getState().isLoggedIn,
   };
