@@ -711,7 +711,7 @@ body {
       <div class="reply-composer" id="reply-composer">
         <p class="section-sub" id="reply-as" style="margin-bottom:0;font-size:.92rem">Replying as Anonymous</p>
         <label class="sr-only" for="reply-entry">Reply</label>
-        <textarea id="reply-entry" maxlength="2000" placeholder="Reply gently, if you’ve been here too…"></textarea>
+        <textarea id="reply-entry" maxlength="2000" placeholder="Have something to share?"></textarea>
         <button class="btn btn-primary btn-small" id="reply-btn" type="button">Add to thread</button>
       </div>
     </div>
@@ -1680,7 +1680,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=13');
+      await navigator.serviceWorker.register('./sw.js?v=14');
     } catch (_) {}
   }
 }
