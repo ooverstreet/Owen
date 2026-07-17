@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Harbor">
+<meta name="theme-color" content="#E8F1F4">
+<meta name="description" content="A peaceful private space to get things off your chest, with a gentle Angel companion.">
+<title>Harbor — Set things down</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@340;420;560&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mist: #E8F1F4;
+  --mist-deep: #D3E4EA;
+  --water: #3E7A86;
+  --water-deep: #1F4F58;
+  --lagoon: #5A9AA6;
+  --sand: #E6DED0;
+  --warm: #B8894A;
+  --ink: #1A2B32;
+  --ink-soft: #4A636C;
+  --ink-faint: #7A9199;
+  --paper: rgba(255, 252, 248, 0.72);
+  --paper-solid: #FFFCF8;
+  --line: rgba(31, 79, 88, 0.12);
+  --ok: #2F7D6A;
+  --warn: #9A5B2E;
+  --safe: #8B3A3A;
+  --shadow: 0 18px 50px rgba(31, 79, 88, 0.10);
+  --radius: 22px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; min-height: 100%;
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 420;
+  line-height: 1.5;
+}
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(1200px 700px at 70% -10%, rgba(184, 212, 222, 0.9), transparent 60%),
+    radial-gradient(900px 500px at 10% 20%, rgba(230, 222, 208, 0.55), transparent 55%),
+    linear-gradient(180deg, #EAF3F6 0%, var(--mist) 42%, #DCE9EE 100%);
+}
+
+#app {
+  width: min(720px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    20px
+    max(28px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+.screen { display: none; flex: 1; flex-direction: column; animation: rise .55s ease both; }
+.screen.active { display: flex; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.02); }
+}
+@keyframes ripple {
+  0% { transform: scaleX(.7); opacity: .35; }
+  100% { transform: scaleX(1.15); opacity: 0; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+#home {
+  justify-content: flex-end;
+  position: relative;
+  padding-bottom: 8px;
+}
+.hero-visual {
+  position: absolute;
+  inset: 8% 0 auto;
+  height: min(46vh, 360px);
+  pointer-events: none;
+  overflow: hidden;
+}
+.horizon {
+  position: absolute;
+  left: 50%;
+  bottom: 38%;
+  width: 140%;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(62,122,134,.35), transparent);
+}
+.water-plane {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 0;
+  height: 58%;
+  background:
+    linear-gradient(180deg, rgba(90,154,166,.18), rgba(62,122,134,.42));
+  border-radius: 50% 50% 0 0 / 28% 28% 0 0;
+}
+.ripple {
+  position: absolute;
+  left: 50%;
+  bottom: 34%;
+  width: 160px;
+  height: 18px;
+  margin-left: -80px;
+  border: 1.5px solid rgba(255,252,248,.55);
+  border-radius: 50%;
+  animation: ripple 4.8s ease-out infinite;
+}
+.ripple.r2 { animation-delay: 1.6s; width: 220px; margin-left: -110px; }
+.ripple.r3 { animation-delay: 3.2s; width: 280px; margin-left: -140px; }
+.mark {
+  position: absolute;
+  left: 50%;
+  bottom: 42%;
+  width: 64px;
+  height: 84px;
+  margin-left: -32px;
+  animation: breathe 5.5s ease-in-out infinite;
+}
+.mark svg { width: 100%; height: 100%; display: block; }
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: min(48vh, 380px);
+}
+.brand {
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 12vw, 5rem);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  color: var(--water-deep);
+  line-height: 0.95;
+  margin-bottom: 14px;
+}
+.lede {
+  font-size: 1.125rem;
+  color: var(--ink-soft);
+  max-width: 28ch;
+  margin-bottom: 28px;
+}
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 560;
+  border-radius: 999px;
+  padding: 14px 22px;
+  transition: transform .15s ease, background .2s ease, color .2s ease;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  background: var(--water-deep);
+  color: #F4FBFC;
+}
+.btn-primary:hover { background: #163F47; }
+.btn-ghost {
+  background: transparent;
+  color: var(--water);
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.privacy-note {
+  margin-top: 18px;
+  font-size: .9rem;
+  color: var(--ink-faint);
+}
+
+/* ── Shared chrome ──────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.brand-mini {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 650;
+  color: var(--water-deep);
+  letter-spacing: -0.03em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.linkish {
+  background: none;
+  border: none;
+  color: var(--water);
+  font: inherit;
+  font-weight: 560;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.35rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: var(--water-deep);
+  margin-bottom: 8px;
+}
+.section-sub {
+  color: var(--ink-soft);
+  margin-bottom: 22px;
+  max-width: 36ch;
+}
+
+/* ── Write ──────────────────────────────────────────────────── */
+.write-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+#entry {
+  flex: 1;
+  min-height: 220px;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  padding: 20px 20px 48px;
+  font: inherit;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--ink);
+  outline: none;
+  box-shadow: var(--shadow);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+#entry::placeholder { color: var(--ink-faint); }
+#entry:focus {
+  border-color: rgba(62, 122, 134, 0.45);
+  box-shadow: 0 18px 50px rgba(31, 79, 88, 0.14);
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-faint);
+  font-size: .92rem;
+}
+.tone-pill {
+  display: none;
+  color: var(--warn);
+  animation: fadeIn .35s ease both;
+}
+.tone-pill.show { display: inline; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.btn-secondary {
+  background: rgba(255,252,248,.7);
+  color: var(--water-deep);
+  border: 1px solid var(--line);
+}
+.crisis {
+  display: none;
+  margin-top: 8px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(139, 58, 58, 0.08);
+  border: 1px solid rgba(139, 58, 58, 0.18);
+  color: var(--ink);
+  animation: fadeIn .4s ease both;
+}
+.crisis.show { display: block; }
+.crisis strong { color: var(--safe); font-weight: 560; }
+.crisis a { color: var(--water-deep); }
+
+/* ── Angel / entry view ─────────────────────────────────────── */
+.angel-panel {
+  margin-top: 8px;
+  padding: 22px 22px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, rgba(255,252,248,.88), rgba(214,232,236,.72));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  animation: fadeIn .55s ease both;
+}
+.angel-label {
+  font-size: .78rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--warm);
+  font-weight: 560;
+  margin-bottom: 10px;
+}
+.angel-text {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--water-deep);
+  margin-bottom: 14px;
+}
+.angel-note {
+  font-size: .92rem;
+  color: var(--ink-soft);
+}
+.your-words {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.your-words h3 {
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  font-weight: 560;
+}
+.your-words p {
+  white-space: pre-wrap;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+/* ── Journal ────────────────────────────────────────────────── */
+.journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.entry-row {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: transform .15s ease, border-color .2s ease;
+}
+.entry-row:hover { border-color: rgba(62,122,134,.35); }
+.entry-row:active { transform: scale(.99); }
+.entry-row time {
+  display: block;
+  font-size: .84rem;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.entry-row .preview {
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.empty {
+  color: var(--ink-faint);
+  padding: 28px 4px;
+}
+.footer-help {
+  margin-top: auto;
+  padding-top: 28px;
+  font-size: .86rem;
+  color: var(--ink-faint);
+}
+.footer-help a { color: var(--water); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section id="home" class="screen active" aria-label="Welcome">
+    <div class="hero-visual" aria-hidden="true">
+      <div class="horizon"></div>
+      <div class="water-plane"></div>
+      <div class="ripple"></div>
+      <div class="ripple r2"></div>
+      <div class="ripple r3"></div>
+      <div class="mark">
+        <svg viewBox="0 0 64 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 8v56" stroke="#1F4F58" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M32 14c12 5 19 14 21 25" stroke="#B8894A" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="8" r="4.5" fill="#B8894A"/>
+          <path d="M10 70c8-4 16-4 22 0s14 4 22 0" stroke="#3E7A86" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+        </svg>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <h1 class="brand">Harbor</h1>
+      <p class="lede">A quiet place to set things down. Private, respectful, and gently accompanied.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="start-write">Share what’s on your chest</button>
+        <button class="btn btn-ghost" id="open-journal">Your journal</button>
+      </div>
+      <p class="privacy-note">Stays on this device in Phase 1. Nothing is posted.</p>
+    </div>
+  </section>
+
+  <!-- WRITE -->
+  <section id="write" class="screen" aria-label="Write">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="linkish" data-go="journal">Journal</button>
+    </div>
+    <h2 class="section-title">What’s weighing on you?</h2>
+    <p class="section-sub">Say it plainly. No performance needed — only respect for yourself and others.</p>
+    <div class="write-shell">
+      <label class="visually-hidden" for="entry" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Your words</label>
+      <textarea id="entry" maxlength="4000" placeholder="You can start anywhere. A loss, a worry, a goodbye that still echoes…"></textarea>
+      <div class="meta-row">
+        <span class="tone-pill" id="tone-pill">Let’s keep this respectful — no insults or threats.</span>
+        <span id="count">0 / 4000</span>
+      </div>
+      <div class="crisis" id="crisis" role="status">
+        <strong>You’re not alone.</strong>
+        If you’re in immediate danger or thinking of harming yourself, please reach out now:
+        in the US call or text <a href="tel:988">988</a>;
+        internationally see <a href="https://www.iasp.info/suicidalthoughts/" target="_blank" rel="noopener">IASP resources</a>.
+        Harbor’s Angel is a gentle companion, not a crisis service.
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="release-btn">Release to Angel</button>
+        <button class="btn btn-secondary" id="save-only">Save quietly</button>
+      </div>
+    </div>
+    <p class="footer-help">Phase 1 is private and local. Soft social “I’ve felt this too” comes later.</p>
+  </section>
+
+  <!-- ANGEL RESPONSE -->
+  <section id="angel" class="screen" aria-label="Angel response">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="linkish" data-go="journal">Journal</button>
+    </div>
+    <div class="angel-panel">
+      <div class="angel-label">Angel</div>
+      <p class="angel-text" id="angel-text"></p>
+      <p class="angel-note" id="angel-note"></p>
+      <div class="your-words">
+        <h3>What you set down</h3>
+        <p id="angel-entry"></p>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:20px">
+      <button class="btn btn-primary" data-go="write">Write again</button>
+      <button class="btn btn-secondary" data-go="journal">See journal</button>
+    </div>
+  </section>
+
+  <!-- JOURNAL -->
+  <section id="journal" class="screen" aria-label="Journal">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="linkish" data-go="write">New entry</button>
+    </div>
+    <h2 class="section-title">Your harbor</h2>
+    <p class="section-sub">Only you can see these. Tap one to revisit the Angel’s note.</p>
+    <div class="journal-list" id="journal-list"></div>
+    <p class="footer-help">Want a clean slate? <button class="linkish" id="clear-journal" style="padding:0">Clear all local entries</button></p>
+  </section>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'harbor.entries.v1';
+const $ = (sel) => document.querySelector(sel);
+const screens = {
+  home: $('#home'),
+  write: $('#write'),
+  angel: $('#angel'),
+  journal: $('#journal'),
+};
+
+const CRISIS_RE = /\b(kill myself|end my life|suicide|suicidal|want to die|don't want to (?:be )?alive|dont want to (?:be )?alive|self[- ]?harm|cut myself|hang myself)\b/i;
+const HARSH_RE = /\b(kill you|i hope you die|you should die|worthless piece|piece of shit|go die|rape|nigger|faggot)\b/i;
+
+const ANGEL_POOL = {
+  grief: [
+    "What you lost still deserves room. Naming it here doesn’t make you stuck — it makes you honest.",
+    "Grief moves in tides. Today you let one wave land. That is enough.",
+    "Some endings leave a quiet shape behind. You don’t have to fill it yet."
+  ],
+  regret: [
+    "Regret is often love with nowhere to go. You can hold the lesson without punishing yourself forever.",
+    "You showed up to your own unfinished story. That takes more courage than pretending it never happened.",
+    "The past can inform you without owning you. Setting it down is practice, not erasure."
+  ],
+  worry: [
+    "Worry tries to protect you by rehearsing pain. You don’t have to rehearse alone.",
+    "You named the weight. That already loosens its grip a little.",
+    "Not every storm needs a plan tonight. Sometimes it needs a shore."
+  ],
+  loneliness: [
+    "Feeling alone doesn’t mean you are unseen. This page held you for a moment — and so did I.",
+    "Loneliness is heavy because connection matters to you. That longing is human, not a flaw.",
+    "You reached toward light by writing. Stay near that instinct."
+  ],
+  anger: [
+    "Anger often guards a softer truth. You can honor the heat without letting it burn the room.",
+    "You put the fire into words instead of into yourself. That is a kind of care.",
+    "It’s allowed to feel sharp. It’s also allowed to set the sharp thing down."
+  ],
+  goodbye: [
+    "Goodbyes rarely finish cleanly. Returning to them gently is part of loving what was.",
+    "You can miss something and still keep walking. Both can be true.",
+    "What ended still shaped you. Thanking it silently is a form of peace."
+  ],
+  general: [
+    "Thank you for trusting this quiet place with something real.",
+    "You don’t have to tidy the feeling before it’s welcome here.",
+    "I heard you. You can leave this on the shore and come back when you need to."
+  ]
+};
+
+const ANGEL_NOTES = [
+  "I’m not a therapist or a crisis line — just a steady, respectful companion for what you carry.",
+  "Your words stay on this device in Phase 1. Share only what feels safe.",
+  "If this feeling returns tomorrow, you’re allowed to write it again. Repetition isn’t failure."
+];
+
+function loadEntries() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveEntries(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function showScreen(name) {
+  Object.entries(screens).forEach(([key, el]) => {
+    el.classList.toggle('active', key === name);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function detectTheme(text) {
+  const t = text.toLowerCase();
+  if (/(miss|lost|grief|funeral|passed|mourning|empty house|never again)/.test(t)) return 'grief';
+  if (/(regret|should have|shouldn't have|wish i|my fault|mistake)/.test(t)) return 'regret';
+  if (/(worried|anxious|afraid|scared|what if|stress|panic)/.test(t)) return 'worry';
+  if (/(lonely|alone|no one|isolated|left out)/.test(t)) return 'loneliness';
+  if (/(angry|furious|betrayed|hate that|rage|unfair)/.test(t)) return 'anger';
+  if (/(goodbye|broke up|ended|leaving|moved away|last time)/.test(t)) return 'goodbye';
+  return 'general';
+}
+
+function pick(arr, seed) {
+  const i = Math.abs(hash(seed)) % arr.length;
+  return arr[i];
+}
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return h;
+}
+
+function craftAngel(text) {
+  const theme = detectTheme(text);
+  const line = pick(ANGEL_POOL[theme], text.slice(0, 80) + theme);
+  const note = pick(ANGEL_NOTES, text.length + theme);
+  return { theme, line, note };
+}
+
+function formatWhen(ts) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    }).format(new Date(ts));
+  } catch {
+    return new Date(ts).toLocaleString();
+  }
+}
+
+function renderJournal() {
+  const list = loadEntries().sort((a, b) => b.createdAt - a.createdAt);
+  const root = $('#journal-list');
+  if (!list.length) {
+    root.innerHTML = '<p class="empty">Nothing here yet. When you’re ready, set something down.</p>';
+    return;
+  }
+  root.innerHTML = '';
+  list.forEach((entry) => {
+    const btn = document.createElement('button');
+    btn.className = 'entry-row';
+    btn.type = 'button';
+    btn.innerHTML = `<time>${formatWhen(entry.createdAt)}</time><div class="preview"></div>`;
+    btn.querySelector('.preview').textContent = entry.text;
+    btn.addEventListener('click', () => openEntry(entry.id));
+    root.appendChild(btn);
+  });
+}
+
+function openEntry(id) {
+  const entry = loadEntries().find((e) => e.id === id);
+  if (!entry) return;
+  $('#angel-text').textContent = entry.angelLine;
+  $('#angel-note').textContent = entry.angelNote;
+  $('#angel-entry').textContent = entry.text;
+  showScreen('angel');
+}
+
+function updateToneAndCrisis() {
+  const text = $('#entry').value;
+  $('#count').textContent = `${text.length} / 4000`;
+  $('#tone-pill').classList.toggle('show', HARSH_RE.test(text));
+  $('#crisis').classList.toggle('show', CRISIS_RE.test(text));
+}
+
+function persistEntry(text, withAngel) {
+  const angel = withAngel ? craftAngel(text) : {
+    theme: 'general',
+    line: 'Held quietly. No reply needed — sometimes setting it down is the whole act.',
+    note: ANGEL_NOTES[0]
+  };
+  const entry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+    text: text.trim(),
+    createdAt: Date.now(),
+    theme: angel.theme,
+    angelLine: angel.line,
+    angelNote: angel.note,
+  };
+  const list = loadEntries();
+  list.push(entry);
+  saveEntries(list);
+  return entry;
+}
+
+function release(withAngel) {
+  const text = $('#entry').value.trim();
+  if (!text) {
+    $('#entry').focus();
+    return;
+  }
+  if (HARSH_RE.test(text)) {
+    $('#tone-pill').classList.add('show');
+    return;
+  }
+  const entry = persistEntry(text, withAngel);
+  $('#entry').value = '';
+  updateToneAndCrisis();
+  $('#angel-text').textContent = entry.angelLine;
+  $('#angel-note').textContent = entry.angelNote;
+  $('#angel-entry').textContent = entry.text;
+  showScreen('angel');
+}
+
+$('#start-write').addEventListener('click', () => showScreen('write'));
+$('#open-journal').addEventListener('click', () => { renderJournal(); showScreen('journal'); });
+$('#entry').addEventListener('input', updateToneAndCrisis);
+$('#release-btn').addEventListener('click', () => release(true));
+$('#save-only').addEventListener('click', () => release(false));
+$('#clear-journal').addEventListener('click', () => {
+  if (confirm('Clear all Harbor entries stored on this device?')) {
+    saveEntries([]);
+    renderJournal();
+  }
+});
+
+document.querySelectorAll('[data-go]').forEach((el) => {
+  el.addEventListener('click', () => {
+    const dest = el.getAttribute('data-go');
+    if (dest === 'journal') renderJournal();
+    if (dest === 'write') updateToneAndCrisis();
+    showScreen(dest);
+  });
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
