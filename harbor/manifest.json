@@ -1,0 +1,22 @@
+{
+  "id": "/Owen/harbor/",
+  "name": "Harbor — Set things down",
+  "short_name": "Harbor",
+  "description": "A peaceful private space to get things off your chest, with a gentle Angel companion. Private by default.",
+  "start_url": "/Owen/harbor/",
+  "scope": "/Owen/harbor/",
+  "display": "standalone",
+  "background_color": "#E8F1F4",
+  "theme_color": "#E8F1F4",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["lifestyle", "health", "productivity"],
+  "icons": [
+    {
+      "src": "/Owen/harbor/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
