@@ -17,10 +17,37 @@ Deno.serve(async (req) => {
     const adminSecret = Deno.env.get("ADMIN_SECRET") || "";
     const provided = String(req.headers.get("x-harbor-admin") || body?.adminSecret || "");
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") || "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEY") || "",
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEY") || "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    async function callerIsAdmin() {
+      // 1) Shared admin secret (bootstrap / emergency)
+      if (adminSecret && provided === adminSecret) return true;
+
+      // 2) Logged-in user JWT with admin role in harbor_profiles
+      const authHeader = req.headers.get("Authorization") || "";
+      const jwt = authHeader.replace(/^Bearer\s+/i, "").trim();
+      if (!jwt || !anonKey) return false;
+
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${jwt}` } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData?.user) return false;
+
+      const { data: prof } = await supabase
+        .from("harbor_profiles")
+        .select("role,email")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+
+      if (prof?.role === "admin") return true;
+      if ((userData.user.email || "").toLowerCase() === "owenstreet7@gmail.com") return true;
+      return false;
+    }
 
     if (action === "report") {
       const id = crypto.randomUUID();
@@ -49,7 +76,7 @@ Deno.serve(async (req) => {
     }
 
     // Admin-only below
-    if (!adminSecret || provided !== adminSecret) {
+    if (!(await callerIsAdmin())) {
       return cors({ error: "Unauthorized" }, 401);
     }
 

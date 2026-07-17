@@ -17,6 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
 <script src="./db.js"></script>
+<script src="./auth.js"></script>
 <script src="./angel.js"></script>
 <script src="./moderation.js"></script>
 <style>
@@ -619,7 +620,7 @@ body {
         <button class="btn btn-ghost" id="home-write">Share something</button>
       </div>
       <p class="privacy-note" id="home-storage-note">First light greets everyone. Cloud sync turns on when Supabase is connected.</p>
-      <p class="privacy-note"><button class="linkish" data-go="guidelines" style="padding:0">Community guidelines</button> — be considerate, respectful, and thoughtful.</p>
+      <p class="privacy-note">You must agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
     </div>
   </section>
 
@@ -627,24 +628,25 @@ body {
   <section id="guidelines" class="screen" aria-label="Guidelines">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="feed">Back</button>
+      <button class="linkish" id="guidelines-leave" type="button">Leave</button>
     </div>
     <h2 class="section-title">Harbor Guidelines</h2>
-    <p class="section-sub">A peaceful place only works if we protect the peace.</p>
+    <p class="section-sub" id="guidelines-sub">Agreement is required to enter Harbor. A peaceful place only works if we protect the peace.</p>
     <div class="angel-panel" style="margin-bottom:16px">
       <div class="angel-label">Disclaimer</div>
       <p class="angel-text" style="font-size:1.1rem">Be considerate. Be respectful. Be thoughtful.</p>
       <p class="angel-note">Harbor is not a crisis service or professional care. Harmful content may be removed, and accounts may be restricted. Moderation records may be kept for safety or legal reasons.</p>
     </div>
     <ul id="guidelines-list" style="list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 18px;padding:0"></ul>
-    <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
+    <label id="guidelines-agree-label" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
       <input id="guidelines-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
       <span>I agree to keep Harbor considerate, respectful, and thoughtful.</span>
     </label>
     <div class="actions">
-      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — continue</button>
-      <button class="btn btn-secondary" data-go="home" type="button">Not now</button>
+      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — enter Harbor</button>
+      <button class="btn btn-secondary" id="decline-guidelines" type="button">I do not agree</button>
     </div>
+    <p class="footer-help" id="guidelines-gate-note">Without agreement, you can’t enter the shore, write, or join threads.</p>
   </section>
 
   <!-- FEED -->
@@ -653,7 +655,7 @@ body {
       <button class="brand-mini" data-go="home">Harbor</button>
       <div class="top-actions">
         <button class="linkish" data-go="write">Write</button>
-        <button class="linkish" id="open-identity">Identity</button>
+        <button class="linkish" id="open-account" type="button">Account</button>
       </div>
     </div>
     <h2 class="section-title">The shore</h2>
@@ -752,42 +754,65 @@ body {
     </div>
   </section>
 
-  <!-- IDENTITY SHEET -->
-  <section id="identity" class="screen" aria-label="Identity">
+  <!-- ACCOUNT / LOGIN -->
+  <section id="account" class="screen" aria-label="Account">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
       <button class="linkish" data-go="feed">Done</button>
     </div>
-    <h2 class="section-title">How you show up</h2>
-    <p class="section-sub">Default to anonymous anytime. A username is optional and can be changed.</p>
-    <div class="identity-bar" style="flex-direction:column;align-items:stretch">
+    <h2 class="section-title">Your account</h2>
+    <p class="section-sub" id="account-sub">Sign in to keep your Harbor name across devices, or stay as a guest below.</p>
+
+    <div id="auth-guest" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px">
+      <div class="seg" role="group" aria-label="Auth mode">
+        <button type="button" id="auth-mode-signin" class="active">Sign in</button>
+        <button type="button" id="auth-mode-signup">Create account</button>
+      </div>
+      <input id="auth-email" type="email" autocomplete="email" placeholder="Email"
+        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+      <input id="auth-password" type="password" autocomplete="current-password" placeholder="Password (6+ characters)"
+        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+      <input id="auth-display" type="text" maxlength="24" placeholder="Display name (optional)"
+        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none;display:none">
+      <button class="btn btn-primary" id="auth-submit" type="button">Sign in</button>
+      <p id="auth-status" style="font-size:.9rem;color:var(--ink-faint);margin:0"></p>
+    </div>
+
+    <div id="auth-user" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;display:none;margin-bottom:14px">
+      <p id="auth-user-line" style="margin:0;color:var(--water-deep);font-weight:560"></p>
+      <p id="auth-role-line" style="margin:0;font-size:.92rem;color:var(--ink-soft);display:none"></p>
+      <button class="btn btn-secondary btn-small" id="auth-signout" type="button">Sign out</button>
+    </div>
+
+    <div id="account-prefs" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;margin-top:8px">
+      <label for="pref-username" style="font-size:.95rem;color:var(--ink-soft)">How you appear on posts</label>
       <div class="seg" role="group" aria-label="Default identity">
         <button type="button" id="pref-anon" class="active">Anonymous</button>
         <button type="button" id="pref-named">Username</button>
       </div>
-      <input id="pref-username" type="text" maxlength="24" placeholder="Your Harbor username" autocomplete="nickname"
+      <input id="pref-username" type="text" maxlength="24" placeholder="Username on posts" autocomplete="nickname"
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
-      <button class="btn btn-primary" id="save-identity" type="button">Save identity</button>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:.95rem;color:var(--ink-soft);line-height:1.4">
         <input id="pref-scripture" type="checkbox" checked style="margin-top:4px;accent-color:var(--water-deep)">
-        <span>Include occasional gentle scripture in Shore whispers (still no politics).</span>
+        <span>Include occasional gentle scripture in Shore whispers.</span>
       </label>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <label for="pref-groq" style="font-size:.95rem;color:var(--ink-soft)">Angel AI key (Groq — stays on this phone)</label>
-        <input id="pref-groq" type="password" autocomplete="off" placeholder="gsk_… paste free Groq key"
-          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
-        <p id="groq-status" style="font-size:.86rem;color:var(--ink-faint);margin:0">Local Angel is active until a key is saved.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-        <label for="pref-admin" style="font-size:.95rem;color:var(--ink-soft)">Admin key (owner only — for remove/ban tools)</label>
-        <input id="pref-admin" type="password" autocomplete="off" placeholder="Optional admin secret"
-          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
-        <p style="font-size:.86rem;color:var(--ink-faint);margin:0">Used with the moderation Edge Function. Leave blank for regular visitors.</p>
-      </div>
-      <button class="linkish" data-go="guidelines" type="button">View community guidelines</button>
-      <button class="btn btn-secondary" id="reset-device" type="button">Clear cache on this phone</button>
+      <button class="btn btn-primary" id="save-identity" type="button">Save preferences</button>
+      <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
+      <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
-    <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
+
+    <div id="admin-panel" class="angel-panel" style="margin-top:18px;display:none">
+      <div class="angel-label">Admin</div>
+      <p class="angel-note" style="margin-bottom:12px">Only you see this after signing in as admin. Visitors never get these controls.</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label for="pref-groq" style="font-size:.95rem;color:var(--ink-soft)">Angel AI key (optional device fallback)</label>
+        <input id="pref-groq" type="password" autocomplete="off" placeholder="gsk_… optional"
+          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+        <p id="groq-status" style="font-size:.86rem;color:var(--ink-faint);margin:0">Prefer server-side Angel when possible.</p>
+      </div>
+    </div>
+
+    <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
   </section>
 
 </div>
@@ -901,7 +926,7 @@ const screens = {
   feed: $('#feed'),
   write: $('#write'),
   thread: $('#thread'),
-  identity: $('#identity'),
+  account: $('#account'),
   guidelines: $('#guidelines'),
 };
 
@@ -909,6 +934,12 @@ let selectedTags = new Set();
 let activeFilter = 'all';
 let currentThreadId = null;
 let draftMode = 'anonymous';
+let pendingAfterGuidelines = 'feed';
+const GATED_SCREENS = new Set(['feed', 'write', 'thread', 'account']);
+
+function hasAgreedGuidelines() {
+  return !!(window.HarborMod && HarborMod.guidelinesAccepted());
+}
 
 function loadJSON(key, fallback) {
   try {
@@ -993,11 +1024,33 @@ function startWhispers() {
 }
 
 function showScreen(name) {
+  if (GATED_SCREENS.has(name) && !hasAgreedGuidelines()) {
+    pendingAfterGuidelines = name;
+    renderGuidelines();
+    name = 'guidelines';
+  }
   Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
   window.scrollTo({ top: 0, behavior: 'smooth' });
   const rail = $('#shore-whisper-rail');
   if (rail) rail.classList.toggle('show', name === 'feed' || name === 'home' || name === 'write');
   if (name === 'feed' || name === 'home') showNextWhisper();
+}
+
+async function enterHarbor(dest = 'feed') {
+  if (!hasAgreedGuidelines()) {
+    pendingAfterGuidelines = dest;
+    renderGuidelines();
+    showScreen('guidelines');
+    return;
+  }
+  if (dest === 'feed') await renderFeed();
+  if (dest === 'write') {
+    syncWriteIdentityUI();
+    renderTagPicker();
+    updateToneAndCrisis();
+  }
+  if (dest === 'account') syncAccountScreen();
+  showScreen(dest);
 }
 
 function normalizeText(text) {
@@ -1236,9 +1289,7 @@ function renderFilters(posts) {
 async function renderFeed() {
   const status = cloudStatusText();
   const homeNote = $('#home-storage-note');
-  const idNote = $('#identity-storage-note');
   if (homeNote) homeNote.textContent = status;
-  if (idNote) idNote.textContent = status;
   const posts = allPostsForFeed();
   renderFilters(posts);
   const filtered = activeFilter === 'all'
@@ -1299,7 +1350,7 @@ async function openThread(id) {
   feltBtn.classList.toggle('done', !!feltMap[id]);
   feltBtn.textContent = feltMap[id] ? 'You felt this too' : 'I’ve felt this too';
   updateReplyAsLabel();
-  const adminOn = !!(localStorage.getItem('harbor.adminSecret.v1') || '').trim();
+  const adminOn = !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
   $('#admin-hide-btn').hidden = !adminOn || post.id === FEATURED_POST.id;
   $('#admin-ban-btn').hidden = !adminOn || post.id === FEATURED_POST.id || post.authorName === 'Harbor';
   showScreen('thread');
@@ -1332,21 +1383,52 @@ function syncWriteIdentityUI() {
   $('#username-input').value = identity.username || '';
 }
 
-function syncIdentityScreen() {
+function syncAccountScreen() {
+  const auth = window.HarborAuth ? HarborAuth.getState() : { isLoggedIn: false, isAdmin: false };
+  const guest = $('#auth-guest');
+  const userBox = $('#auth-user');
+  const adminPanel = $('#admin-panel');
+  const accountSub = $('#account-sub');
+  const roleLine = $('#auth-role-line');
+  const idNote = $('#identity-storage-note');
+
+  guest.style.display = auth.isLoggedIn ? 'none' : 'flex';
+  userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
+  adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
+
+  if (!auth.isLoggedIn) {
+    accountSub.textContent = 'Sign in to keep your Harbor name across devices, or stay as a guest below.';
+    if (idNote) idNote.textContent = 'Posting preferences stay on this device unless you sign in.';
+  } else {
+    $('#auth-user-line').textContent = auth.user?.email || 'Signed in';
+    if (auth.isAdmin) {
+      roleLine.style.display = 'block';
+      roleLine.textContent = 'Admin — remove/ban tools unlocked on posts.';
+      accountSub.textContent = 'You’re signed in as Harbor admin.';
+      if (idNote) idNote.textContent = 'Admin tools appear only while you’re signed in.';
+    } else {
+      roleLine.style.display = 'none';
+      roleLine.textContent = '';
+      accountSub.textContent = 'Signed in. Choose how you appear on posts.';
+      if (idNote) idNote.textContent = 'You’re signed in. Preferences below apply on this device.';
+    }
+  }
+
   const identity = loadIdentity();
   const whispers = loadWhisperPrefs();
   $('#pref-anon').classList.toggle('active', identity.mode === 'anonymous');
   $('#pref-named').classList.toggle('active', identity.mode === 'named');
-  $('#pref-username').value = identity.username || '';
+  $('#pref-username').value = identity.username || (auth.profile?.display_name || '');
   $('#pref-username').disabled = identity.mode !== 'named';
   $('#pref-scripture').checked = whispers.includeScripture;
-  try { $('#pref-groq').value = localStorage.getItem('harbor.groqKey.v1') || ''; } catch (_) { $('#pref-groq').value = ''; }
-  try { $('#pref-admin').value = localStorage.getItem('harbor.adminSecret.v1') || ''; } catch (_) { $('#pref-admin').value = ''; }
-  const status = $('#groq-status');
-  if (status) {
-    status.textContent = ($('#pref-groq').value || '').trim()
-      ? 'Angel AI key saved on this phone.'
-      : 'Local Angel is active until a key is saved.';
+  if (auth.isAdmin) {
+    try { $('#pref-groq').value = localStorage.getItem('harbor.groqKey.v1') || ''; } catch (_) { $('#pref-groq').value = ''; }
+    const status = $('#groq-status');
+    if (status) {
+      status.textContent = ($('#pref-groq').value || '').trim()
+        ? 'Optional Angel fallback key saved on this phone.'
+        : 'Optional — only needed as a device fallback.';
+    }
   }
 }
 
@@ -1601,14 +1683,14 @@ async function toggleFelt() {
 }
 
 /* events */
-$('#enter-feed').addEventListener('click', async () => { await renderFeed(); showScreen('feed'); });
-$('#home-write').addEventListener('click', () => {
-  syncWriteIdentityUI();
-  renderTagPicker();
-  updateToneAndCrisis();
-  showScreen('write');
+$('#enter-feed').addEventListener('click', () => enterHarbor('feed'));
+$('#home-write').addEventListener('click', () => enterHarbor('write'));
+$('#home-guidelines').addEventListener('click', () => {
+  pendingAfterGuidelines = 'feed';
+  renderGuidelines();
+  showScreen('guidelines');
 });
-$('#open-identity').addEventListener('click', () => { syncIdentityScreen(); showScreen('identity'); });
+$('#open-account').addEventListener('click', () => enterHarbor('account'));
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
 $('#save-private').addEventListener('click', () => release(true));
@@ -1649,17 +1731,70 @@ $('#save-identity').addEventListener('click', () => {
   }
   saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
   saveWhisperPrefs({ includeScripture: $('#pref-scripture').checked });
-  try {
-    const groq = ($('#pref-groq').value || '').trim();
-    if (groq) localStorage.setItem('harbor.groqKey.v1', groq);
-    else localStorage.removeItem('harbor.groqKey.v1');
-    const admin = ($('#pref-admin').value || '').trim();
-    if (admin) localStorage.setItem('harbor.adminSecret.v1', admin);
-    else localStorage.removeItem('harbor.adminSecret.v1');
-  } catch (_) {}
+  if (window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin()) {
+    try {
+      const groq = ($('#pref-groq').value || '').trim();
+      if (groq) localStorage.setItem('harbor.groqKey.v1', groq);
+      else localStorage.removeItem('harbor.groqKey.v1');
+    } catch (_) {}
+  }
   showNextWhisper();
   showScreen('feed');
   renderFeed();
+});
+
+let authMode = 'signin';
+$('#auth-mode-signin').addEventListener('click', () => {
+  authMode = 'signin';
+  $('#auth-mode-signin').classList.add('active');
+  $('#auth-mode-signup').classList.remove('active');
+  $('#auth-display').style.display = 'none';
+  $('#auth-submit').textContent = 'Sign in';
+  $('#auth-password').autocomplete = 'current-password';
+});
+$('#auth-mode-signup').addEventListener('click', () => {
+  authMode = 'signup';
+  $('#auth-mode-signup').classList.add('active');
+  $('#auth-mode-signin').classList.remove('active');
+  $('#auth-display').style.display = 'block';
+  $('#auth-submit').textContent = 'Create account';
+  $('#auth-password').autocomplete = 'new-password';
+});
+$('#auth-submit').addEventListener('click', async () => {
+  const email = ($('#auth-email').value || '').trim();
+  const password = $('#auth-password').value || '';
+  const display = ($('#auth-display').value || '').trim();
+  const status = $('#auth-status');
+  if (!window.HarborAuth) {
+    status.textContent = 'Sign-in isn’t ready yet. Refresh and try again.';
+    return;
+  }
+  if (!email || password.length < 6) {
+    status.textContent = 'Use a valid email and a password with at least 6 characters.';
+    return;
+  }
+  status.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
+  try {
+    if (authMode === 'signin') await HarborAuth.signIn(email, password);
+    else await HarborAuth.signUp(email, password, display);
+    const state = HarborAuth.getState();
+    if (!state.session && authMode === 'signup') {
+      status.textContent = 'Account created. If email confirmation is on, check your inbox, then sign in.';
+    } else {
+      status.textContent = state.isAdmin ? 'Welcome, admin.' : 'Welcome ashore.';
+    }
+    syncAccountScreen();
+    const btn = $('#open-account');
+    if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+  } catch (err) {
+    status.textContent = err.message || 'Could not authenticate.';
+  }
+});
+$('#auth-signout').addEventListener('click', async () => {
+  if (window.HarborAuth) await HarborAuth.signOut();
+  syncAccountScreen();
+  const btn = $('#open-account');
+  if (btn) btn.textContent = 'Sign in';
 });
 
 $('#report-btn').addEventListener('click', async () => {
@@ -1699,25 +1834,23 @@ $('#report-btn').addEventListener('click', async () => {
 });
 
 $('#admin-hide-btn').addEventListener('click', async () => {
-  const secret = localStorage.getItem('harbor.adminSecret.v1') || '';
-  if (!secret || !currentThreadId) return;
+  if (!currentThreadId || !(window.HarborAuth && HarborAuth.isAdmin())) return;
   const reason = prompt('Reason for removal (saved in moderation history):', 'Guidelines violation');
   if (!reason) return;
   try {
-    await HarborDB.modAction({ action: 'hide_post', postId: currentThreadId, reason }, secret);
+    await HarborDB.modAction({ action: 'hide_post', postId: currentThreadId, reason });
     await refreshCloudPosts();
     alert('Post removed and archived in moderation history.');
     showScreen('feed');
     await renderFeed();
   } catch (err) {
-    alert(err.message || 'Admin remove failed. Deploy harbor-moderation function + ADMIN_SECRET first.');
+    alert(err.message || 'Admin remove failed.');
   }
 });
 
 $('#admin-ban-btn').addEventListener('click', async () => {
-  const secret = localStorage.getItem('harbor.adminSecret.v1') || '';
   const post = getPostById(currentThreadId);
-  if (!secret || !post) return;
+  if (!post || !(window.HarborAuth && HarborAuth.isAdmin())) return;
   const banUsername = post.authorMode === 'named' ? post.authorName : '';
   const banDevice = post.deviceId || '';
   const mode = banUsername
@@ -1732,25 +1865,61 @@ $('#admin-ban-btn').addEventListener('click', async () => {
   const reason = prompt('Ban reason (saved in history):', 'Guidelines violation');
   if (!reason) return;
   try {
-    await HarborDB.modAction({ action: 'ban', banType, banValue, reason }, secret);
+    await HarborDB.modAction({ action: 'ban', banType, banValue, reason });
     alert(`Ban saved for ${banType}: ${banValue}`);
   } catch (err) {
-    alert(err.message || 'Ban failed. Deploy harbor-moderation function + ADMIN_SECRET first.');
+    alert(err.message || 'Ban failed.');
   }
 });
 
-$('#accept-guidelines').addEventListener('click', () => {
+async function continueAfterGuidelines() {
+  const dest = GATED_SCREENS.has(pendingAfterGuidelines) ? pendingAfterGuidelines : 'feed';
+  $('#write-guidelines-check').checked = true;
+  if (dest === 'feed') await renderFeed();
+  if (dest === 'write') {
+    syncWriteIdentityUI();
+    renderTagPicker();
+    updateToneAndCrisis();
+  }
+  if (dest === 'account') syncAccountScreen();
+  if (dest === 'thread' && currentThreadId) {
+    await openThread(currentThreadId);
+    return;
+  }
+  showScreen(dest === 'thread' ? 'feed' : dest);
+}
+
+$('#accept-guidelines').addEventListener('click', async () => {
+  if (hasAgreedGuidelines()) {
+    await continueAfterGuidelines();
+    return;
+  }
   if (!$('#guidelines-check').checked) {
-    alert('Please check the box to agree before continuing.');
+    alert('Please check the box to agree before entering Harbor.');
     return;
   }
   if (window.HarborMod) HarborMod.acceptGuidelines();
-  $('#write-guidelines-check').checked = true;
-  showScreen('write');
-  syncWriteIdentityUI();
-  renderTagPicker();
-  updateToneAndCrisis();
+  await continueAfterGuidelines();
 });
+
+function leaveWithoutGuidelines() {
+  if (hasAgreedGuidelines()) {
+    showScreen('home');
+    return;
+  }
+  pendingAfterGuidelines = 'feed';
+  showScreen('home');
+}
+
+$('#decline-guidelines').addEventListener('click', () => {
+  if (hasAgreedGuidelines()) {
+    showScreen('home');
+    return;
+  }
+  alert('Harbor requires agreement to the community guidelines. You’re welcome back anytime.');
+  leaveWithoutGuidelines();
+});
+$('#guidelines-leave').addEventListener('click', leaveWithoutGuidelines);
 
 $('#add-tag').addEventListener('click', () => {
   const tag = normalizeTag($('#custom-tag').value);
@@ -1769,16 +1938,23 @@ $('#custom-tag').addEventListener('keydown', (e) => {
 document.querySelectorAll('[data-go]').forEach((el) => {
   el.addEventListener('click', async () => {
     const dest = el.getAttribute('data-go');
+    if (dest === 'guidelines') {
+      pendingAfterGuidelines = hasAgreedGuidelines() ? 'feed' : 'feed';
+      renderGuidelines();
+      showScreen('guidelines');
+      return;
+    }
+    if (GATED_SCREENS.has(dest) && !hasAgreedGuidelines()) {
+      await enterHarbor(dest);
+      return;
+    }
     if (dest === 'feed') await renderFeed();
-    if (dest === 'identity') syncIdentityScreen();
-    if (dest === 'guidelines') renderGuidelines();
+    if (dest === 'account') syncAccountScreen();
     if (dest === 'write') {
       syncWriteIdentityUI();
       renderTagPicker();
       updateToneAndCrisis();
-      if (window.HarborMod && HarborMod.guidelinesAccepted()) {
-        $('#write-guidelines-check').checked = true;
-      }
+      if (hasAgreedGuidelines()) $('#write-guidelines-check').checked = true;
     }
     showScreen(dest);
   });
@@ -1842,7 +2018,7 @@ function mountScreenSkies() {
         </svg>
       </div>
     </div>`;
-  ['feed', 'write', 'thread', 'identity', 'guidelines'].forEach((id) => {
+  ['feed', 'write', 'thread', 'account', 'guidelines'].forEach((id) => {
     const screen = document.getElementById(id);
     if (!screen || screen.querySelector('.screen-sky')) return;
     screen.insertAdjacentHTML('afterbegin', skyHtml);
@@ -1862,10 +2038,29 @@ function renderGuidelines() {
     <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.35);color:var(--ink-soft);font-size:.92rem">
       ${escapeHtml(g.legal)}
     </li>`;
-  if (HarborMod.guidelinesAccepted()) {
-    $('#guidelines-check').checked = true;
-    $('#write-guidelines-check').checked = true;
+  const agreed = hasAgreedGuidelines();
+  const check = $('#guidelines-check');
+  const acceptBtn = $('#accept-guidelines');
+  const declineBtn = $('#decline-guidelines');
+  const gateNote = $('#guidelines-gate-note');
+  const sub = $('#guidelines-sub');
+  if (check) {
+    check.checked = agreed;
+    check.disabled = agreed;
   }
+  if (acceptBtn) acceptBtn.textContent = agreed ? 'Continue into Harbor' : 'I agree — enter Harbor';
+  if (declineBtn) declineBtn.style.display = agreed ? 'none' : '';
+  if (gateNote) {
+    gateNote.textContent = agreed
+      ? 'You’ve already agreed. You can continue anytime.'
+      : 'Without agreement, you can’t enter the shore, write, or join threads.';
+  }
+  if (sub) {
+    sub.textContent = agreed
+      ? 'Thank you for helping keep Harbor peaceful.'
+      : 'Agreement is required to enter Harbor. A peaceful place only works if we protect the peace.';
+  }
+  if (agreed) $('#write-guidelines-check').checked = true;
 }
 
 async function boot() {
@@ -1887,6 +2082,21 @@ async function boot() {
   const note = $('#home-storage-note');
   if (note) note.textContent = cloudStatusText();
 
+  if (window.HarborAuth) {
+    try {
+      await HarborAuth.init();
+      HarborAuth.onChange(() => {
+        syncAccountScreen();
+        const btn = $('#open-account');
+        if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+      });
+      const btn = $('#open-account');
+      if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+    } catch (err) {
+      console.warn('Harbor auth init failed', err);
+    }
+  }
+
   if (window.HarborDB) {
     try {
       await HarborDB.init();
@@ -1901,7 +2111,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=15');
+      await navigator.serviceWorker.register('./sw.js?v=18');
     } catch (_) {}
   }
 }

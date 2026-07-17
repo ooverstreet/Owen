@@ -152,10 +152,11 @@
     const key = cfg.supabaseAnonKey;
     if (!url || !key) throw new Error('Cloud not configured');
     const endpoint = `${url.replace(/\/$/, '')}/functions/v1/harbor-moderation`;
+    const userJwt = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
     const headers = {
       'Content-Type': 'application/json',
       apikey: key,
-      Authorization: `Bearer ${key}`,
+      Authorization: `Bearer ${userJwt || key}`,
     };
     if (adminSecret) headers['x-harbor-admin'] = adminSecret;
     const res = await fetch(endpoint, {

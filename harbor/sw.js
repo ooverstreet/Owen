@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v15';
+const CACHE = 'harbor-v18';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
@@ -6,6 +6,7 @@ const URLS  = [
   '/Owen/harbor/icon.svg',
   '/Owen/harbor/config.js',
   '/Owen/harbor/db.js',
+  '/Owen/harbor/auth.js',
   '/Owen/harbor/angel.js',
   '/Owen/harbor/moderation.js',
 ];
@@ -30,6 +31,7 @@ self.addEventListener('fetch', e => {
     || url.pathname.endsWith('/harbor/index.html')
     || url.pathname.endsWith('/harbor/config.js')
     || url.pathname.endsWith('/harbor/db.js')
+    || url.pathname.endsWith('/harbor/auth.js')
     || url.pathname.endsWith('/harbor/angel.js')
     || url.pathname.endsWith('/harbor/moderation.js');
 
