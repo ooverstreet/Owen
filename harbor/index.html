@@ -358,7 +358,8 @@ body {
     </div>
     <h2 class="section-title">The shore</h2>
     <p class="section-sub">Start with the first light. Then open any thread that meets you.</p>
-    <div class="feed-filters" id="feed-filters" aria-label="Filter by tag"></div>
+    <p class="section-sub" style="margin-top:-8px;margin-bottom:14px;font-size:.92rem">Topics are simple labels — tap one to show only posts about that feeling.</p>
+    <div class="feed-filters" id="feed-filters" aria-label="Filter by topic"></div>
     <div class="feed-list" id="feed-list"></div>
     <div class="fab-wrap">
       <button class="btn btn-primary btn-small" data-go="write">New post</button>
@@ -372,7 +373,7 @@ body {
       <button class="linkish" data-go="feed">Feed</button>
     </div>
     <h2 class="section-title">What’s weighing on you?</h2>
-    <p class="section-sub">Tag it so others can find a similar shore. Stay anonymous, or sign a name.</p>
+    <p class="section-sub">Stay anonymous, or sign a name. Add a topic if you want — it’s just a label like “hope” or “goodbye.”</p>
     <div class="write-shell">
       <div class="identity-bar">
         <div class="seg" role="group" aria-label="Post as">
@@ -388,10 +389,10 @@ body {
         <span id="count">0 / 4000</span>
       </div>
       <div>
-        <p class="section-sub" style="margin-bottom:10px">Tags</p>
+        <p class="section-sub" style="margin-bottom:10px">Topic <span style="color:var(--ink-faint);font-weight:420">(optional)</span></p>
         <div class="tag-picker" id="tag-picker"></div>
         <div class="custom-tag-row" style="margin-top:10px">
-          <input id="custom-tag" type="text" maxlength="24" placeholder="Add a tag" autocomplete="off">
+          <input id="custom-tag" type="text" maxlength="24" placeholder="Or type your own topic" autocomplete="off">
           <button class="btn btn-secondary btn-small" type="button" id="add-tag">Add</button>
         </div>
       </div>
@@ -470,7 +471,7 @@ const FEATURED_POST = {
   authorMode: 'named',
   authorName: 'Harbor',
   text: 'Today I start a new and exciting chapter. Harbor. A place people can come and be themselves with no judgment. Say how you feel or what makes you excited, happy, disappointed etc. While respecting others and their opinions.',
-  tags: ['welcome', 'first-light', 'harbor', 'respect'],
+  tags: ['welcome'],
   createdAt: Date.UTC(2026, 6, 17, 12, 0, 0),
   angelLine: 'You don’t have to tidy the feeling before it’s welcome here.',
   angelNote: 'Your words stay on this device for now. Share only what feels safe.',
@@ -575,6 +576,14 @@ function saveIdentity(identity) {
   saveJSON(STORAGE_IDENTITY, identity);
 }
 
+function normalizeText(text) {
+  return String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function isSameAsFeatured(text) {
+  return normalizeText(text) === normalizeText(FEATURED_POST.text);
+}
+
 function migrateLegacy() {
   const existing = loadJSON(STORAGE_POSTS, null);
   if (existing) return;
@@ -583,27 +592,36 @@ function migrateLegacy() {
     saveJSON(STORAGE_POSTS, []);
     return;
   }
-  const migrated = legacy.map((e) => ({
-    id: e.id || uid(),
-    featured: false,
-    authorMode: 'anonymous',
-    authorName: 'Anonymous',
-    text: e.text || '',
-    tags: e.theme ? [e.theme] : [],
-    createdAt: e.createdAt || Date.now(),
-    angelLine: e.angelLine || craftAngel(e.text || '').line,
-    angelNote: e.angelNote || ANGEL_NOTES[0],
-    feltCount: 0,
-    private: false,
-    replies: [],
-  }));
+  const migrated = legacy
+    .filter((e) => e && e.text && !isSameAsFeatured(e.text))
+    .map((e) => ({
+      id: e.id || uid(),
+      featured: false,
+      authorMode: 'anonymous',
+      authorName: 'Anonymous',
+      text: e.text || '',
+      tags: e.theme && e.theme !== 'general' ? [e.theme] : [],
+      createdAt: e.createdAt || Date.now(),
+      angelLine: e.angelLine || craftAngel(e.text || '').line,
+      angelNote: e.angelNote || ANGEL_NOTES[0],
+      feltCount: 0,
+      private: false,
+      replies: [],
+    }));
   saveJSON(STORAGE_POSTS, migrated);
+}
+
+function pruneFeaturedDuplicates(posts) {
+  return posts.filter((p) => p && p.text && !isSameAsFeatured(p.text));
 }
 
 function loadPosts() {
   migrateLegacy();
   const local = loadJSON(STORAGE_POSTS, []);
-  return Array.isArray(local) ? local : [];
+  const list = Array.isArray(local) ? local : [];
+  const pruned = pruneFeaturedDuplicates(list);
+  if (pruned.length !== list.length) savePosts(pruned);
+  return pruned;
 }
 
 function savePosts(posts) {
@@ -664,13 +682,12 @@ function normalizeTag(tag) {
 }
 
 function allPostsForFeed() {
-  const local = loadPosts().filter((p) => !p.private);
-  return [FEATURED_POST, ...local.filter((p) => p.id !== FEATURED_POST.id)]
-    .sort((a, b) => {
-      if (a.featured && !b.featured) return -1;
-      if (!a.featured && b.featured) return 1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
-    });
+  const local = loadPosts().filter((p) => !p.private && p.id !== FEATURED_POST.id);
+  return [FEATURED_POST, ...local].sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
 }
 
 function getPostById(id) {
