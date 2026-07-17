@@ -620,7 +620,7 @@ body {
         <button class="btn btn-ghost" id="home-write">Share something</button>
       </div>
       <p class="privacy-note" id="home-storage-note">First light greets everyone. Cloud sync turns on when Supabase is connected.</p>
-      <p class="privacy-note"><button class="linkish" data-go="guidelines" style="padding:0">Community guidelines</button> — be considerate, respectful, and thoughtful.</p>
+      <p class="privacy-note">You must agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
     </div>
   </section>
 
@@ -628,24 +628,25 @@ body {
   <section id="guidelines" class="screen" aria-label="Guidelines">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="feed">Back</button>
+      <button class="linkish" id="guidelines-leave" type="button">Leave</button>
     </div>
     <h2 class="section-title">Harbor Guidelines</h2>
-    <p class="section-sub">A peaceful place only works if we protect the peace.</p>
+    <p class="section-sub" id="guidelines-sub">Agreement is required to enter Harbor. A peaceful place only works if we protect the peace.</p>
     <div class="angel-panel" style="margin-bottom:16px">
       <div class="angel-label">Disclaimer</div>
       <p class="angel-text" style="font-size:1.1rem">Be considerate. Be respectful. Be thoughtful.</p>
       <p class="angel-note">Harbor is not a crisis service or professional care. Harmful content may be removed, and accounts may be restricted. Moderation records may be kept for safety or legal reasons.</p>
     </div>
     <ul id="guidelines-list" style="list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 18px;padding:0"></ul>
-    <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
+    <label id="guidelines-agree-label" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
       <input id="guidelines-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
       <span>I agree to keep Harbor considerate, respectful, and thoughtful.</span>
     </label>
     <div class="actions">
-      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — continue</button>
-      <button class="btn btn-secondary" data-go="home" type="button">Not now</button>
+      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — enter Harbor</button>
+      <button class="btn btn-secondary" id="decline-guidelines" type="button">I do not agree</button>
     </div>
+    <p class="footer-help" id="guidelines-gate-note">Without agreement, you can’t enter the shore, write, or join threads.</p>
   </section>
 
   <!-- FEED -->
@@ -933,6 +934,12 @@ let selectedTags = new Set();
 let activeFilter = 'all';
 let currentThreadId = null;
 let draftMode = 'anonymous';
+let pendingAfterGuidelines = 'feed';
+const GATED_SCREENS = new Set(['feed', 'write', 'thread', 'account']);
+
+function hasAgreedGuidelines() {
+  return !!(window.HarborMod && HarborMod.guidelinesAccepted());
+}
 
 function loadJSON(key, fallback) {
   try {
@@ -1017,11 +1024,33 @@ function startWhispers() {
 }
 
 function showScreen(name) {
+  if (GATED_SCREENS.has(name) && !hasAgreedGuidelines()) {
+    pendingAfterGuidelines = name;
+    renderGuidelines();
+    name = 'guidelines';
+  }
   Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
   window.scrollTo({ top: 0, behavior: 'smooth' });
   const rail = $('#shore-whisper-rail');
   if (rail) rail.classList.toggle('show', name === 'feed' || name === 'home' || name === 'write');
   if (name === 'feed' || name === 'home') showNextWhisper();
+}
+
+async function enterHarbor(dest = 'feed') {
+  if (!hasAgreedGuidelines()) {
+    pendingAfterGuidelines = dest;
+    renderGuidelines();
+    showScreen('guidelines');
+    return;
+  }
+  if (dest === 'feed') await renderFeed();
+  if (dest === 'write') {
+    syncWriteIdentityUI();
+    renderTagPicker();
+    updateToneAndCrisis();
+  }
+  if (dest === 'account') syncAccountScreen();
+  showScreen(dest);
 }
 
 function normalizeText(text) {
@@ -1654,14 +1683,14 @@ async function toggleFelt() {
 }
 
 /* events */
-$('#enter-feed').addEventListener('click', async () => { await renderFeed(); showScreen('feed'); });
-$('#home-write').addEventListener('click', () => {
-  syncWriteIdentityUI();
-  renderTagPicker();
-  updateToneAndCrisis();
-  showScreen('write');
+$('#enter-feed').addEventListener('click', () => enterHarbor('feed'));
+$('#home-write').addEventListener('click', () => enterHarbor('write'));
+$('#home-guidelines').addEventListener('click', () => {
+  pendingAfterGuidelines = 'feed';
+  renderGuidelines();
+  showScreen('guidelines');
 });
-$('#open-account').addEventListener('click', () => { syncAccountScreen(); showScreen('account'); });
+$('#open-account').addEventListener('click', () => enterHarbor('account'));
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
 $('#save-private').addEventListener('click', () => release(true));
@@ -1843,18 +1872,54 @@ $('#admin-ban-btn').addEventListener('click', async () => {
   }
 });
 
-$('#accept-guidelines').addEventListener('click', () => {
+async function continueAfterGuidelines() {
+  const dest = GATED_SCREENS.has(pendingAfterGuidelines) ? pendingAfterGuidelines : 'feed';
+  $('#write-guidelines-check').checked = true;
+  if (dest === 'feed') await renderFeed();
+  if (dest === 'write') {
+    syncWriteIdentityUI();
+    renderTagPicker();
+    updateToneAndCrisis();
+  }
+  if (dest === 'account') syncAccountScreen();
+  if (dest === 'thread' && currentThreadId) {
+    await openThread(currentThreadId);
+    return;
+  }
+  showScreen(dest === 'thread' ? 'feed' : dest);
+}
+
+$('#accept-guidelines').addEventListener('click', async () => {
+  if (hasAgreedGuidelines()) {
+    await continueAfterGuidelines();
+    return;
+  }
   if (!$('#guidelines-check').checked) {
-    alert('Please check the box to agree before continuing.');
+    alert('Please check the box to agree before entering Harbor.');
     return;
   }
   if (window.HarborMod) HarborMod.acceptGuidelines();
-  $('#write-guidelines-check').checked = true;
-  showScreen('write');
-  syncWriteIdentityUI();
-  renderTagPicker();
-  updateToneAndCrisis();
+  await continueAfterGuidelines();
 });
+
+function leaveWithoutGuidelines() {
+  if (hasAgreedGuidelines()) {
+    showScreen('home');
+    return;
+  }
+  pendingAfterGuidelines = 'feed';
+  showScreen('home');
+}
+
+$('#decline-guidelines').addEventListener('click', () => {
+  if (hasAgreedGuidelines()) {
+    showScreen('home');
+    return;
+  }
+  alert('Harbor requires agreement to the community guidelines. You’re welcome back anytime.');
+  leaveWithoutGuidelines();
+});
+$('#guidelines-leave').addEventListener('click', leaveWithoutGuidelines);
 
 $('#add-tag').addEventListener('click', () => {
   const tag = normalizeTag($('#custom-tag').value);
@@ -1873,16 +1938,23 @@ $('#custom-tag').addEventListener('keydown', (e) => {
 document.querySelectorAll('[data-go]').forEach((el) => {
   el.addEventListener('click', async () => {
     const dest = el.getAttribute('data-go');
+    if (dest === 'guidelines') {
+      pendingAfterGuidelines = hasAgreedGuidelines() ? 'feed' : 'feed';
+      renderGuidelines();
+      showScreen('guidelines');
+      return;
+    }
+    if (GATED_SCREENS.has(dest) && !hasAgreedGuidelines()) {
+      await enterHarbor(dest);
+      return;
+    }
     if (dest === 'feed') await renderFeed();
     if (dest === 'account') syncAccountScreen();
-    if (dest === 'guidelines') renderGuidelines();
     if (dest === 'write') {
       syncWriteIdentityUI();
       renderTagPicker();
       updateToneAndCrisis();
-      if (window.HarborMod && HarborMod.guidelinesAccepted()) {
-        $('#write-guidelines-check').checked = true;
-      }
+      if (hasAgreedGuidelines()) $('#write-guidelines-check').checked = true;
     }
     showScreen(dest);
   });
@@ -1966,10 +2038,29 @@ function renderGuidelines() {
     <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.35);color:var(--ink-soft);font-size:.92rem">
       ${escapeHtml(g.legal)}
     </li>`;
-  if (HarborMod.guidelinesAccepted()) {
-    $('#guidelines-check').checked = true;
-    $('#write-guidelines-check').checked = true;
+  const agreed = hasAgreedGuidelines();
+  const check = $('#guidelines-check');
+  const acceptBtn = $('#accept-guidelines');
+  const declineBtn = $('#decline-guidelines');
+  const gateNote = $('#guidelines-gate-note');
+  const sub = $('#guidelines-sub');
+  if (check) {
+    check.checked = agreed;
+    check.disabled = agreed;
   }
+  if (acceptBtn) acceptBtn.textContent = agreed ? 'Continue into Harbor' : 'I agree — enter Harbor';
+  if (declineBtn) declineBtn.style.display = agreed ? 'none' : '';
+  if (gateNote) {
+    gateNote.textContent = agreed
+      ? 'You’ve already agreed. You can continue anytime.'
+      : 'Without agreement, you can’t enter the shore, write, or join threads.';
+  }
+  if (sub) {
+    sub.textContent = agreed
+      ? 'Thank you for helping keep Harbor peaceful.'
+      : 'Agreement is required to enter Harbor. A peaceful place only works if we protect the peace.';
+  }
+  if (agreed) $('#write-guidelines-check').checked = true;
 }
 
 async function boot() {
@@ -2020,7 +2111,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=17');
+      await navigator.serviceWorker.register('./sw.js?v=18');
     } catch (_) {}
   }
 }
