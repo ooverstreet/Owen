@@ -2028,10 +2028,29 @@ document.querySelectorAll('[data-go]').forEach((el) => {
 });
 
 async function resetLocalHarbor({ reload = true } = {}) {
+  // Sign out first so Supabase clears its persisted auth session
+  try {
+    if (window.HarborAuth && HarborAuth.signOut) await HarborAuth.signOut();
+  } catch (_) {}
+
   try {
     Object.keys(localStorage)
-      .filter((k) => k.startsWith('harbor'))
+      .filter((k) => (
+        k.startsWith('harbor')
+        || k.startsWith('sb-')
+        || /supabase/i.test(k)
+      ))
       .forEach((k) => localStorage.removeItem(k));
+  } catch (_) {}
+
+  try {
+    Object.keys(sessionStorage)
+      .filter((k) => (
+        k.startsWith('harbor')
+        || k.startsWith('sb-')
+        || /supabase/i.test(k)
+      ))
+      .forEach((k) => sessionStorage.removeItem(k));
   } catch (_) {}
 
   if ('caches' in window) {
