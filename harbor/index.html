@@ -14,6 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@340;420;560&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script src="./db.js"></script>
 <style>
 :root {
   --mist: #E8F1F4;
@@ -343,7 +346,7 @@ body {
         <button class="btn btn-primary" id="enter-feed">Enter Harbor</button>
         <button class="btn btn-ghost" id="home-write">Share something</button>
       </div>
-      <p class="privacy-note">Your posts stay on this device for now. A first light post greets everyone.</p>
+      <p class="privacy-note" id="home-storage-note">First light greets everyone. Cloud sync turns on when Supabase is connected.</p>
     </div>
   </section>
 
@@ -430,6 +433,7 @@ body {
         <div class="reply-list" id="reply-list"></div>
       </div>
       <div class="reply-composer" id="reply-composer">
+        <p class="section-sub" id="reply-as" style="margin-bottom:0;font-size:.92rem">Replying as Anonymous</p>
         <label class="sr-only" for="reply-entry">Reply</label>
         <textarea id="reply-entry" maxlength="2000" placeholder="Reply gently, if you’ve been here too…"></textarea>
         <button class="btn btn-primary btn-small" id="reply-btn" type="button">Add to thread</button>
@@ -454,7 +458,7 @@ body {
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
       <button class="btn btn-primary" id="save-identity" type="button">Save identity</button>
     </div>
-    <p class="footer-help">Clearing this device clears local posts. The first light post always remains for everyone.</p>
+    <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
   </section>
 
 </div>
@@ -474,10 +478,12 @@ const FEATURED_POST = {
   tags: ['welcome'],
   createdAt: Date.UTC(2026, 6, 17, 12, 0, 0),
   angelLine: 'You don’t have to tidy the feeling before it’s welcome here.',
-  angelNote: 'Your words stay on this device for now. Share only what feels safe.',
+  angelNote: 'Share only what feels safe. Be kind to yourself and others here.',
   feltCount: 1,
   private: false,
 };
+
+let cloudPosts = null; // null = not loaded / unavailable
 
 const SUGGESTED_TAGS = ['grief', 'goodbye', 'worry', 'hope', 'gratitude', 'family', 'change', 'lonely', 'healing', 'florida'];
 const STORAGE_POSTS = 'harbor.posts.v2';
@@ -527,7 +533,7 @@ const ANGEL_POOL = {
 };
 const ANGEL_NOTES = [
   'I’m not a therapist or a crisis line — just a steady, respectful companion for what you carry.',
-  'Your words stay on this device for now. Share only what feels safe.',
+  'Share only what feels safe. Be kind to yourself and others here.',
   'If this feeling returns tomorrow, you’re allowed to write it again. Repetition isn’t failure.'
 ];
 
@@ -581,7 +587,13 @@ function normalizeText(text) {
 }
 
 function isSameAsFeatured(text) {
-  return normalizeText(text) === normalizeText(FEATURED_POST.text);
+  const a = normalizeText(text);
+  const b = normalizeText(FEATURED_POST.text);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  // Catch near-duplicates from early local drafts
+  const stem = b.slice(0, 64);
+  return stem.length > 20 && a.startsWith(stem);
 }
 
 function migrateLegacy() {
@@ -617,11 +629,32 @@ function pruneFeaturedDuplicates(posts) {
 
 function loadPosts() {
   migrateLegacy();
+  // Drop old journal store so founding entry cannot re-migrate as a duplicate
+  try { localStorage.removeItem(STORAGE_LEGACY); } catch (_) {}
   const local = loadJSON(STORAGE_POSTS, []);
   const list = Array.isArray(local) ? local : [];
   const pruned = pruneFeaturedDuplicates(list);
   if (pruned.length !== list.length) savePosts(pruned);
   return pruned;
+}
+
+function cloudStatusText() {
+  if (window.HarborDB && HarborDB.isReady()) return 'Cloud sync on — posts can reach every visitor.';
+  if (window.HarborDB && HarborDB.configured()) return 'Cloud configured, connecting…';
+  return 'Local mode — connect Supabase in config.js to share across devices.';
+}
+
+async function refreshCloudPosts() {
+  if (!window.HarborDB || !HarborDB.isReady()) {
+    cloudPosts = null;
+    return;
+  }
+  try {
+    cloudPosts = await HarborDB.listPosts();
+  } catch (err) {
+    console.warn('Harbor cloud read failed', err);
+    cloudPosts = null;
+  }
 }
 
 function savePosts(posts) {
@@ -682,7 +715,17 @@ function normalizeTag(tag) {
 }
 
 function allPostsForFeed() {
-  const local = loadPosts().filter((p) => !p.private && p.id !== FEATURED_POST.id);
+  if (Array.isArray(cloudPosts) && cloudPosts.length) {
+    const list = cloudPosts.filter((p) => !p.private);
+    const hasFeatured = list.some((p) => p.featured || p.id === FEATURED_POST.id);
+    const merged = hasFeatured ? list.slice() : [FEATURED_POST, ...list];
+    return merged.sort((a, b) => {
+      if ((a.featured || a.id === FEATURED_POST.id) && !(b.featured || b.id === FEATURED_POST.id)) return -1;
+      if (!(a.featured || a.id === FEATURED_POST.id) && (b.featured || b.id === FEATURED_POST.id)) return 1;
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+  }
+  const local = loadPosts().filter((p) => !p.private && p.id !== FEATURED_POST.id && !isSameAsFeatured(p.text));
   return [FEATURED_POST, ...local].sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
@@ -691,10 +734,22 @@ function allPostsForFeed() {
 }
 
 function getPostById(id) {
-  if (id === FEATURED_POST.id) return { ...FEATURED_POST, replies: loadJSON(`harbor.replies.${id}`, []) };
+  if (Array.isArray(cloudPosts)) {
+    const cloud = cloudPosts.find((p) => p.id === id);
+    if (cloud) return cloud;
+  }
+  if (id === FEATURED_POST.id) {
+    return { ...FEATURED_POST, replies: loadJSON(`harbor.replies.${id}`, []) };
+  }
   const post = loadPosts().find((p) => p.id === id);
   if (!post) return null;
   return { ...post, replies: Array.isArray(post.replies) ? post.replies : [] };
+}
+
+function updateReplyAsLabel() {
+  const author = currentAuthor();
+  const el = $('#reply-as');
+  if (el) el.textContent = `Replying as ${author.authorName}`;
 }
 
 function renderTags(tags) {
@@ -739,14 +794,19 @@ function renderFilters(posts) {
     return `<button type="button" class="filter-chip ${active}" data-filter="${escapeHtml(t)}">${escapeHtml(label)}</button>`;
   }).join('');
   root.querySelectorAll('[data-filter]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       activeFilter = btn.getAttribute('data-filter');
-      renderFeed();
+      await renderFeed();
     });
   });
 }
 
-function renderFeed() {
+async function renderFeed() {
+  const status = cloudStatusText();
+  const homeNote = $('#home-storage-note');
+  const idNote = $('#identity-storage-note');
+  if (homeNote) homeNote.textContent = status;
+  if (idNote) idNote.textContent = status;
   const posts = allPostsForFeed();
   renderFilters(posts);
   const filtered = activeFilter === 'all'
@@ -776,12 +836,26 @@ function renderFeed() {
   });
 }
 
-function openThread(id) {
+async function openThread(id) {
+  if (window.HarborDB && HarborDB.isReady()) {
+    try {
+      const fresh = await HarborDB.getPost(id);
+      if (fresh) {
+        if (!Array.isArray(cloudPosts)) cloudPosts = [];
+        const idx = cloudPosts.findIndex((p) => p.id === id);
+        if (idx >= 0) cloudPosts[idx] = fresh;
+        else cloudPosts.push(fresh);
+      }
+    } catch (err) {
+      console.warn('Harbor cloud thread read failed', err);
+    }
+  }
+
   const post = getPostById(id);
   if (!post) return;
   currentThreadId = id;
   const card = $('#thread-post');
-  card.className = `post-card full${post.featured ? ' featured' : ''}`;
+  card.className = `post-card full${post.featured || post.id === FEATURED_POST.id ? ' featured' : ''}`;
   card.innerHTML = postCardHtml(post, true);
   $('#angel-text').textContent = post.angelLine || craftAngel(post.text).line;
   $('#angel-note').textContent = post.angelNote || ANGEL_NOTES[0];
@@ -790,7 +864,7 @@ function openThread(id) {
   const feltBtn = $('#felt-btn');
   feltBtn.classList.toggle('done', !!feltMap[id]);
   feltBtn.textContent = feltMap[id] ? 'You felt this too' : 'I’ve felt this too';
-  $('#reply-entry').value = '';
+  updateReplyAsLabel();
   showScreen('thread');
 }
 
@@ -855,16 +929,28 @@ function updateToneAndCrisis() {
 
 function currentAuthor() {
   const identity = loadIdentity();
-  const mode = draftMode;
-  const username = ($('#username-input').value || identity.username || '').trim().slice(0, 24);
-  if (mode === 'named' && username) {
-    saveIdentity({ mode: 'named', username });
-    return { authorMode: 'named', authorName: username };
+  const onWrite = screens.write.classList.contains('active');
+  const writeUser = ($('#username-input').value || '').trim().slice(0, 24);
+
+  // Write screen can temporarily override; replies use saved identity
+  if (onWrite) {
+    if (draftMode === 'named') {
+      const name = writeUser || identity.username;
+      if (name) {
+        saveIdentity({ mode: 'named', username: name });
+        return { authorMode: 'named', authorName: name };
+      }
+    }
+    return { authorMode: 'anonymous', authorName: 'Anonymous' };
+  }
+
+  if (identity.mode === 'named' && identity.username) {
+    return { authorMode: 'named', authorName: identity.username };
   }
   return { authorMode: 'anonymous', authorName: 'Anonymous' };
 }
 
-function persistPost({ text, tags, privatePost }) {
+async function persistPost({ text, tags, privatePost }) {
   const angel = craftAngel(text);
   const author = currentAuthor();
   const post = {
@@ -880,13 +966,24 @@ function persistPost({ text, tags, privatePost }) {
     private: !!privatePost,
     replies: [],
   };
+
+  if (!privatePost && window.HarborDB && HarborDB.isReady()) {
+    try {
+      await HarborDB.createPost(post);
+      await refreshCloudPosts();
+      return post;
+    } catch (err) {
+      console.warn('Harbor cloud write failed, saving locally', err);
+    }
+  }
+
   const posts = loadPosts();
   posts.push(post);
   savePosts(posts);
   return post;
 }
 
-function release(privatePost) {
+async function release(privatePost) {
   const text = $('#entry').value.trim();
   if (!text) {
     $('#entry').focus();
@@ -896,20 +993,20 @@ function release(privatePost) {
     $('#tone-pill').classList.add('show');
     return;
   }
-  if (draftMode === 'named' && !$('#username-input').value.trim()) {
+  if (draftMode === 'named' && !$('#username-input').value.trim() && !loadIdentity().username) {
     $('#username-input').focus();
     return;
   }
   const tags = Array.from(selectedTags);
-  const post = persistPost({ text, tags, privatePost });
+  const post = await persistPost({ text, tags, privatePost });
   $('#entry').value = '';
   selectedTags = new Set();
   renderTagPicker();
   updateToneAndCrisis();
-  openThread(post.id);
+  await openThread(post.id);
 }
 
-function addReply() {
+async function addReply() {
   const text = $('#reply-entry').value.trim();
   if (!text || !currentThreadId) return;
   if (HARSH_RE.test(text)) {
@@ -923,6 +1020,23 @@ function addReply() {
     text,
     createdAt: Date.now(),
   };
+
+  if (window.HarborDB && HarborDB.isReady()) {
+    try {
+      // Ensure featured exists in cloud before first reply
+      if (currentThreadId === FEATURED_POST.id) {
+        const existing = await HarborDB.getPost(FEATURED_POST.id);
+        if (!existing) await HarborDB.createPost({ ...FEATURED_POST, replies: [] });
+      }
+      await HarborDB.addReply(currentThreadId, reply);
+      await refreshCloudPosts();
+      $('#reply-entry').value = '';
+      await openThread(currentThreadId);
+      return;
+    } catch (err) {
+      console.warn('Harbor cloud reply failed, saving locally', err);
+    }
+  }
 
   if (currentThreadId === FEATURED_POST.id) {
     const key = `harbor.replies.${FEATURED_POST.id}`;
@@ -938,38 +1052,49 @@ function addReply() {
     savePosts(posts);
   }
   $('#reply-entry').value = '';
-  openThread(currentThreadId);
+  await openThread(currentThreadId);
 }
 
-function toggleFelt() {
+async function toggleFelt() {
   if (!currentThreadId) return;
   const feltMap = loadJSON(STORAGE_FELT, {});
-  const posts = loadPosts();
+  if (feltMap[currentThreadId]) {
+    await openThread(currentThreadId);
+    return;
+  }
+
+  if (window.HarborDB && HarborDB.isReady()) {
+    try {
+      await HarborDB.incrementFelt(currentThreadId);
+      feltMap[currentThreadId] = true;
+      saveJSON(STORAGE_FELT, feltMap);
+      await refreshCloudPosts();
+      await openThread(currentThreadId);
+      return;
+    } catch (err) {
+      console.warn('Harbor cloud felt failed', err);
+    }
+  }
 
   if (currentThreadId === FEATURED_POST.id) {
-    if (feltMap[currentThreadId]) return;
     feltMap[currentThreadId] = true;
     saveJSON(STORAGE_FELT, feltMap);
-    // Featured base count is visual-only bump via local marker
-    openThread(currentThreadId);
+    await openThread(currentThreadId);
     return;
   }
 
+  const posts = loadPosts();
   const idx = posts.findIndex((p) => p.id === currentThreadId);
   if (idx < 0) return;
-  if (feltMap[currentThreadId]) {
-    openThread(currentThreadId);
-    return;
-  }
   posts[idx].feltCount = (posts[idx].feltCount || 0) + 1;
   feltMap[currentThreadId] = true;
   savePosts(posts);
   saveJSON(STORAGE_FELT, feltMap);
-  openThread(currentThreadId);
+  await openThread(currentThreadId);
 }
 
 /* events */
-$('#enter-feed').addEventListener('click', () => { renderFeed(); showScreen('feed'); });
+$('#enter-feed').addEventListener('click', async () => { await renderFeed(); showScreen('feed'); });
 $('#home-write').addEventListener('click', () => {
   syncWriteIdentityUI();
   renderTagPicker();
@@ -980,8 +1105,8 @@ $('#open-identity').addEventListener('click', () => { syncIdentityScreen(); show
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
 $('#save-private').addEventListener('click', () => release(true));
-$('#reply-btn').addEventListener('click', addReply);
-$('#felt-btn').addEventListener('click', toggleFelt);
+$('#reply-btn').addEventListener('click', () => addReply());
+$('#felt-btn').addEventListener('click', () => toggleFelt());
 
 $('#mode-anon').addEventListener('click', () => {
   draftMode = 'anonymous';
@@ -1035,9 +1160,9 @@ $('#custom-tag').addEventListener('keydown', (e) => {
 });
 
 document.querySelectorAll('[data-go]').forEach((el) => {
-  el.addEventListener('click', () => {
+  el.addEventListener('click', async () => {
     const dest = el.getAttribute('data-go');
-    if (dest === 'feed') renderFeed();
+    if (dest === 'feed') await renderFeed();
     if (dest === 'write') {
       syncWriteIdentityUI();
       renderTagPicker();
@@ -1048,11 +1173,33 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   });
 });
 
-migrateLegacy();
-renderTagPicker();
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+async function boot() {
+  migrateLegacy();
+  loadPosts(); // prune duplicates immediately
+  renderTagPicker();
+  const note = $('#home-storage-note');
+  if (note) note.textContent = cloudStatusText();
+
+  if (window.HarborDB) {
+    try {
+      await HarborDB.init();
+      await refreshCloudPosts();
+      if (note) note.textContent = cloudStatusText();
+    } catch (err) {
+      console.warn('Harbor cloud init failed', err);
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.update()));
+      await navigator.serviceWorker.register('./sw.js?v=4');
+    } catch (_) {}
+  }
 }
+
+boot();
 </script>
 </body>
 </html>
