@@ -136,39 +136,39 @@ body {
   overflow: hidden; clip: rect(0,0,0,0); border: 0;
 }
 
-/* Soft sky shared across screens */
-.sky-ambient {
-  position: fixed;
+/* Soft sky band inside each content screen */
+.screen { position: relative; z-index: 1; }
+.screen-sky {
+  position: absolute;
   inset: 0;
-  width: min(720px, 100%);
-  margin: 0 auto;
-  left: 0; right: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
 }
+.screen > *:not(.screen-sky) { position: relative; z-index: 1; }
 .sky-cloud {
   position: absolute;
   border-radius: 999px;
-  background: radial-gradient(ellipse at 40% 40%, rgba(255,252,248,.72), rgba(214,232,236,.18) 70%, transparent 75%);
-  filter: blur(1px);
-  opacity: .55;
+  background: rgba(255, 252, 248, 0.62);
+  box-shadow: 0 0 0 1px rgba(255,252,248,.15);
+  opacity: .7;
 }
 .sky-cloud.c1 {
-  top: 7%; left: 0; width: 120px; height: 36px;
-  animation: cloudDrift 70s linear infinite;
+  top: 18px; left: 0; width: 132px; height: 38px;
+  animation: cloudDrift 52s linear infinite;
+  animation-delay: -18s;
 }
 .sky-cloud.c2 {
-  top: 14%; left: 0; width: 88px; height: 28px;
-  animation: cloudDriftBack 92s linear infinite;
-  animation-delay: 12s;
-  opacity: .4;
+  top: 48px; left: 0; width: 96px; height: 30px;
+  animation: cloudDriftBack 68s linear infinite;
+  animation-delay: -30s;
+  opacity: .55;
 }
 .sky-cloud.c3 {
-  top: 4%; left: 0; width: 150px; height: 40px;
-  animation: cloudDrift 110s linear infinite;
-  animation-delay: 28s;
-  opacity: .35;
+  top: 8px; left: 0; width: 160px; height: 42px;
+  animation: cloudDrift 84s linear infinite;
+  animation-delay: -44s;
+  opacity: .48;
 }
 .sky-cloud::before,
 .sky-cloud::after {
@@ -179,21 +179,20 @@ body {
 }
 .sky-cloud::before { width: 46%; height: 120%; top: -35%; left: 18%; }
 .sky-cloud::after { width: 38%; height: 100%; top: -20%; right: 14%; }
-.sky-ambient .gull.sky-g1 {
-  top: 10%;
-  animation: gullA 38s linear infinite;
-  animation-delay: 4s;
-  color: rgba(31, 79, 88, 0.28);
+.screen-sky .gull.sky-g1 {
+  top: 28px;
+  animation: gullA 28s linear infinite;
+  animation-delay: -8s;
+  color: rgba(31, 79, 88, 0.42);
+  width: 20px; height: 11px;
+}
+.screen-sky .gull.sky-g2 {
+  top: 56px;
+  animation: gullB 36s linear infinite;
+  animation-delay: -16s;
+  color: rgba(31, 79, 88, 0.34);
   width: 18px; height: 10px;
 }
-.sky-ambient .gull.sky-g2 {
-  top: 16%;
-  animation: gullB 46s linear infinite;
-  animation-delay: 18s;
-  color: rgba(31, 79, 88, 0.22);
-  width: 16px; height: 9px;
-}
-.screen { position: relative; z-index: 1; }
 
 /* ── Hero ───────────────────────────────────────────────────── */
 #home { justify-content: flex-end; position: relative; padding-bottom: 8px; }
@@ -266,14 +265,17 @@ body {
 }
 .hero-cloud.h1 {
   top: 8%; left: 0; width: 100px; height: 30px;
-  animation: cloudDrift 64s linear infinite;
-  opacity: .5;
+  animation: cloudDrift 54s linear infinite;
+  animation-delay: -16s;
+  opacity: .6;
+  background: rgba(255, 252, 248, 0.58);
 }
 .hero-cloud.h2 {
   top: 2%; left: 0; width: 72px; height: 24px;
-  animation: cloudDriftBack 80s linear infinite;
-  animation-delay: 20s;
-  opacity: .35;
+  animation: cloudDriftBack 70s linear infinite;
+  animation-delay: -28s;
+  opacity: .45;
+  background: rgba(255, 252, 248, 0.48);
 }
 .hero-cloud::before,
 .hero-cloud::after {
@@ -290,7 +292,10 @@ body {
   .sky-cloud, .hero-cloud {
     animation: none !important;
   }
-  .ambient-boat, .gull, .sky-cloud, .hero-cloud { opacity: 0; }
+  .ambient-boat, .gull { opacity: 0; }
+  .sky-cloud.c1, .hero-cloud.h1 { left: 12%; opacity: .35; }
+  .sky-cloud.c2, .hero-cloud.h2 { left: 58%; opacity: .28; }
+  .sky-cloud.c3 { left: 34%; opacity: .22; }
 }
 .hero-copy { position: relative; z-index: 1; margin-top: auto; padding-top: min(44vh, 340px); }
 .brand {
@@ -490,21 +495,6 @@ body {
 </head>
 <body>
 <div id="app">
-  <div class="sky-ambient" aria-hidden="true">
-    <div class="sky-cloud c1"></div>
-    <div class="sky-cloud c2"></div>
-    <div class="sky-cloud c3"></div>
-    <div class="gull sky-g1">
-      <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="gull sky-g2">
-      <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
 
   <!-- HOME -->
   <section id="home" class="screen active" aria-label="Welcome">
@@ -1427,6 +1417,30 @@ $('#reset-device').addEventListener('click', async () => {
   await resetLocalHarbor({ reload: true });
 });
 
+function mountScreenSkies() {
+  const skyHtml = `
+    <div class="screen-sky" aria-hidden="true">
+      <div class="sky-cloud c1"></div>
+      <div class="sky-cloud c2"></div>
+      <div class="sky-cloud c3"></div>
+      <div class="gull sky-g1">
+        <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="gull sky-g2">
+        <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>`;
+  ['feed', 'write', 'thread', 'identity'].forEach((id) => {
+    const screen = document.getElementById(id);
+    if (!screen || screen.querySelector('.screen-sky')) return;
+    screen.insertAdjacentHTML('afterbegin', skyHtml);
+  });
+}
+
 async function boot() {
   const params = new URLSearchParams(location.search);
   if (params.has('reset')) {
@@ -1434,6 +1448,7 @@ async function boot() {
     return;
   }
 
+  mountScreenSkies();
   migrateLegacy();
   loadPosts(); // prune duplicates immediately
   renderTagPicker();
@@ -1454,7 +1469,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=8');
+      await navigator.serviceWorker.register('./sw.js?v=9');
     } catch (_) {}
   }
 }
