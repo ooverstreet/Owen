@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v14';
+const CACHE = 'harbor-v15';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
@@ -7,6 +7,7 @@ const URLS  = [
   '/Owen/harbor/config.js',
   '/Owen/harbor/db.js',
   '/Owen/harbor/angel.js',
+  '/Owen/harbor/moderation.js',
 ];
 
 self.addEventListener('install', e => {
@@ -29,7 +30,8 @@ self.addEventListener('fetch', e => {
     || url.pathname.endsWith('/harbor/index.html')
     || url.pathname.endsWith('/harbor/config.js')
     || url.pathname.endsWith('/harbor/db.js')
-    || url.pathname.endsWith('/harbor/angel.js');
+    || url.pathname.endsWith('/harbor/angel.js')
+    || url.pathname.endsWith('/harbor/moderation.js');
 
   if (isAppShell) {
     e.respondWith(

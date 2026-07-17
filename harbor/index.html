@@ -18,6 +18,7 @@
 <script src="./config.js"></script>
 <script src="./db.js"></script>
 <script src="./angel.js"></script>
+<script src="./moderation.js"></script>
 <style>
 :root {
   --mist: #E8F1F4;
@@ -618,6 +619,31 @@ body {
         <button class="btn btn-ghost" id="home-write">Share something</button>
       </div>
       <p class="privacy-note" id="home-storage-note">First light greets everyone. Cloud sync turns on when Supabase is connected.</p>
+      <p class="privacy-note"><button class="linkish" data-go="guidelines" style="padding:0">Community guidelines</button> — be considerate, respectful, and thoughtful.</p>
+    </div>
+  </section>
+
+  <!-- GUIDELINES -->
+  <section id="guidelines" class="screen" aria-label="Guidelines">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="linkish" data-go="feed">Back</button>
+    </div>
+    <h2 class="section-title">Harbor Guidelines</h2>
+    <p class="section-sub">A peaceful place only works if we protect the peace.</p>
+    <div class="angel-panel" style="margin-bottom:16px">
+      <div class="angel-label">Disclaimer</div>
+      <p class="angel-text" style="font-size:1.1rem">Be considerate. Be respectful. Be thoughtful.</p>
+      <p class="angel-note">Harbor is not a crisis service or professional care. Harmful content may be removed, and accounts may be restricted. Moderation records may be kept for safety or legal reasons.</p>
+    </div>
+    <ul id="guidelines-list" style="list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 18px;padding:0"></ul>
+    <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
+      <input id="guidelines-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
+      <span>I agree to keep Harbor considerate, respectful, and thoughtful.</span>
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" id="accept-guidelines" type="button">I agree — continue</button>
+      <button class="btn btn-secondary" data-go="home" type="button">Not now</button>
     </div>
   </section>
 
@@ -682,6 +708,10 @@ body {
         internationally see <a href="https://www.iasp.info/suicidalthoughts/" target="_blank" rel="noopener">IASP resources</a>.
         Harbor’s Angel is a gentle companion, not a crisis service.
       </div>
+      <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink-soft);font-size:.95rem">
+        <input id="write-guidelines-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
+        <span>I will be considerate, respectful, and thoughtful. <button type="button" class="linkish" data-go="guidelines" style="padding:0;display:inline">Read guidelines</button></span>
+      </label>
       <div class="actions">
         <button class="btn btn-primary" id="release-btn">Post to Harbor</button>
         <button class="btn btn-secondary" id="save-private">Keep private</button>
@@ -698,7 +728,12 @@ body {
     </div>
     <div class="thread-stack">
       <article class="post-card full" id="thread-post" style="cursor:default"></article>
-      <button class="felt-btn" id="felt-btn" type="button">I’ve felt this too</button>
+      <div class="actions" style="margin-top:0">
+        <button class="felt-btn" id="felt-btn" type="button">I’ve felt this too</button>
+        <button class="btn btn-secondary btn-small" id="report-btn" type="button">Report</button>
+        <button class="btn btn-secondary btn-small" id="admin-hide-btn" type="button" hidden>Remove (admin)</button>
+        <button class="btn btn-secondary btn-small" id="admin-ban-btn" type="button" hidden>Ban author (admin)</button>
+      </div>
       <div class="angel-panel" id="angel-panel">
         <div class="angel-label">Angel</div>
         <p class="angel-text" id="angel-text"></p>
@@ -743,6 +778,13 @@ body {
           style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
         <p id="groq-status" style="font-size:.86rem;color:var(--ink-faint);margin:0">Local Angel is active until a key is saved.</p>
       </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <label for="pref-admin" style="font-size:.95rem;color:var(--ink-soft)">Admin key (owner only — for remove/ban tools)</label>
+        <input id="pref-admin" type="password" autocomplete="off" placeholder="Optional admin secret"
+          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+        <p style="font-size:.86rem;color:var(--ink-faint);margin:0">Used with the moderation Edge Function. Leave blank for regular visitors.</p>
+      </div>
+      <button class="linkish" data-go="guidelines" type="button">View community guidelines</button>
       <button class="btn btn-secondary" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
     <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
@@ -809,7 +851,6 @@ const SHORE_WHISPERS = [
 ];
 
 const CRISIS_RE = /\b(kill myself|end my life|suicide|suicidal|want to die|don't want to (?:be )?alive|dont want to (?:be )?alive|self[- ]?harm|cut myself|hang myself)\b/i;
-const HARSH_RE = /\b(kill you|i hope you die|you should die|worthless piece|piece of shit|go die|rape|nigger|faggot)\b/i;
 
 const ANGEL_POOL = {
   grief: [
@@ -861,6 +902,7 @@ const screens = {
   write: $('#write'),
   thread: $('#thread'),
   identity: $('#identity'),
+  guidelines: $('#guidelines'),
 };
 
 let selectedTags = new Set();
@@ -1257,6 +1299,9 @@ async function openThread(id) {
   feltBtn.classList.toggle('done', !!feltMap[id]);
   feltBtn.textContent = feltMap[id] ? 'You felt this too' : 'I’ve felt this too';
   updateReplyAsLabel();
+  const adminOn = !!(localStorage.getItem('harbor.adminSecret.v1') || '').trim();
+  $('#admin-hide-btn').hidden = !adminOn || post.id === FEATURED_POST.id;
+  $('#admin-ban-btn').hidden = !adminOn || post.id === FEATURED_POST.id || post.authorName === 'Harbor';
   showScreen('thread');
 }
 
@@ -1295,6 +1340,14 @@ function syncIdentityScreen() {
   $('#pref-username').value = identity.username || '';
   $('#pref-username').disabled = identity.mode !== 'named';
   $('#pref-scripture').checked = whispers.includeScripture;
+  try { $('#pref-groq').value = localStorage.getItem('harbor.groqKey.v1') || ''; } catch (_) { $('#pref-groq').value = ''; }
+  try { $('#pref-admin').value = localStorage.getItem('harbor.adminSecret.v1') || ''; } catch (_) { $('#pref-admin').value = ''; }
+  const status = $('#groq-status');
+  if (status) {
+    status.textContent = ($('#pref-groq').value || '').trim()
+      ? 'Angel AI key saved on this phone.'
+      : 'Local Angel is active until a key is saved.';
+  }
 }
 
 function renderTagPicker() {
@@ -1314,11 +1367,23 @@ function renderTagPicker() {
   });
 }
 
+function contentBlocked(text) {
+  if (window.HarborMod && HarborMod.findBlocked) return HarborMod.findBlocked(text);
+  return { blocked: false };
+}
+
 function updateToneAndCrisis() {
   const text = $('#entry').value;
   $('#count').textContent = `${text.length} / 4000`;
-  $('#tone-pill').classList.toggle('show', HARSH_RE.test(text));
-  $('#crisis').classList.toggle('show', CRISIS_RE.test(text));
+  const blocked = contentBlocked(text);
+  $('#tone-pill').classList.toggle('show', blocked.blocked);
+  if (blocked.blocked) {
+    $('#tone-pill').textContent = 'That language isn’t welcome here — hate, threats, and discrimination are blocked.';
+  } else {
+    $('#tone-pill').textContent = 'Let’s keep this respectful — no insults or threats.';
+  }
+  const crisis = window.HarborMod ? HarborMod.isCrisis(text) : CRISIS_RE.test(text);
+  $('#crisis').classList.toggle('show', crisis);
 }
 
 function currentAuthor() {
@@ -1346,6 +1411,16 @@ function currentAuthor() {
 
 async function persistPost({ text, tags, privatePost }) {
   const author = currentAuthor();
+  const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
+
+  if (window.HarborDB && HarborDB.isReady()) {
+    const banned = await HarborDB.isBanned({
+      deviceId,
+      username: author.authorMode === 'named' ? author.authorName : '',
+    });
+    if (banned) throw new Error('This account or device can’t post right now due to a guidelines ban.');
+  }
+
   const angel = await askAngel(text);
   const post = {
     id: uid(),
@@ -1360,6 +1435,7 @@ async function persistPost({ text, tags, privatePost }) {
     private: !!privatePost,
     replies: [],
     angelSource: angel.source || 'local',
+    deviceId,
   };
 
   if (!privatePost && window.HarborDB && HarborDB.isReady()) {
@@ -1384,7 +1460,8 @@ async function release(privatePost) {
     $('#entry').focus();
     return;
   }
-  if (HARSH_RE.test(text)) {
+  const blocked = contentBlocked(text);
+  if (blocked.blocked) {
     $('#tone-pill').classList.add('show');
     return;
   }
@@ -1392,6 +1469,13 @@ async function release(privatePost) {
     $('#username-input').focus();
     return;
   }
+  const agreed = $('#write-guidelines-check').checked || (window.HarborMod && HarborMod.guidelinesAccepted());
+  if (!agreed) {
+    alert('Please agree to Harbor’s guidelines before posting.');
+    showScreen('guidelines');
+    return;
+  }
+  if (window.HarborMod) HarborMod.acceptGuidelines();
 
   const releaseBtn = $('#release-btn');
   const saveBtn = $('#save-private');
@@ -1409,6 +1493,8 @@ async function release(privatePost) {
     renderTagPicker();
     updateToneAndCrisis();
     await openThread(post.id);
+  } catch (err) {
+    alert(err.message || 'Could not post right now.');
   } finally {
     releaseBtn.disabled = false;
     saveBtn.disabled = false;
@@ -1420,8 +1506,9 @@ async function release(privatePost) {
 async function addReply() {
   const text = $('#reply-entry').value.trim();
   if (!text || !currentThreadId) return;
-  if (HARSH_RE.test(text)) {
-    alert('Let’s keep replies respectful.');
+  const blocked = contentBlocked(text);
+  if (blocked.blocked) {
+    alert('That language isn’t welcome here. Please keep replies considerate and respectful.');
     return;
   }
   const author = currentAuthor();
@@ -1430,14 +1517,23 @@ async function addReply() {
     ...author,
     text,
     createdAt: Date.now(),
+    deviceId: window.HarborMod ? HarborMod.deviceId() : null,
   };
 
   if (window.HarborDB && HarborDB.isReady()) {
     try {
+      const banned = await HarborDB.isBanned({
+        deviceId: reply.deviceId,
+        username: author.authorMode === 'named' ? author.authorName : '',
+      });
+      if (banned) {
+        alert('This account or device can’t post right now due to a guidelines ban.');
+        return;
+      }
       // Ensure featured exists in cloud before first reply
       if (currentThreadId === FEATURED_POST.id) {
         const existing = await HarborDB.getPost(FEATURED_POST.id);
-        if (!existing) await HarborDB.createPost({ ...FEATURED_POST, replies: [] });
+        if (!existing) await HarborDB.createPost({ ...FEATURED_POST, replies: [], deviceId: reply.deviceId });
       }
       await HarborDB.addReply(currentThreadId, reply);
       await refreshCloudPosts();
@@ -1553,9 +1649,107 @@ $('#save-identity').addEventListener('click', () => {
   }
   saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
   saveWhisperPrefs({ includeScripture: $('#pref-scripture').checked });
+  try {
+    const groq = ($('#pref-groq').value || '').trim();
+    if (groq) localStorage.setItem('harbor.groqKey.v1', groq);
+    else localStorage.removeItem('harbor.groqKey.v1');
+    const admin = ($('#pref-admin').value || '').trim();
+    if (admin) localStorage.setItem('harbor.adminSecret.v1', admin);
+    else localStorage.removeItem('harbor.adminSecret.v1');
+  } catch (_) {}
   showNextWhisper();
   showScreen('feed');
   renderFeed();
+});
+
+$('#report-btn').addEventListener('click', async () => {
+  if (!currentThreadId) return;
+  const reason = prompt('Why are you reporting this? (hate, threats, harassment, spam, other)', 'guidelines');
+  if (!reason) return;
+  const details = prompt('Optional details (kept private for moderation):', '') || '';
+  const author = currentAuthor();
+  try {
+    if (window.HarborDB && HarborDB.modAction) {
+      await HarborDB.modAction({
+        action: 'report',
+        targetType: 'post',
+        targetId: currentThreadId,
+        postId: currentThreadId,
+        reason,
+        details,
+        deviceId: window.HarborMod ? HarborMod.deviceId() : null,
+        reporterName: author.authorName,
+      });
+    } else {
+      // local fallback trail
+      const key = 'harbor.localReports.v1';
+      const list = loadJSON(key, []);
+      list.push({ id: uid(), targetId: currentThreadId, reason, details, at: Date.now() });
+      saveJSON(key, list);
+    }
+    alert('Thank you. A report was filed for review.');
+  } catch (err) {
+    // Still keep a local trail if cloud mod function isn’t deployed yet
+    const key = 'harbor.localReports.v1';
+    const list = loadJSON(key, []);
+    list.push({ id: uid(), targetId: currentThreadId, reason, details, at: Date.now(), error: String(err.message || err) });
+    saveJSON(key, list);
+    alert('Report saved on this device. Cloud moderation function may still need setup.');
+  }
+});
+
+$('#admin-hide-btn').addEventListener('click', async () => {
+  const secret = localStorage.getItem('harbor.adminSecret.v1') || '';
+  if (!secret || !currentThreadId) return;
+  const reason = prompt('Reason for removal (saved in moderation history):', 'Guidelines violation');
+  if (!reason) return;
+  try {
+    await HarborDB.modAction({ action: 'hide_post', postId: currentThreadId, reason }, secret);
+    await refreshCloudPosts();
+    alert('Post removed and archived in moderation history.');
+    showScreen('feed');
+    await renderFeed();
+  } catch (err) {
+    alert(err.message || 'Admin remove failed. Deploy harbor-moderation function + ADMIN_SECRET first.');
+  }
+});
+
+$('#admin-ban-btn').addEventListener('click', async () => {
+  const secret = localStorage.getItem('harbor.adminSecret.v1') || '';
+  const post = getPostById(currentThreadId);
+  if (!secret || !post) return;
+  const banUsername = post.authorMode === 'named' ? post.authorName : '';
+  const banDevice = post.deviceId || '';
+  const mode = banUsername
+    ? confirm(`Ban username "${banUsername}"? Cancel to ban device instead (if available).`)
+    : false;
+  const banType = mode ? 'username' : 'device';
+  const banValue = mode ? banUsername : banDevice;
+  if (!banValue) {
+    alert('No username/device available to ban for this post.');
+    return;
+  }
+  const reason = prompt('Ban reason (saved in history):', 'Guidelines violation');
+  if (!reason) return;
+  try {
+    await HarborDB.modAction({ action: 'ban', banType, banValue, reason }, secret);
+    alert(`Ban saved for ${banType}: ${banValue}`);
+  } catch (err) {
+    alert(err.message || 'Ban failed. Deploy harbor-moderation function + ADMIN_SECRET first.');
+  }
+});
+
+$('#accept-guidelines').addEventListener('click', () => {
+  if (!$('#guidelines-check').checked) {
+    alert('Please check the box to agree before continuing.');
+    return;
+  }
+  if (window.HarborMod) HarborMod.acceptGuidelines();
+  $('#write-guidelines-check').checked = true;
+  showScreen('write');
+  syncWriteIdentityUI();
+  renderTagPicker();
+  updateToneAndCrisis();
 });
 
 $('#add-tag').addEventListener('click', () => {
@@ -1576,12 +1770,16 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   el.addEventListener('click', async () => {
     const dest = el.getAttribute('data-go');
     if (dest === 'feed') await renderFeed();
+    if (dest === 'identity') syncIdentityScreen();
+    if (dest === 'guidelines') renderGuidelines();
     if (dest === 'write') {
       syncWriteIdentityUI();
       renderTagPicker();
       updateToneAndCrisis();
+      if (window.HarborMod && HarborMod.guidelinesAccepted()) {
+        $('#write-guidelines-check').checked = true;
+      }
     }
-    if (dest === 'identity') syncIdentityScreen();
     showScreen(dest);
   });
 });
@@ -1644,11 +1842,30 @@ function mountScreenSkies() {
         </svg>
       </div>
     </div>`;
-  ['feed', 'write', 'thread', 'identity'].forEach((id) => {
+  ['feed', 'write', 'thread', 'identity', 'guidelines'].forEach((id) => {
     const screen = document.getElementById(id);
     if (!screen || screen.querySelector('.screen-sky')) return;
     screen.insertAdjacentHTML('afterbegin', skyHtml);
   });
+}
+
+function renderGuidelines() {
+  const g = window.HarborMod && HarborMod.GUIDELINES;
+  if (!g) return;
+  const list = $('#guidelines-list');
+  if (!list) return;
+  list.innerHTML = g.rules.map((rule) => `
+    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.55);color:var(--ink)">
+      ${escapeHtml(rule)}
+    </li>
+  `).join('') + `
+    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.35);color:var(--ink-soft);font-size:.92rem">
+      ${escapeHtml(g.legal)}
+    </li>`;
+  if (HarborMod.guidelinesAccepted()) {
+    $('#guidelines-check').checked = true;
+    $('#write-guidelines-check').checked = true;
+  }
 }
 
 async function boot() {
@@ -1659,10 +1876,14 @@ async function boot() {
   }
 
   mountScreenSkies();
+  renderGuidelines();
   startWhispers();
   migrateLegacy();
   loadPosts(); // prune duplicates immediately
   renderTagPicker();
+  if (window.HarborMod && HarborMod.guidelinesAccepted()) {
+    $('#write-guidelines-check').checked = true;
+  }
   const note = $('#home-storage-note');
   if (note) note.textContent = cloudStatusText();
 
@@ -1680,7 +1901,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=14');
+      await navigator.serviceWorker.register('./sw.js?v=15');
     } catch (_) {}
   }
 }

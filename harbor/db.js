@@ -42,6 +42,7 @@
       angelNote: row.angel_note,
       feltCount: row.felt_count || 0,
       private: !!row.is_private,
+      deviceId: row.device_id || null,
       replies,
       cloud: true,
     };
@@ -99,6 +100,7 @@
       angel_note: post.angelNote,
       felt_count: post.feltCount || 0,
       is_private: false,
+      device_id: post.deviceId || null,
       created_at: new Date(post.createdAt || Date.now()).toISOString(),
     };
     const { error } = await client.from('harbor_posts').insert(row);
@@ -128,11 +130,42 @@
       author_mode: reply.authorMode,
       author_name: reply.authorName,
       body: reply.text,
+      device_id: reply.deviceId || null,
       created_at: new Date(reply.createdAt || Date.now()).toISOString(),
     };
     const { error } = await client.from('harbor_replies').insert(row);
     if (error) throw error;
     return true;
+  }
+
+  async function isBanned({ deviceId, username }) {
+    if (!ready) return false;
+    const checks = [];
+    if (deviceId) checks.push(client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'device').eq('ban_value', deviceId).limit(1));
+    if (username) checks.push(client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'username').eq('ban_value', String(username).toLowerCase()).limit(1));
+    const results = await Promise.all(checks);
+    return results.some((r) => !r.error && r.data && r.data.length);
+  }
+
+  async function modAction(payload, adminSecret) {
+    const url = cfg.supabaseUrl;
+    const key = cfg.supabaseAnonKey;
+    if (!url || !key) throw new Error('Cloud not configured');
+    const endpoint = `${url.replace(/\/$/, '')}/functions/v1/harbor-moderation`;
+    const headers = {
+      'Content-Type': 'application/json',
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    };
+    if (adminSecret) headers['x-harbor-admin'] = adminSecret;
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Moderation HTTP ${res.status}`);
+    return data;
   }
 
   async function incrementFelt(postId) {
@@ -150,10 +183,13 @@
     init,
     configured,
     isReady: () => ready,
+    lastError: () => lastError,
     listPosts,
     createPost,
     getPost,
     addReply,
     incrementFelt,
+    isBanned,
+    modAction,
   };
 })();
