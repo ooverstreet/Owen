@@ -737,6 +737,12 @@ body {
         <input id="pref-scripture" type="checkbox" checked style="margin-top:4px;accent-color:var(--water-deep)">
         <span>Include occasional gentle scripture in Shore whispers (still no politics).</span>
       </label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label for="pref-groq" style="font-size:.95rem;color:var(--ink-soft)">Angel AI key (Groq — stays on this phone)</label>
+        <input id="pref-groq" type="password" autocomplete="off" placeholder="gsk_… paste free Groq key"
+          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+        <p id="groq-status" style="font-size:.86rem;color:var(--ink-faint);margin:0">Local Angel is active until a key is saved.</p>
+      </div>
       <button class="btn btn-secondary" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
     <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
@@ -1674,7 +1680,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=12');
+      await navigator.serviceWorker.register('./sw.js?v=13');
     } catch (_) {}
   }
 }

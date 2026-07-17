@@ -111,8 +111,16 @@
     };
   }
 
+  function resolveGroqKey() {
+    try {
+      const local = localStorage.getItem('harbor.groqKey.v1');
+      if (local && local.trim()) return local.trim();
+    } catch (_) {}
+    return (cfg.groqApiKey || '').trim();
+  }
+
   async function askGroqDirect(text) {
-    const key = cfg.groqApiKey;
+    const key = resolveGroqKey();
     if (!key) return null;
     const model = cfg.angelModel || 'llama-3.3-70b-versatile';
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -202,5 +210,6 @@
     respond,
     craftLocal,
     detectTheme,
+    hasGroqKey: () => !!resolveGroqKey(),
   };
 })();
