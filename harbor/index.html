@@ -640,7 +640,14 @@ function loadPosts() {
 
 function cloudStatusText() {
   if (window.HarborDB && HarborDB.isReady()) return 'Cloud sync on — posts can reach every visitor.';
-  if (window.HarborDB && HarborDB.configured()) return 'Cloud configured, connecting…';
+  if (window.HarborDB && HarborDB.configured()) {
+    const err = HarborDB.lastError && HarborDB.lastError();
+    const msg = (err && (err.message || err.code)) || '';
+    if (/harbor_posts|schema cache|PGRST205/i.test(msg)) {
+      return 'Supabase connected — run harbor/supabase.sql once in the SQL Editor to finish setup.';
+    }
+    return 'Supabase key is set, but cloud tables are not ready yet.';
+  }
   return 'Local mode — connect Supabase in config.js to share across devices.';
 }
 
