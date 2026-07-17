@@ -457,6 +457,7 @@ body {
       <input id="pref-username" type="text" maxlength="24" placeholder="Your Harbor username" autocomplete="nickname"
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
       <button class="btn btn-primary" id="save-identity" type="button">Save identity</button>
+      <button class="btn btn-secondary" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
     <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
   </section>
@@ -1180,7 +1181,47 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   });
 });
 
+async function resetLocalHarbor({ reload = true } = {}) {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('harbor'))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch (_) {}
+
+  if ('caches' in window) {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => /harbor/i.test(k)).map((k) => caches.delete(k)));
+    } catch (_) {}
+  }
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    } catch (_) {}
+  }
+
+  if (reload) {
+    const url = new URL(location.href);
+    url.searchParams.set('fresh', String(Date.now()));
+    url.searchParams.delete('reset');
+    location.replace(url.toString());
+  }
+}
+
+$('#reset-device').addEventListener('click', async () => {
+  if (!confirm('Clear Harbor cache and local drafts on this phone? Shared cloud posts stay safe.')) return;
+  await resetLocalHarbor({ reload: true });
+});
+
 async function boot() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('reset')) {
+    await resetLocalHarbor({ reload: true });
+    return;
+  }
+
   migrateLegacy();
   loadPosts(); // prune duplicates immediately
   renderTagPicker();
@@ -1201,7 +1242,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=4');
+      await navigator.serviceWorker.register('./sw.js?v=6');
     } catch (_) {}
   }
 }
