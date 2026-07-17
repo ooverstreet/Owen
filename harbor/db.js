@@ -8,12 +8,23 @@
     return !!(cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase);
   }
 
+  let lastError = null;
+
   async function init() {
+    lastError = null;
     if (!configured()) {
       ready = false;
       return false;
     }
     client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    // Probe that schema exists
+    const { error } = await client.from('harbor_posts').select('id').limit(1);
+    if (error) {
+      lastError = error;
+      ready = false;
+      console.warn('Harbor cloud schema not ready:', error.message || error);
+      return false;
+    }
     ready = true;
     return true;
   }
