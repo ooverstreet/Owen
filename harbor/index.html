@@ -327,6 +327,84 @@ body {
 }
 .section-sub { color: var(--ink-soft); margin-bottom: 20px; max-width: 38ch; }
 
+/* ── Shore whispers ─────────────────────────────────────────── */
+.whisper-card {
+  margin: 0 0 18px;
+  padding: 14px 16px 12px;
+  border-left: 2px solid rgba(184, 137, 74, 0.45);
+  background: rgba(255, 252, 248, 0.42);
+  border-radius: 0 14px 14px 0;
+  animation: fadeIn .6s ease both;
+}
+.whisper-card .whisper-label {
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--warm);
+  font-weight: 560;
+  margin-bottom: 6px;
+}
+.whisper-card .whisper-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--water-deep);
+  margin-bottom: 6px;
+}
+.whisper-card .whisper-source {
+  font-size: .86rem;
+  color: var(--ink-faint);
+}
+.whisper-rail {
+  display: none;
+  position: fixed;
+  top: 26%;
+  right: max(18px, calc((100vw - 720px) / 2 - 228px));
+  width: 200px;
+  padding: 16px 16px 14px;
+  border-left: 2px solid rgba(184, 137, 74, 0.4);
+  background: rgba(255, 252, 248, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 0 16px 16px 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.whisper-rail.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.whisper-rail .whisper-label {
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--warm);
+  font-weight: 560;
+  margin-bottom: 8px;
+}
+.whisper-rail .whisper-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--water-deep);
+  margin-bottom: 8px;
+}
+.whisper-rail .whisper-source {
+  font-size: .82rem;
+  color: var(--ink-faint);
+}
+@media (min-width: 980px) {
+  .whisper-rail { display: block; }
+  .whisper-card { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .whisper-rail, .whisper-card { transition: none; animation: none; }
+}
+
 /* ── Feed ───────────────────────────────────────────────────── */
 .feed-filters {
   display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px;
@@ -554,6 +632,11 @@ body {
     <h2 class="section-title">The shore</h2>
     <p class="section-sub">Start with the first light. Then open any thread that meets you.</p>
     <p class="section-sub" style="margin-top:-8px;margin-bottom:14px;font-size:.92rem">Topics are simple labels — tap one to show only posts about that feeling.</p>
+    <aside class="whisper-card" id="shore-whisper-card" aria-live="polite">
+      <div class="whisper-label">Shore whisper</div>
+      <p class="whisper-text" id="whisper-card-text"></p>
+      <p class="whisper-source" id="whisper-card-source"></p>
+    </aside>
     <div class="feed-filters" id="feed-filters" aria-label="Filter by topic"></div>
     <div class="feed-list" id="feed-list"></div>
     <div class="fab-wrap">
@@ -649,12 +732,22 @@ body {
       <input id="pref-username" type="text" maxlength="24" placeholder="Your Harbor username" autocomplete="nickname"
         style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
       <button class="btn btn-primary" id="save-identity" type="button">Save identity</button>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:.95rem;color:var(--ink-soft);line-height:1.4">
+        <input id="pref-scripture" type="checkbox" checked style="margin-top:4px;accent-color:var(--water-deep)">
+        <span>Include occasional gentle scripture in Shore whispers (still no politics).</span>
+      </label>
       <button class="btn btn-secondary" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
     <p class="footer-help" id="identity-storage-note">First light always remains. Connect Supabase to share posts across phones and browsers.</p>
   </section>
 
 </div>
+
+<aside class="whisper-rail" id="shore-whisper-rail" aria-live="polite">
+  <div class="whisper-label">Shore whisper</div>
+  <p class="whisper-text" id="whisper-rail-text"></p>
+  <p class="whisper-source" id="whisper-rail-source"></p>
+</aside>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
@@ -683,6 +776,30 @@ const STORAGE_POSTS = 'harbor.posts.v2';
 const STORAGE_IDENTITY = 'harbor.identity.v1';
 const STORAGE_LEGACY = 'harbor.entries.v1';
 const STORAGE_FELT = 'harbor.felt.v1';
+const STORAGE_WHISPERS = 'harbor.whispers.v1';
+
+/* Positive, non-political. Mostly secular; occasional gentle scripture. */
+const SHORE_WHISPERS = [
+  { text: 'Be kind whenever possible. It is always possible.', source: 'Dalai Lama', kind: 'secular' },
+  { text: 'You are allowed to take up quiet space.', source: 'Harbor', kind: 'secular' },
+  { text: 'In the middle of difficulty lies opportunity.', source: 'Albert Einstein', kind: 'secular' },
+  { text: 'What you seek is seeking you.', source: 'Rumi', kind: 'secular' },
+  { text: 'No act of kindness, no matter how small, is ever wasted.', source: 'Aesop', kind: 'secular' },
+  { text: 'Happiness depends upon ourselves.', source: 'Aristotle', kind: 'secular' },
+  { text: 'The best way out is always through.', source: 'Robert Frost', kind: 'secular' },
+  { text: 'Keep your face always toward the sunshine—and shadows will fall behind you.', source: 'Walt Whitman', kind: 'secular' },
+  { text: 'Wherever you are, be all there.', source: 'Jim Elliot', kind: 'secular' },
+  { text: 'We are all just walking each other home.', source: 'Ram Dass', kind: 'secular' },
+  { text: 'It is never too late to be what you might have been.', source: 'George Eliot', kind: 'secular' },
+  { text: 'Let your life lightly dance on the edges of Time like dew on the tip of a leaf.', source: 'Rabindranath Tagore', kind: 'secular' },
+  { text: 'Courage doesn’t always roar. Sometimes courage is the quiet voice at the end of the day saying, “I will try again tomorrow.”', source: 'Mary Anne Radmacher', kind: 'secular' },
+  { text: 'Do your little bit of good where you are.', source: 'Desmond Tutu', kind: 'secular' },
+  { text: 'There is a crack in everything. That’s how the light gets in.', source: 'Leonard Cohen', kind: 'secular' },
+  { text: 'Peace I leave with you; my peace I give you.', source: 'John 14:27', kind: 'scripture' },
+  { text: 'The Lord is close to the brokenhearted.', source: 'Psalm 34:18', kind: 'scripture' },
+  { text: 'Be still, and know that I am God.', source: 'Psalm 46:10', kind: 'scripture' },
+  { text: 'Let all that you do be done in love.', source: '1 Corinthians 16:14', kind: 'scripture' },
+];
 
 const CRISIS_RE = /\b(kill myself|end my life|suicide|suicidal|want to die|don't want to (?:be )?alive|dont want to (?:be )?alive|self[- ]?harm|cut myself|hang myself)\b/i;
 const HARSH_RE = /\b(kill you|i hope you die|you should die|worthless piece|piece of shit|go die|rape|nigger|faggot)\b/i;
@@ -744,11 +861,6 @@ let activeFilter = 'all';
 let currentThreadId = null;
 let draftMode = 'anonymous';
 
-function showScreen(name) {
-  Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
 function loadJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -773,6 +885,70 @@ function loadIdentity() {
 
 function saveIdentity(identity) {
   saveJSON(STORAGE_IDENTITY, identity);
+}
+
+function loadWhisperPrefs() {
+  const prefs = loadJSON(STORAGE_WHISPERS, { includeScripture: true });
+  return { includeScripture: prefs.includeScripture !== false };
+}
+
+function saveWhisperPrefs(prefs) {
+  saveJSON(STORAGE_WHISPERS, prefs);
+}
+
+let whisperTimer = null;
+let lastWhisperIndex = -1;
+
+function allowedWhispers() {
+  const { includeScripture } = loadWhisperPrefs();
+  return SHORE_WHISPERS.filter((w) => includeScripture || w.kind !== 'scripture');
+}
+
+function pickWhisper() {
+  const pool = allowedWhispers();
+  if (!pool.length) return null;
+  let idx = Math.floor(Math.random() * pool.length);
+  if (pool.length > 1 && idx === lastWhisperIndex) idx = (idx + 1) % pool.length;
+  lastWhisperIndex = idx;
+  return pool[idx];
+}
+
+function renderWhisper(whisper) {
+  if (!whisper) return;
+  const textEls = [$('#whisper-card-text'), $('#whisper-rail-text')];
+  const sourceEls = [$('#whisper-card-source'), $('#whisper-rail-source')];
+  textEls.forEach((el) => { if (el) el.textContent = `“${whisper.text}”`; });
+  sourceEls.forEach((el) => {
+    if (!el) return;
+    el.textContent = whisper.kind === 'scripture'
+      ? `Scripture · ${whisper.source}`
+      : `— ${whisper.source}`;
+  });
+  const rail = $('#shore-whisper-rail');
+  if (rail) {
+    rail.classList.remove('show');
+    // re-trigger fade
+    void rail.offsetWidth;
+    rail.classList.add('show');
+  }
+}
+
+function showNextWhisper() {
+  renderWhisper(pickWhisper());
+}
+
+function startWhispers() {
+  showNextWhisper();
+  if (whisperTimer) clearInterval(whisperTimer);
+  whisperTimer = setInterval(showNextWhisper, 55000);
+}
+
+function showScreen(name) {
+  Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const rail = $('#shore-whisper-rail');
+  if (rail) rail.classList.toggle('show', name === 'feed' || name === 'home' || name === 'write');
+  if (name === 'feed' || name === 'home') showNextWhisper();
 }
 
 function normalizeText(text) {
@@ -1097,10 +1273,12 @@ function syncWriteIdentityUI() {
 
 function syncIdentityScreen() {
   const identity = loadIdentity();
+  const whispers = loadWhisperPrefs();
   $('#pref-anon').classList.toggle('active', identity.mode === 'anonymous');
   $('#pref-named').classList.toggle('active', identity.mode === 'named');
   $('#pref-username').value = identity.username || '';
   $('#pref-username').disabled = identity.mode !== 'named';
+  $('#pref-scripture').checked = whispers.includeScripture;
 }
 
 function renderTagPicker() {
@@ -1341,6 +1519,8 @@ $('#save-identity').addEventListener('click', () => {
     return;
   }
   saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
+  saveWhisperPrefs({ includeScripture: $('#pref-scripture').checked });
+  showNextWhisper();
   showScreen('feed');
   renderFeed();
 });
@@ -1446,6 +1626,7 @@ async function boot() {
   }
 
   mountScreenSkies();
+  startWhispers();
   migrateLegacy();
   loadPosts(); // prune duplicates immediately
   renderTagPicker();
@@ -1466,7 +1647,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=10');
+      await navigator.serviceWorker.register('./sw.js?v=11');
     } catch (_) {}
   }
 }
