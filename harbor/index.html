@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Harbor">
 <meta name="theme-color" content="#E8F1F4">
-<meta name="description" content="A peaceful private space to get things off your chest, with a gentle Angel companion.">
+<meta name="description" content="A peaceful place to set things down — anonymously or with a name — and find gentle company.">
 <title>Harbor — Set things down</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -29,7 +29,6 @@
   --paper: rgba(255, 252, 248, 0.72);
   --paper-solid: #FFFCF8;
   --line: rgba(31, 79, 88, 0.12);
-  --ok: #2F7D6A;
   --warn: #9A5B2E;
   --safe: #8B3A3A;
   --shadow: 0 18px 50px rgba(31, 79, 88, 0.10);
@@ -88,311 +87,232 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Hero ───────────────────────────────────────────────────── */
-#home {
-  justify-content: flex-end;
-  position: relative;
-  padding-bottom: 8px;
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); border: 0;
 }
+
+/* ── Hero ───────────────────────────────────────────────────── */
+#home { justify-content: flex-end; position: relative; padding-bottom: 8px; }
 .hero-visual {
-  position: absolute;
-  inset: 8% 0 auto;
-  height: min(46vh, 360px);
-  pointer-events: none;
-  overflow: hidden;
+  position: absolute; inset: 8% 0 auto; height: min(42vh, 320px);
+  pointer-events: none; overflow: hidden;
 }
 .horizon {
-  position: absolute;
-  left: 50%;
-  bottom: 38%;
-  width: 140%;
-  height: 1px;
+  position: absolute; left: 50%; bottom: 38%; width: 140%; height: 1px;
   transform: translateX(-50%);
   background: linear-gradient(90deg, transparent, rgba(62,122,134,.35), transparent);
 }
 .water-plane {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  bottom: 0;
-  height: 58%;
-  background:
-    linear-gradient(180deg, rgba(90,154,166,.18), rgba(62,122,134,.42));
+  position: absolute; left: -10%; right: -10%; bottom: 0; height: 58%;
+  background: linear-gradient(180deg, rgba(90,154,166,.18), rgba(62,122,134,.42));
   border-radius: 50% 50% 0 0 / 28% 28% 0 0;
 }
 .ripple {
-  position: absolute;
-  left: 50%;
-  bottom: 34%;
-  width: 160px;
-  height: 18px;
-  margin-left: -80px;
-  border: 1.5px solid rgba(255,252,248,.55);
-  border-radius: 50%;
+  position: absolute; left: 50%; bottom: 34%; width: 160px; height: 18px;
+  margin-left: -80px; border: 1.5px solid rgba(255,252,248,.55); border-radius: 50%;
   animation: ripple 4.8s ease-out infinite;
 }
 .ripple.r2 { animation-delay: 1.6s; width: 220px; margin-left: -110px; }
 .ripple.r3 { animation-delay: 3.2s; width: 280px; margin-left: -140px; }
 .mark {
-  position: absolute;
-  left: 50%;
-  bottom: 42%;
-  width: 64px;
-  height: 84px;
-  margin-left: -32px;
-  animation: breathe 5.5s ease-in-out infinite;
+  position: absolute; left: 50%; bottom: 42%; width: 64px; height: 84px;
+  margin-left: -32px; animation: breathe 5.5s ease-in-out infinite;
 }
 .mark svg { width: 100%; height: 100%; display: block; }
-
-.hero-copy {
-  position: relative;
-  z-index: 1;
-  margin-top: auto;
-  padding-top: min(48vh, 380px);
-}
+.hero-copy { position: relative; z-index: 1; margin-top: auto; padding-top: min(44vh, 340px); }
 .brand {
   font-family: var(--font-display);
   font-size: clamp(3.4rem, 12vw, 5rem);
-  font-weight: 650;
-  letter-spacing: -0.04em;
-  color: var(--water-deep);
-  line-height: 0.95;
-  margin-bottom: 14px;
+  font-weight: 650; letter-spacing: -0.04em; color: var(--water-deep);
+  line-height: 0.95; margin-bottom: 14px;
 }
-.lede {
-  font-size: 1.125rem;
-  color: var(--ink-soft);
-  max-width: 28ch;
-  margin-bottom: 28px;
-}
+.lede { font-size: 1.125rem; color: var(--ink-soft); max-width: 30ch; margin-bottom: 28px; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.privacy-note { margin-top: 18px; font-size: .9rem; color: var(--ink-faint); }
+
+/* ── Buttons / chrome ───────────────────────────────────────── */
 .btn {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 560;
-  border-radius: 999px;
-  padding: 14px 22px;
-  transition: transform .15s ease, background .2s ease, color .2s ease;
+  appearance: none; border: none; cursor: pointer;
+  font-family: var(--font-body); font-size: 1rem; font-weight: 560;
+  border-radius: 999px; padding: 14px 22px;
+  transition: transform .15s ease, background .2s ease;
 }
 .btn:active { transform: scale(.97); }
-.btn-primary {
-  background: var(--water-deep);
-  color: #F4FBFC;
-}
+.btn-primary { background: var(--water-deep); color: #F4FBFC; }
 .btn-primary:hover { background: #163F47; }
-.btn-ghost {
-  background: transparent;
-  color: var(--water);
-  padding-left: 10px;
-  padding-right: 10px;
+.btn-secondary {
+  background: rgba(255,252,248,.7); color: var(--water-deep);
+  border: 1px solid var(--line);
 }
-.privacy-note {
-  margin-top: 18px;
-  font-size: .9rem;
-  color: var(--ink-faint);
-}
+.btn-ghost { background: transparent; color: var(--water); padding-left: 10px; padding-right: 10px; }
+.btn-small { padding: 10px 16px; font-size: .95rem; }
 
-/* ── Shared chrome ──────────────────────────────────────────── */
 .topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 18px;
 }
 .brand-mini {
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-  font-weight: 650;
-  color: var(--water-deep);
-  letter-spacing: -0.03em;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+  font-family: var(--font-display); font-size: 1.55rem; font-weight: 650;
+  color: var(--water-deep); letter-spacing: -0.03em;
+  background: none; border: none; cursor: pointer; padding: 0;
 }
 .linkish {
-  background: none;
-  border: none;
-  color: var(--water);
-  font: inherit;
-  font-weight: 560;
-  cursor: pointer;
-  padding: 8px 0;
+  background: none; border: none; color: var(--water); font: inherit;
+  font-weight: 560; cursor: pointer; padding: 8px 0;
 }
+.top-actions { display: flex; gap: 14px; align-items: center; }
 .section-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.8rem, 5vw, 2.35rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  color: var(--water-deep);
-  margin-bottom: 8px;
+  font-family: var(--font-display); font-size: clamp(1.7rem, 5vw, 2.2rem);
+  font-weight: 650; letter-spacing: -0.03em; color: var(--water-deep); margin-bottom: 8px;
 }
-.section-sub {
-  color: var(--ink-soft);
-  margin-bottom: 22px;
-  max-width: 36ch;
+.section-sub { color: var(--ink-soft); margin-bottom: 20px; max-width: 38ch; }
+
+/* ── Feed ───────────────────────────────────────────────────── */
+.feed-filters {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px;
+  margin-bottom: 4px; -webkit-overflow-scrolling: touch;
 }
+.filter-chip {
+  flex: 0 0 auto; border: 1px solid var(--line); background: rgba(255,252,248,.55);
+  color: var(--ink-soft); border-radius: 999px; padding: 8px 14px;
+  font: inherit; font-size: .9rem; font-weight: 560; cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--water-deep); color: #F4FBFC; border-color: var(--water-deep);
+}
+.feed-list { display: flex; flex-direction: column; gap: 12px; }
+.post-card {
+  width: 100%; text-align: left; border: 1px solid var(--line);
+  background: var(--paper); border-radius: 18px; padding: 16px 18px;
+  cursor: pointer; font: inherit; color: inherit;
+  transition: transform .15s ease, border-color .2s ease;
+  animation: fadeIn .4s ease both;
+}
+.post-card:hover { border-color: rgba(62,122,134,.35); }
+.post-card:active { transform: scale(.99); }
+.post-card.featured {
+  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
+  border-color: rgba(184, 137, 74, 0.28);
+  box-shadow: var(--shadow);
+}
+.post-meta {
+  display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center;
+  margin-bottom: 8px; font-size: .84rem; color: var(--ink-faint);
+}
+.author { color: var(--water-deep); font-weight: 560; }
+.featured-badge {
+  color: var(--warm); font-weight: 560; letter-spacing: .04em; text-transform: uppercase;
+  font-size: .72rem;
+}
+.post-body {
+  color: var(--ink); line-height: 1.65; white-space: pre-wrap;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+}
+.post-card.full .post-body { display: block; -webkit-line-clamp: unset; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.tag {
+  font-size: .78rem; font-weight: 560; color: var(--water);
+  background: rgba(62,122,134,.08); border-radius: 999px; padding: 4px 10px;
+}
+.post-foot {
+  margin-top: 12px; font-size: .86rem; color: var(--ink-faint);
+  display: flex; justify-content: space-between; gap: 10px;
+}
+.empty { color: var(--ink-faint); padding: 20px 4px; }
+.fab-wrap { position: sticky; bottom: 8px; display: flex; justify-content: flex-end; margin-top: 18px; }
 
 /* ── Write ──────────────────────────────────────────────────── */
-.write-shell {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.write-shell { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.identity-bar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line);
+  background: rgba(255,252,248,.55);
 }
+.seg {
+  display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden;
+}
+.seg button {
+  border: none; background: transparent; color: var(--ink-soft);
+  font: inherit; font-weight: 560; font-size: .9rem; padding: 8px 14px; cursor: pointer;
+}
+.seg button.active { background: var(--water-deep); color: #F4FBFC; }
+#username-input {
+  flex: 1; min-width: 140px; border: 1px solid var(--line); background: var(--paper-solid);
+  border-radius: 999px; padding: 10px 14px; font: inherit; color: var(--ink); outline: none;
+}
+#username-input:disabled { opacity: .45; }
 #entry {
-  flex: 1;
-  min-height: 220px;
-  width: 100%;
-  resize: vertical;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius);
-  padding: 20px 20px 48px;
-  font: inherit;
-  font-size: 1.08rem;
-  line-height: 1.65;
-  color: var(--ink);
-  outline: none;
-  box-shadow: var(--shadow);
-  transition: border-color .2s ease, box-shadow .2s ease;
+  flex: 1; min-height: 200px; width: 100%; resize: vertical;
+  border: 1px solid var(--line); background: var(--paper); backdrop-filter: blur(10px);
+  border-radius: var(--radius); padding: 20px; font: inherit; font-size: 1.08rem;
+  line-height: 1.65; color: var(--ink); outline: none; box-shadow: var(--shadow);
 }
 #entry::placeholder { color: var(--ink-faint); }
-#entry:focus {
-  border-color: rgba(62, 122, 134, 0.45);
-  box-shadow: 0 18px 50px rgba(31, 79, 88, 0.14);
-}
+#entry:focus { border-color: rgba(62, 122, 134, 0.45); }
 .meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink-faint);
-  font-size: .92rem;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; color: var(--ink-faint); font-size: .92rem;
 }
-.tone-pill {
-  display: none;
-  color: var(--warn);
-  animation: fadeIn .35s ease both;
-}
+.tone-pill { display: none; color: var(--warn); animation: fadeIn .35s ease both; }
 .tone-pill.show { display: inline; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-.btn-secondary {
-  background: rgba(255,252,248,.7);
-  color: var(--water-deep);
-  border: 1px solid var(--line);
+.tag-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-pick {
+  border: 1px solid var(--line); background: rgba(255,252,248,.65);
+  color: var(--ink-soft); border-radius: 999px; padding: 8px 12px;
+  font: inherit; font-size: .88rem; font-weight: 560; cursor: pointer;
 }
+.tag-pick.active { background: rgba(62,122,134,.14); color: var(--water-deep); border-color: rgba(62,122,134,.35); }
+.custom-tag-row { display: flex; gap: 8px; }
+#custom-tag {
+  flex: 1; border: 1px solid var(--line); background: var(--paper-solid);
+  border-radius: 999px; padding: 10px 14px; font: inherit; outline: none;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 .crisis {
-  display: none;
-  margin-top: 8px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(139, 58, 58, 0.08);
-  border: 1px solid rgba(139, 58, 58, 0.18);
-  color: var(--ink);
-  animation: fadeIn .4s ease both;
+  display: none; margin-top: 4px; padding: 16px 18px; border-radius: 18px;
+  background: rgba(139, 58, 58, 0.08); border: 1px solid rgba(139, 58, 58, 0.18);
+  color: var(--ink); animation: fadeIn .4s ease both;
 }
 .crisis.show { display: block; }
 .crisis strong { color: var(--safe); font-weight: 560; }
 .crisis a { color: var(--water-deep); }
 
-/* ── Angel / entry view ─────────────────────────────────────── */
+/* ── Thread ─────────────────────────────────────────────────── */
+.thread-stack { display: flex; flex-direction: column; gap: 14px; }
 .angel-panel {
-  margin-top: 8px;
-  padding: 22px 22px 20px;
-  border-radius: var(--radius);
+  padding: 20px 20px 18px; border-radius: var(--radius);
   background: linear-gradient(160deg, rgba(255,252,248,.88), rgba(214,232,236,.72));
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  animation: fadeIn .55s ease both;
+  border: 1px solid var(--line); box-shadow: var(--shadow); animation: fadeIn .55s ease both;
 }
 .angel-label {
-  font-size: .78rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--warm);
-  font-weight: 560;
-  margin-bottom: 10px;
+  font-size: .78rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--warm); font-weight: 560; margin-bottom: 10px;
 }
 .angel-text {
-  font-family: var(--font-display);
-  font-size: 1.28rem;
-  font-weight: 500;
-  line-height: 1.45;
-  color: var(--water-deep);
-  margin-bottom: 14px;
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 500;
+  line-height: 1.45; color: var(--water-deep); margin-bottom: 10px;
 }
-.angel-note {
-  font-size: .92rem;
-  color: var(--ink-soft);
+.angel-note { font-size: .92rem; color: var(--ink-soft); }
+.reply-list { display: flex; flex-direction: column; gap: 10px; }
+.reply {
+  border: 1px solid var(--line); background: rgba(255,252,248,.55);
+  border-radius: 16px; padding: 14px 16px; animation: fadeIn .35s ease both;
 }
-.your-words {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+.reply .post-body { -webkit-line-clamp: unset; display: block; }
+.reply-composer { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+#reply-entry {
+  min-height: 90px; width: 100%; resize: vertical; border: 1px solid var(--line);
+  background: var(--paper); border-radius: 16px; padding: 14px 16px; font: inherit;
+  color: var(--ink); outline: none;
 }
-.your-words h3 {
-  font-size: .78rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 10px;
-  font-weight: 560;
+.felt-btn {
+  align-self: flex-start; border: 1px solid rgba(184,137,74,.35);
+  background: rgba(184,137,74,.08); color: var(--warm);
+  border-radius: 999px; padding: 10px 16px; font: inherit; font-weight: 560; cursor: pointer;
 }
-.your-words p {
-  white-space: pre-wrap;
-  color: var(--ink-soft);
-  line-height: 1.65;
-}
-
-/* ── Journal ────────────────────────────────────────────────── */
-.journal-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.entry-row {
-  width: 100%;
-  text-align: left;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  border-radius: 18px;
-  padding: 16px 18px;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  transition: transform .15s ease, border-color .2s ease;
-}
-.entry-row:hover { border-color: rgba(62,122,134,.35); }
-.entry-row:active { transform: scale(.99); }
-.entry-row time {
-  display: block;
-  font-size: .84rem;
-  color: var(--ink-faint);
-  margin-bottom: 6px;
-}
-.entry-row .preview {
-  color: var(--ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.empty {
-  color: var(--ink-faint);
-  padding: 28px 4px;
-}
-.footer-help {
-  margin-top: auto;
-  padding-top: 28px;
-  font-size: .86rem;
-  color: var(--ink-faint);
-}
+.felt-btn.done { opacity: .7; }
+.footer-help { margin-top: auto; padding-top: 24px; font-size: .86rem; color: var(--ink-faint); }
 .footer-help a { color: var(--water); }
 </style>
 </head>
@@ -418,12 +338,30 @@ body {
     </div>
     <div class="hero-copy">
       <h1 class="brand">Harbor</h1>
-      <p class="lede">A quiet place to set things down. Private, respectful, and gently accompanied.</p>
+      <p class="lede">A quiet coastal place to set things down — with your name, or anonymously.</p>
       <div class="cta-row">
-        <button class="btn btn-primary" id="start-write">Share what’s on your chest</button>
-        <button class="btn btn-ghost" id="open-journal">Your journal</button>
+        <button class="btn btn-primary" id="enter-feed">Enter Harbor</button>
+        <button class="btn btn-ghost" id="home-write">Share something</button>
       </div>
-      <p class="privacy-note">Stays on this device in Phase 1. Nothing is posted.</p>
+      <p class="privacy-note">Your posts stay on this device for now. A first light post greets everyone.</p>
+    </div>
+  </section>
+
+  <!-- FEED -->
+  <section id="feed" class="screen" aria-label="Harbor feed">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home">Harbor</button>
+      <div class="top-actions">
+        <button class="linkish" data-go="write">Write</button>
+        <button class="linkish" id="open-identity">Identity</button>
+      </div>
+    </div>
+    <h2 class="section-title">The shore</h2>
+    <p class="section-sub">Start with the first light. Then open any thread that meets you.</p>
+    <div class="feed-filters" id="feed-filters" aria-label="Filter by tag"></div>
+    <div class="feed-list" id="feed-list"></div>
+    <div class="fab-wrap">
+      <button class="btn btn-primary btn-small" data-go="write">New post</button>
     </div>
   </section>
 
@@ -431,16 +369,31 @@ body {
   <section id="write" class="screen" aria-label="Write">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="journal">Journal</button>
+      <button class="linkish" data-go="feed">Feed</button>
     </div>
     <h2 class="section-title">What’s weighing on you?</h2>
-    <p class="section-sub">Say it plainly. No performance needed — only respect for yourself and others.</p>
+    <p class="section-sub">Tag it so others can find a similar shore. Stay anonymous, or sign a name.</p>
     <div class="write-shell">
-      <label class="visually-hidden" for="entry" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Your words</label>
+      <div class="identity-bar">
+        <div class="seg" role="group" aria-label="Post as">
+          <button type="button" id="mode-anon" class="active">Anonymous</button>
+          <button type="button" id="mode-named">Username</button>
+        </div>
+        <input id="username-input" type="text" maxlength="24" placeholder="Choose a username" disabled autocomplete="nickname">
+      </div>
+      <label class="sr-only" for="entry">Your words</label>
       <textarea id="entry" maxlength="4000" placeholder="You can start anywhere. A loss, a worry, a goodbye that still echoes…"></textarea>
       <div class="meta-row">
         <span class="tone-pill" id="tone-pill">Let’s keep this respectful — no insults or threats.</span>
         <span id="count">0 / 4000</span>
+      </div>
+      <div>
+        <p class="section-sub" style="margin-bottom:10px">Tags</p>
+        <div class="tag-picker" id="tag-picker"></div>
+        <div class="custom-tag-row" style="margin-top:10px">
+          <input id="custom-tag" type="text" maxlength="24" placeholder="Add a tag" autocomplete="off">
+          <button class="btn btn-secondary btn-small" type="button" id="add-tag">Add</button>
+        </div>
       </div>
       <div class="crisis" id="crisis" role="status">
         <strong>You’re not alone.</strong>
@@ -450,124 +403,225 @@ body {
         Harbor’s Angel is a gentle companion, not a crisis service.
       </div>
       <div class="actions">
-        <button class="btn btn-primary" id="release-btn">Release to Angel</button>
-        <button class="btn btn-secondary" id="save-only">Save quietly</button>
+        <button class="btn btn-primary" id="release-btn">Post to Harbor</button>
+        <button class="btn btn-secondary" id="save-private">Keep private</button>
       </div>
     </div>
-    <p class="footer-help">Phase 1 is private and local. Soft social “I’ve felt this too” comes later.</p>
+    <p class="footer-help">Private posts stay in your journal thread only on this device.</p>
   </section>
 
-  <!-- ANGEL RESPONSE -->
-  <section id="angel" class="screen" aria-label="Angel response">
+  <!-- THREAD -->
+  <section id="thread" class="screen" aria-label="Thread">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="journal">Journal</button>
+      <button class="linkish" data-go="feed">Back to shore</button>
     </div>
-    <div class="angel-panel">
-      <div class="angel-label">Angel</div>
-      <p class="angel-text" id="angel-text"></p>
-      <p class="angel-note" id="angel-note"></p>
-      <div class="your-words">
-        <h3>What you set down</h3>
-        <p id="angel-entry"></p>
+    <div class="thread-stack">
+      <article class="post-card full" id="thread-post" style="cursor:default"></article>
+      <button class="felt-btn" id="felt-btn" type="button">I’ve felt this too</button>
+      <div class="angel-panel" id="angel-panel">
+        <div class="angel-label">Angel</div>
+        <p class="angel-text" id="angel-text"></p>
+        <p class="angel-note" id="angel-note"></p>
+      </div>
+      <div>
+        <h3 class="section-title" style="font-size:1.35rem;margin-bottom:10px">Thread</h3>
+        <div class="reply-list" id="reply-list"></div>
+      </div>
+      <div class="reply-composer" id="reply-composer">
+        <label class="sr-only" for="reply-entry">Reply</label>
+        <textarea id="reply-entry" maxlength="2000" placeholder="Reply gently, if you’ve been here too…"></textarea>
+        <button class="btn btn-primary btn-small" id="reply-btn" type="button">Add to thread</button>
       </div>
     </div>
-    <div class="actions" style="margin-top:20px">
-      <button class="btn btn-primary" data-go="write">Write again</button>
-      <button class="btn btn-secondary" data-go="journal">See journal</button>
-    </div>
   </section>
 
-  <!-- JOURNAL -->
-  <section id="journal" class="screen" aria-label="Journal">
+  <!-- IDENTITY SHEET -->
+  <section id="identity" class="screen" aria-label="Identity">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="write">New entry</button>
+      <button class="linkish" data-go="feed">Done</button>
     </div>
-    <h2 class="section-title">Your harbor</h2>
-    <p class="section-sub">Only you can see these. Tap one to revisit the Angel’s note.</p>
-    <div class="journal-list" id="journal-list"></div>
-    <p class="footer-help">Want a clean slate? <button class="linkish" id="clear-journal" style="padding:0">Clear all local entries</button></p>
+    <h2 class="section-title">How you show up</h2>
+    <p class="section-sub">Default to anonymous anytime. A username is optional and can be changed.</p>
+    <div class="identity-bar" style="flex-direction:column;align-items:stretch">
+      <div class="seg" role="group" aria-label="Default identity">
+        <button type="button" id="pref-anon" class="active">Anonymous</button>
+        <button type="button" id="pref-named">Username</button>
+      </div>
+      <input id="pref-username" type="text" maxlength="24" placeholder="Your Harbor username" autocomplete="nickname"
+        style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
+      <button class="btn btn-primary" id="save-identity" type="button">Save identity</button>
+    </div>
+    <p class="footer-help">Clearing this device clears local posts. The first light post always remains for everyone.</p>
   </section>
 
 </div>
 
 <script>
-const STORAGE_KEY = 'harbor.entries.v1';
-const $ = (sel) => document.querySelector(sel);
-const screens = {
-  home: $('#home'),
-  write: $('#write'),
-  angel: $('#angel'),
-  journal: $('#journal'),
+/* ═══════════════════════════════════════════════════════════════
+   FEATURED FIRST POST
+   Always shown first for every visitor, before any threads.
+   Paste/replace `text` with the entry you want newcomers to see.
+═══════════════════════════════════════════════════════════════ */
+const FEATURED_POST = {
+  id: 'harbor-first-light',
+  featured: true,
+  authorMode: 'named',
+  authorName: 'Harbor',
+  text: 'Welcome to Harbor.\n\nThis is a quiet place for the things we carry — the goodbyes, the almosts, the nights that still echo. You can set something down here with your name, or stay anonymous. Tag what it is so others who’ve felt something similar can find their way to the shore.\n\nStart here. The rest of the threads open after this light.',
+  tags: ['welcome', 'first-light', 'harbor'],
+  createdAt: Date.UTC(2026, 6, 17, 12, 0, 0),
+  angelLine: 'Every shore needs a first light. Thank you for beginning gently.',
+  angelNote: 'I’m a calm companion — not a therapist or crisis line. Your pace is welcome here.',
+  feltCount: 1,
+  private: false,
 };
+
+const SUGGESTED_TAGS = ['grief', 'goodbye', 'worry', 'hope', 'gratitude', 'family', 'change', 'lonely', 'healing', 'florida'];
+const STORAGE_POSTS = 'harbor.posts.v2';
+const STORAGE_IDENTITY = 'harbor.identity.v1';
+const STORAGE_LEGACY = 'harbor.entries.v1';
+const STORAGE_FELT = 'harbor.felt.v1';
 
 const CRISIS_RE = /\b(kill myself|end my life|suicide|suicidal|want to die|don't want to (?:be )?alive|dont want to (?:be )?alive|self[- ]?harm|cut myself|hang myself)\b/i;
 const HARSH_RE = /\b(kill you|i hope you die|you should die|worthless piece|piece of shit|go die|rape|nigger|faggot)\b/i;
 
 const ANGEL_POOL = {
   grief: [
-    "What you lost still deserves room. Naming it here doesn’t make you stuck — it makes you honest.",
-    "Grief moves in tides. Today you let one wave land. That is enough.",
-    "Some endings leave a quiet shape behind. You don’t have to fill it yet."
+    'What you lost still deserves room. Naming it here doesn’t make you stuck — it makes you honest.',
+    'Grief moves in tides. Today you let one wave land. That is enough.',
+    'Some endings leave a quiet shape behind. You don’t have to fill it yet.'
   ],
   regret: [
-    "Regret is often love with nowhere to go. You can hold the lesson without punishing yourself forever.",
-    "You showed up to your own unfinished story. That takes more courage than pretending it never happened.",
-    "The past can inform you without owning you. Setting it down is practice, not erasure."
+    'Regret is often love with nowhere to go. You can hold the lesson without punishing yourself forever.',
+    'You showed up to your own unfinished story. That takes more courage than pretending it never happened.',
+    'The past can inform you without owning you. Setting it down is practice, not erasure.'
   ],
   worry: [
-    "Worry tries to protect you by rehearsing pain. You don’t have to rehearse alone.",
-    "You named the weight. That already loosens its grip a little.",
-    "Not every storm needs a plan tonight. Sometimes it needs a shore."
+    'Worry tries to protect you by rehearsing pain. You don’t have to rehearse alone.',
+    'You named the weight. That already loosens its grip a little.',
+    'Not every storm needs a plan tonight. Sometimes it needs a shore.'
   ],
   loneliness: [
-    "Feeling alone doesn’t mean you are unseen. This page held you for a moment — and so did I.",
-    "Loneliness is heavy because connection matters to you. That longing is human, not a flaw.",
-    "You reached toward light by writing. Stay near that instinct."
+    'Feeling alone doesn’t mean you are unseen. This page held you for a moment — and so did I.',
+    'Loneliness is heavy because connection matters to you. That longing is human, not a flaw.',
+    'You reached toward light by writing. Stay near that instinct.'
   ],
   anger: [
-    "Anger often guards a softer truth. You can honor the heat without letting it burn the room.",
-    "You put the fire into words instead of into yourself. That is a kind of care.",
-    "It’s allowed to feel sharp. It’s also allowed to set the sharp thing down."
+    'Anger often guards a softer truth. You can honor the heat without letting it burn the room.',
+    'You put the fire into words instead of into yourself. That is a kind of care.',
+    'It’s allowed to feel sharp. It’s also allowed to set the sharp thing down.'
   ],
   goodbye: [
-    "Goodbyes rarely finish cleanly. Returning to them gently is part of loving what was.",
-    "You can miss something and still keep walking. Both can be true.",
-    "What ended still shaped you. Thanking it silently is a form of peace."
+    'Goodbyes rarely finish cleanly. Returning to them gently is part of loving what was.',
+    'You can miss something and still keep walking. Both can be true.',
+    'What ended still shaped you. Thanking it silently is a form of peace.'
   ],
   general: [
-    "Thank you for trusting this quiet place with something real.",
-    "You don’t have to tidy the feeling before it’s welcome here.",
-    "I heard you. You can leave this on the shore and come back when you need to."
+    'Thank you for trusting this quiet place with something real.',
+    'You don’t have to tidy the feeling before it’s welcome here.',
+    'I heard you. You can leave this on the shore and come back when you need to.'
   ]
 };
-
 const ANGEL_NOTES = [
-  "I’m not a therapist or a crisis line — just a steady, respectful companion for what you carry.",
-  "Your words stay on this device in Phase 1. Share only what feels safe.",
-  "If this feeling returns tomorrow, you’re allowed to write it again. Repetition isn’t failure."
+  'I’m not a therapist or a crisis line — just a steady, respectful companion for what you carry.',
+  'Your words stay on this device for now. Share only what feels safe.',
+  'If this feeling returns tomorrow, you’re allowed to write it again. Repetition isn’t failure.'
 ];
 
-function loadEntries() {
+const $ = (sel) => document.querySelector(sel);
+const screens = {
+  home: $('#home'),
+  feed: $('#feed'),
+  write: $('#write'),
+  thread: $('#thread'),
+  identity: $('#identity'),
+};
+
+let selectedTags = new Set();
+let activeFilter = 'all';
+let currentThreadId = null;
+let draftMode = 'anonymous';
+
+function showScreen(name) {
+  Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function loadJSON(key, fallback) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-    return Array.isArray(list) ? list : [];
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
   } catch {
-    return [];
+    return fallback;
   }
 }
 
-function saveEntries(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+function saveJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
-function showScreen(name) {
-  Object.entries(screens).forEach(([key, el]) => {
-    el.classList.toggle('active', key === name);
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function loadIdentity() {
+  const id = loadJSON(STORAGE_IDENTITY, { mode: 'anonymous', username: '' });
+  return {
+    mode: id.mode === 'named' ? 'named' : 'anonymous',
+    username: String(id.username || '').trim().slice(0, 24),
+  };
+}
+
+function saveIdentity(identity) {
+  saveJSON(STORAGE_IDENTITY, identity);
+}
+
+function migrateLegacy() {
+  const existing = loadJSON(STORAGE_POSTS, null);
+  if (existing) return;
+  const legacy = loadJSON(STORAGE_LEGACY, []);
+  if (!Array.isArray(legacy) || !legacy.length) {
+    saveJSON(STORAGE_POSTS, []);
+    return;
+  }
+  const migrated = legacy.map((e) => ({
+    id: e.id || uid(),
+    featured: false,
+    authorMode: 'anonymous',
+    authorName: 'Anonymous',
+    text: e.text || '',
+    tags: e.theme ? [e.theme] : [],
+    createdAt: e.createdAt || Date.now(),
+    angelLine: e.angelLine || craftAngel(e.text || '').line,
+    angelNote: e.angelNote || ANGEL_NOTES[0],
+    feltCount: 0,
+    private: false,
+    replies: [],
+  }));
+  saveJSON(STORAGE_POSTS, migrated);
+}
+
+function loadPosts() {
+  migrateLegacy();
+  const local = loadJSON(STORAGE_POSTS, []);
+  return Array.isArray(local) ? local : [];
+}
+
+function savePosts(posts) {
+  saveJSON(STORAGE_POSTS, posts);
+}
+
+function uid() {
+  return crypto.randomUUID ? crypto.randomUUID() : `p_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return h;
+}
+
+function pick(arr, seed) {
+  return arr[Math.abs(hash(seed)) % arr.length];
 }
 
 function detectTheme(text) {
@@ -581,22 +635,13 @@ function detectTheme(text) {
   return 'general';
 }
 
-function pick(arr, seed) {
-  const i = Math.abs(hash(seed)) % arr.length;
-  return arr[i];
-}
-
-function hash(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
-  return h;
-}
-
 function craftAngel(text) {
   const theme = detectTheme(text);
-  const line = pick(ANGEL_POOL[theme], text.slice(0, 80) + theme);
-  const note = pick(ANGEL_NOTES, text.length + theme);
-  return { theme, line, note };
+  return {
+    theme,
+    line: pick(ANGEL_POOL[theme], text.slice(0, 80) + theme),
+    note: pick(ANGEL_NOTES, text.length + theme),
+  };
 }
 
 function formatWhen(ts) {
@@ -609,32 +654,179 @@ function formatWhen(ts) {
   }
 }
 
-function renderJournal() {
-  const list = loadEntries().sort((a, b) => b.createdAt - a.createdAt);
-  const root = $('#journal-list');
+function displayName(post) {
+  if (post.authorMode === 'named' && post.authorName) return post.authorName;
+  return 'Anonymous';
+}
+
+function normalizeTag(tag) {
+  return String(tag || '').toLowerCase().replace(/[^a-z0-9-_ ]/g, '').trim().replace(/\s+/g, '-').slice(0, 24);
+}
+
+function allPostsForFeed() {
+  const local = loadPosts().filter((p) => !p.private);
+  return [FEATURED_POST, ...local.filter((p) => p.id !== FEATURED_POST.id)]
+    .sort((a, b) => {
+      if (a.featured && !b.featured) return -1;
+      if (!a.featured && b.featured) return 1;
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+}
+
+function getPostById(id) {
+  if (id === FEATURED_POST.id) return { ...FEATURED_POST, replies: loadJSON(`harbor.replies.${id}`, []) };
+  const post = loadPosts().find((p) => p.id === id);
+  if (!post) return null;
+  return { ...post, replies: Array.isArray(post.replies) ? post.replies : [] };
+}
+
+function renderTags(tags) {
+  if (!tags || !tags.length) return '';
+  return `<div class="tag-row">${tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join('')}</div>`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function postCardHtml(post, full = false) {
+  const replies = post.replies || [];
+  const felt = post.feltCount || 0;
+  return `
+    <div class="post-meta">
+      ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
+      <span class="author">${escapeHtml(displayName(post))}</span>
+      <time>${escapeHtml(formatWhen(post.createdAt))}</time>
+    </div>
+    <div class="post-body">${escapeHtml(post.text)}</div>
+    ${renderTags(post.tags)}
+    <div class="post-foot">
+      <span>${replies.length ? `${replies.length} in thread` : 'Open thread'}</span>
+      <span>${felt ? `${felt} felt this too` : 'Be the first to feel this'}</span>
+    </div>
+  `;
+}
+
+function renderFilters(posts) {
+  const tagSet = new Set();
+  posts.forEach((p) => (p.tags || []).forEach((t) => tagSet.add(t)));
+  const root = $('#feed-filters');
+  const tags = ['all', ...Array.from(tagSet).sort()];
+  root.innerHTML = tags.map((t) => {
+    const label = t === 'all' ? 'All' : `#${t}`;
+    const active = activeFilter === t ? 'active' : '';
+    return `<button type="button" class="filter-chip ${active}" data-filter="${escapeHtml(t)}">${escapeHtml(label)}</button>`;
+  }).join('');
+  root.querySelectorAll('[data-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.getAttribute('data-filter');
+      renderFeed();
+    });
+  });
+}
+
+function renderFeed() {
+  const posts = allPostsForFeed();
+  renderFilters(posts);
+  const filtered = activeFilter === 'all'
+    ? posts
+    : posts.filter((p) => p.featured || (p.tags || []).includes(activeFilter));
+  // Featured always first even when filtering, if it matches or filter is all;
+  // if filter is specific and featured lacks tag, still show featured first then matches.
+  const featured = posts.find((p) => p.featured);
+  const rest = filtered.filter((p) => !p.featured);
+  const list = [];
+  if (featured) list.push(featured);
+  rest.forEach((p) => list.push(p));
+
+  const root = $('#feed-list');
   if (!list.length) {
-    root.innerHTML = '<p class="empty">Nothing here yet. When you’re ready, set something down.</p>';
+    root.innerHTML = '<p class="empty">No posts on this shore yet.</p>';
     return;
   }
   root.innerHTML = '';
-  list.forEach((entry) => {
+  list.forEach((post) => {
     const btn = document.createElement('button');
-    btn.className = 'entry-row';
     btn.type = 'button';
-    btn.innerHTML = `<time>${formatWhen(entry.createdAt)}</time><div class="preview"></div>`;
-    btn.querySelector('.preview').textContent = entry.text;
-    btn.addEventListener('click', () => openEntry(entry.id));
+    btn.className = `post-card${post.featured ? ' featured' : ''}`;
+    btn.innerHTML = postCardHtml(post);
+    btn.addEventListener('click', () => openThread(post.id));
     root.appendChild(btn);
   });
 }
 
-function openEntry(id) {
-  const entry = loadEntries().find((e) => e.id === id);
-  if (!entry) return;
-  $('#angel-text').textContent = entry.angelLine;
-  $('#angel-note').textContent = entry.angelNote;
-  $('#angel-entry').textContent = entry.text;
-  showScreen('angel');
+function openThread(id) {
+  const post = getPostById(id);
+  if (!post) return;
+  currentThreadId = id;
+  const card = $('#thread-post');
+  card.className = `post-card full${post.featured ? ' featured' : ''}`;
+  card.innerHTML = postCardHtml(post, true);
+  $('#angel-text').textContent = post.angelLine || craftAngel(post.text).line;
+  $('#angel-note').textContent = post.angelNote || ANGEL_NOTES[0];
+  renderReplies(post);
+  const feltMap = loadJSON(STORAGE_FELT, {});
+  const feltBtn = $('#felt-btn');
+  feltBtn.classList.toggle('done', !!feltMap[id]);
+  feltBtn.textContent = feltMap[id] ? 'You felt this too' : 'I’ve felt this too';
+  $('#reply-entry').value = '';
+  showScreen('thread');
+}
+
+function renderReplies(post) {
+  const root = $('#reply-list');
+  const replies = post.replies || [];
+  if (!replies.length) {
+    root.innerHTML = '<p class="empty">No replies yet. If you’ve been here, you can leave a gentle note.</p>';
+    return;
+  }
+  root.innerHTML = replies.map((r) => `
+    <div class="reply">
+      <div class="post-meta">
+        <span class="author">${escapeHtml(displayName(r))}</span>
+        <time>${escapeHtml(formatWhen(r.createdAt))}</time>
+      </div>
+      <div class="post-body">${escapeHtml(r.text)}</div>
+    </div>
+  `).join('');
+}
+
+function syncWriteIdentityUI() {
+  const identity = loadIdentity();
+  draftMode = identity.mode;
+  $('#mode-anon').classList.toggle('active', draftMode === 'anonymous');
+  $('#mode-named').classList.toggle('active', draftMode === 'named');
+  $('#username-input').disabled = draftMode !== 'named';
+  $('#username-input').value = identity.username || '';
+}
+
+function syncIdentityScreen() {
+  const identity = loadIdentity();
+  $('#pref-anon').classList.toggle('active', identity.mode === 'anonymous');
+  $('#pref-named').classList.toggle('active', identity.mode === 'named');
+  $('#pref-username').value = identity.username || '';
+  $('#pref-username').disabled = identity.mode !== 'named';
+}
+
+function renderTagPicker() {
+  const root = $('#tag-picker');
+  const tags = Array.from(new Set([...SUGGESTED_TAGS, ...selectedTags]));
+  root.innerHTML = tags.map((t) => {
+    const active = selectedTags.has(t) ? 'active' : '';
+    return `<button type="button" class="tag-pick ${active}" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</button>`;
+  }).join('');
+  root.querySelectorAll('[data-tag]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag');
+      if (selectedTags.has(tag)) selectedTags.delete(tag);
+      else selectedTags.add(tag);
+      renderTagPicker();
+    });
+  });
 }
 
 function updateToneAndCrisis() {
@@ -644,27 +836,40 @@ function updateToneAndCrisis() {
   $('#crisis').classList.toggle('show', CRISIS_RE.test(text));
 }
 
-function persistEntry(text, withAngel) {
-  const angel = withAngel ? craftAngel(text) : {
-    theme: 'general',
-    line: 'Held quietly. No reply needed — sometimes setting it down is the whole act.',
-    note: ANGEL_NOTES[0]
-  };
-  const entry = {
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-    text: text.trim(),
-    createdAt: Date.now(),
-    theme: angel.theme,
-    angelLine: angel.line,
-    angelNote: angel.note,
-  };
-  const list = loadEntries();
-  list.push(entry);
-  saveEntries(list);
-  return entry;
+function currentAuthor() {
+  const identity = loadIdentity();
+  const mode = draftMode;
+  const username = ($('#username-input').value || identity.username || '').trim().slice(0, 24);
+  if (mode === 'named' && username) {
+    saveIdentity({ mode: 'named', username });
+    return { authorMode: 'named', authorName: username };
+  }
+  return { authorMode: 'anonymous', authorName: 'Anonymous' };
 }
 
-function release(withAngel) {
+function persistPost({ text, tags, privatePost }) {
+  const angel = craftAngel(text);
+  const author = currentAuthor();
+  const post = {
+    id: uid(),
+    featured: false,
+    ...author,
+    text: text.trim(),
+    tags,
+    createdAt: Date.now(),
+    angelLine: angel.line,
+    angelNote: angel.note,
+    feltCount: 0,
+    private: !!privatePost,
+    replies: [],
+  };
+  const posts = loadPosts();
+  posts.push(post);
+  savePosts(posts);
+  return post;
+}
+
+function release(privatePost) {
   const text = $('#entry').value.trim();
   if (!text) {
     $('#entry').focus();
@@ -674,36 +879,160 @@ function release(withAngel) {
     $('#tone-pill').classList.add('show');
     return;
   }
-  const entry = persistEntry(text, withAngel);
+  if (draftMode === 'named' && !$('#username-input').value.trim()) {
+    $('#username-input').focus();
+    return;
+  }
+  const tags = Array.from(selectedTags);
+  const post = persistPost({ text, tags, privatePost });
   $('#entry').value = '';
+  selectedTags = new Set();
+  renderTagPicker();
   updateToneAndCrisis();
-  $('#angel-text').textContent = entry.angelLine;
-  $('#angel-note').textContent = entry.angelNote;
-  $('#angel-entry').textContent = entry.text;
-  showScreen('angel');
+  openThread(post.id);
 }
 
-$('#start-write').addEventListener('click', () => showScreen('write'));
-$('#open-journal').addEventListener('click', () => { renderJournal(); showScreen('journal'); });
+function addReply() {
+  const text = $('#reply-entry').value.trim();
+  if (!text || !currentThreadId) return;
+  if (HARSH_RE.test(text)) {
+    alert('Let’s keep replies respectful.');
+    return;
+  }
+  const author = currentAuthor();
+  const reply = {
+    id: uid(),
+    ...author,
+    text,
+    createdAt: Date.now(),
+  };
+
+  if (currentThreadId === FEATURED_POST.id) {
+    const key = `harbor.replies.${FEATURED_POST.id}`;
+    const replies = loadJSON(key, []);
+    replies.push(reply);
+    saveJSON(key, replies);
+  } else {
+    const posts = loadPosts();
+    const idx = posts.findIndex((p) => p.id === currentThreadId);
+    if (idx < 0) return;
+    posts[idx].replies = Array.isArray(posts[idx].replies) ? posts[idx].replies : [];
+    posts[idx].replies.push(reply);
+    savePosts(posts);
+  }
+  $('#reply-entry').value = '';
+  openThread(currentThreadId);
+}
+
+function toggleFelt() {
+  if (!currentThreadId) return;
+  const feltMap = loadJSON(STORAGE_FELT, {});
+  const posts = loadPosts();
+
+  if (currentThreadId === FEATURED_POST.id) {
+    if (feltMap[currentThreadId]) return;
+    feltMap[currentThreadId] = true;
+    saveJSON(STORAGE_FELT, feltMap);
+    // Featured base count is visual-only bump via local marker
+    openThread(currentThreadId);
+    return;
+  }
+
+  const idx = posts.findIndex((p) => p.id === currentThreadId);
+  if (idx < 0) return;
+  if (feltMap[currentThreadId]) {
+    openThread(currentThreadId);
+    return;
+  }
+  posts[idx].feltCount = (posts[idx].feltCount || 0) + 1;
+  feltMap[currentThreadId] = true;
+  savePosts(posts);
+  saveJSON(STORAGE_FELT, feltMap);
+  openThread(currentThreadId);
+}
+
+/* events */
+$('#enter-feed').addEventListener('click', () => { renderFeed(); showScreen('feed'); });
+$('#home-write').addEventListener('click', () => {
+  syncWriteIdentityUI();
+  renderTagPicker();
+  updateToneAndCrisis();
+  showScreen('write');
+});
+$('#open-identity').addEventListener('click', () => { syncIdentityScreen(); showScreen('identity'); });
 $('#entry').addEventListener('input', updateToneAndCrisis);
-$('#release-btn').addEventListener('click', () => release(true));
-$('#save-only').addEventListener('click', () => release(false));
-$('#clear-journal').addEventListener('click', () => {
-  if (confirm('Clear all Harbor entries stored on this device?')) {
-    saveEntries([]);
-    renderJournal();
+$('#release-btn').addEventListener('click', () => release(false));
+$('#save-private').addEventListener('click', () => release(true));
+$('#reply-btn').addEventListener('click', addReply);
+$('#felt-btn').addEventListener('click', toggleFelt);
+
+$('#mode-anon').addEventListener('click', () => {
+  draftMode = 'anonymous';
+  $('#mode-anon').classList.add('active');
+  $('#mode-named').classList.remove('active');
+  $('#username-input').disabled = true;
+});
+$('#mode-named').addEventListener('click', () => {
+  draftMode = 'named';
+  $('#mode-named').classList.add('active');
+  $('#mode-anon').classList.remove('active');
+  $('#username-input').disabled = false;
+  $('#username-input').focus();
+});
+
+$('#pref-anon').addEventListener('click', () => {
+  $('#pref-anon').classList.add('active');
+  $('#pref-named').classList.remove('active');
+  $('#pref-username').disabled = true;
+});
+$('#pref-named').addEventListener('click', () => {
+  $('#pref-named').classList.add('active');
+  $('#pref-anon').classList.remove('active');
+  $('#pref-username').disabled = false;
+  $('#pref-username').focus();
+});
+$('#save-identity').addEventListener('click', () => {
+  const named = $('#pref-named').classList.contains('active');
+  const username = $('#pref-username').value.trim().slice(0, 24);
+  if (named && !username) {
+    $('#pref-username').focus();
+    return;
+  }
+  saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
+  showScreen('feed');
+  renderFeed();
+});
+
+$('#add-tag').addEventListener('click', () => {
+  const tag = normalizeTag($('#custom-tag').value);
+  if (!tag) return;
+  selectedTags.add(tag);
+  $('#custom-tag').value = '';
+  renderTagPicker();
+});
+$('#custom-tag').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    $('#add-tag').click();
   }
 });
 
 document.querySelectorAll('[data-go]').forEach((el) => {
   el.addEventListener('click', () => {
     const dest = el.getAttribute('data-go');
-    if (dest === 'journal') renderJournal();
-    if (dest === 'write') updateToneAndCrisis();
+    if (dest === 'feed') renderFeed();
+    if (dest === 'write') {
+      syncWriteIdentityUI();
+      renderTagPicker();
+      updateToneAndCrisis();
+    }
+    if (dest === 'identity') syncIdentityScreen();
     showScreen(dest);
   });
 });
 
+migrateLegacy();
+renderTagPicker();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
