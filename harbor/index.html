@@ -89,6 +89,35 @@ body {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes boatDrift {
+  0%, 8% { transform: translate3d(-18vw, 0, 0); opacity: 0; }
+  14% { opacity: .38; }
+  48% { transform: translate3d(42vw, -3px, 0); opacity: .42; }
+  78% { opacity: .34; }
+  88%, 100% { transform: translate3d(118vw, 2px, 0); opacity: 0; }
+}
+@keyframes boatBob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -3px; }
+}
+@keyframes gullA {
+  0% { transform: translate3d(-12vw, 28px, 0) scale(.85); opacity: 0; }
+  12% { opacity: .42; }
+  55% { transform: translate3d(48vw, -6px, 0) scale(1); opacity: .38; }
+  88% { opacity: .28; }
+  100% { transform: translate3d(112vw, 14px, 0) scale(.9); opacity: 0; }
+}
+@keyframes gullB {
+  0% { transform: translate3d(108vw, 8px, 0) scale(.8); opacity: 0; }
+  14% { opacity: .36; }
+  52% { transform: translate3d(40vw, -18px, 0) scale(.95); opacity: .32; }
+  90% { opacity: .22; }
+  100% { transform: translate3d(-16vw, 4px, 0) scale(.75); opacity: 0; }
+}
+@keyframes wingFlap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(.55); }
+}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -121,8 +150,48 @@ body {
 .mark {
   position: absolute; left: 50%; bottom: 42%; width: 64px; height: 84px;
   margin-left: -32px; animation: breathe 5.5s ease-in-out infinite;
+  z-index: 2;
 }
 .mark svg { width: 100%; height: 100%; display: block; }
+
+/* Soft coastal silhouettes */
+.ambient-boat {
+  position: absolute;
+  left: 0;
+  bottom: 40%;
+  width: 54px;
+  height: 36px;
+  z-index: 1;
+  animation: boatDrift 48s linear infinite;
+}
+.ambient-boat .bob {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: boatBob 3.6s ease-in-out infinite;
+}
+.ambient-boat svg { width: 100%; height: 100%; display: block; opacity: .9; }
+.gull {
+  position: absolute;
+  top: 18%;
+  left: 0;
+  width: 22px;
+  height: 12px;
+  z-index: 3;
+  color: rgba(31, 79, 88, 0.45);
+}
+.gull svg { width: 100%; height: 100%; display: block; transform-origin: center; animation: wingFlap 1.1s ease-in-out infinite; }
+.gull.g1 { animation: gullA 26s linear infinite; }
+.gull.g2 { top: 12%; animation: gullB 34s linear infinite; animation-delay: 7s; }
+.gull.g3 { top: 24%; width: 18px; height: 10px; animation: gullA 31s linear infinite; animation-delay: 15s; color: rgba(31, 79, 88, 0.32); }
+.gull.g3 svg { animation-duration: 1.35s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-boat, .gull, .gull svg, .ambient-boat .bob, .ripple, .mark {
+    animation: none !important;
+  }
+  .ambient-boat, .gull { opacity: 0; }
+}
 .hero-copy { position: relative; z-index: 1; margin-top: auto; padding-top: min(44vh, 340px); }
 .brand {
   font-family: var(--font-display);
@@ -330,6 +399,32 @@ body {
       <div class="ripple"></div>
       <div class="ripple r2"></div>
       <div class="ripple r3"></div>
+      <div class="ambient-boat">
+        <span class="bob">
+          <svg viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 4v18" stroke="#1F4F58" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+            <path d="M30 6l14 14H30V6z" fill="#1F4F58" opacity=".28"/>
+            <path d="M30 8l-10 12h10V8z" fill="#1F4F58" opacity=".2"/>
+            <path d="M12 28h40l-4 6H16l-4-6z" fill="#1F4F58" opacity=".34"/>
+            <path d="M10 28h44" stroke="#3E7A86" stroke-width="1.5" stroke-linecap="round" opacity=".35"/>
+          </svg>
+        </span>
+      </div>
+      <div class="gull g1">
+        <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="gull g2">
+        <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="gull g3">
+        <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="mark">
         <svg viewBox="0 0 64 84" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M32 8v56" stroke="#1F4F58" stroke-width="3.5" stroke-linecap="round"/>
@@ -1242,7 +1337,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=6');
+      await navigator.serviceWorker.register('./sw.js?v=7');
     } catch (_) {}
   }
 }
