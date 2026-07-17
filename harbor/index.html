@@ -118,11 +118,82 @@ body {
   0%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(.55); }
 }
+@keyframes cloudDrift {
+  0% { transform: translate3d(-30vw, 0, 0); opacity: 0; }
+  12% { opacity: .55; }
+  88% { opacity: .45; }
+  100% { transform: translate3d(110vw, 0, 0); opacity: 0; }
+}
+@keyframes cloudDriftBack {
+  0% { transform: translate3d(105vw, 0, 0); opacity: 0; }
+  14% { opacity: .4; }
+  86% { opacity: .35; }
+  100% { transform: translate3d(-35vw, 0, 0); opacity: 0; }
+}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); border: 0;
 }
+
+/* Soft sky shared across screens */
+.sky-ambient {
+  position: fixed;
+  inset: 0;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  left: 0; right: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.sky-cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at 40% 40%, rgba(255,252,248,.72), rgba(214,232,236,.18) 70%, transparent 75%);
+  filter: blur(1px);
+  opacity: .55;
+}
+.sky-cloud.c1 {
+  top: 7%; left: 0; width: 120px; height: 36px;
+  animation: cloudDrift 70s linear infinite;
+}
+.sky-cloud.c2 {
+  top: 14%; left: 0; width: 88px; height: 28px;
+  animation: cloudDriftBack 92s linear infinite;
+  animation-delay: 12s;
+  opacity: .4;
+}
+.sky-cloud.c3 {
+  top: 4%; left: 0; width: 150px; height: 40px;
+  animation: cloudDrift 110s linear infinite;
+  animation-delay: 28s;
+  opacity: .35;
+}
+.sky-cloud::before,
+.sky-cloud::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: inherit;
+}
+.sky-cloud::before { width: 46%; height: 120%; top: -35%; left: 18%; }
+.sky-cloud::after { width: 38%; height: 100%; top: -20%; right: 14%; }
+.sky-ambient .gull.sky-g1 {
+  top: 10%;
+  animation: gullA 38s linear infinite;
+  animation-delay: 4s;
+  color: rgba(31, 79, 88, 0.28);
+  width: 18px; height: 10px;
+}
+.sky-ambient .gull.sky-g2 {
+  top: 16%;
+  animation: gullB 46s linear infinite;
+  animation-delay: 18s;
+  color: rgba(31, 79, 88, 0.22);
+  width: 16px; height: 9px;
+}
+.screen { position: relative; z-index: 1; }
 
 /* ── Hero ───────────────────────────────────────────────────── */
 #home { justify-content: flex-end; position: relative; padding-bottom: 8px; }
@@ -185,12 +256,41 @@ body {
 .gull.g2 { top: 12%; animation: gullB 34s linear infinite; animation-delay: 7s; }
 .gull.g3 { top: 24%; width: 18px; height: 10px; animation: gullA 31s linear infinite; animation-delay: 15s; color: rgba(31, 79, 88, 0.32); }
 .gull.g3 svg { animation-duration: 1.35s; }
+.hero-cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at 40% 40%, rgba(255,252,248,.65), rgba(214,232,236,.16) 70%, transparent 75%);
+  filter: blur(0.8px);
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-cloud.h1 {
+  top: 8%; left: 0; width: 100px; height: 30px;
+  animation: cloudDrift 64s linear infinite;
+  opacity: .5;
+}
+.hero-cloud.h2 {
+  top: 2%; left: 0; width: 72px; height: 24px;
+  animation: cloudDriftBack 80s linear infinite;
+  animation-delay: 20s;
+  opacity: .35;
+}
+.hero-cloud::before,
+.hero-cloud::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: inherit;
+}
+.hero-cloud::before { width: 46%; height: 120%; top: -35%; left: 18%; }
+.hero-cloud::after { width: 38%; height: 100%; top: -20%; right: 14%; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-boat, .gull, .gull svg, .ambient-boat .bob, .ripple, .mark {
+  .ambient-boat, .gull, .gull svg, .ambient-boat .bob, .ripple, .mark,
+  .sky-cloud, .hero-cloud {
     animation: none !important;
   }
-  .ambient-boat, .gull { opacity: 0; }
+  .ambient-boat, .gull, .sky-cloud, .hero-cloud { opacity: 0; }
 }
 .hero-copy { position: relative; z-index: 1; margin-top: auto; padding-top: min(44vh, 340px); }
 .brand {
@@ -390,10 +490,27 @@ body {
 </head>
 <body>
 <div id="app">
+  <div class="sky-ambient" aria-hidden="true">
+    <div class="sky-cloud c1"></div>
+    <div class="sky-cloud c2"></div>
+    <div class="sky-cloud c3"></div>
+    <div class="gull sky-g1">
+      <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="gull sky-g2">
+      <svg viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 8c4-6 8-6 10-2 2-4 6-4 10 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
 
   <!-- HOME -->
   <section id="home" class="screen active" aria-label="Welcome">
     <div class="hero-visual" aria-hidden="true">
+      <div class="hero-cloud h1"></div>
+      <div class="hero-cloud h2"></div>
       <div class="horizon"></div>
       <div class="water-plane"></div>
       <div class="ripple"></div>
@@ -1337,7 +1454,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=7');
+      await navigator.serviceWorker.register('./sw.js?v=8');
     } catch (_) {}
   }
 }
