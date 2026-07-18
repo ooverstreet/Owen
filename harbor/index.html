@@ -190,10 +190,20 @@ body {
 }
 
 /* ── Hero ───────────────────────────────────────────────────── */
-#home { justify-content: flex-end; position: relative; padding-bottom: 8px; }
+#home {
+  justify-content: flex-start;
+  position: relative;
+  padding-bottom: 12px;
+  gap: 0;
+}
 .hero-visual {
-  position: absolute; inset: 8% 0 auto; height: min(42vh, 320px);
-  pointer-events: none; overflow: hidden;
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  height: min(34vh, 260px);
+  margin-top: 4px;
+  pointer-events: none;
+  overflow: hidden;
 }
 .horizon {
   position: absolute; left: 50%; bottom: 38%; width: 140%; height: 1px;
