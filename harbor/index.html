@@ -491,6 +491,44 @@ body {
   outline: none;
 }
 .invite-status { font-size: .9rem; color: var(--ink-faint); margin: 0; }
+.invite-status.ok {
+  color: var(--water-deep);
+  font-weight: 560;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(62,122,134,.08);
+  border: 1px solid rgba(62,122,134,.18);
+}
+.invite-result {
+  display: none;
+  margin-top: 12px;
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(184, 137, 74, 0.35);
+  background: rgba(255,252,248,.75);
+}
+.invite-result.show { display: block; animation: fadeIn .35s ease both; }
+.invite-result .invite-result-title {
+  margin: 0 0 8px;
+  color: var(--water-deep);
+  font-weight: 560;
+}
+.invite-result .invite-result-code {
+  margin: 0 0 10px;
+  font-size: .92rem;
+  color: var(--ink-soft);
+}
+.invite-result input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--paper-solid);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: .86rem;
+  color: var(--water-deep);
+  margin-bottom: 10px;
+}
 .feed-list { display: flex; flex-direction: column; gap: 16px; }
 .post-card {
   width: 100%; text-align: left; border: 1px solid var(--line);
