@@ -439,18 +439,58 @@ body {
 }
 
 /* ── Feed ───────────────────────────────────────────────────── */
-.feed-filters {
-  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px;
-  margin-bottom: 4px; -webkit-overflow-scrolling: touch;
+.room-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 16px;
 }
-.filter-chip {
-  flex: 0 0 auto; border: 1px solid var(--line); background: rgba(255,252,248,.55);
-  color: var(--ink-soft); border-radius: 999px; padding: 8px 14px;
-  font: inherit; font-size: .9rem; font-weight: 560; cursor: pointer;
+.room-bar label {
+  font-size: .86rem;
+  font-weight: 560;
+  color: var(--ink-soft);
+  letter-spacing: .02em;
 }
-.filter-chip.active {
-  background: var(--water-deep); color: #F4FBFC; border-color: var(--water-deep);
+.room-select {
+  flex: 1 1 180px;
+  min-width: 0;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--paper-solid) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233E7A86' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border-radius: 999px;
+  padding: 12px 40px 12px 16px;
+  font: inherit;
+  font-weight: 560;
+  color: var(--water-deep);
+  outline: none;
 }
+.room-select:focus { border-color: rgba(62,122,134,.45); }
+.room-blurb {
+  width: 100%;
+  margin: -6px 0 14px;
+  font-size: .92rem;
+  color: var(--ink-faint);
+}
+.invite-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,252,248,.55);
+}
+.invite-box input {
+  border: 1px solid var(--line);
+  background: var(--paper-solid);
+  border-radius: 999px;
+  padding: 12px 16px;
+  font: inherit;
+  outline: none;
+}
+.invite-status { font-size: .9rem; color: var(--ink-faint); margin: 0; }
 .feed-list { display: flex; flex-direction: column; gap: 16px; }
 .post-card {
   width: 100%; text-align: left; border: 1px solid var(--line);
@@ -676,6 +716,13 @@ body {
         <button class="btn btn-secondary" id="home-signin" type="button">Sign in</button>
       </div>
       <p class="privacy-note" id="home-storage-note">An account is required. Guests can’t enter or post.</p>
+      <div id="home-invite" class="invite-box" hidden>
+        <p style="margin:0;color:var(--water-deep);font-weight:560">Early shore — invite only</p>
+        <p style="margin:0;font-size:.92rem;color:var(--ink-soft)">Have an invite? Enter the code to create an account.</p>
+        <input id="home-invite-code" type="text" autocomplete="off" placeholder="Invite code" maxlength="40">
+        <button class="btn btn-secondary btn-small" id="home-invite-redeem" type="button">Unlock with invite</button>
+        <p class="invite-status" id="home-invite-status"></p>
+      </div>
       <p class="privacy-note">You’ll also agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
       <p class="privacy-note"><button class="linkish" id="enter-feed" type="button" style="padding:0">Already signed in? Enter Harbor</button></p>
     </div>
@@ -715,8 +762,13 @@ body {
         <button class="linkish" id="open-account" type="button">Account</button>
       </div>
     </div>
-    <h2 class="section-title">The shore</h2>
+    <h2 class="section-title" id="feed-title">The shore</h2>
     <p class="section-sub" id="feed-sub">Start with First light. Then open any thread that meets you.</p>
+    <div class="room-bar">
+      <label for="room-select">Room</label>
+      <select id="room-select" class="room-select" aria-label="Choose a room"></select>
+    </div>
+    <p class="room-blurb" id="room-blurb">Everyone’s quiet notes.</p>
     <aside id="welcome-ashore" class="welcome-ashore" hidden>
       <p>Welcome ashore. Begin with <strong>First light</strong> — then share something of your own when you’re ready. You can stay anonymous.</p>
       <div class="welcome-actions">
@@ -730,7 +782,6 @@ body {
       <p class="whisper-text" id="whisper-card-text"></p>
       <p class="whisper-source" id="whisper-card-source"></p>
     </aside>
-    <div class="feed-filters" id="feed-filters" aria-label="Filter by topic"></div>
     <div class="feed-list" id="feed-list"></div>
     <div class="fab-wrap">
       <button class="btn btn-primary btn-small" data-go="write">New post</button>
@@ -866,6 +917,13 @@ body {
       <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
 
+    <div id="invite-panel" class="angel-panel" style="margin-top:18px;display:none">
+      <div class="angel-label">Invite a friend</div>
+      <p class="angel-note" style="margin-bottom:12px">Harbor is invite-only for now. Copy a link and send it to someone who will keep the shore respectful.</p>
+      <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
+    </div>
+
     <div id="admin-panel" class="angel-panel" style="margin-top:18px;display:none">
       <div class="angel-label">Admin</div>
       <p class="angel-note" style="margin-bottom:8px">Only you see this after signing in as admin. Visitors never get these controls.</p>
@@ -906,12 +964,24 @@ const FEATURED_POST = {
 let cloudPosts = null; // null = not loaded / unavailable
 
 const SUGGESTED_TAGS = ['grief', 'goodbye', 'worry', 'hope', 'gratitude', 'family', 'change', 'lonely', 'healing', 'florida'];
+const ROOMS = [
+  { id: 'shore', label: 'The shore', tag: null, blurb: 'Everyone’s quiet notes.' },
+  { id: 'grief', label: 'Grief', tag: 'grief', blurb: 'Loss, missing, and what still aches.' },
+  { id: 'hope', label: 'Hope', tag: 'hope', blurb: 'Light, looking forward, and small courage.' },
+  { id: 'lonely', label: 'Loneliness', tag: 'lonely', blurb: 'Feeling alone — and reaching out gently.' },
+  { id: 'goodbye', label: 'Goodbye', tag: 'goodbye', blurb: 'Endings, farewells, and unfinished pages.' },
+  { id: 'gratitude', label: 'Gratitude', tag: 'gratitude', blurb: 'Thanks, mercy, and what you’re holding dear.' },
+  { id: 'worry', label: 'Worry', tag: 'worry', blurb: 'Fears, what-ifs, and restless minds.' },
+  { id: 'change', label: 'New chapter', tag: 'change', blurb: 'Beginnings, change, and starting again.' },
+];
 const STORAGE_POSTS = 'harbor.posts.v2';
 const STORAGE_IDENTITY = 'harbor.identity.v1';
 const STORAGE_LEGACY = 'harbor.entries.v1';
 const STORAGE_FELT = 'harbor.felt.v1';
 const STORAGE_WHISPERS = 'harbor.whispers.v1';
 const STORAGE_WELCOME = 'harbor.welcome.v1';
+const STORAGE_INVITE = 'harbor.invite.v1';
+const STORAGE_ROOM = 'harbor.room.v1';
 
 /* Positive, non-political. Mostly secular; occasional gentle scripture. */
 const SHORE_WHISPERS = [
@@ -992,12 +1062,98 @@ const screens = {
 };
 
 let selectedTags = new Set();
-let activeFilter = 'all';
+let activeRoomId = 'shore';
 let currentThreadId = null;
 let draftMode = 'anonymous';
 let pendingEntry = 'feed';
 let authMode = 'signup';
 const MEMBER_SCREENS = new Set(['feed', 'write', 'thread']);
+
+function cfgInviteCodes() {
+  const list = (window.HARBOR_CONFIG && HARBOR_CONFIG.inviteCodes) || [];
+  return list.map((c) => String(c).trim().toLowerCase()).filter(Boolean);
+}
+
+function earlyAccessOn() {
+  return !!(window.HARBOR_CONFIG && HARBOR_CONFIG.earlyAccess);
+}
+
+function normalizeInviteCode(code) {
+  return String(code || '').trim().toLowerCase().replace(/\s+/g, '-');
+}
+
+function getSavedInvite() {
+  try { return normalizeInviteCode(localStorage.getItem(STORAGE_INVITE) || ''); }
+  catch (_) { return ''; }
+}
+
+function hasValidInvite() {
+  const saved = getSavedInvite();
+  return !!(saved && cfgInviteCodes().includes(saved));
+}
+
+function redeemInvite(code) {
+  const normalized = normalizeInviteCode(code);
+  if (!normalized || !cfgInviteCodes().includes(normalized)) return false;
+  try { localStorage.setItem(STORAGE_INVITE, normalized); } catch (_) {}
+  return hasValidInvite();
+}
+
+function canCreateAccount() {
+  if (!earlyAccessOn()) return true;
+  if (isLoggedIn()) return true;
+  return hasValidInvite();
+}
+
+function inviteLinkFor(code) {
+  const base = (window.HARBOR_CONFIG && HARBOR_CONFIG.siteUrl)
+    || 'https://ooverstreet.github.io/Owen/harbor/';
+  const url = new URL(base);
+  url.searchParams.set('invite', normalizeInviteCode(code));
+  return url.toString();
+}
+
+function currentRoom() {
+  return ROOMS.find((r) => r.id === activeRoomId) || ROOMS[0];
+}
+
+function setActiveRoom(roomId, { persist = true } = {}) {
+  const room = ROOMS.find((r) => r.id === roomId) || ROOMS[0];
+  activeRoomId = room.id;
+  if (persist) {
+    try { localStorage.setItem(STORAGE_ROOM, activeRoomId); } catch (_) {}
+  }
+  const select = $('#room-select');
+  if (select && select.value !== activeRoomId) select.value = activeRoomId;
+  const blurb = $('#room-blurb');
+  if (blurb) blurb.textContent = room.blurb;
+  const title = $('#feed-title');
+  if (title) title.textContent = room.label;
+  return room;
+}
+
+function syncRoomPicker() {
+  const select = $('#room-select');
+  if (!select) return;
+  select.innerHTML = ROOMS.map((r) => (
+    `<option value="${escapeHtml(r.id)}">${escapeHtml(r.label)}</option>`
+  )).join('');
+  select.value = activeRoomId;
+  setActiveRoom(activeRoomId, { persist: false });
+}
+
+function applyRoomToWrite() {
+  const room = currentRoom();
+  selectedTags = new Set();
+  if (room.tag) selectedTags.add(room.tag);
+  const sub = document.querySelector('#write .section-sub');
+  if (sub) {
+    sub.textContent = room.tag
+      ? `You’re writing in ${room.label}. Stay anonymous, or sign a name.`
+      : 'Stay anonymous, or sign a name. Add a topic if you want — it’s just a label like “hope” or “goodbye.”';
+  }
+  renderTagPicker();
+}
 
 function hasAgreedGuidelines() {
   if (window.HarborAuth && HarborAuth.guidelinesAccepted && HarborAuth.guidelinesAccepted()) return true;
@@ -1037,13 +1193,24 @@ function setAuthMode(mode) {
 }
 
 function openAccountForEntry(mode = 'signup') {
+  if (mode === 'signup' && !canCreateAccount()) {
+    syncHomeInviteUI();
+    const status = $('#home-invite-status');
+    if (status) status.textContent = 'Enter a valid invite code first — Harbor is invite-only right now.';
+    showScreen('home');
+    const input = $('#home-invite-code');
+    if (input) input.focus();
+    return;
+  }
   setAuthMode(mode);
   syncAccountScreen();
   const status = $('#auth-status');
   if (status && !isLoggedIn()) {
     status.textContent = mode === 'signin'
       ? 'Sign in with your Harbor account to enter.'
-      : 'Create an account to enter Harbor.';
+      : (hasValidInvite()
+        ? 'Invite ready. Create your account to enter Harbor.'
+        : 'Create an account to enter Harbor.');
   }
   showScreen('account');
 }
@@ -1190,7 +1357,7 @@ async function enterHarbor(dest = 'feed') {
   }
   if (dest === 'write') {
     syncWriteIdentityUI();
-    renderTagPicker();
+    applyRoomToWrite();
     updateToneAndCrisis();
   }
   if (dest === 'account') {
@@ -1416,35 +1583,16 @@ function postCardHtml(post, full = false) {
   `;
 }
 
-function renderFilters(posts) {
-  const tagSet = new Set();
-  posts.forEach((p) => (p.tags || []).forEach((t) => tagSet.add(t)));
-  const root = $('#feed-filters');
-  const tags = ['all', ...Array.from(tagSet).sort()];
-  root.innerHTML = tags.map((t) => {
-    const label = t === 'all' ? 'All' : `#${t}`;
-    const active = activeFilter === t ? 'active' : '';
-    return `<button type="button" class="filter-chip ${active}" data-filter="${escapeHtml(t)}">${escapeHtml(label)}</button>`;
-  }).join('');
-  root.querySelectorAll('[data-filter]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      activeFilter = btn.getAttribute('data-filter');
-      await renderFeed();
-    });
-  });
-}
-
 async function renderFeed() {
   const status = cloudStatusText();
   const homeNote = $('#home-storage-note');
-  if (homeNote) homeNote.textContent = status;
+  if (homeNote && isLoggedIn()) homeNote.textContent = status;
   const posts = allPostsForFeed();
-  renderFilters(posts);
-  const filtered = activeFilter === 'all'
+  const room = currentRoom();
+  setActiveRoom(room.id, { persist: false });
+  const filtered = !room.tag
     ? posts
-    : posts.filter((p) => p.featured || (p.tags || []).includes(activeFilter));
-  // Featured always first even when filtering, if it matches or filter is all;
-  // if filter is specific and featured lacks tag, still show featured first then matches.
+    : posts.filter((p) => p.featured || (p.tags || []).includes(room.tag));
   const featured = posts.find((p) => p.featured);
   const rest = filtered.filter((p) => !p.featured);
   const list = [];
@@ -1453,9 +1601,9 @@ async function renderFeed() {
 
   const root = $('#feed-list');
   if (!list.length) {
-    root.innerHTML = activeFilter === 'all'
+    root.innerHTML = !room.tag
       ? '<p class="empty">The shore is quiet right now — you can be the first to set something down today.</p>'
-      : `<p class="empty">Nothing under #${escapeHtml(activeFilter)} yet. The shore is quiet here — try All, or share the first note on this topic.</p>`;
+      : `<p class="empty">${escapeHtml(room.label)} is quiet right now — share the first note in this room, or return to The shore.</p>`;
     return;
   }
   root.innerHTML = '';
@@ -1470,7 +1618,9 @@ async function renderFeed() {
   if (list.length === 1 && list[0].featured) {
     const note = document.createElement('p');
     note.className = 'empty';
-    note.textContent = 'The shore is still waking up. After First light, you’re welcome to share something of your own.';
+    note.textContent = room.tag
+      ? `${room.label} is still waking up. After First light, you’re welcome to share something here.`
+      : 'The shore is still waking up. After First light, you’re welcome to share something of your own.';
     root.appendChild(note);
   }
 }
@@ -1544,11 +1694,61 @@ function syncWriteIdentityUI() {
   $('#username-input').value = identity.username || '';
 }
 
+function renderInviteLinks() {
+  const root = $('#invite-link-list');
+  if (!root) return;
+  const codes = cfgInviteCodes();
+  if (!codes.length) {
+    root.innerHTML = '<p class="invite-status">No invite codes configured yet.</p>';
+    return;
+  }
+  root.innerHTML = codes.map((code) => `
+    <button type="button" class="btn btn-secondary btn-small" data-copy-invite="${escapeHtml(code)}">
+      Copy link · ${escapeHtml(code)}
+    </button>
+  `).join('');
+  root.querySelectorAll('[data-copy-invite]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const code = btn.getAttribute('data-copy-invite');
+      const link = inviteLinkFor(code);
+      const status = $('#invite-copy-status');
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(link);
+        } else {
+          window.prompt('Copy this invite link:', link);
+        }
+        if (status) status.textContent = 'Invite link copied. Send it to someone you trust.';
+      } catch (_) {
+        window.prompt('Copy this invite link:', link);
+        if (status) status.textContent = 'Copy the link from the prompt, then send it.';
+      }
+    });
+  });
+}
+
+function syncHomeInviteUI() {
+  const box = $('#home-invite');
+  if (!box) return;
+  const show = earlyAccessOn() && !isLoggedIn() && !hasValidInvite();
+  box.hidden = !show;
+  const note = $('#home-storage-note');
+  if (!note || isLoggedIn()) return;
+  if (earlyAccessOn() && hasValidInvite()) {
+    note.textContent = 'Invite unlocked. Create an account to come ashore.';
+  } else if (earlyAccessOn()) {
+    note.textContent = 'Harbor is invite-only right now. Redeem a code, then create an account.';
+  } else {
+    note.textContent = 'An account is required. Guests can’t enter or post.';
+  }
+}
+
 function syncAccountScreen() {
   const auth = window.HarborAuth ? HarborAuth.getState() : { isLoggedIn: false, isAdmin: false };
   const guest = $('#auth-guest');
   const userBox = $('#auth-user');
   const adminPanel = $('#admin-panel');
+  const invitePanel = $('#invite-panel');
   const accountSub = $('#account-sub');
   const roleLine = $('#auth-role-line');
   const idNote = $('#identity-storage-note');
@@ -1556,10 +1756,20 @@ function syncAccountScreen() {
   guest.style.display = auth.isLoggedIn ? 'none' : 'flex';
   userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
+  if (invitePanel) {
+    invitePanel.style.display = auth.isLoggedIn ? 'block' : 'none';
+    if (auth.isLoggedIn) renderInviteLinks();
+  }
 
   if (!auth.isLoggedIn) {
-    accountSub.textContent = 'Create an account or sign in to enter Harbor. Guests can’t post or browse the shore.';
-    if (idNote) idNote.textContent = 'An account is required before you can enter.';
+    if (earlyAccessOn() && !hasValidInvite()) {
+      accountSub.textContent = 'Sign in if you already have an account, or redeem an invite on the home screen to create one.';
+    } else {
+      accountSub.textContent = 'Create an account or sign in to enter Harbor. Guests can’t post or browse the shore.';
+    }
+    if (idNote) idNote.textContent = earlyAccessOn()
+      ? 'Early shore: new accounts need an invite.'
+      : 'An account is required before you can enter.';
   } else {
     $('#auth-user-line').textContent = auth.user?.email || 'Signed in';
     if (auth.isAdmin) {
@@ -1582,6 +1792,7 @@ function syncAccountScreen() {
   $('#pref-username').value = identity.username || (auth.profile?.display_name || '');
   $('#pref-username').disabled = identity.mode !== 'named';
   $('#pref-scripture').checked = whispers.includeScripture;
+  syncHomeInviteUI();
 }
 
 function renderTagPicker() {
@@ -1870,6 +2081,28 @@ $('#home-signin').addEventListener('click', () => {
   pendingEntry = 'feed';
   openAccountForEntry('signin');
 });
+$('#home-invite-redeem').addEventListener('click', () => {
+  const code = ($('#home-invite-code').value || '').trim();
+  const status = $('#home-invite-status');
+  if (!redeemInvite(code)) {
+    if (status) status.textContent = 'That invite code wasn’t recognized. Check the link and try again.';
+    return;
+  }
+  if (status) status.textContent = 'Invite unlocked. You can create an account now.';
+  syncHomeInviteUI();
+  pendingEntry = 'feed';
+  openAccountForEntry('signup');
+});
+$('#home-invite-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    $('#home-invite-redeem').click();
+  }
+});
+$('#room-select').addEventListener('change', async () => {
+  setActiveRoom($('#room-select').value);
+  await renderFeed();
+});
 $('#home-guidelines').addEventListener('click', () => {
   pendingEntry = 'feed';
   renderGuidelines();
@@ -1964,6 +2197,10 @@ $('#auth-submit').addEventListener('click', async () => {
   }
   if (!email || password.length < 6) {
     status.textContent = 'Use a valid email and a password with at least 6 characters.';
+    return;
+  }
+  if (authMode === 'signup' && !canCreateAccount()) {
+    status.textContent = 'An invite is required to create an account right now.';
     return;
   }
   status.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
@@ -2300,19 +2537,37 @@ async function boot() {
     return;
   }
 
+  // Invite + room deep links
+  const inviteParam = params.get('invite');
+  if (inviteParam) {
+    const ok = redeemInvite(inviteParam);
+    const status = $('#home-invite-status');
+    if (status) {
+      status.textContent = ok
+        ? 'Invite unlocked from your link. Create an account to come ashore.'
+        : 'That invite link wasn’t recognized.';
+    }
+  }
+  try {
+    const savedRoom = localStorage.getItem(STORAGE_ROOM);
+    if (savedRoom) activeRoomId = savedRoom;
+  } catch (_) {}
+  const roomParam = params.get('room');
+  if (roomParam && ROOMS.some((r) => r.id === roomParam)) activeRoomId = roomParam;
+
   mountScreenSkies();
   renderGuidelines();
   startWhispers();
   migrateLegacy();
   loadPosts(); // prune duplicates immediately
+  syncRoomPicker();
   renderTagPicker();
+  syncHomeInviteUI();
   if (window.HarborMod && HarborMod.guidelinesAccepted()) {
     $('#write-guidelines-check').checked = true;
   }
   const note = $('#home-storage-note');
-  if (note) {
-    note.textContent = 'An account is required. Guests can’t enter or post.';
-  }
+  if (note && !isLoggedIn()) syncHomeInviteUI();
 
   if (window.HarborAuth) {
     try {
@@ -2320,21 +2575,19 @@ async function boot() {
       setAuthMode('signup');
       HarborAuth.onChange(() => {
         syncAccountScreen();
+        syncHomeInviteUI();
         const btn = $('#open-account');
         if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
         if (!HarborAuth.isLoggedIn()) {
           const active = document.querySelector('.screen.active');
           if (active && MEMBER_SCREENS.has(active.id)) showScreen('home');
         }
-        if (note) {
-          note.textContent = HarborAuth.isLoggedIn()
-            ? cloudStatusText()
-            : 'An account is required. Guests can’t enter or post.';
-        }
+        if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
       });
       const btn = $('#open-account');
       if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
       if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
+      syncHomeInviteUI();
     } catch (err) {
       console.warn('Harbor auth init failed', err);
     }
@@ -2344,17 +2597,22 @@ async function boot() {
     try {
       await HarborDB.init();
       await refreshCloudPosts();
-      if (note) note.textContent = cloudStatusText();
+      if (note && isLoggedIn()) note.textContent = cloudStatusText();
     } catch (err) {
       console.warn('Harbor cloud init failed', err);
     }
+  }
+
+  // Arrived with a good invite → offer account creation
+  if (inviteParam && hasValidInvite() && !isLoggedIn()) {
+    pendingEntry = 'feed';
   }
 
   if ('serviceWorker' in navigator) {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=24');
+      await navigator.serviceWorker.register('./sw.js?v=25');
     } catch (_) {}
   }
 }
