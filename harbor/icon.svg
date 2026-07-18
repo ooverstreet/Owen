@@ -16,21 +16,22 @@
   </defs>
   <rect width="128" height="128" rx="28" fill="url(#sky)"/>
   <path d="M0 78c18-10 36-10 54 0s36 10 54 0 18-10 20-10v60H0V78z" fill="url(#water)" opacity=".9"/>
-  <!-- rock base -->
   <path d="M44 86c4-6 12-8 20-8s16 2 20 8c-8 3-16 4-20 4s-12-1-20-4z" fill="#1F4F58" opacity=".55"/>
-  <!-- tapered tower -->
   <path d="M52 86L56 40h16l4 46H52z" fill="url(#tower)"/>
-  <!-- classic mid band -->
   <path d="M54.8 62h18.4l.6 8H54.2l.6-8z" fill="#EAF2F4" opacity=".35"/>
-  <!-- gallery / lantern room -->
+  <!-- lantern room + dome -->
   <rect x="54" y="28" width="20" height="14" rx="2.5" fill="#1F4F58"/>
   <path d="M52 28h24" stroke="#C9A66B" stroke-width="2" stroke-linecap="round"/>
-  <!-- dome -->
   <path d="M54 28c0-8 6-12 10-12s10 4 10 12H54z" fill="#1F4F58"/>
-  <circle cx="64" cy="20" r="2.2" fill="#C9A66B"/>
-  <!-- light shining out into the sky -->
-  <path d="M74 32L108 18" stroke="#C9A66B" stroke-width="3.5" stroke-linecap="round"/>
-  <path d="M74 36L110 30" stroke="#C9A66B" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
-  <path d="M74 28L104 10" stroke="#C9A66B" stroke-width="1.8" stroke-linecap="round" opacity=".4"/>
+  <!-- 4 rays from one bulb into the sky -->
+  <g stroke="#C9A66B" stroke-linecap="round">
+    <path d="M64 35L102 8" stroke-width="1.8" opacity=".45"/>
+    <path d="M64 35L112 18" stroke-width="2.4" opacity=".65"/>
+    <path d="M64 35L116 35" stroke-width="3.4"/>
+    <path d="M64 35L110 52" stroke-width="2" opacity=".5"/>
+  </g>
+  <!-- single central bulb -->
+  <circle cx="64" cy="35" r="3.6" fill="#C9A66B"/>
+  <circle cx="64" cy="35" r="1.5" fill="#F2E2B8"/>
   <path d="M18 96c12-5 24-5 36 0s24 5 36 0 20-5 20-5" stroke="#EAF2F4" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
 </svg>
