@@ -74,14 +74,42 @@
     }
   }
 
+  const GUIDELINES_KEY = 'harbor.guidelines.v1';
+  const GUIDELINES_COOKIE = 'harbor_guidelines';
+
+  function readGuidelinesCookie() {
+    try {
+      return document.cookie.split(';').some((part) => part.trim() === `${GUIDELINES_COOKIE}=accepted`);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function writeGuidelinesCookie() {
+    try {
+      // path covers /Owen/harbor/ and index.html on GitHub Pages
+      document.cookie = `${GUIDELINES_COOKIE}=accepted; Max-Age=31536000; Path=/; SameSite=Lax`;
+    } catch (_) {}
+  }
+
   function guidelinesAccepted() {
-    try { return localStorage.getItem('harbor.guidelines.v1') === 'accepted'; }
-    catch (_) { return false; }
+    try {
+      if (localStorage.getItem(GUIDELINES_KEY) === 'accepted') return true;
+    } catch (_) {}
+    return readGuidelinesCookie();
   }
 
   function acceptGuidelines() {
-    try { localStorage.setItem('harbor.guidelines.v1', 'accepted'); }
-    catch (_) {}
+    let stored = false;
+    try {
+      localStorage.setItem(GUIDELINES_KEY, 'accepted');
+      stored = localStorage.getItem(GUIDELINES_KEY) === 'accepted';
+    } catch (_) {
+      stored = false;
+    }
+    writeGuidelinesCookie();
+    if (!stored) stored = readGuidelinesCookie();
+    return stored;
   }
 
   window.HarborMod = {

@@ -37,7 +37,27 @@
       profile,
       isAdmin: !!(profile && profile.role === 'admin'),
       isLoggedIn: !!session?.user,
+      guidelinesAccepted: !!(profile && profile.guidelines_accepted_at),
     };
+  }
+
+  function syncGuidelinesLocal(accepted) {
+    if (!accepted) return;
+    try { localStorage.setItem('harbor.guidelines.v1', 'accepted'); } catch (_) {}
+    try {
+      document.cookie = 'harbor_guidelines=accepted; Max-Age=31536000; Path=/; SameSite=Lax';
+    } catch (_) {}
+  }
+
+  function localGuidelinesAccepted() {
+    try {
+      if (localStorage.getItem('harbor.guidelines.v1') === 'accepted') return true;
+    } catch (_) {}
+    try {
+      return document.cookie.split(';').some((part) => part.trim() === 'harbor_guidelines=accepted');
+    } catch (_) {
+      return false;
+    }
   }
 
   async function init() {
@@ -87,27 +107,64 @@
     }
     const { data, error } = await client
       .from('harbor_profiles')
-      .select('id,email,display_name,role,created_at')
+      .select('id,email,display_name,role,created_at,guidelines_accepted_at')
       .eq('id', session.user.id)
       .maybeSingle();
     if (error) {
-      console.warn('Harbor profile load failed', error);
-      profile = null;
-      return null;
-    }
-    // If trigger hasn’t created a row yet, create a soft local view
-    if (!data) {
+      // Older DBs may not have guidelines_accepted_at yet — retry without it
+      const retry = await client
+        .from('harbor_profiles')
+        .select('id,email,display_name,role,created_at')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      if (retry.error) {
+        console.warn('Harbor profile load failed', error);
+        profile = null;
+        return null;
+      }
+      profile = retry.data || null;
+    } else if (!data) {
       const email = session.user.email || '';
       profile = {
         id: session.user.id,
         email,
         display_name: email.split('@')[0] || 'Harbor friend',
         role: email.toLowerCase() === 'owenstreet7@gmail.com' ? 'admin' : 'member',
+        guidelines_accepted_at: null,
       };
     } else {
       profile = data;
     }
+    if (profile?.guidelines_accepted_at) {
+      syncGuidelinesLocal(true);
+    } else if (profile && localGuidelinesAccepted()) {
+      // Device already agreed — attach that to the account once
+      const stamp = new Date().toISOString();
+      const { error: syncErr } = await client
+        .from('harbor_profiles')
+        .update({ guidelines_accepted_at: stamp, updated_at: stamp })
+        .eq('id', session.user.id);
+      if (!syncErr) profile = { ...profile, guidelines_accepted_at: stamp };
+    }
     return profile;
+  }
+
+  async function acceptGuidelines() {
+    syncGuidelinesLocal(true);
+    if (!client || !session?.user) return getState().guidelinesAccepted || localGuidelinesAccepted();
+    const stamp = new Date().toISOString();
+    const { error } = await client
+      .from('harbor_profiles')
+      .update({ guidelines_accepted_at: stamp, updated_at: stamp })
+      .eq('id', session.user.id);
+    if (error) {
+      console.warn('Harbor guidelines cloud save failed', error);
+      return localGuidelinesAccepted();
+    }
+    if (profile) profile = { ...profile, guidelines_accepted_at: stamp };
+    else await refreshProfile();
+    emit();
+    return true;
   }
 
   async function signUp(email, password, displayName) {
@@ -180,10 +237,12 @@
     signOut,
     refreshProfile,
     updateDisplayName,
+    acceptGuidelines,
     onChange,
     accessToken,
     siteUrl,
     isAdmin: () => getState().isAdmin,
     isLoggedIn: () => getState().isLoggedIn,
+    guidelinesAccepted: () => !!(getState().guidelinesAccepted || localGuidelinesAccepted()),
   };
 })();

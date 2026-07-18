@@ -1000,7 +1000,24 @@ let authMode = 'signup';
 const MEMBER_SCREENS = new Set(['feed', 'write', 'thread']);
 
 function hasAgreedGuidelines() {
-  return !!(window.HarborMod && HarborMod.guidelinesAccepted());
+  if (window.HarborAuth && HarborAuth.guidelinesAccepted && HarborAuth.guidelinesAccepted()) return true;
+  return !!(window.HarborMod && HarborMod.guidelinesAccepted && HarborMod.guidelinesAccepted());
+}
+
+async function persistGuidelinesAgreement() {
+  let ok = false;
+  if (window.HarborMod && HarborMod.acceptGuidelines) {
+    ok = !!HarborMod.acceptGuidelines();
+  }
+  if (window.HarborAuth && HarborAuth.acceptGuidelines) {
+    try { ok = !!(await HarborAuth.acceptGuidelines()) || ok; }
+    catch (_) {}
+  }
+  if (!ok && !hasAgreedGuidelines()) {
+    alert('Could not save your agreement on this phone. Check that browser storage is allowed, then try again.');
+    return false;
+  }
+  return true;
 }
 
 function isLoggedIn() {
@@ -1699,7 +1716,7 @@ async function release(privatePost) {
     showScreen('guidelines');
     return;
   }
-  if (window.HarborMod) HarborMod.acceptGuidelines();
+  await persistGuidelinesAgreement();
 
   const releaseBtn = $('#release-btn');
   const saveBtn = $('#save-private');
@@ -2074,7 +2091,8 @@ $('#accept-guidelines').addEventListener('click', async () => {
     alert('Please check the box to agree before entering Harbor.');
     return;
   }
-  if (window.HarborMod) HarborMod.acceptGuidelines();
+  const saved = await persistGuidelinesAgreement();
+  if (!saved) return;
   await continueAfterGuidelines();
 });
 
@@ -2132,18 +2150,34 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   });
 });
 
-async function resetLocalHarbor({ reload = true } = {}) {
+async function clearHarborAppCache() {
+  if ('caches' in window) {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => /harbor/i.test(k)).map((k) => caches.delete(k)));
+    } catch (_) {}
+  }
+  if ('serviceWorker' in navigator) {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.update()));
+    } catch (_) {}
+  }
+}
+
+async function resetLocalHarbor({ reload = true, keepGuidelines = false } = {}) {
   // Sign out first so Supabase clears its persisted auth session
   try {
     if (window.HarborAuth && HarborAuth.signOut) await HarborAuth.signOut();
   } catch (_) {}
 
+  const keep = new Set(keepGuidelines ? ['harbor.guidelines.v1'] : []);
+
   try {
     Object.keys(localStorage)
       .filter((k) => (
-        k.startsWith('harbor')
-        || k.startsWith('sb-')
-        || /supabase/i.test(k)
+        (k.startsWith('harbor') || k.startsWith('sb-') || /supabase/i.test(k))
+        && !keep.has(k)
       ))
       .forEach((k) => localStorage.removeItem(k));
   } catch (_) {}
@@ -2158,12 +2192,7 @@ async function resetLocalHarbor({ reload = true } = {}) {
       .forEach((k) => sessionStorage.removeItem(k));
   } catch (_) {}
 
-  if ('caches' in window) {
-    try {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => /harbor/i.test(k)).map((k) => caches.delete(k)));
-    } catch (_) {}
-  }
+  await clearHarborAppCache();
 
   if ('serviceWorker' in navigator) {
     try {
@@ -2181,8 +2210,12 @@ async function resetLocalHarbor({ reload = true } = {}) {
 }
 
 $('#reset-device').addEventListener('click', async () => {
-  if (!confirm('Clear Harbor cache and local drafts on this phone? Shared cloud posts stay safe.')) return;
-  await resetLocalHarbor({ reload: true });
+  if (!confirm('Clear Harbor app cache on this phone? You’ll stay signed in and keep your guidelines agreement.')) return;
+  await clearHarborAppCache();
+  const url = new URL(location.href);
+  url.searchParams.set('fresh', String(Date.now()));
+  url.searchParams.delete('reset');
+  location.replace(url.toString());
 });
 
 function mountScreenSkies() {
@@ -2321,7 +2354,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=23');
+      await navigator.serviceWorker.register('./sw.js?v=24');
     } catch (_) {}
   }
 }
