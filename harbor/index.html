@@ -917,17 +917,13 @@ body {
       <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
     </div>
 
-    <div id="invite-panel" class="angel-panel" style="margin-top:18px;display:none">
-      <div class="angel-label">Invite a friend</div>
-      <p class="angel-note" style="margin-bottom:12px">Harbor is invite-only for now. Copy a link and send it to someone who will keep the shore respectful.</p>
-      <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px"></div>
-      <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
-    </div>
-
     <div id="admin-panel" class="angel-panel" style="margin-top:18px;display:none">
       <div class="angel-label">Admin</div>
       <p class="angel-note" style="margin-bottom:8px">Only you see this after signing in as admin. Visitors never get these controls.</p>
-      <p class="angel-note" style="margin:0">Angel AI runs on the server (Supabase secret). No API keys live in the browser.</p>
+      <p class="angel-note" style="margin-bottom:12px">Angel AI runs on the server. Invite codes below are for admission only.</p>
+      <button class="btn btn-primary btn-small" id="admin-generate-invite" type="button">Generate invite code</button>
+      <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
+      <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
     </div>
 
     <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
@@ -1088,15 +1084,28 @@ function getSavedInvite() {
 }
 
 function hasValidInvite() {
-  const saved = getSavedInvite();
-  return !!(saved && cfgInviteCodes().includes(saved));
+  // Set only after a successful redeem (config or cloud)
+  return !!getSavedInvite();
 }
 
-function redeemInvite(code) {
-  const normalized = normalizeInviteCode(code);
-  if (!normalized || !cfgInviteCodes().includes(normalized)) return false;
-  try { localStorage.setItem(STORAGE_INVITE, normalized); } catch (_) {}
+function saveInviteLocal(code) {
+  try { localStorage.setItem(STORAGE_INVITE, normalizeInviteCode(code)); } catch (_) {}
   return hasValidInvite();
+}
+
+async function redeemInvite(code) {
+  const normalized = normalizeInviteCode(code);
+  if (!normalized) return false;
+  if (cfgInviteCodes().includes(normalized)) return saveInviteLocal(normalized);
+  if (window.HarborDB && HarborDB.validateInvite) {
+    try {
+      const ok = await HarborDB.validateInvite(normalized);
+      if (ok) return saveInviteLocal(normalized);
+    } catch (err) {
+      console.warn('Harbor invite validate failed', err);
+    }
+  }
+  return false;
 }
 
 function canCreateAccount() {
@@ -1694,37 +1703,66 @@ function syncWriteIdentityUI() {
   $('#username-input').value = identity.username || '';
 }
 
-function renderInviteLinks() {
+async function copyInviteLink(code) {
+  const link = inviteLinkFor(code);
+  const status = $('#invite-copy-status');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(link);
+    } else {
+      window.prompt('Copy this invite link:', link);
+    }
+    if (status) status.textContent = `Copied ${code}. Send that link for admission.`;
+  } catch (_) {
+    window.prompt('Copy this invite link:', link);
+    if (status) status.textContent = 'Copy the link from the prompt, then send it.';
+  }
+}
+
+function bindInviteCopyButtons(root) {
+  root.querySelectorAll('[data-copy-invite]').forEach((btn) => {
+    btn.addEventListener('click', () => copyInviteLink(btn.getAttribute('data-copy-invite')));
+  });
+}
+
+async function renderInviteLinks() {
   const root = $('#invite-link-list');
   if (!root) return;
-  const codes = cfgInviteCodes();
+  const status = $('#invite-copy-status');
+  const starter = cfgInviteCodes();
+
+  root.innerHTML = '<p class="invite-status">Loading invite codes…</p>';
+  let cloud = [];
+  if (window.HarborDB && HarborDB.listInvites) {
+    try {
+      cloud = await HarborDB.listInvites();
+    } catch (err) {
+      console.warn('Harbor invite list failed', err);
+      if (status) {
+        status.textContent = 'Cloud invites need SQL setup — starter codes still work below.';
+      }
+    }
+  }
+
+  const cloudCodes = cloud.filter((row) => row.active !== false).map((row) => row.code);
+  const codes = Array.from(new Set([...cloudCodes, ...starter]));
   if (!codes.length) {
-    root.innerHTML = '<p class="invite-status">No invite codes configured yet.</p>';
+    root.innerHTML = '<p class="invite-status">No invite codes yet. Tap Generate invite code.</p>';
     return;
   }
-  root.innerHTML = codes.map((code) => `
-    <button type="button" class="btn btn-secondary btn-small" data-copy-invite="${escapeHtml(code)}">
-      Copy link · ${escapeHtml(code)}
-    </button>
-  `).join('');
-  root.querySelectorAll('[data-copy-invite]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const code = btn.getAttribute('data-copy-invite');
-      const link = inviteLinkFor(code);
-      const status = $('#invite-copy-status');
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(link);
-        } else {
-          window.prompt('Copy this invite link:', link);
-        }
-        if (status) status.textContent = 'Invite link copied. Send it to someone you trust.';
-      } catch (_) {
-        window.prompt('Copy this invite link:', link);
-        if (status) status.textContent = 'Copy the link from the prompt, then send it.';
-      }
-    });
-  });
+
+  root.innerHTML = codes.map((code) => {
+    const row = cloud.find((r) => r.code === code);
+    const meta = row
+      ? ` · ${row.use_count || 0}/${row.max_uses || '∞'} used`
+      : ' · starter';
+    return `
+      <button type="button" class="btn btn-secondary btn-small" data-copy-invite="${escapeHtml(code)}">
+        Copy link · ${escapeHtml(code)}${escapeHtml(meta)}
+      </button>
+    `;
+  }).join('');
+  bindInviteCopyButtons(root);
 }
 
 function syncHomeInviteUI() {
@@ -1748,7 +1786,6 @@ function syncAccountScreen() {
   const guest = $('#auth-guest');
   const userBox = $('#auth-user');
   const adminPanel = $('#admin-panel');
-  const invitePanel = $('#invite-panel');
   const accountSub = $('#account-sub');
   const roleLine = $('#auth-role-line');
   const idNote = $('#identity-storage-note');
@@ -1756,10 +1793,7 @@ function syncAccountScreen() {
   guest.style.display = auth.isLoggedIn ? 'none' : 'flex';
   userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
-  if (invitePanel) {
-    invitePanel.style.display = auth.isLoggedIn ? 'block' : 'none';
-    if (auth.isLoggedIn) renderInviteLinks();
-  }
+  if (auth.isAdmin) renderInviteLinks();
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -2081,10 +2115,12 @@ $('#home-signin').addEventListener('click', () => {
   pendingEntry = 'feed';
   openAccountForEntry('signin');
 });
-$('#home-invite-redeem').addEventListener('click', () => {
+$('#home-invite-redeem').addEventListener('click', async () => {
   const code = ($('#home-invite-code').value || '').trim();
   const status = $('#home-invite-status');
-  if (!redeemInvite(code)) {
+  if (status) status.textContent = 'Checking invite…';
+  const ok = await redeemInvite(code);
+  if (!ok) {
     if (status) status.textContent = 'That invite code wasn’t recognized. Check the link and try again.';
     return;
   }
@@ -2092,6 +2128,28 @@ $('#home-invite-redeem').addEventListener('click', () => {
   syncHomeInviteUI();
   pendingEntry = 'feed';
   openAccountForEntry('signup');
+});
+
+$('#admin-generate-invite').addEventListener('click', async () => {
+  const status = $('#invite-copy-status');
+  if (!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin())) return;
+  if (!window.HarborDB || !HarborDB.createInvite) {
+    if (status) status.textContent = 'Cloud invites aren’t ready yet.';
+    return;
+  }
+  if (status) status.textContent = 'Generating invite…';
+  try {
+    const row = await HarborDB.createInvite('Admission invite');
+    await renderInviteLinks();
+    await copyInviteLink(row.code);
+    if (status) status.textContent = `New code ${row.code} ready — link copied.`;
+  } catch (err) {
+    if (status) {
+      status.textContent = err.message?.includes('harbor_invites') || err.code === '42P01'
+        ? 'Run harbor/supabase-invites.sql in Supabase first.'
+        : (err.message || 'Could not generate invite.');
+    }
+  }
 });
 $('#home-invite-code').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -2540,12 +2598,13 @@ async function boot() {
   // Invite + room deep links
   const inviteParam = params.get('invite');
   if (inviteParam) {
-    const ok = redeemInvite(inviteParam);
     const status = $('#home-invite-status');
-    if (status) {
-      status.textContent = ok
-        ? 'Invite unlocked from your link. Create an account to come ashore.'
-        : 'That invite link wasn’t recognized.';
+    if (status) status.textContent = 'Checking invite from your link…';
+    // Cloud validate runs after HarborDB.init below; config codes work immediately
+    const quick = cfgInviteCodes().includes(normalizeInviteCode(inviteParam));
+    if (quick) {
+      saveInviteLocal(inviteParam);
+      if (status) status.textContent = 'Invite unlocked from your link. Create an account to come ashore.';
     }
   }
   try {
@@ -2603,6 +2662,17 @@ async function boot() {
     }
   }
 
+  if (inviteParam && !hasValidInvite()) {
+    const status = $('#home-invite-status');
+    const ok = await redeemInvite(inviteParam);
+    if (status) {
+      status.textContent = ok
+        ? 'Invite unlocked from your link. Create an account to come ashore.'
+        : 'That invite link wasn’t recognized.';
+    }
+  }
+  syncHomeInviteUI();
+
   // Arrived with a good invite → offer account creation
   if (inviteParam && hasValidInvite() && !isLoggedIn()) {
     pendingEntry = 'feed';
@@ -2612,7 +2682,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=25');
+      await navigator.serviceWorker.register('./sw.js?v=26');
     } catch (_) {}
   }
 }
