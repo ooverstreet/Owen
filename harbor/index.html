@@ -759,11 +759,16 @@ body {
           <path d="M25 22h22" stroke="#B8894A" stroke-width="2" stroke-linecap="round"/>
           <!-- dome -->
           <path d="M27 22c0-7 5.5-11 9-11s9 4 9 11H27z" fill="#1F4F58"/>
-          <circle cx="36" cy="15" r="2" fill="#B8894A"/>
-          <!-- beams into the sky -->
-          <path d="M45 28L66 16" stroke="#B8894A" stroke-width="3" stroke-linecap="round"/>
-          <path d="M45 32L68 26" stroke="#B8894A" stroke-width="2" stroke-linecap="round" opacity=".55"/>
-          <path d="M45 24L64 10" stroke="#B8894A" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+          <!-- 4 rays from one bulb into the sky -->
+          <g stroke="#B8894A" stroke-linecap="round">
+            <path d="M36 29L58 8" stroke-width="1.5" opacity=".45"/>
+            <path d="M36 29L64 16" stroke-width="2.1" opacity=".65"/>
+            <path d="M36 29L68 29" stroke-width="3"/>
+            <path d="M36 29L62 42" stroke-width="1.8" opacity=".5"/>
+          </g>
+          <!-- single central bulb -->
+          <circle cx="36" cy="29" r="3.2" fill="#B8894A"/>
+          <circle cx="36" cy="29" r="1.3" fill="#F2E2B8"/>
           <!-- water line -->
           <path d="M8 84c8-4 16-4 22 0s14 4 22 0 12-4 12-4" stroke="#3E7A86" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
         </svg>
@@ -3009,7 +3014,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=40');
+      await navigator.serviceWorker.register('./sw.js?v=41');
     } catch (_) {}
   }
 }
