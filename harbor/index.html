@@ -960,6 +960,12 @@ body {
       <p class="angel-note" style="margin-bottom:8px">Only you see this after signing in as admin. Visitors never get these controls.</p>
       <p class="angel-note" style="margin-bottom:12px">Angel AI runs on the server. Only admins can generate invite codes.</p>
       <button class="btn btn-primary btn-small" id="admin-generate-invite" type="button">Generate invite code</button>
+      <div id="invite-result" class="invite-result" aria-live="polite">
+        <p class="invite-result-title" id="invite-result-title">Invite ready</p>
+        <p class="invite-result-code" id="invite-result-code"></p>
+        <input id="invite-result-link" type="text" readonly onclick="this.select()" aria-label="Invite link">
+        <button class="btn btn-secondary btn-small" id="invite-result-copy" type="button">Copy link again</button>
+      </div>
       <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
       <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
     </div>
@@ -1741,20 +1747,61 @@ function syncWriteIdentityUI() {
   $('#username-input').value = identity.username || '';
 }
 
+function showInviteResult(code, { copied = false } = {}) {
+  const box = $('#invite-result');
+  const title = $('#invite-result-title');
+  const codeEl = $('#invite-result-code');
+  const linkEl = $('#invite-result-link');
+  const status = $('#invite-copy-status');
+  const link = inviteLinkFor(code);
+  if (codeEl) codeEl.textContent = `Code: ${code}`;
+  if (linkEl) linkEl.value = link;
+  if (title) {
+    title.textContent = copied
+      ? 'Copied — invite link is ready to send'
+      : 'Invite ready — tap the link to select, then copy';
+  }
+  if (box) {
+    box.classList.add('show');
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  if (status) {
+    status.classList.add('ok');
+    status.textContent = copied
+      ? `Verified: “${code}” was copied to your clipboard. Paste it in a message to a friend.`
+      : `Invite “${code}” is ready below. Tap the link field, then Copy.`;
+  }
+  return link;
+}
+
 async function copyInviteLink(code) {
   const link = inviteLinkFor(code);
   const status = $('#invite-copy-status');
+  let copied = false;
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(link);
+      copied = true;
+    }
+  } catch (_) {
+    copied = false;
+  }
+  showInviteResult(code, { copied });
+  if (!copied) {
+    // Fallback: select the visible field so phone users can copy manually
+    const linkEl = $('#invite-result-link');
+    if (linkEl) {
+      linkEl.focus();
+      linkEl.select();
     } else {
       window.prompt('Copy this invite link:', link);
     }
-    if (status) status.textContent = `Copied ${code}. Send that link for admission.`;
-  } catch (_) {
-    window.prompt('Copy this invite link:', link);
-    if (status) status.textContent = 'Copy the link from the prompt, then send it.';
+    if (status) {
+      status.classList.add('ok');
+      status.textContent = `Select the link below and copy it. Code: ${code}`;
+    }
   }
+  return copied;
 }
 
 function bindInviteCopyButtons(root) {
@@ -2217,12 +2264,22 @@ $('#home-invite-redeem').addEventListener('click', async () => {
 
 $('#admin-generate-invite').addEventListener('click', async () => {
   const status = $('#invite-copy-status');
+  const btn = $('#admin-generate-invite');
   if (!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin())) return;
   if (!window.HarborDB || !HarborDB.createInvite) {
-    if (status) status.textContent = 'Cloud invites aren’t ready yet.';
+    if (status) {
+      status.classList.remove('ok');
+      status.textContent = 'Cloud invites aren’t ready yet.';
+    }
     return;
   }
-  if (status) status.textContent = 'Generating invite…';
+  const prev = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  if (status) {
+    status.classList.remove('ok');
+    status.textContent = 'Generating a new invite code…';
+  }
   try {
     const row = await Promise.race([
       HarborDB.createInvite('Admin invite'),
@@ -2231,13 +2288,35 @@ $('#admin-generate-invite').addEventListener('click', async () => {
     inviteCloudCache = null;
     invitePaintedStarter = false;
     await renderInviteLinks({ force: true });
-    await copyInviteLink(row.code);
-    if (status) status.textContent = `New code ${row.code} ready — link copied.`;
+    const copied = await copyInviteLink(row.code);
+    btn.textContent = copied ? 'Generated ✓' : 'Generated';
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1600);
   } catch (err) {
+    btn.disabled = false;
+    btn.textContent = prev;
     if (status) {
+      status.classList.remove('ok');
       status.textContent = /harbor_invites|42P01|timed out|SQL/i.test(String(err.message || err))
         ? 'Run supabase-invites.sql in Supabase, then try Generate again. Starter copy links still work.'
         : (err.message || 'Could not generate invite.');
+    }
+  }
+});
+$('#invite-result-copy').addEventListener('click', async () => {
+  const linkEl = $('#invite-result-link');
+  const codeEl = $('#invite-result-code');
+  const code = (codeEl?.textContent || '').replace(/^Code:\s*/i, '').trim();
+  if (code) {
+    await copyInviteLink(code);
+    return;
+  }
+  if (linkEl?.value) {
+    try {
+      await navigator.clipboard.writeText(linkEl.value);
+      linkEl.select();
+    } catch (_) {
+      linkEl.focus();
+      linkEl.select();
     }
   }
 });
@@ -2781,7 +2860,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=30');
+      await navigator.serviceWorker.register('./sw.js?v=31');
     } catch (_) {}
   }
 }
