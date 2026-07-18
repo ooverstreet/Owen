@@ -1,4 +1,4 @@
-/* Harbor Angel client — prefers Supabase Edge Function, falls back locally */
+/* Harbor Angel client — Supabase Edge Function first, local companion fallback (no client API keys) */
 (function () {
   const cfg = window.HARBOR_CONFIG || {};
 
@@ -111,97 +111,45 @@
     };
   }
 
-  function resolveGroqKey() {
-    try {
-      const local = localStorage.getItem('harbor.groqKey.v1');
-      if (local && local.trim()) return local.trim();
-    } catch (_) {}
-    return (cfg.groqApiKey || '').trim();
-  }
+  async function askEdge(text) {
+    const url = cfg.supabaseUrl;
+    const key = cfg.supabaseAnonKey;
+    const fn = cfg.angelFunction || 'harbor-angel';
+    if (!url || !key) return null;
 
-  async function askGroqDirect(text) {
-    const key = resolveGroqKey();
-    if (!key) return null;
-    const model = cfg.angelModel || 'llama-3.3-70b-versatile';
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const userJwt = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
+    const endpoint = `${url.replace(/\/$/, '')}/functions/v1/${fn}`;
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${key}`,
         'Content-Type': 'application/json',
+        apikey: key,
+        Authorization: `Bearer ${userJwt || key}`,
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.7,
-        max_tokens: 220,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are Harbor\'s Angel — calm, warm, brief (40–80 words). Acknowledge one concrete detail. Not a therapist or crisis line. No emojis. No politics. If self-harm intent appears, gently point to local emergency help or US 988.',
-          },
-          {
-            role: 'user',
-            content: `Someone set this down at Harbor:\n\n"""${text}"""\n\nRespond as the Angel.`,
-          },
-        ],
-      }),
+      body: JSON.stringify({ text }),
     });
-    if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new Error(`Angel edge HTTP ${res.status}${detail ? `: ${detail.slice(0, 120)}` : ''}`);
+    }
     const data = await res.json();
-    const line = String(data?.choices?.[0]?.message?.content || '').trim();
-    if (!line) throw new Error('Empty Groq Angel reply');
+    if (!data?.line) throw new Error('Empty Angel edge reply');
     return {
-      line,
-      note: LOCAL_NOTES[0],
-      source: 'ai',
+      line: String(data.line).trim(),
+      note: data.note || LOCAL_NOTES[0],
+      source: data.source || 'ai',
       theme: detectTheme(text),
     };
-  }
-
-  async function askAI(text) {
-    // 1) Supabase Edge Function (keeps API keys server-side)
-    try {
-      const url = cfg.supabaseUrl;
-      const key = cfg.supabaseAnonKey;
-      const fn = cfg.angelFunction || 'harbor-angel';
-      if (url && key) {
-        const endpoint = `${url.replace(/\/$/, '')}/functions/v1/${fn}`;
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: key,
-            Authorization: `Bearer ${key}`,
-          },
-          body: JSON.stringify({ text }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.line) {
-            return {
-              line: String(data.line).trim(),
-              note: data.note || LOCAL_NOTES[0],
-              source: data.source || 'ai',
-              theme: detectTheme(text),
-            };
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Edge Angel unavailable', err);
-    }
-
-    // 2) Optional direct Groq key for personal prototypes
-    return askGroqDirect(text);
   }
 
   async function respond(text) {
     const trimmed = String(text || '').trim();
     if (!trimmed) return craftLocal('');
     try {
-      const ai = await askAI(trimmed);
+      const ai = await askEdge(trimmed);
       if (ai?.line) return ai;
     } catch (err) {
-      console.warn('Harbor Angel AI unavailable, using local companion', err);
+      console.warn('Harbor Angel edge unavailable, using local companion', err);
     }
     return craftLocal(trimmed);
   }
@@ -210,6 +158,5 @@
     respond,
     craftLocal,
     detectTheme,
-    hasGroqKey: () => !!resolveGroqKey(),
   };
 })();
