@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v38';
+const CACHE = 'harbor-v39';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
