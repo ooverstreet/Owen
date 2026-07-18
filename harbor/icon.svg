@@ -16,7 +16,15 @@
   </defs>
   <rect width="128" height="128" rx="28" fill="url(#sky)"/>
   <path d="M0 78c18-10 36-10 54 0s36 10 54 0 18-10 20-10v60H0V78z" fill="url(#water)" opacity=".9"/>
-  <path d="M44 86c4-6 12-8 20-8s16 2 20 8c-8 3-16 4-20 4s-12-1-20-4z" fill="#1F4F58" opacity=".55"/>
+  <!-- wider island -->
+  <path d="M28 88c7-9 20-13 36-13s29 4 36 13c-11 4-22 6-36 6s-25-2-36-6z" fill="#1F4F58" opacity=".55"/>
+  <!-- small palms (in scale) -->
+  <g stroke-linecap="round" fill="none">
+    <path d="M38 86v-11" stroke="#1F4F58" stroke-width="1.5"/>
+    <path d="M38 75c-4.5-2.5-6.5-1-7.5 1.2M38 75c4.5-2.5 6.5-1 7.5 1.2M38 75c-2.2-4.2-.5-6.2 1.4-7M38 75c2.2-4.2.5-6.2-1.4-7" stroke="#3E7A86" stroke-width="1.35"/>
+    <path d="M90 86.5v-9" stroke="#1F4F58" stroke-width="1.35"/>
+    <path d="M90 77.5c-3.6-2-5.2-.8-6 1M90 77.5c3.6-2 5.2-.8 6 1M90 77.5c-1.8-3.4-.4-5 1.1-5.6M90 77.5c1.8-3.4.4-5-1.1-5.6" stroke="#3E7A86" stroke-width="1.2"/>
+  </g>
   <path d="M52 86L56 40h16l4 46H52z" fill="url(#tower)"/>
   <path d="M54.8 62h18.4l.6 8H54.2l.6-8z" fill="#EAF2F4" opacity=".35"/>
   <!-- lantern room + dome -->
@@ -35,4 +43,3 @@
   <circle cx="64" cy="35" r="1.5" fill="#F2E2B8"/>
   <path d="M18 96c12-5 24-5 36 0s24 5 36 0 20-5 20-5" stroke="#EAF2F4" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
 </svg>
-
