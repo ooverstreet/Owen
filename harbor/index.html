@@ -2682,7 +2682,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=26');
+      await navigator.serviceWorker.register('./sw.js?v=28');
     } catch (_) {}
   }
 }

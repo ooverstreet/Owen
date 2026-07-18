@@ -29,13 +29,24 @@
     });
   }
 
+  function ownerEmail(email) {
+    return String(email || '').trim().toLowerCase() === 'owenstreet7@gmail.com';
+  }
+
+  function computeIsAdmin() {
+    if (profile && profile.role === 'admin') return true;
+    // Owner email is always admin, even if the profile row is missing/stale
+    if (ownerEmail(session?.user?.email) || ownerEmail(profile?.email)) return true;
+    return false;
+  }
+
   function getState() {
     return {
       ready: !!client,
       session,
       user: session?.user || null,
       profile,
-      isAdmin: !!(profile && profile.role === 'admin'),
+      isAdmin: computeIsAdmin(),
       isLoggedIn: !!session?.user,
       guidelinesAccepted: !!(profile && profile.guidelines_accepted_at),
     };
@@ -135,6 +146,20 @@
     } else {
       profile = data;
     }
+
+    // Keep Owen as admin in memory + try to persist if the row is still "member"
+    if (profile && ownerEmail(session.user.email || profile.email) && profile.role !== 'admin') {
+      profile = { ...profile, role: 'admin' };
+      const stamp = new Date().toISOString();
+      await client
+        .from('harbor_profiles')
+        .update({ role: 'admin', updated_at: stamp })
+        .eq('id', session.user.id)
+        .then(({ error: roleErr }) => {
+          if (roleErr) console.warn('Harbor admin promote failed', roleErr);
+        });
+    }
+
     if (profile?.guidelines_accepted_at) {
       syncGuidelinesLocal(true);
     } else if (profile && localGuidelinesAccepted()) {
@@ -193,10 +218,6 @@
     if (error) throw error;
     session = data.session;
     await refreshProfile();
-    // Ensure Owen stays admin even if profile existed before SQL
-    if (session?.user?.email?.toLowerCase() === 'owenstreet7@gmail.com' && profile && profile.role !== 'admin') {
-      profile = { ...profile, role: 'admin' };
-    }
     emit();
     return data;
   }
