@@ -234,14 +234,18 @@
     return data || [];
   }
 
-  async function createInvite(note = '') {
-    const c = authedClient();
-    if (!c) throw new Error('Cloud not configured');
+  function newInviteCode() {
     const rand = (crypto.randomUUID && crypto.randomUUID().slice(0, 8))
       || Math.random().toString(16).slice(2, 10);
-    const code = `shore-${rand}`;
+    return `shore-${rand}`;
+  }
+
+  async function createInvite(note = '', code = '') {
+    const c = authedClient();
+    if (!c) throw new Error('Cloud not configured');
+    const normalized = String(code || newInviteCode()).trim().toLowerCase();
     const row = {
-      code,
+      code: normalized,
       note: String(note || 'Admin invite').slice(0, 120),
       active: true,
       max_uses: 50,
