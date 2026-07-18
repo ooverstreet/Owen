@@ -963,12 +963,16 @@ body {
       <div id="invite-result" class="invite-result" aria-live="polite">
         <p class="invite-result-title" id="invite-result-title">Invite ready</p>
         <p class="invite-result-code" id="invite-result-code"></p>
-        <label class="field-label" for="invite-result-link" style="display:block;margin:0 0 6px;font-size:.82rem;color:var(--ink-soft)">Your invite link (tap &amp; hold → Copy)</label>
+        <label class="field-label" for="invite-result-link" style="display:block;margin:0 0 6px;font-size:.82rem;color:var(--ink-soft)">Your invite link — must start with https://</label>
         <input id="invite-result-link" type="url" readonly inputmode="url" autocomplete="off" onclick="this.select()" aria-label="Harbor invite link starting with https">
-        <button class="btn btn-secondary btn-small" id="invite-result-copy" type="button">Copy link again</button>
-        <p class="invite-confirm-note" style="margin:10px 0 0;font-size:.8rem;color:var(--ink-soft);line-height:1.35">Use the https:// link above — not Google or old SQL text. One person per code.</p>
+        <div class="invite-result-actions" style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn btn-primary btn-small" id="invite-result-share" type="button">Share invite…</button>
+          <button class="btn btn-secondary btn-small" id="invite-result-copy" type="button">Copy link</button>
+          <a class="btn btn-ghost btn-small" id="invite-result-open" href="#" target="_blank" rel="noopener">Open to test</a>
+        </div>
+        <p class="invite-confirm-note" style="margin:10px 0 0;font-size:.8rem;color:var(--ink-soft);line-height:1.35">If paste still shows SQL, your phone kept old Supabase text. Tap <strong>Share invite…</strong> instead, or tap &amp; hold the https link above → Copy.</p>
       </div>
-      <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
+      <div id="invite-link-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
       <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
     </div>
 
@@ -1166,6 +1170,51 @@ function inviteLinkFor(code) {
   const url = new URL(base);
   url.searchParams.set('invite', normalizeInviteCode(code));
   return url.toString();
+}
+
+function isHarborInviteUrl(text) {
+  const t = String(text || '').trim();
+  return /^https:\/\//i.test(t) && /[?&]invite=/i.test(t) && !/\bon conflict\b/i.test(t) && !/\('first-light'/i.test(t);
+}
+
+/** Sync clipboard write — must run inside the tap, before any await (Android). */
+function copyTextSync(text) {
+  const value = String(text || '');
+  if (!isHarborInviteUrl(value)) return false;
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = value;
+    ta.setAttribute('readonly', '');
+    ta.setAttribute('aria-hidden', 'true');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;border:0;padding:0;margin:0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return !!ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function shareInviteLink(code) {
+  const link = inviteLinkFor(code);
+  if (!isHarborInviteUrl(link)) return false;
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Harbor invite',
+        text: 'A quiet place to set things down — join with this invite:',
+        url: link,
+      });
+      return true;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return false;
+    }
+  }
+  return copyTextSync(link);
 }
 
 function currentRoom() {
@@ -1749,23 +1798,31 @@ function syncWriteIdentityUI() {
   $('#username-input').value = identity.username || '';
 }
 
-function showInviteResult(code, { copied = false } = {}) {
+function showInviteResult(code, { copied = false, shared = false } = {}) {
   const box = $('#invite-result');
   const title = $('#invite-result-title');
   const codeEl = $('#invite-result-code');
   const linkEl = $('#invite-result-link');
+  const openEl = $('#invite-result-open');
   const status = $('#invite-copy-status');
   const link = inviteLinkFor(code);
   if (codeEl) codeEl.textContent = `Code: ${code}`;
   if (linkEl) {
     linkEl.value = link;
-    // Make it obvious this is a Harbor URL, not SQL
     linkEl.setAttribute('inputmode', 'url');
+    try {
+      linkEl.focus({ preventScroll: true });
+      linkEl.select();
+      linkEl.setSelectionRange(0, link.length);
+    } catch (_) {}
   }
+  if (openEl) openEl.href = link;
   if (title) {
-    title.textContent = copied
-      ? 'Copied — your Harbor invite link is ready'
-      : 'Invite ready — tap & hold the link below, then Copy';
+    title.textContent = shared
+      ? 'Shared — check Messages / your share target'
+      : copied
+        ? 'Copied — paste should start with https://ooverstreet.github.io/'
+        : 'Invite ready — tap Share invite… (don’t paste old SQL)';
   }
   if (box) {
     box.classList.add('show');
@@ -1773,53 +1830,42 @@ function showInviteResult(code, { copied = false } = {}) {
   }
   if (status) {
     status.classList.add('ok');
-    status.textContent = copied
-      ? `Verified clipboard: a Harbor link ending in ?invite=${code}. Paste into Messages — it should start with https://ooverstreet.github.io/`
-      : `Your invite link is in the box below (starts with https://…). Tap & hold → Copy. Code: ${code}`;
+    status.textContent = shared
+      ? `Invite ${code} shared. The link must start with https:// — never SQL.`
+      : copied
+        ? `Clipboard now has a Harbor URL ending in ?invite=${code}.`
+        : `Link is in the box (https://…). Tap Share invite… or tap & hold the link → Copy. Code: ${code}`;
   }
   return link;
 }
 
-async function copyInviteLink(code, { assumeGesture = true } = {}) {
+function presentInviteLink(code, { preferShare = false } = {}) {
   const link = inviteLinkFor(code);
-  const status = $('#invite-copy-status');
-  let copied = false;
-
-  // Always show the real link first so phones can manual-copy even if clipboard fails
-  showInviteResult(code, { copied: false });
-  const linkEl = $('#invite-result-link');
-  if (linkEl) {
-    try {
-      linkEl.focus({ preventScroll: true });
-      linkEl.select();
-      linkEl.setSelectionRange(0, link.length);
-    } catch (_) {}
+  // Sync copy inside the user gesture — never await first on Android
+  const copied = copyTextSync(link);
+  showInviteResult(code, { copied, shared: false });
+  if (preferShare && navigator.share) {
+    // Fire share without blocking the visible link UI
+    shareInviteLink(code).then((shared) => {
+      if (shared) showInviteResult(code, { copied, shared: true });
+    });
   }
-
-  // Clipboard often fails after await on Android — only claim success if write works
-  if (assumeGesture && navigator.clipboard && navigator.clipboard.writeText) {
-    try {
-      await navigator.clipboard.writeText(link);
-      // Read-back isn't always allowed; sanity-check shape at least
-      if (/^https:\/\/ooverstreet\.github\.io\//i.test(link) && link.includes('invite=')) {
-        copied = true;
-      }
-    } catch (_) {
-      copied = false;
-    }
-  }
-
-  showInviteResult(code, { copied });
-  if (!copied && status) {
-    status.classList.add('ok');
-    status.textContent = `Clipboard may still have old text. Tap & hold the https:// link below, choose Copy, then paste. Code: ${code}`;
-  }
-  return copied;
+  return { link, copied };
 }
 
 function bindInviteCopyButtons(root) {
   root.querySelectorAll('[data-copy-invite]').forEach((btn) => {
-    btn.addEventListener('click', () => copyInviteLink(btn.getAttribute('data-copy-invite')));
+    btn.addEventListener('click', () => {
+      presentInviteLink(btn.getAttribute('data-copy-invite'));
+    });
+  });
+  root.querySelectorAll('[data-share-invite]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const code = btn.getAttribute('data-share-invite');
+      const shared = await shareInviteLink(code);
+      const copied = shared ? false : copyTextSync(inviteLinkFor(code));
+      showInviteResult(code, { copied, shared });
+    });
   });
 }
 
@@ -1835,12 +1881,21 @@ function paintInviteButtons(root, codes, cloud = []) {
   root.innerHTML = codes.map((code) => {
     const row = cloud.find((r) => r.code === code);
     const meta = row
-      ? ` · ${row.use_count || 0}/${row.max_uses || '∞'} used`
-      : ' · starter';
+      ? `${row.use_count || 0}/${row.max_uses || '∞'} used`
+      : 'starter';
+    const link = inviteLinkFor(code);
     return `
-      <button type="button" class="btn btn-secondary btn-small" data-copy-invite="${escapeHtml(code)}">
-        Copy link · ${escapeHtml(code)}${escapeHtml(meta)}
-      </button>
+      <div class="invite-row" style="display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--line)">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap">
+          <strong style="color:var(--water-deep)">${escapeHtml(code)}</strong>
+          <span style="font-size:.78rem;color:var(--ink-soft)">${escapeHtml(meta)}</span>
+        </div>
+        <a href="${escapeHtml(link)}" style="font-size:.82rem;word-break:break-all;color:var(--water-deep);line-height:1.35">${escapeHtml(link)}</a>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button type="button" class="btn btn-primary btn-small" data-share-invite="${escapeHtml(code)}">Share…</button>
+          <button type="button" class="btn btn-secondary btn-small" data-copy-invite="${escapeHtml(code)}">Copy link</button>
+        </div>
+      </div>
     `;
   }).join('');
   bindInviteCopyButtons(root);
@@ -2282,81 +2337,71 @@ $('#admin-generate-invite').addEventListener('click', async () => {
   if (!window.HarborDB || !HarborDB.createInvite) {
     if (status) {
       status.classList.remove('ok');
-      status.textContent = 'Cloud invites aren’t ready yet.';
+      status.textContent = 'Cloud invites aren’t ready yet. Starter Share links below still work.';
     }
     return;
   }
+
+  // Build code + copy SYNCHRONOUSLY in this tap — Android drops clipboard after await
+  const code = `shore-${(crypto.randomUUID && crypto.randomUUID().slice(0, 8)) || Math.random().toString(16).slice(2, 10)}`;
+  const { copied } = presentInviteLink(code);
+
   const prev = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Generating…';
+  btn.textContent = 'Saving…';
   if (status) {
-    status.classList.remove('ok');
-    status.textContent = 'Generating a new invite code…';
+    status.classList.add('ok');
+    status.textContent = copied
+      ? `Link ready for ${code}. Saving to Harbor…`
+      : `Link for ${code} is in the box. Tap Share invite… — then we’ll finish saving.`;
   }
+
   try {
-    const row = await Promise.race([
-      HarborDB.createInvite('Admin invite'),
+    await Promise.race([
+      HarborDB.createInvite('Admin invite', code),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — run supabase-invites.sql')), 4000)),
     ]);
-    // Show the real https link immediately (before list refresh)
-    showInviteResult(row.code, { copied: false });
-    const link = inviteLinkFor(row.code);
-    const linkEl = $('#invite-result-link');
-    if (linkEl) {
-      linkEl.value = link;
-      linkEl.focus();
-      linkEl.select();
-    }
-
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(link);
-      copied = /^https:\/\//i.test(link) && link.includes('invite=');
-    } catch (_) {
-      copied = false;
-    }
-    showInviteResult(row.code, { copied });
 
     inviteCloudCache = null;
     invitePaintedStarter = false;
-    // Refresh list in background — don't block confirmation UI
     renderInviteLinks({ force: true }).catch(() => {});
-
-    btn.textContent = copied ? 'Generated ✓' : 'Generated — copy link below';
-    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2200);
+    showInviteResult(code, { copied });
+    btn.textContent = copied ? 'Generated ✓' : 'Generated — tap Share invite…';
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2400);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = prev;
+    // Keep the https link visible even if cloud save failed — Owen can still share starters
+    showInviteResult(code, { copied: false });
     if (status) {
       status.classList.remove('ok');
-      status.textContent = /harbor_invites|42P01|timed out|SQL/i.test(String(err.message || err))
-        ? 'Run supabase-invites.sql in Supabase, then try Generate again. Starter copy links still work.'
-        : (err.message || 'Could not generate invite.');
+      status.textContent = /harbor_invites|42P01|timed out|SQL|row-level|policy|42501/i.test(String(err.message || err))
+        ? `Cloud save failed for ${code}. Use Share on a starter link below (first-light), or check admin role in Supabase.`
+        : (err.message || 'Could not save invite — use a starter Share link below.');
     }
   }
 });
-$('#invite-result-copy').addEventListener('click', async (e) => {
+$('#invite-result-copy').addEventListener('click', (e) => {
   e.preventDefault();
   const linkEl = $('#invite-result-link');
   const codeEl = $('#invite-result-code');
   const code = (codeEl?.textContent || '').replace(/^Code:\s*/i, '').trim();
   const link = (linkEl?.value || '').trim() || (code ? inviteLinkFor(code) : '');
-  if (!link || !/^https:\/\//i.test(link)) {
-    if (code) await copyInviteLink(code, { assumeGesture: true });
+  if (!isHarborInviteUrl(link)) {
+    if (code) presentInviteLink(code);
     return;
   }
-  let copied = false;
-  try {
-    await navigator.clipboard.writeText(link);
-    copied = true;
-  } catch (_) {
-    copied = false;
-  }
-  if (linkEl) {
-    linkEl.focus();
-    linkEl.select();
-  }
+  const copied = copyTextSync(link);
   if (code) showInviteResult(code, { copied });
+});
+$('#invite-result-share').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const codeEl = $('#invite-result-code');
+  const code = (codeEl?.textContent || '').replace(/^Code:\s*/i, '').trim();
+  if (!code) return;
+  const shared = await shareInviteLink(code);
+  const copied = shared ? false : copyTextSync(inviteLinkFor(code));
+  showInviteResult(code, { copied, shared });
 });
 $('#home-invite-code').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -2898,7 +2943,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=33');
+      await navigator.serviceWorker.register('./sw.js?v=34');
     } catch (_) {}
   }
 }
