@@ -13,7 +13,9 @@
   <rect width="128" height="128" rx="28" fill="url(#sky)"/>
   <path d="M0 78c18-10 36-10 54 0s36 10 54 0 18-10 20-10v60H0V78z" fill="url(#water)" opacity=".9"/>
   <path d="M64 28v52" stroke="#1F4F58" stroke-width="4" stroke-linecap="round"/>
-  <path d="M64 34c14 6 22 16 24 28" stroke="#C9A66B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <!-- Beacon shines up/out into the sky -->
+  <path d="M69 24c12-12 26-12 38-2" stroke="#C9A66B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M70 28c10-6 20-5 30 2" stroke="#C9A66B" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55"/>
   <circle cx="64" cy="28" r="5" fill="#C9A66B"/>
   <path d="M18 96c12-5 24-5 36 0s24 5 36 0 20-5 20-5" stroke="#EAF2F4" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
 </svg>
