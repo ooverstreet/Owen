@@ -769,12 +769,12 @@ body {
           <!-- single central bulb -->
           <circle cx="36" cy="29" r="3.2" fill="#B8894A"/>
           <circle cx="36" cy="29" r="1.3" fill="#F2E2B8"/>
-          <!-- little person out front, looking into the sea -->
-          <g fill="#1F4F58" opacity=".88">
-            <circle cx="14" cy="66" r="2.1"/>
-            <path d="M12 69h4c.5 0 .9.45.8 1l-1 8.2c0 .4-.35.7-.75.7h-2.1c-.4 0-.7-.3-.75-.7l-1-8.2c-.1-.55.3-1 .8-1z"/>
+          <!-- tiny person on the gallery railing, looking out -->
+          <g fill="#1F4F58" opacity=".92">
+            <circle cx="48.5" cy="17.6" r="1.05"/>
+            <path d="M48.5 18.8v2.8" stroke="#1F4F58" stroke-width="1.25" stroke-linecap="round"/>
           </g>
-          <path d="M16.2 71.5h5" stroke="#1F4F58" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+          <path d="M49.2 20.2h2.2" stroke="#1F4F58" stroke-width="1" stroke-linecap="round" opacity=".55"/>
           <!-- water line -->
           <path d="M8 84c8-4 16-4 22 0s14 4 22 0 12-4 12-4" stroke="#3E7A86" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
         </svg>
@@ -3020,7 +3020,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=42');
+      await navigator.serviceWorker.register('./sw.js?v=43');
     } catch (_) {}
   }
 }
