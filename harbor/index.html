@@ -1755,11 +1755,15 @@ function showInviteResult(code, { copied = false } = {}) {
   const status = $('#invite-copy-status');
   const link = inviteLinkFor(code);
   if (codeEl) codeEl.textContent = `Code: ${code}`;
-  if (linkEl) linkEl.value = link;
+  if (linkEl) {
+    linkEl.value = link;
+    // Make it obvious this is a Harbor URL, not SQL
+    linkEl.setAttribute('inputmode', 'url');
+  }
   if (title) {
     title.textContent = copied
-      ? 'Copied — invite link is ready to send'
-      : 'Invite ready — tap the link to select, then copy';
+      ? 'Copied — your Harbor invite link is ready'
+      : 'Invite ready — tap & hold the link below, then Copy';
   }
   if (box) {
     box.classList.add('show');
@@ -1768,38 +1772,45 @@ function showInviteResult(code, { copied = false } = {}) {
   if (status) {
     status.classList.add('ok');
     status.textContent = copied
-      ? `Verified: “${code}” was copied to your clipboard. Paste it in a message to a friend.`
-      : `Invite “${code}” is ready below. Tap the link field, then Copy.`;
+      ? `Verified clipboard: a Harbor link ending in ?invite=${code}. Paste into Messages — it should start with https://ooverstreet.github.io/`
+      : `Your invite link is in the box below (starts with https://…). Tap & hold → Copy. Code: ${code}`;
   }
   return link;
 }
 
-async function copyInviteLink(code) {
+async function copyInviteLink(code, { assumeGesture = true } = {}) {
   const link = inviteLinkFor(code);
   const status = $('#invite-copy-status');
   let copied = false;
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(link);
-      copied = true;
-    }
-  } catch (_) {
-    copied = false;
-  }
-  showInviteResult(code, { copied });
-  if (!copied) {
-    // Fallback: select the visible field so phone users can copy manually
-    const linkEl = $('#invite-result-link');
-    if (linkEl) {
-      linkEl.focus();
+
+  // Always show the real link first so phones can manual-copy even if clipboard fails
+  showInviteResult(code, { copied: false });
+  const linkEl = $('#invite-result-link');
+  if (linkEl) {
+    try {
+      linkEl.focus({ preventScroll: true });
       linkEl.select();
-    } else {
-      window.prompt('Copy this invite link:', link);
+      linkEl.setSelectionRange(0, link.length);
+    } catch (_) {}
+  }
+
+  // Clipboard often fails after await on Android — only claim success if write works
+  if (assumeGesture && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(link);
+      // Read-back isn't always allowed; sanity-check shape at least
+      if (/^https:\/\/ooverstreet\.github\.io\//i.test(link) && link.includes('invite=')) {
+        copied = true;
+      }
+    } catch (_) {
+      copied = false;
     }
-    if (status) {
-      status.classList.add('ok');
-      status.textContent = `Select the link below and copy it. Code: ${code}`;
-    }
+  }
+
+  showInviteResult(code, { copied });
+  if (!copied && status) {
+    status.classList.add('ok');
+    status.textContent = `Clipboard may still have old text. Tap & hold the https:// link below, choose Copy, then paste. Code: ${code}`;
   }
   return copied;
 }
