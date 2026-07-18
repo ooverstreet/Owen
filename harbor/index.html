@@ -750,12 +750,26 @@ body {
         <svg viewBox="0 0 72 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <!-- wider island -->
           <path d="M8 80c5-7 14-10 28-10s23 3 28 10c-8 3-17 4-28 4s-20-1-28-4z" fill="#1F4F58" opacity=".45"/>
-          <!-- small palms -->
+          <!-- small palms — drooping fronds -->
           <g stroke-linecap="round" fill="none">
-            <path d="M14 79v-9" stroke="#1F4F58" stroke-width="1.35"/>
-            <path d="M14 70c-3.6-2-5.2-.8-6 1M14 70c3.6-2 5.2-.8 6 1M14 70c-1.8-3.4-.4-5 1.1-5.6M14 70c1.8-3.4.4-5-1.1-5.6" stroke="#3E7A86" stroke-width="1.2"/>
-            <path d="M58 79.5v-7.5" stroke="#1F4F58" stroke-width="1.2"/>
-            <path d="M58 72c-3-1.7-4.4-.7-5.1.8M58 72c3-1.7 4.4-.7 5.1.8M58 72c-1.5-2.8-.3-4.2.9-4.7M58 72c1.5-2.8.3-4.2-.9-4.7" stroke="#3E7A86" stroke-width="1.1"/>
+            <path d="M15 80c-.8-3.2-.4-6.5 0-9.2" stroke="#1F4F58" stroke-width="1.4"/>
+            <g stroke="#3E7A86" stroke-width="1.25">
+              <path d="M15 70.8C10.5 70 7.5 73 6.5 77"/>
+              <path d="M15 70.8C19.5 70 22.5 73 23.5 77"/>
+              <path d="M15 70.8C10 68 7.5 68.5 6.2 71"/>
+              <path d="M15 70.8C20 68 22.5 68.5 23.8 71"/>
+              <path d="M15 70.8C12.8 66.2 10.5 65.5 9 66.2"/>
+              <path d="M15 70.8C17.2 66.2 19.5 65.5 21 66.2"/>
+            </g>
+            <path d="M57 80.5c-.6-2.8-.3-5.5 0-7.8" stroke="#1F4F58" stroke-width="1.2"/>
+            <g stroke="#3E7A86" stroke-width="1.1">
+              <path d="M57 72.7C53.2 72 50.8 74.5 50 77.5"/>
+              <path d="M57 72.7C60.8 72 63.2 74.5 64 77.5"/>
+              <path d="M57 72.7C52.8 70.2 50.8 70.6 49.8 72.5"/>
+              <path d="M57 72.7C61.2 70.2 63.2 70.6 64.2 72.5"/>
+              <path d="M57 72.7C55.2 68.8 53.4 68.2 52.2 68.8"/>
+              <path d="M57 72.7C58.8 68.8 60.6 68.2 61.8 68.8"/>
+            </g>
           </g>
           <!-- tapered tower -->
           <path d="M24 78L28 34h16l4 44H24z" fill="#1F4F58"/>
@@ -3021,7 +3035,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=45');
+      await navigator.serviceWorker.register('./sw.js?v=46');
     } catch (_) {}
   }
 }
