@@ -421,7 +421,7 @@ body {
 .filter-chip.active {
   background: var(--water-deep); color: #F4FBFC; border-color: var(--water-deep);
 }
-.feed-list { display: flex; flex-direction: column; gap: 12px; }
+.feed-list { display: flex; flex-direction: column; gap: 16px; }
 .post-card {
   width: 100%; text-align: left; border: 1px solid var(--line);
   background: var(--paper); border-radius: 18px; padding: 16px 18px;
@@ -459,7 +459,33 @@ body {
   margin-top: 12px; font-size: .86rem; color: var(--ink-faint);
   display: flex; justify-content: space-between; gap: 10px;
 }
-.empty { color: var(--ink-faint); padding: 20px 4px; }
+.empty { color: var(--ink-faint); padding: 22px 4px; line-height: 1.45; max-width: 36ch; }
+.welcome-ashore {
+  margin: 0 0 16px;
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(184, 137, 74, 0.28);
+  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.72));
+  animation: fadeIn .55s ease both;
+}
+.welcome-ashore p {
+  margin: 0 0 12px;
+  color: var(--water-deep);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+.welcome-ashore .welcome-actions {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.felt-thanks {
+  font-size: .9rem;
+  color: var(--warm);
+  min-height: 1.2em;
+  margin: 0;
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.felt-thanks.show { opacity: 1; }
 .fab-wrap { position: sticky; bottom: 8px; display: flex; justify-content: flex-end; margin-top: 18px; }
 
 /* ── Write ──────────────────────────────────────────────────── */
@@ -660,8 +686,15 @@ body {
       </div>
     </div>
     <h2 class="section-title">The shore</h2>
-    <p class="section-sub">Start with the first light. Then open any thread that meets you.</p>
-    <p class="section-sub" style="margin-top:-8px;margin-bottom:14px;font-size:.92rem">Topics are simple labels — tap one to show only posts about that feeling.</p>
+    <p class="section-sub" id="feed-sub">Start with First light. Then open any thread that meets you.</p>
+    <aside id="welcome-ashore" class="welcome-ashore" hidden>
+      <p>Welcome ashore. Begin with <strong>First light</strong> — then share something of your own when you’re ready. You can stay anonymous.</p>
+      <div class="welcome-actions">
+        <button class="btn btn-primary btn-small" id="welcome-first-light" type="button">Open First light</button>
+        <button class="btn btn-secondary btn-small" id="welcome-share" type="button">Share something</button>
+        <button class="linkish" id="welcome-dismiss" type="button">Got it</button>
+      </div>
+    </aside>
     <aside class="whisper-card" id="shore-whisper-card" aria-live="polite">
       <div class="whisper-label">Shore whisper</div>
       <p class="whisper-text" id="whisper-card-text"></p>
@@ -737,6 +770,7 @@ body {
         <button class="btn btn-secondary btn-small" id="admin-hide-btn" type="button" hidden>Remove (admin)</button>
         <button class="btn btn-secondary btn-small" id="admin-ban-btn" type="button" hidden>Ban author (admin)</button>
       </div>
+      <p class="felt-thanks" id="felt-thanks" aria-live="polite"></p>
       <div class="angel-panel" id="angel-panel">
         <div class="angel-label">Angel</div>
         <p class="angel-text" id="angel-text"></p>
@@ -804,13 +838,8 @@ body {
 
     <div id="admin-panel" class="angel-panel" style="margin-top:18px;display:none">
       <div class="angel-label">Admin</div>
-      <p class="angel-note" style="margin-bottom:12px">Only you see this after signing in as admin. Visitors never get these controls.</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <label for="pref-groq" style="font-size:.95rem;color:var(--ink-soft)">Angel AI key (optional device fallback)</label>
-        <input id="pref-groq" type="password" autocomplete="off" placeholder="gsk_… optional"
-          style="border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none">
-        <p id="groq-status" style="font-size:.86rem;color:var(--ink-faint);margin:0">Prefer server-side Angel when possible.</p>
-      </div>
+      <p class="angel-note" style="margin-bottom:8px">Only you see this after signing in as admin. Visitors never get these controls.</p>
+      <p class="angel-note" style="margin:0">Angel AI runs on the server (Supabase secret). No API keys live in the browser.</p>
     </div>
 
     <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
@@ -852,6 +881,7 @@ const STORAGE_IDENTITY = 'harbor.identity.v1';
 const STORAGE_LEGACY = 'harbor.entries.v1';
 const STORAGE_FELT = 'harbor.felt.v1';
 const STORAGE_WHISPERS = 'harbor.whispers.v1';
+const STORAGE_WELCOME = 'harbor.welcome.v1';
 
 /* Positive, non-political. Mostly secular; occasional gentle scripture. */
 const SHORE_WHISPERS = [
@@ -1073,6 +1103,29 @@ function showScreen(name) {
   if (name === 'feed' || name === 'home') showNextWhisper();
 }
 
+function hasSeenWelcome() {
+  try { return localStorage.getItem(STORAGE_WELCOME) === 'seen'; }
+  catch (_) { return false; }
+}
+
+function markWelcomeSeen() {
+  try { localStorage.setItem(STORAGE_WELCOME, 'seen'); } catch (_) {}
+  const el = $('#welcome-ashore');
+  if (el) el.hidden = true;
+}
+
+function showWelcomeIfNeeded() {
+  const el = $('#welcome-ashore');
+  if (!el) return;
+  el.hidden = hasSeenWelcome();
+  const sub = $('#feed-sub');
+  if (sub) {
+    sub.textContent = hasSeenWelcome()
+      ? 'Start with First light. Then open any thread that meets you.'
+      : 'You’re new here — First light is a gentle place to begin.';
+  }
+}
+
 async function enterHarbor(dest = 'feed') {
   pendingEntry = MEMBER_SCREENS.has(dest) ? dest : 'feed';
   if (!hasAgreedGuidelines()) {
@@ -1084,7 +1137,10 @@ async function enterHarbor(dest = 'feed') {
     openAccountForEntry(authMode === 'signin' ? 'signin' : 'signup');
     return;
   }
-  if (dest === 'feed') await renderFeed();
+  if (dest === 'feed') {
+    await renderFeed();
+    showWelcomeIfNeeded();
+  }
   if (dest === 'write') {
     syncWriteIdentityUI();
     renderTagPicker();
@@ -1350,7 +1406,9 @@ async function renderFeed() {
 
   const root = $('#feed-list');
   if (!list.length) {
-    root.innerHTML = '<p class="empty">No posts on this shore yet.</p>';
+    root.innerHTML = activeFilter === 'all'
+      ? '<p class="empty">The shore is quiet right now — you can be the first to set something down today.</p>'
+      : `<p class="empty">Nothing under #${escapeHtml(activeFilter)} yet. The shore is quiet here — try All, or share the first note on this topic.</p>`;
     return;
   }
   root.innerHTML = '';
@@ -1362,6 +1420,12 @@ async function renderFeed() {
     btn.addEventListener('click', () => openThread(post.id));
     root.appendChild(btn);
   });
+  if (list.length === 1 && list[0].featured) {
+    const note = document.createElement('p');
+    note.className = 'empty';
+    note.textContent = 'The shore is still waking up. After First light, you’re welcome to share something of your own.';
+    root.appendChild(note);
+  }
 }
 
 async function openThread(id) {
@@ -1394,6 +1458,11 @@ async function openThread(id) {
   const feltBtn = $('#felt-btn');
   feltBtn.classList.toggle('done', !!feltMap[id]);
   feltBtn.textContent = feltMap[id] ? 'You felt this too' : 'I’ve felt this too';
+  const thanks = $('#felt-thanks');
+  if (thanks) {
+    thanks.textContent = '';
+    thanks.classList.remove('show');
+  }
   updateReplyAsLabel();
   const adminOn = !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
   $('#admin-hide-btn').hidden = !adminOn || post.id === FEATURED_POST.id;
@@ -1405,7 +1474,7 @@ function renderReplies(post) {
   const root = $('#reply-list');
   const replies = post.replies || [];
   if (!replies.length) {
-    root.innerHTML = '<p class="empty">No replies yet. If you’ve been here, you can leave a gentle note.</p>';
+    root.innerHTML = '<p class="empty">No replies yet. If this met you, a short gentle note is welcome.</p>';
     return;
   }
   root.innerHTML = replies.map((r) => `
@@ -1466,15 +1535,6 @@ function syncAccountScreen() {
   $('#pref-username').value = identity.username || (auth.profile?.display_name || '');
   $('#pref-username').disabled = identity.mode !== 'named';
   $('#pref-scripture').checked = whispers.includeScripture;
-  if (auth.isAdmin) {
-    try { $('#pref-groq').value = localStorage.getItem('harbor.groqKey.v1') || ''; } catch (_) { $('#pref-groq').value = ''; }
-    const status = $('#groq-status');
-    if (status) {
-      status.textContent = ($('#pref-groq').value || '').trim()
-        ? 'Optional Angel fallback key saved on this phone.'
-        : 'Optional — only needed as a device fallback.';
-    }
-  }
 }
 
 function renderTagPicker() {
@@ -1702,6 +1762,13 @@ async function addReply() {
   await openThread(currentThreadId);
 }
 
+function showFeltThanks() {
+  const thanks = $('#felt-thanks');
+  if (!thanks) return;
+  thanks.textContent = 'Thank you — they aren’t alone in this.';
+  thanks.classList.add('show');
+}
+
 async function toggleFelt() {
   if (!currentThreadId) return;
   const feltMap = loadJSON(STORAGE_FELT, {});
@@ -1717,6 +1784,7 @@ async function toggleFelt() {
       saveJSON(STORAGE_FELT, feltMap);
       await refreshCloudPosts();
       await openThread(currentThreadId);
+      showFeltThanks();
       return;
     } catch (err) {
       console.warn('Harbor cloud felt failed', err);
@@ -1727,6 +1795,7 @@ async function toggleFelt() {
     feltMap[currentThreadId] = true;
     saveJSON(STORAGE_FELT, feltMap);
     await openThread(currentThreadId);
+    showFeltThanks();
     return;
   }
 
@@ -1738,6 +1807,7 @@ async function toggleFelt() {
   savePosts(posts);
   saveJSON(STORAGE_FELT, feltMap);
   await openThread(currentThreadId);
+  showFeltThanks();
 }
 
 /* events */
@@ -1773,6 +1843,18 @@ $('#account-done').addEventListener('click', async () => {
     return;
   }
   showScreen('home');
+});
+$('#welcome-first-light').addEventListener('click', () => {
+  markWelcomeSeen();
+  openThread(FEATURED_POST.id);
+});
+$('#welcome-share').addEventListener('click', () => {
+  markWelcomeSeen();
+  enterHarbor('write');
+});
+$('#welcome-dismiss').addEventListener('click', () => {
+  markWelcomeSeen();
+  showWelcomeIfNeeded();
 });
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
@@ -1814,13 +1896,6 @@ $('#save-identity').addEventListener('click', async () => {
   }
   saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
   saveWhisperPrefs({ includeScripture: $('#pref-scripture').checked });
-  if (window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin()) {
-    try {
-      const groq = ($('#pref-groq').value || '').trim();
-      if (groq) localStorage.setItem('harbor.groqKey.v1', groq);
-      else localStorage.removeItem('harbor.groqKey.v1');
-    } catch (_) {}
-  }
   showNextWhisper();
   if (isLoggedIn()) {
     await enterHarbor('feed');
@@ -2216,7 +2291,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=20');
+      await navigator.serviceWorker.register('./sw.js?v=22');
     } catch (_) {}
   }
 }
