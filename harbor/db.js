@@ -244,15 +244,35 @@
     const c = authedClient();
     if (!c) throw new Error('Cloud not configured');
     const normalized = String(code || newInviteCode()).trim().toLowerCase();
+    const payload = {
+      p_code: normalized,
+      p_note: String(note || 'Admin invite').slice(0, 120),
+      p_max_uses: 50,
+    };
+
+    // Prefer SECURITY DEFINER RPC (works even if profile.role is stale)
+    const rpc = await c.rpc('harbor_create_invite', payload);
+    if (!rpc.error && rpc.data) {
+      return Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
+    }
+
+    // Fallback: direct insert (needs admin RLS / owner-email policy)
     const row = {
       code: normalized,
-      note: String(note || 'Admin invite').slice(0, 120),
+      note: payload.p_note,
       active: true,
       max_uses: 50,
       created_by: (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null,
     };
-    const { data, error } = await c.from('harbor_invites').insert(row).select('code,note,active,use_count,max_uses,created_at').maybeSingle();
-    if (error) throw error;
+    const { data, error } = await c
+      .from('harbor_invites')
+      .insert(row)
+      .select('code,note,active,use_count,max_uses,created_at')
+      .maybeSingle();
+    if (error) {
+      const rpcMsg = rpc.error?.message || '';
+      throw new Error(error.message || rpcMsg || 'Could not create invite');
+    }
     return data || row;
   }
 
