@@ -180,6 +180,69 @@
     return next;
   }
 
+  function baseClient() {
+    if (!configured()) return null;
+    return client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  }
+
+  function authedClient() {
+    if (!configured()) return null;
+    const jwt = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
+    return window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+      global: jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : undefined,
+    });
+  }
+
+  async function validateInvite(code) {
+    const c = baseClient();
+    if (!c) return false;
+    const normalized = String(code || '').trim().toLowerCase();
+    if (!normalized) return false;
+    const { data, error } = await c
+      .from('harbor_invites')
+      .select('code,active,use_count,max_uses')
+      .eq('code', normalized)
+      .eq('active', true)
+      .maybeSingle();
+    if (error) {
+      // Table may not exist yet — caller can fall back to config codes
+      console.warn('Harbor invite lookup failed', error.message || error);
+      return false;
+    }
+    if (!data) return false;
+    if (data.max_uses != null && data.use_count >= data.max_uses) return false;
+    return true;
+  }
+
+  async function listInvites() {
+    const c = authedClient();
+    if (!c) throw new Error('Cloud not configured');
+    const { data, error } = await c
+      .from('harbor_invites')
+      .select('code,note,active,use_count,max_uses,created_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function createInvite(note = '') {
+    const c = authedClient();
+    if (!c) throw new Error('Cloud not configured');
+    const rand = (crypto.randomUUID && crypto.randomUUID().slice(0, 8))
+      || Math.random().toString(16).slice(2, 10);
+    const code = `shore-${rand}`;
+    const row = {
+      code,
+      note: String(note || 'Admission invite').slice(0, 120),
+      active: true,
+      max_uses: 50,
+      created_by: (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null,
+    };
+    const { data, error } = await c.from('harbor_invites').insert(row).select('code,note,active,use_count,max_uses,created_at').maybeSingle();
+    if (error) throw error;
+    return data || row;
+  }
+
   window.HarborDB = {
     init,
     configured,
@@ -192,5 +255,8 @@
     incrementFelt,
     isBanned,
     modAction,
+    validateInvite,
+    listInvites,
+    createInvite,
   };
 })();
