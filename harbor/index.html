@@ -2361,7 +2361,7 @@ $('#admin-generate-invite').addEventListener('click', async () => {
   btn.textContent = 'Saving…';
   if (resultBox) resultBox.classList.remove('show');
   if (status) {
-    status.classList.remove('ok');
+    status.classList.remove('ok', 'err');
     status.textContent = 'Saving a new invite code to Harbor…';
   }
 
@@ -2380,13 +2380,15 @@ $('#admin-generate-invite').addEventListener('click', async () => {
     const savedStatus = `Saved: ${code}. Tap Share invite…`;
     showInviteResult(code, { copied: false });
     if (status) {
+      status.classList.remove('err');
       status.classList.add('ok');
       status.textContent = savedStatus;
     }
     renderInviteLinks({ force: true })
       .catch(() => {})
       .finally(() => {
-        if (status && status.textContent !== savedStatus) {
+        if (status) {
+          status.classList.remove('err');
           status.classList.add('ok');
           status.textContent = savedStatus;
         }
@@ -2401,6 +2403,7 @@ $('#admin-generate-invite').addEventListener('click', async () => {
     const raw = String(err?.message || err || '');
     if (status) {
       status.classList.remove('ok');
+      status.classList.add('err');
       if (/Not signed in|Sign in again/i.test(raw)) {
         status.textContent = 'Session expired — sign out, sign in, then tap Generate again.';
       } else if (/Admin only/i.test(raw)) {
