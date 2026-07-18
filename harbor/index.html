@@ -2321,7 +2321,12 @@ $('#home-invite-redeem').addEventListener('click', async () => {
   if (status) status.textContent = 'Checking invite…';
   const ok = await redeemInvite(code);
   if (!ok) {
-    if (status) status.textContent = 'That invite code wasn’t recognized. Check the link and try again.';
+    if (status) {
+      const normalized = normalizeInviteCode(code);
+      status.textContent = /^shore-/i.test(normalized)
+        ? 'That code never finished saving to Harbor. Use first-light, or generate again after running the invite SQL.'
+        : 'That invite code wasn’t recognized. Check the link and try again.';
+    }
     return;
   }
   if (status) status.textContent = 'Invite unlocked. You can create an account now.';
@@ -2333,6 +2338,7 @@ $('#home-invite-redeem').addEventListener('click', async () => {
 $('#admin-generate-invite').addEventListener('click', async () => {
   const status = $('#invite-copy-status');
   const btn = $('#admin-generate-invite');
+  const resultBox = $('#invite-result');
   if (!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin())) return;
   if (!window.HarborDB || !HarborDB.createInvite) {
     if (status) {
@@ -2342,41 +2348,55 @@ $('#admin-generate-invite').addEventListener('click', async () => {
     return;
   }
 
-  // Build code + copy SYNCHRONOUSLY in this tap — Android drops clipboard after await
-  const code = `shore-${(crypto.randomUUID && crypto.randomUUID().slice(0, 8)) || Math.random().toString(16).slice(2, 10)}`;
-  const { copied } = presentInviteLink(code);
-
   const prev = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Saving…';
+  if (resultBox) resultBox.classList.remove('show');
   if (status) {
-    status.classList.add('ok');
-    status.textContent = copied
-      ? `Link ready for ${code}. Saving to Harbor…`
-      : `Link for ${code} is in the box. Tap Share invite… — then we’ll finish saving.`;
+    status.classList.remove('ok');
+    status.textContent = 'Saving a new invite code to Harbor…';
   }
 
   try {
-    await Promise.race([
-      HarborDB.createInvite('Admin invite', code),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — run supabase-invites.sql')), 4000)),
+    // Save FIRST — never show a code until it’s redeemable in Supabase
+    const row = await Promise.race([
+      HarborDB.createInvite('Admin invite'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — re-run supabase-invites.sql')), 6000)),
     ]);
+    const code = row?.code;
+    if (!code) throw new Error('Invite saved but no code returned');
+
+    // Verify lookup works for friends (anon validate) before offering the link
+    let redeemable = false;
+    try {
+      redeemable = await HarborDB.validateInvite(code);
+    } catch (_) {
+      redeemable = false;
+    }
+    if (!redeemable) {
+      throw new Error('Invite saved but not readable yet — re-run supabase-invites.sql (select policy), then try again.');
+    }
 
     inviteCloudCache = null;
     invitePaintedStarter = false;
     renderInviteLinks({ force: true }).catch(() => {});
-    showInviteResult(code, { copied });
-    btn.textContent = copied ? 'Generated ✓' : 'Generated — tap Share invite…';
-    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2400);
+
+    // After await, clipboard may fail on Android — show link + Share button (new tap)
+    showInviteResult(code, { copied: false });
+    if (status) {
+      status.classList.add('ok');
+      status.textContent = `Saved & verified: ${code}. Tap Share invite… (don’t paste old SQL).`;
+    }
+    btn.textContent = 'Generated — tap Share invite…';
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2600);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = prev;
-    // Keep the https link visible even if cloud save failed — Owen can still share starters
-    showInviteResult(code, { copied: false });
+    if (resultBox) resultBox.classList.remove('show');
     if (status) {
       status.classList.remove('ok');
-      status.textContent = /harbor_invites|42P01|timed out|SQL|row-level|policy|42501/i.test(String(err.message || err))
-        ? `Cloud save failed for ${code}. Use Share on a starter link below (first-light), or check admin role in Supabase.`
+      status.textContent = /harbor_invites|42P01|timed out|SQL|row-level|policy|42501|Admin only|function|rpc|readable/i.test(String(err.message || err))
+        ? 'Could not save invite to Harbor. Re-run supabase-invites.sql in Supabase, then Generate again. Meanwhile Share first-light below.'
         : (err.message || 'Could not save invite — use a starter Share link below.');
     }
   }
@@ -2943,7 +2963,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=34');
+      await navigator.serviceWorker.register('./sw.js?v=35');
     } catch (_) {}
   }
 }
