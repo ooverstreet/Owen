@@ -1725,7 +1725,9 @@ function bindInviteCopyButtons(root) {
   });
 }
 
-let inviteRenderToken = 0;
+let inviteCloudCache = null; // { at, rows }
+let inviteFetchInFlight = null;
+let invitePaintedStarter = false;
 
 function paintInviteButtons(root, codes, cloud = []) {
   if (!codes.length) {
@@ -1746,37 +1748,65 @@ function paintInviteButtons(root, codes, cloud = []) {
   bindInviteCopyButtons(root);
 }
 
-async function renderInviteLinks() {
+function paintStarterInvitesOnly() {
+  const root = $('#invite-link-list');
+  if (!root) return;
+  paintInviteButtons(root, cfgInviteCodes(), inviteCloudCache?.rows || []);
+  invitePaintedStarter = true;
+}
+
+async function fetchCloudInvites({ force = false } = {}) {
+  const now = Date.now();
+  if (!force && inviteCloudCache && (now - inviteCloudCache.at) < 60000) {
+    return inviteCloudCache.rows;
+  }
+  if (!force && inviteFetchInFlight) return inviteFetchInFlight;
+  if (!window.HarborDB || !HarborDB.listInvites) return [];
+
+  inviteFetchInFlight = Promise.race([
+    HarborDB.listInvites(),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Invite list timed out')), 2500)),
+  ])
+    .then((rows) => {
+      inviteCloudCache = { at: Date.now(), rows: rows || [] };
+      return inviteCloudCache.rows;
+    })
+    .catch((err) => {
+      console.warn('Harbor invite list failed', err);
+      return inviteCloudCache?.rows || [];
+    })
+    .finally(() => { inviteFetchInFlight = null; });
+
+  return inviteFetchInFlight;
+}
+
+async function renderInviteLinks({ force = false } = {}) {
   const root = $('#invite-link-list');
   if (!root) return;
   const status = $('#invite-copy-status');
   const starter = cfgInviteCodes();
-  const token = ++inviteRenderToken;
 
-  // Show starter codes immediately so the panel never looks stuck
-  paintInviteButtons(root, starter, []);
+  // Always paint local starters first (sync) — never leave the UI waiting
+  if (!invitePaintedStarter || force) paintStarterInvitesOnly();
 
-  let cloud = [];
-  if (window.HarborDB && HarborDB.listInvites) {
-    try {
-      cloud = await Promise.race([
-        HarborDB.listInvites(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Invite list timed out')), 4000)),
-      ]);
-    } catch (err) {
-      console.warn('Harbor invite list failed', err);
-      if (status && token === inviteRenderToken) {
-        status.textContent = 'Cloud invites need SQL setup — starter codes below still work. Run supabase-invites.sql, then tap Generate.';
-      }
-      return;
-    }
+  // Skip repeat cloud fetches unless forced (Generate) or cache is cold
+  if (!force && inviteCloudCache && (Date.now() - inviteCloudCache.at) < 60000) {
+    const codes = Array.from(new Set([
+      ...inviteCloudCache.rows.filter((r) => r.active !== false).map((r) => r.code),
+      ...starter,
+    ]));
+    paintInviteButtons(root, codes, inviteCloudCache.rows);
+    return;
   }
 
-  if (token !== inviteRenderToken) return;
+  const cloud = await fetchCloudInvites({ force });
   const cloudCodes = cloud.filter((row) => row.active !== false).map((row) => row.code);
   const codes = Array.from(new Set([...cloudCodes, ...starter]));
   paintInviteButtons(root, codes, cloud);
-  if (status && cloudCodes.length && /SQL setup|timed out|Loading/i.test(status.textContent || '')) {
+
+  if (!cloudCodes.length && status && force) {
+    status.textContent = 'Starter codes work below. For Generate, run supabase-invites.sql once in Supabase.';
+  } else if (cloudCodes.length && status && /SQL setup|timed out|Loading/i.test(status.textContent || '')) {
     status.textContent = 'Invite codes ready. Copy a link or generate a new one.';
   }
 }
@@ -1809,7 +1839,8 @@ function syncAccountScreen() {
   guest.style.display = auth.isLoggedIn ? 'none' : 'flex';
   userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
-  if (auth.isAdmin) renderInviteLinks();
+  // Cheap sync paint only — never kick off network on every auth tick
+  if (auth.isAdmin) paintStarterInvitesOnly();
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -2155,14 +2186,19 @@ $('#admin-generate-invite').addEventListener('click', async () => {
   }
   if (status) status.textContent = 'Generating invite…';
   try {
-    const row = await HarborDB.createInvite('Admission invite');
-    await renderInviteLinks();
+    const row = await Promise.race([
+      HarborDB.createInvite('Admin invite'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — run supabase-invites.sql')), 4000)),
+    ]);
+    inviteCloudCache = null;
+    invitePaintedStarter = false;
+    await renderInviteLinks({ force: true });
     await copyInviteLink(row.code);
     if (status) status.textContent = `New code ${row.code} ready — link copied.`;
   } catch (err) {
     if (status) {
-      status.textContent = err.message?.includes('harbor_invites') || err.code === '42P01'
-        ? 'Run harbor/supabase-invites.sql in Supabase first.'
+      status.textContent = /harbor_invites|42P01|timed out|SQL/i.test(String(err.message || err))
+        ? 'Run supabase-invites.sql in Supabase, then try Generate again. Starter copy links still work.'
         : (err.message || 'Could not generate invite.');
     }
   }
@@ -2190,6 +2226,10 @@ $('#open-account').addEventListener('click', () => {
   }
   syncAccountScreen();
   showScreen('account');
+  // One gentle cloud refresh when opening Account (not on every auth event)
+  if (window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin()) {
+    renderInviteLinks({ force: false });
+  }
 });
 $('#account-done').addEventListener('click', async () => {
   if (isLoggedIn() && hasAgreedGuidelines()) {
@@ -2648,16 +2688,21 @@ async function boot() {
     try {
       await HarborAuth.init();
       setAuthMode('signup');
+      let accountSyncTimer = null;
       HarborAuth.onChange(() => {
-        syncAccountScreen();
-        syncHomeInviteUI();
-        const btn = $('#open-account');
-        if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
-        if (!HarborAuth.isLoggedIn()) {
-          const active = document.querySelector('.screen.active');
-          if (active && MEMBER_SCREENS.has(active.id)) showScreen('home');
-        }
-        if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
+        // Debounce — auth can emit several times and was freezing Chrome on phones
+        clearTimeout(accountSyncTimer);
+        accountSyncTimer = setTimeout(() => {
+          syncAccountScreen();
+          syncHomeInviteUI();
+          const btn = $('#open-account');
+          if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
+          if (!HarborAuth.isLoggedIn()) {
+            const active = document.querySelector('.screen.active');
+            if (active && MEMBER_SCREENS.has(active.id)) showScreen('home');
+          }
+          if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
+        }, 120);
       });
       const btn = $('#open-account');
       if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
@@ -2698,7 +2743,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=28');
+      await navigator.serviceWorker.register('./sw.js?v=30');
     } catch (_) {}
   }
 }
