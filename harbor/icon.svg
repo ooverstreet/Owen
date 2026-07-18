@@ -33,11 +33,6 @@
   <!-- single central bulb -->
   <circle cx="64" cy="35" r="3.6" fill="#C9A66B"/>
   <circle cx="64" cy="35" r="1.5" fill="#F2E2B8"/>
-  <!-- tiny person on the gallery railing, looking out to sea -->
-  <g fill="#1F4F58" opacity=".92">
-    <circle cx="78" cy="23.2" r="1.15"/>
-    <path d="M78 24.5v3.2" stroke="#1F4F58" stroke-width="1.35" stroke-linecap="round"/>
-  </g>
-  <path d="M78.7 26.2h2.4" stroke="#1F4F58" stroke-width="1.1" stroke-linecap="round" opacity=".55"/>
   <path d="M18 96c12-5 24-5 36 0s24 5 36 0 20-5 20-5" stroke="#EAF2F4" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
 </svg>
+
