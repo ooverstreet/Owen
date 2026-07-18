@@ -233,7 +233,7 @@
     const code = `shore-${rand}`;
     const row = {
       code,
-      note: String(note || 'Admission invite').slice(0, 120),
+      note: String(note || 'Admin invite').slice(0, 120),
       active: true,
       max_uses: 50,
       created_by: (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null,
