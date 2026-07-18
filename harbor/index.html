@@ -963,8 +963,10 @@ body {
       <div id="invite-result" class="invite-result" aria-live="polite">
         <p class="invite-result-title" id="invite-result-title">Invite ready</p>
         <p class="invite-result-code" id="invite-result-code"></p>
-        <input id="invite-result-link" type="text" readonly onclick="this.select()" aria-label="Invite link">
+        <label class="field-label" for="invite-result-link" style="display:block;margin:0 0 6px;font-size:.82rem;color:var(--ink-soft)">Your invite link (tap &amp; hold → Copy)</label>
+        <input id="invite-result-link" type="url" readonly inputmode="url" autocomplete="off" onclick="this.select()" aria-label="Harbor invite link starting with https">
         <button class="btn btn-secondary btn-small" id="invite-result-copy" type="button">Copy link again</button>
+        <p class="invite-confirm-note" style="margin:10px 0 0;font-size:.8rem;color:var(--ink-soft);line-height:1.35">Use the https:// link above — not Google or old SQL text. One person per code.</p>
       </div>
       <div id="invite-link-list" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div>
       <p id="invite-copy-status" class="invite-status" style="margin-top:8px"></p>
@@ -2896,7 +2898,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=32');
+      await navigator.serviceWorker.register('./sw.js?v=33');
     } catch (_) {}
   }
 }
