@@ -1725,32 +1725,13 @@ function bindInviteCopyButtons(root) {
   });
 }
 
-async function renderInviteLinks() {
-  const root = $('#invite-link-list');
-  if (!root) return;
-  const status = $('#invite-copy-status');
-  const starter = cfgInviteCodes();
+let inviteRenderToken = 0;
 
-  root.innerHTML = '<p class="invite-status">Loading invite codes…</p>';
-  let cloud = [];
-  if (window.HarborDB && HarborDB.listInvites) {
-    try {
-      cloud = await HarborDB.listInvites();
-    } catch (err) {
-      console.warn('Harbor invite list failed', err);
-      if (status) {
-        status.textContent = 'Cloud invites need SQL setup — starter codes still work below.';
-      }
-    }
-  }
-
-  const cloudCodes = cloud.filter((row) => row.active !== false).map((row) => row.code);
-  const codes = Array.from(new Set([...cloudCodes, ...starter]));
+function paintInviteButtons(root, codes, cloud = []) {
   if (!codes.length) {
     root.innerHTML = '<p class="invite-status">No invite codes yet. Tap Generate invite code.</p>';
     return;
   }
-
   root.innerHTML = codes.map((code) => {
     const row = cloud.find((r) => r.code === code);
     const meta = row
@@ -1763,6 +1744,41 @@ async function renderInviteLinks() {
     `;
   }).join('');
   bindInviteCopyButtons(root);
+}
+
+async function renderInviteLinks() {
+  const root = $('#invite-link-list');
+  if (!root) return;
+  const status = $('#invite-copy-status');
+  const starter = cfgInviteCodes();
+  const token = ++inviteRenderToken;
+
+  // Show starter codes immediately so the panel never looks stuck
+  paintInviteButtons(root, starter, []);
+
+  let cloud = [];
+  if (window.HarborDB && HarborDB.listInvites) {
+    try {
+      cloud = await Promise.race([
+        HarborDB.listInvites(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Invite list timed out')), 4000)),
+      ]);
+    } catch (err) {
+      console.warn('Harbor invite list failed', err);
+      if (status && token === inviteRenderToken) {
+        status.textContent = 'Cloud invites need SQL setup — starter codes below still work. Run supabase-invites.sql, then tap Generate.';
+      }
+      return;
+    }
+  }
+
+  if (token !== inviteRenderToken) return;
+  const cloudCodes = cloud.filter((row) => row.active !== false).map((row) => row.code);
+  const codes = Array.from(new Set([...cloudCodes, ...starter]));
+  paintInviteButtons(root, codes, cloud);
+  if (status && cloudCodes.length && /SQL setup|timed out|Loading/i.test(status.textContent || '')) {
+    status.textContent = 'Invite codes ready. Copy a link or generate a new one.';
+  }
 }
 
 function syncHomeInviteUI() {

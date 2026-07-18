@@ -217,10 +217,11 @@
   async function listInvites() {
     const c = authedClient();
     if (!c) throw new Error('Cloud not configured');
-    const { data, error } = await c
+    const query = c
       .from('harbor_invites')
       .select('code,note,active,use_count,max_uses,created_at')
       .order('created_at', { ascending: false });
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   }
