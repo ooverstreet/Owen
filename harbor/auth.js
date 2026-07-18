@@ -4,6 +4,7 @@
   let client = null;
   let session = null;
   let profile = null;
+  let adminPromoteTried = false;
   const listeners = new Set();
 
   function configured() {
@@ -147,17 +148,21 @@
       profile = data;
     }
 
-    // Keep Owen as admin in memory + try to persist if the row is still "member"
+    // Keep Owen as admin in memory. DB promote needs SQL (RLS blocks self-role changes).
     if (profile && ownerEmail(session.user.email || profile.email) && profile.role !== 'admin') {
       profile = { ...profile, role: 'admin' };
-      const stamp = new Date().toISOString();
-      await client
-        .from('harbor_profiles')
-        .update({ role: 'admin', updated_at: stamp })
-        .eq('id', session.user.id)
-        .then(({ error: roleErr }) => {
-          if (roleErr) console.warn('Harbor admin promote failed', roleErr);
-        });
+      if (!adminPromoteTried) {
+        adminPromoteTried = true;
+        // Best-effort only; ignore failures so phones don't stall
+        client
+          .from('harbor_profiles')
+          .update({ role: 'admin', updated_at: new Date().toISOString() })
+          .eq('id', session.user.id)
+          .then(({ error: roleErr }) => {
+            if (roleErr) console.warn('Harbor admin promote failed (run supabase-admin-promote.sql)', roleErr);
+          })
+          .catch(() => {});
+      }
     }
 
     if (profile?.guidelines_accepted_at) {

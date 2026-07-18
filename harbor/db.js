@@ -180,6 +180,9 @@
     return next;
   }
 
+  let authed = null;
+  let authedJwt = '';
+
   function baseClient() {
     if (!configured()) return null;
     return client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
@@ -188,9 +191,14 @@
   function authedClient() {
     if (!configured()) return null;
     const jwt = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
-    return window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
-      global: jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : undefined,
-    });
+    // Reuse one client — recreating Supabase clients on every call can freeze phones
+    if (!authed || authedJwt !== jwt) {
+      authedJwt = jwt;
+      authed = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+        global: jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : undefined,
+      });
+    }
+    return authed;
   }
 
   async function validateInvite(code) {
