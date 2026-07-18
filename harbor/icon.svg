@@ -9,13 +9,28 @@
       <stop offset="0%" stop-color="#6FA8B4"/>
       <stop offset="100%" stop-color="#3E7A86"/>
     </linearGradient>
+    <linearGradient id="tower" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A6270"/>
+      <stop offset="100%" stop-color="#1F4F58"/>
+    </linearGradient>
   </defs>
   <rect width="128" height="128" rx="28" fill="url(#sky)"/>
   <path d="M0 78c18-10 36-10 54 0s36 10 54 0 18-10 20-10v60H0V78z" fill="url(#water)" opacity=".9"/>
-  <path d="M64 28v52" stroke="#1F4F58" stroke-width="4" stroke-linecap="round"/>
-  <!-- Beacon shines up/out into the sky -->
-  <path d="M69 24c12-12 26-12 38-2" stroke="#C9A66B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-  <path d="M70 28c10-6 20-5 30 2" stroke="#C9A66B" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55"/>
-  <circle cx="64" cy="28" r="5" fill="#C9A66B"/>
+  <!-- rock base -->
+  <path d="M44 86c4-6 12-8 20-8s16 2 20 8c-8 3-16 4-20 4s-12-1-20-4z" fill="#1F4F58" opacity=".55"/>
+  <!-- tapered tower -->
+  <path d="M52 86L56 40h16l4 46H52z" fill="url(#tower)"/>
+  <!-- classic mid band -->
+  <path d="M54.8 62h18.4l.6 8H54.2l.6-8z" fill="#EAF2F4" opacity=".35"/>
+  <!-- gallery / lantern room -->
+  <rect x="54" y="28" width="20" height="14" rx="2.5" fill="#1F4F58"/>
+  <path d="M52 28h24" stroke="#C9A66B" stroke-width="2" stroke-linecap="round"/>
+  <!-- dome -->
+  <path d="M54 28c0-8 6-12 10-12s10 4 10 12H54z" fill="#1F4F58"/>
+  <circle cx="64" cy="20" r="2.2" fill="#C9A66B"/>
+  <!-- light shining out into the sky -->
+  <path d="M74 32L108 18" stroke="#C9A66B" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M74 36L110 30" stroke="#C9A66B" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+  <path d="M74 28L104 10" stroke="#C9A66B" stroke-width="1.8" stroke-linecap="round" opacity=".4"/>
   <path d="M18 96c12-5 24-5 36 0s24 5 36 0 20-5 20-5" stroke="#EAF2F4" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
 </svg>
