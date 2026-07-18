@@ -2296,12 +2296,32 @@ $('#admin-generate-invite').addEventListener('click', async () => {
       HarborDB.createInvite('Admin invite'),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — run supabase-invites.sql')), 4000)),
     ]);
+    // Show the real https link immediately (before list refresh)
+    showInviteResult(row.code, { copied: false });
+    const link = inviteLinkFor(row.code);
+    const linkEl = $('#invite-result-link');
+    if (linkEl) {
+      linkEl.value = link;
+      linkEl.focus();
+      linkEl.select();
+    }
+
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(link);
+      copied = /^https:\/\//i.test(link) && link.includes('invite=');
+    } catch (_) {
+      copied = false;
+    }
+    showInviteResult(row.code, { copied });
+
     inviteCloudCache = null;
     invitePaintedStarter = false;
-    await renderInviteLinks({ force: true });
-    const copied = await copyInviteLink(row.code);
-    btn.textContent = copied ? 'Generated ✓' : 'Generated';
-    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1600);
+    // Refresh list in background — don't block confirmation UI
+    renderInviteLinks({ force: true }).catch(() => {});
+
+    btn.textContent = copied ? 'Generated ✓' : 'Generated — copy link below';
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2200);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = prev;
@@ -2313,23 +2333,28 @@ $('#admin-generate-invite').addEventListener('click', async () => {
     }
   }
 });
-$('#invite-result-copy').addEventListener('click', async () => {
+$('#invite-result-copy').addEventListener('click', async (e) => {
+  e.preventDefault();
   const linkEl = $('#invite-result-link');
   const codeEl = $('#invite-result-code');
   const code = (codeEl?.textContent || '').replace(/^Code:\s*/i, '').trim();
-  if (code) {
-    await copyInviteLink(code);
+  const link = (linkEl?.value || '').trim() || (code ? inviteLinkFor(code) : '');
+  if (!link || !/^https:\/\//i.test(link)) {
+    if (code) await copyInviteLink(code, { assumeGesture: true });
     return;
   }
-  if (linkEl?.value) {
-    try {
-      await navigator.clipboard.writeText(linkEl.value);
-      linkEl.select();
-    } catch (_) {
-      linkEl.focus();
-      linkEl.select();
-    }
+  let copied = false;
+  try {
+    await navigator.clipboard.writeText(link);
+    copied = true;
+  } catch (_) {
+    copied = false;
   }
+  if (linkEl) {
+    linkEl.focus();
+    linkEl.select();
+  }
+  if (code) showInviteResult(code, { copied });
 });
 $('#home-invite-code').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -2871,7 +2896,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=31');
+      await navigator.serviceWorker.register('./sw.js?v=32');
     } catch (_) {}
   }
 }
