@@ -292,14 +292,34 @@ body {
   .sky-cloud.c2, .hero-cloud.h2 { left: 58%; opacity: .28; }
   .sky-cloud.c3 { left: 34%; opacity: .22; }
 }
-.hero-copy { position: relative; z-index: 1; margin-top: auto; padding-top: min(44vh, 340px); }
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  padding-top: 4px;
+}
 .brand {
   font-family: var(--font-display);
-  font-size: clamp(3.4rem, 12vw, 5rem);
+  font-size: clamp(3.2rem, 11vw, 5rem);
   font-weight: 650; letter-spacing: -0.04em; color: var(--water-deep);
-  line-height: 0.95; margin-bottom: 14px;
+  line-height: 0.95; margin-bottom: 12px;
 }
-.lede { font-size: 1.125rem; color: var(--ink-soft); max-width: 30ch; margin-bottom: 28px; }
+.lede { font-size: 1.1rem; color: var(--ink-soft); max-width: 30ch; margin-bottom: 22px; }
+
+/* Wider phones / desktop: more sky room, still no empty middle gap */
+@media (min-width: 720px) {
+  #home { justify-content: flex-end; }
+  .hero-visual {
+    position: absolute;
+    inset: 6% 0 auto;
+    height: min(40vh, 300px);
+    margin-top: 0;
+  }
+  .hero-copy {
+    margin-top: auto;
+    padding-top: min(28vh, 220px);
+  }
+}
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .privacy-note { margin-top: 18px; font-size: .9rem; color: var(--ink-faint); }
 
@@ -2301,7 +2321,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=22');
+      await navigator.serviceWorker.register('./sw.js?v=23');
     } catch (_) {}
   }
 }
