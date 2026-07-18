@@ -93,11 +93,12 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes boatDrift {
-  0%, 8% { transform: translate3d(-18vw, 0, 0); opacity: 0; }
+  /* Stay low in the water — never cross the island/mark */
+  0%, 8% { transform: translate3d(-18vw, 10px, 0); opacity: 0; }
   14% { opacity: .38; }
-  48% { transform: translate3d(42vw, -3px, 0); opacity: .42; }
-  78% { opacity: .34; }
-  88%, 100% { transform: translate3d(118vw, 2px, 0); opacity: 0; }
+  48% { transform: translate3d(42vw, 14px, 0); opacity: .4; }
+  78% { opacity: .32; }
+  88%, 100% { transform: translate3d(118vw, 12px, 0); opacity: 0; }
 }
 @keyframes boatBob {
   0%, 100% { translate: 0 0; }
@@ -233,9 +234,10 @@ body {
 .ambient-boat {
   position: absolute;
   left: 0;
-  bottom: 40%;
-  width: 54px;
-  height: 36px;
+  /* Sit out in the water below the island, not through it */
+  bottom: 22%;
+  width: 48px;
+  height: 32px;
   z-index: 1;
   animation: boatDrift 48s linear infinite;
 }
@@ -3035,7 +3037,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=46');
+      await navigator.serviceWorker.register('./sw.js?v=47');
     } catch (_) {}
   }
 }
