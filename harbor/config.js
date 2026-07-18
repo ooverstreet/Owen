@@ -11,4 +11,7 @@ window.HARBOR_CONFIG = {
   // Used for auth email confirmation / password-reset redirects
   siteUrl: 'https://ooverstreet.github.io/Owen/harbor/',
   angelFunction: 'harbor-angel',
+  // Early shore: new accounts need a valid invite code (sign-in still works)
+  earlyAccess: true,
+  inviteCodes: ['first-light', 'quiet-shore', 'harbor-friend'],
 };
