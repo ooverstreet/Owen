@@ -499,6 +499,14 @@ body {
   background: rgba(62,122,134,.08);
   border: 1px solid rgba(62,122,134,.18);
 }
+.invite-status.err {
+  color: #6b3a2e;
+  font-weight: 560;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(176, 92, 64, 0.1);
+  border: 1px solid rgba(176, 92, 64, 0.28);
+}
 .invite-result {
   display: none;
   margin-top: 12px;
@@ -2358,46 +2366,50 @@ $('#admin-generate-invite').addEventListener('click', async () => {
   }
 
   try {
-    // Save FIRST — never show a code until it’s redeemable in Supabase
+    // Save FIRST — never show a code until Supabase accepts it
     const row = await Promise.race([
       HarborDB.createInvite('Admin invite'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — re-run supabase-invites.sql')), 6000)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Generate timed out — check connection and try again')), 8000)),
     ]);
     const code = row?.code;
     if (!code) throw new Error('Invite saved but no code returned');
 
-    // Verify lookup works for friends (anon validate) before offering the link
-    let redeemable = false;
-    try {
-      redeemable = await HarborDB.validateInvite(code);
-    } catch (_) {
-      redeemable = false;
-    }
-    if (!redeemable) {
-      throw new Error('Invite saved but not readable yet — re-run supabase-invites.sql (select policy), then try again.');
-    }
-
     inviteCloudCache = null;
     invitePaintedStarter = false;
-    renderInviteLinks({ force: true }).catch(() => {});
-
-    // After await, clipboard may fail on Android — show link + Share button (new tap)
+    // Don’t let list refresh overwrite the success status
+    const savedStatus = `Saved: ${code}. Tap Share invite…`;
     showInviteResult(code, { copied: false });
     if (status) {
       status.classList.add('ok');
-      status.textContent = `Saved & verified: ${code}. Tap Share invite… (don’t paste old SQL).`;
+      status.textContent = savedStatus;
     }
+    renderInviteLinks({ force: true })
+      .catch(() => {})
+      .finally(() => {
+        if (status && status.textContent !== savedStatus) {
+          status.classList.add('ok');
+          status.textContent = savedStatus;
+        }
+      });
+
     btn.textContent = 'Generated — tap Share invite…';
-    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2600);
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2800);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = prev;
     if (resultBox) resultBox.classList.remove('show');
+    const raw = String(err?.message || err || '');
     if (status) {
       status.classList.remove('ok');
-      status.textContent = /harbor_invites|42P01|timed out|SQL|row-level|policy|42501|Admin only|function|rpc|readable/i.test(String(err.message || err))
-        ? 'Could not save invite to Harbor. Re-run supabase-invites.sql in Supabase, then Generate again. Meanwhile Share first-light below.'
-        : (err.message || 'Could not save invite — use a starter Share link below.');
+      if (/Not signed in|Sign in again/i.test(raw)) {
+        status.textContent = 'Session expired — sign out, sign in, then tap Generate again.';
+      } else if (/Admin only/i.test(raw)) {
+        status.textContent = 'Admin role missing in Supabase. Run supabase-admin-promote.sql, then try Generate again.';
+      } else if (/harbor_invites|42P01|function|rpc|PGRST|does not exist/i.test(raw)) {
+        status.textContent = 'Invite function missing — re-run supabase-invites.sql, then Generate again. Starter Share links below still work.';
+      } else {
+        status.textContent = raw || 'Could not save invite — use Share on first-light below.';
+      }
     }
   }
 });
@@ -2963,7 +2975,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=35');
+      await navigator.serviceWorker.register('./sw.js?v=36');
     } catch (_) {}
   }
 }

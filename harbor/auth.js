@@ -255,9 +255,14 @@
     return session?.access_token || '';
   }
 
+  function getClient() {
+    return client;
+  }
+
   window.HarborAuth = {
     init,
     getState,
+    getClient,
     signUp,
     signIn,
     signOut,

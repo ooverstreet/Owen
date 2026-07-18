@@ -190,12 +190,20 @@
 
   function authedClient() {
     if (!configured()) return null;
+    // Prefer HarborAuth’s client — it holds the real session. A second client with only
+    // an Authorization header gets overwritten by the anon/publishable key, so RPC
+    // sees auth.uid() = null (“Not signed in”) and Generate just flashes.
+    if (window.HarborAuth && typeof HarborAuth.getClient === 'function') {
+      const shared = HarborAuth.getClient();
+      if (shared) return shared;
+    }
+    // Fallback only if Auth isn’t ready yet
     const jwt = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
-    // Reuse one client — recreating Supabase clients on every call can freeze phones
     if (!authed || authedJwt !== jwt) {
       authedJwt = jwt;
       authed = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
         global: jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : undefined,
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       });
     }
     return authed;
@@ -243,6 +251,9 @@
   async function createInvite(note = '', code = '') {
     const c = authedClient();
     if (!c) throw new Error('Cloud not configured');
+    const token = (window.HarborAuth && HarborAuth.accessToken && HarborAuth.accessToken()) || '';
+    if (!token) throw new Error('Sign in again, then tap Generate invite code.');
+
     const normalized = String(code || newInviteCode()).trim().toLowerCase();
     const payload = {
       p_code: normalized,
@@ -271,7 +282,10 @@
       .maybeSingle();
     if (error) {
       const rpcMsg = rpc.error?.message || '';
-      throw new Error(error.message || rpcMsg || 'Could not create invite');
+      throw new Error(rpcMsg || error.message || 'Could not create invite');
+    }
+    if (!data && rpc.error) {
+      throw new Error(rpc.error.message || 'Could not create invite');
     }
     return data || row;
   }
