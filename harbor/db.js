@@ -29,6 +29,19 @@
     return true;
   }
 
+  function currentUserId() {
+    try {
+      return (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function writeClient() {
+    // Prefer signed-in client so user_id stamps / edit RPCs see auth.uid()
+    return authedClient() || client;
+  }
+
   function mapPost(row, replies = []) {
     return {
       id: row.id,
@@ -38,11 +51,13 @@
       text: row.body,
       tags: row.tags || [],
       createdAt: new Date(row.created_at).getTime(),
+      editedAt: row.edited_at ? new Date(row.edited_at).getTime() : null,
       angelLine: row.angel_line,
       angelNote: row.angel_note,
       feltCount: row.felt_count || 0,
       private: !!row.is_private,
       deviceId: row.device_id || null,
+      userId: row.user_id || null,
       replies,
       cloud: true,
     };
@@ -55,6 +70,9 @@
       authorName: row.author_name,
       text: row.body,
       createdAt: new Date(row.created_at).getTime(),
+      editedAt: row.edited_at ? new Date(row.edited_at).getTime() : null,
+      deviceId: row.device_id || null,
+      userId: row.user_id || null,
       cloud: true,
     };
   }
@@ -89,6 +107,7 @@
 
   async function createPost(post) {
     if (!ready || post.private) return null;
+    const c = writeClient();
     const row = {
       id: post.id,
       featured: !!post.featured,
@@ -101,9 +120,14 @@
       felt_count: post.feltCount || 0,
       is_private: false,
       device_id: post.deviceId || null,
+      user_id: post.userId || currentUserId(),
       created_at: new Date(post.createdAt || Date.now()).toISOString(),
     };
-    const { error } = await client.from('harbor_posts').insert(row);
+    let { error } = await c.from('harbor_posts').insert(row);
+    if (error && /user_id|edited_at|PGRST/i.test(error.message || '')) {
+      delete row.user_id;
+      ({ error } = await c.from('harbor_posts').insert(row));
+    }
     if (error) throw error;
     return true;
   }
@@ -124,6 +148,7 @@
 
   async function addReply(postId, reply) {
     if (!ready) return null;
+    const c = writeClient();
     const row = {
       id: reply.id,
       post_id: postId,
@@ -131,11 +156,46 @@
       author_name: reply.authorName,
       body: reply.text,
       device_id: reply.deviceId || null,
+      user_id: reply.userId || currentUserId(),
       created_at: new Date(reply.createdAt || Date.now()).toISOString(),
     };
-    const { error } = await client.from('harbor_replies').insert(row);
+    let { error } = await c.from('harbor_replies').insert(row);
+    if (error && /user_id|edited_at|PGRST/i.test(error.message || '')) {
+      delete row.user_id;
+      ({ error } = await c.from('harbor_replies').insert(row));
+    }
     if (error) throw error;
     return true;
+  }
+
+  async function updatePost(postId, text, { deviceId = null } = {}) {
+    if (!ready) return null;
+    const c = writeClient();
+    const cleaned = String(text || '').trim();
+    if (!cleaned) throw new Error('Message can’t be empty');
+    const rpc = await c.rpc('harbor_edit_post', {
+      p_id: postId,
+      p_body: cleaned,
+      p_device_id: deviceId || null,
+    });
+    if (rpc.error) throw new Error(rpc.error.message || 'Could not edit post');
+    const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
+    return row ? mapPost(row, []) : { id: postId, text: cleaned, editedAt: Date.now() };
+  }
+
+  async function updateReply(replyId, text, { deviceId = null } = {}) {
+    if (!ready) return null;
+    const c = writeClient();
+    const cleaned = String(text || '').trim();
+    if (!cleaned) throw new Error('Message can’t be empty');
+    const rpc = await c.rpc('harbor_edit_reply', {
+      p_id: replyId,
+      p_body: cleaned,
+      p_device_id: deviceId || null,
+    });
+    if (rpc.error) throw new Error(rpc.error.message || 'Could not edit reply');
+    const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
+    return row ? mapReply(row) : { id: replyId, text: cleaned, editedAt: Date.now() };
   }
 
   async function isBanned({ deviceId, username }) {
@@ -299,6 +359,8 @@
     createPost,
     getPost,
     addReply,
+    updatePost,
+    updateReply,
     incrementFelt,
     isBanned,
     modAction,
