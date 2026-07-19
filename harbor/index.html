@@ -1115,6 +1115,7 @@ const STORAGE_WHISPERS = 'harbor.whispers.v1';
 const STORAGE_WELCOME = 'harbor.welcome.v1';
 const STORAGE_INVITE = 'harbor.invite.v1';
 const STORAGE_ROOM = 'harbor.room.v1';
+const STORAGE_MY_AUTHORS = 'harbor.myAuthors.v1';
 
 /* Positive, non-political. Mostly secular; occasional gentle scripture. */
 const SHORE_WHISPERS = [
@@ -1779,10 +1780,24 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function rememberAuthorName(name) {
+  const cleaned = String(name || '').trim().toLowerCase();
+  if (!cleaned || cleaned === 'anonymous' || cleaned === 'harbor') return;
+  const list = loadJSON(STORAGE_MY_AUTHORS, []);
+  if (!list.includes(cleaned)) {
+    list.push(cleaned);
+    saveJSON(STORAGE_MY_AUTHORS, list.slice(-20));
+  }
+}
+
 function myAuthorNames() {
-  const names = new Set();
+  const names = new Set(loadJSON(STORAGE_MY_AUTHORS, []));
   const identity = loadIdentity();
   if (identity.username) names.add(String(identity.username).trim().toLowerCase());
+  try {
+    const pref = ($('#pref-username')?.value || '').trim();
+    if (pref) names.add(pref.toLowerCase());
+  } catch (_) {}
   try {
     const auth = window.HarborAuth ? HarborAuth.getState() : null;
     const profileName = auth?.profile?.display_name || '';
@@ -1796,6 +1811,27 @@ function myAuthorNames() {
   return names;
 }
 
+function syncMyAuthorsFromAuth() {
+  if (!isLoggedIn()) return;
+  try {
+    const auth = window.HarborAuth ? HarborAuth.getState() : null;
+    const email = String(auth?.user?.email || auth?.profile?.email || '').trim().toLowerCase();
+    const profileName = (auth?.profile?.display_name || '').trim();
+    if (profileName) rememberAuthorName(profileName);
+    const identity = loadIdentity();
+    if (profileName && !identity.username) {
+      saveIdentity({ mode: 'named', username: profileName.slice(0, 24) });
+    } else if (identity.username) {
+      rememberAuthorName(identity.username);
+    }
+    // Owner early-shore names used before user_id stamping
+    if (email === 'owenstreet7@gmail.com') {
+      rememberAuthorName('owen1');
+      rememberAuthorName('owen');
+    }
+  } catch (_) {}
+}
+
 function isOwnMessage(msg) {
   if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
   if (!isLoggedIn()) return false;
@@ -1803,10 +1839,9 @@ function isOwnMessage(msg) {
   if (uid && msg.userId && msg.userId === uid) return true;
   const did = window.HarborMod ? HarborMod.deviceId() : '';
   if (did && msg.deviceId && msg.deviceId === did) return true;
-  // Older cloud posts may lack user_id/device_id — match named author on this account
-  if (msg.authorMode === 'named' && msg.authorName) {
-    if (myAuthorNames().has(String(msg.authorName).trim().toLowerCase())) return true;
-  }
+  // Named posts: match usernames this account has used (survives cache refresh)
+  const author = String(msg.authorName || displayName(msg) || '').trim().toLowerCase();
+  if (author && author !== 'anonymous' && myAuthorNames().has(author)) return true;
   return false;
 }
 
@@ -2436,6 +2471,7 @@ async function persistPost({ text, tags, privatePost }) {
 
   const angel = await askAngel(text);
   const userId = (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null;
+  if (author.authorMode === 'named') rememberAuthorName(author.authorName);
   const post = {
     id: uid(),
     featured: false,
@@ -2540,6 +2576,7 @@ async function addReply() {
     return;
   }
   const author = currentAuthor();
+  if (author.authorMode === 'named') rememberAuthorName(author.authorName);
   const reply = {
     id: uid(),
     ...author,
@@ -2848,6 +2885,7 @@ $('#save-identity').addEventListener('click', async () => {
     return;
   }
   saveIdentity({ mode: named ? 'named' : 'anonymous', username: named ? username : username });
+  if (named && username) rememberAuthorName(username);
   saveWhisperPrefs({ includeScripture: $('#pref-scripture').checked });
   showNextWhisper();
   if (isLoggedIn()) {
@@ -3081,7 +3119,13 @@ async function resetLocalHarbor({ reload = true, keepGuidelines = false } = {}) 
     if (window.HarborAuth && HarborAuth.signOut) await HarborAuth.signOut();
   } catch (_) {}
 
-  const keep = new Set(keepGuidelines ? ['harbor.guidelines.v1'] : []);
+  // Keep identity / device / author names so Edit still works after a cache refresh
+  const keep = new Set([
+    'harbor.deviceId.v1',
+    'harbor.identity.v1',
+    STORAGE_MY_AUTHORS,
+    ...(keepGuidelines ? ['harbor.guidelines.v1'] : []),
+  ]);
 
   try {
     Object.keys(localStorage)
@@ -3252,6 +3296,7 @@ async function boot() {
         // Debounce — auth can emit several times and was freezing Chrome on phones
         clearTimeout(accountSyncTimer);
         accountSyncTimer = setTimeout(() => {
+          syncMyAuthorsFromAuth();
           syncAccountScreen();
           syncHomeInviteUI();
           const btn = $('#open-account');
@@ -3263,6 +3308,7 @@ async function boot() {
           if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
         }, 120);
       });
+      syncMyAuthorsFromAuth();
       const btn = $('#open-account');
       if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
       if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();

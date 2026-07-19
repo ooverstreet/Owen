@@ -146,3 +146,29 @@ $$;
 
 grant execute on function public.harbor_edit_post(text, text, text) to authenticated;
 grant execute on function public.harbor_edit_reply(text, text, text) to authenticated;
+
+-- Backfill ownership for early posts (Owen’s account + matching display names)
+update public.harbor_posts p
+set user_id = u.id
+from auth.users u
+where lower(u.email) = 'owenstreet7@gmail.com'
+  and p.user_id is null
+  and p.id <> 'harbor-first-light'
+  and lower(p.author_name) in (
+    'owen1',
+    'owen',
+    lower(coalesce((select display_name from public.harbor_profiles where id = u.id), '')),
+    lower(split_part(u.email, '@', 1))
+  );
+
+update public.harbor_replies r
+set user_id = u.id
+from auth.users u
+where lower(u.email) = 'owenstreet7@gmail.com'
+  and r.user_id is null
+  and lower(r.author_name) in (
+    'owen1',
+    'owen',
+    lower(coalesce((select display_name from public.harbor_profiles where id = u.id), '')),
+    lower(split_part(u.email, '@', 1))
+  );
