@@ -170,6 +170,7 @@
 
   async function updatePost(postId, text, { deviceId = null } = {}) {
     if (!ready) return null;
+    if (!currentUserId()) throw new Error('Sign in to edit your message.');
     const c = writeClient();
     const cleaned = String(text || '').trim();
     if (!cleaned) throw new Error('Message can’t be empty');
@@ -191,6 +192,7 @@
 
   async function updateReply(replyId, text, { deviceId = null } = {}) {
     if (!ready) return null;
+    if (!currentUserId()) throw new Error('Sign in to edit your message.');
     const c = writeClient();
     const cleaned = String(text || '').trim();
     if (!cleaned) throw new Error('Message can’t be empty');
