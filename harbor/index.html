@@ -690,8 +690,15 @@ body {
   color: var(--ink-faint);
   margin: 6px 0 0;
 }
-.edit-msg-btn {
+.msg-actions {
   margin-left: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.edit-msg-btn,
+.delete-msg-btn {
   padding: 0;
   border: 0;
   background: none;
@@ -701,6 +708,9 @@ body {
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+.delete-msg-btn {
+  color: #8a4a3a;
 }
 .edit-composer {
   display: flex;
@@ -983,7 +993,7 @@ body {
         <button class="felt-btn" id="felt-btn" type="button">I’ve felt this too</button>
         <button class="btn btn-secondary btn-small" id="edit-post-btn" type="button" hidden>Edit</button>
         <button class="btn btn-secondary btn-small" id="report-btn" type="button">Report</button>
-        <button class="btn btn-secondary btn-small" id="admin-hide-btn" type="button" hidden>Remove (admin)</button>
+        <button class="btn btn-secondary btn-small" id="admin-hide-btn" type="button" hidden>Delete</button>
         <button class="btn btn-secondary btn-small" id="admin-ban-btn" type="button" hidden>Ban author (admin)</button>
       </div>
       <p class="felt-thanks" id="felt-thanks" aria-live="polite"></p>
@@ -1835,7 +1845,7 @@ function syncMyAuthorsFromAuth() {
   } catch (_) {}
 }
 
-/** Only the signed-in account may edit — UI gate; server RPC enforces the same. */
+/** Signed-in author may edit their own — UI gate; server RPC enforces the same. */
 function isOwnMessage(msg) {
   if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
   if (!isLoggedIn()) return false;
@@ -1860,10 +1870,26 @@ function isOwnMessage(msg) {
   return false;
 }
 
+function isHarborAdmin() {
+  return !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
+}
+
+/** Authors edit their own; admins can edit anyone’s (except First light for non-admins). */
+function canEditMessage(msg) {
+  if (!msg) return false;
+  if (msg.id === FEATURED_POST.id || msg.featured) return isHarborAdmin();
+  return isOwnMessage(msg) || isHarborAdmin();
+}
+
+function canDeleteMessage(msg) {
+  if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
+  return isHarborAdmin();
+}
+
 function postCardHtml(post, full = false) {
   const replies = post.replies || [];
   const felt = post.feltCount || 0;
-  const canEdit = full && isOwnMessage(post);
+  const canEdit = full && canEditMessage(post);
   const edited = post.editedAt
     ? `<p class="msg-edited">Edited</p>`
     : '';
@@ -1872,7 +1898,7 @@ function postCardHtml(post, full = false) {
       ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
       <span class="author">${escapeHtml(displayName(post))}</span>
       <time>${escapeHtml(formatWhen(post.createdAt))}</time>
-      ${canEdit ? '<button type="button" class="edit-msg-btn" data-edit-post>Edit</button>' : ''}
+      ${canEdit ? '<span class="msg-actions"><button type="button" class="edit-msg-btn" data-edit-post>Edit</button></span>' : ''}
     </div>
     <div class="post-body" data-post-body>${escapeHtml(post.text)}</div>
     ${edited}
@@ -1963,11 +1989,11 @@ async function openThread(id) {
     thanks.classList.remove('show');
   }
   updateReplyAsLabel();
-  const ownPost = isOwnMessage(post);
+  const allowEdit = canEditMessage(post);
   const editPostBtn = $('#edit-post-btn');
   if (editPostBtn) {
-    editPostBtn.hidden = !ownPost;
-    editPostBtn.onclick = ownPost
+    editPostBtn.hidden = !allowEdit;
+    editPostBtn.onclick = allowEdit
       ? (e) => {
           e.preventDefault();
           beginEditPost(card, post);
@@ -1975,8 +2001,8 @@ async function openThread(id) {
         }
       : null;
   }
-  const adminOn = !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
-  $('#admin-hide-btn').hidden = !adminOn || post.id === FEATURED_POST.id;
+  const adminOn = isHarborAdmin();
+  $('#admin-hide-btn').hidden = !canDeleteMessage(post);
   $('#admin-ban-btn').hidden = !adminOn || post.id === FEATURED_POST.id || post.authorName === 'Harbor';
   showScreen('thread');
 }
@@ -1993,13 +2019,17 @@ function renderReplies(post) {
       <div class="post-meta">
         <span class="author">${escapeHtml(displayName(r))}</span>
         <time>${escapeHtml(formatWhen(r.createdAt))}</time>
-        ${isOwnMessage(r) ? '<button type="button" class="edit-msg-btn" data-edit-reply>Edit</button>' : ''}
+        ${(canEditMessage(r) || canDeleteMessage(r)) ? `<span class="msg-actions">
+          ${canEditMessage(r) ? '<button type="button" class="edit-msg-btn" data-edit-reply>Edit</button>' : ''}
+          ${canDeleteMessage(r) ? '<button type="button" class="delete-msg-btn" data-delete-reply>Delete</button>' : ''}
+        </span>` : ''}
       </div>
       <div class="post-body" data-reply-body>${escapeHtml(r.text)}</div>
       ${r.editedAt ? '<p class="msg-edited">Edited</p>' : ''}
     </div>
   `).join('');
   bindReplyEdits(root, post);
+  bindReplyDeletes(root, post);
 }
 
 function editComposerHtml(text, maxLen) {
@@ -2032,6 +2062,33 @@ function bindReplyEdits(root, post) {
       const id = wrap?.getAttribute('data-reply-id');
       const reply = (post.replies || []).find((r) => r.id === id);
       if (wrap && reply) beginEditReply(wrap, post, reply);
+    });
+  });
+}
+
+function bindReplyDeletes(root, post) {
+  root.querySelectorAll('[data-delete-reply]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!isHarborAdmin()) return;
+      const wrap = btn.closest('[data-reply-id]');
+      const replyId = wrap?.getAttribute('data-reply-id');
+      if (!replyId) return;
+      if (!confirm('Delete this reply for everyone?')) return;
+      const reason = prompt('Reason for deletion (saved in moderation history):', 'Removed by admin') || 'Removed by admin';
+      btn.disabled = true;
+      try {
+        if (window.HarborDB && HarborDB.hideReply) {
+          await HarborDB.hideReply(replyId, reason);
+        } else {
+          await HarborDB.modAction({ action: 'hide_reply', replyId, reason });
+        }
+        await refreshCloudPosts();
+        await openThread(post.id);
+      } catch (err) {
+        alert(err.message || 'Could not delete reply.');
+        btn.disabled = false;
+      }
     });
   });
 }
@@ -2136,7 +2193,7 @@ async function saveEditedPost(postId, text) {
   const posts = loadPosts();
   const idx = posts.findIndex((p) => p.id === postId);
   if (idx < 0) throw new Error('Could not find that message to edit.');
-  if (!isOwnMessage(posts[idx])) throw new Error('You can only edit your own messages.');
+  if (!canEditMessage(posts[idx])) throw new Error('You can only edit your own messages.');
   posts[idx] = { ...posts[idx], text, editedAt: Date.now() };
   savePosts(posts);
 }
@@ -2162,7 +2219,7 @@ async function saveEditedReply(postId, replyId, text) {
     const replies = loadJSON(key, []);
     const idx = replies.findIndex((r) => r.id === replyId);
     if (idx < 0) throw new Error('Could not find that reply to edit.');
-    if (!isOwnMessage(replies[idx])) throw new Error('You can only edit your own messages.');
+    if (!canEditMessage(replies[idx])) throw new Error('You can only edit your own messages.');
     replies[idx] = { ...replies[idx], text, editedAt: Date.now() };
     saveJSON(key, replies);
     return;
@@ -2174,7 +2231,7 @@ async function saveEditedReply(postId, replyId, text) {
   const replies = Array.isArray(posts[pIdx].replies) ? posts[pIdx].replies : [];
   const rIdx = replies.findIndex((r) => r.id === replyId);
   if (rIdx < 0) throw new Error('Could not find that reply to edit.');
-  if (!isOwnMessage(replies[rIdx])) throw new Error('You can only edit your own messages.');
+  if (!canEditMessage(replies[rIdx])) throw new Error('You can only edit your own messages.');
   replies[rIdx] = { ...replies[rIdx], text, editedAt: Date.now() };
   posts[pIdx].replies = replies;
   savePosts(posts);
@@ -3004,17 +3061,22 @@ $('#report-btn').addEventListener('click', async () => {
 });
 
 $('#admin-hide-btn').addEventListener('click', async () => {
-  if (!currentThreadId || !(window.HarborAuth && HarborAuth.isAdmin())) return;
-  const reason = prompt('Reason for removal (saved in moderation history):', 'Guidelines violation');
-  if (!reason) return;
+  if (!currentThreadId || !isHarborAdmin()) return;
+  if (!confirm('Delete this post for everyone?')) return;
+  const reason = prompt('Reason for deletion (saved in moderation history):', 'Removed by admin');
+  if (reason === null) return;
   try {
-    await HarborDB.modAction({ action: 'hide_post', postId: currentThreadId, reason });
+    if (window.HarborDB && HarborDB.hidePost) {
+      await HarborDB.hidePost(currentThreadId, reason || 'Removed by admin');
+    } else {
+      await HarborDB.modAction({ action: 'hide_post', postId: currentThreadId, reason: reason || 'Removed by admin' });
+    }
     await refreshCloudPosts();
-    alert('Post removed and archived in moderation history.');
+    alert('Post deleted.');
     showScreen('feed');
     await renderFeed();
   } catch (err) {
-    alert(err.message || 'Admin remove failed.');
+    alert(err.message || 'Could not delete post.');
   }
 });
 

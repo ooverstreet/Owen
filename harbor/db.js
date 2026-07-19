@@ -87,7 +87,8 @@
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    const posts = data || [];
+    // Prefer RLS (is_hidden = false); also filter client-side if column is present.
+    const posts = (data || []).filter((p) => !p.is_hidden);
     const ids = posts.map((p) => p.id);
     let repliesByPost = {};
     if (ids.length) {
@@ -98,6 +99,7 @@
         .order('created_at', { ascending: true });
       if (rErr) throw rErr;
       (replies || []).forEach((r) => {
+        if (r.is_hidden) return;
         if (!repliesByPost[r.post_id]) repliesByPost[r.post_id] = [];
         repliesByPost[r.post_id].push(mapReply(r));
       });
@@ -168,9 +170,16 @@
     return true;
   }
 
+  function editSetupError(msg) {
+    if (/function|does not exist|PGRST202/i.test(msg || '')) {
+      return 'Edit/delete isn’t set up in Supabase yet — run supabase-edit.sql, then try again.';
+    }
+    return msg || 'Could not complete that action';
+  }
+
   async function updatePost(postId, text, { deviceId = null } = {}) {
     if (!ready) return null;
-    if (!currentUserId()) throw new Error('Sign in to edit your message.');
+    if (!currentUserId()) throw new Error('Sign in to edit.');
     const c = writeClient();
     const cleaned = String(text || '').trim();
     if (!cleaned) throw new Error('Message can’t be empty');
@@ -179,20 +188,14 @@
       p_body: cleaned,
       p_device_id: deviceId || null,
     });
-    if (rpc.error) {
-      const msg = rpc.error.message || '';
-      if (/function|does not exist|PGRST202/i.test(msg)) {
-        throw new Error('Edit isn’t set up in Supabase yet — run supabase-edit.sql, then try again.');
-      }
-      throw new Error(msg || 'Could not edit post');
-    }
+    if (rpc.error) throw new Error(editSetupError(rpc.error.message));
     const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
     return row ? mapPost(row, []) : { id: postId, text: cleaned, editedAt: Date.now() };
   }
 
   async function updateReply(replyId, text, { deviceId = null } = {}) {
     if (!ready) return null;
-    if (!currentUserId()) throw new Error('Sign in to edit your message.');
+    if (!currentUserId()) throw new Error('Sign in to edit.');
     const c = writeClient();
     const cleaned = String(text || '').trim();
     if (!cleaned) throw new Error('Message can’t be empty');
@@ -201,15 +204,38 @@
       p_body: cleaned,
       p_device_id: deviceId || null,
     });
-    if (rpc.error) {
-      const msg = rpc.error.message || '';
-      if (/function|does not exist|PGRST202/i.test(msg)) {
-        throw new Error('Edit isn’t set up in Supabase yet — run supabase-edit.sql, then try again.');
-      }
-      throw new Error(msg || 'Could not edit reply');
-    }
+    if (rpc.error) throw new Error(editSetupError(rpc.error.message));
     const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
     return row ? mapReply(row) : { id: replyId, text: cleaned, editedAt: Date.now() };
+  }
+
+  async function hidePost(postId, reason = 'Removed by admin') {
+    if (!ready) return null;
+    if (!currentUserId()) throw new Error('Sign in as admin to delete.');
+    const c = writeClient();
+    const rpc = await c.rpc('harbor_admin_hide_post', {
+      p_id: postId,
+      p_reason: String(reason || 'Removed by admin').slice(0, 500),
+    });
+    if (!rpc.error) return true;
+    // Fallback to edge moderation function if RPC missing
+    if (/function|does not exist|PGRST202/i.test(rpc.error.message || '')) {
+      await modAction({ action: 'hide_post', postId, reason });
+      return true;
+    }
+    throw new Error(editSetupError(rpc.error.message));
+  }
+
+  async function hideReply(replyId, reason = 'Removed by admin') {
+    if (!ready) return null;
+    if (!currentUserId()) throw new Error('Sign in as admin to delete.');
+    const c = writeClient();
+    const rpc = await c.rpc('harbor_admin_hide_reply', {
+      p_id: replyId,
+      p_reason: String(reason || 'Removed by admin').slice(0, 500),
+    });
+    if (rpc.error) throw new Error(editSetupError(rpc.error.message));
+    return true;
   }
 
   async function isBanned({ deviceId, username }) {
@@ -375,6 +401,8 @@
     addReply,
     updatePost,
     updateReply,
+    hidePost,
+    hideReply,
     incrementFelt,
     isBanned,
     modAction,
