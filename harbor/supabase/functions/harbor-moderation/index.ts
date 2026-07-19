@@ -75,22 +75,24 @@ Deno.serve(async (req) => {
       return cors({ ok: true, id });
     }
 
-    // Language strike notify — allowed when alert row exists (created by SQL RPC)
-    if (action === "notify_strike") {
+    // Language strike notify — Harbor Watch (AI) reviews the flag, then optional email
+    if (action === "notify_strike" || action === "watch_review") {
       const alertId = String(body.alertId || "");
+      let alertRow: Record<string, unknown> | null = null;
       if (alertId) {
-        const { data: alertRow } = await supabase
+        const { data } = await supabase
           .from("harbor_mod_alerts")
-          .select("id,kind,email,display_name,match_text,sample_text,user_id")
+          .select("id,kind,email,display_name,match_text,sample_text,user_id,ai_review")
           .eq("id", alertId)
           .maybeSingle();
-        if (!alertRow) return cors({ error: "Unknown alert" }, 404);
-        body.kind = alertRow.kind;
-        body.email = alertRow.email;
-        body.displayName = alertRow.display_name;
-        body.match = alertRow.match_text;
-        body.sample = alertRow.sample_text;
-        body.userId = alertRow.user_id;
+        if (!data) return cors({ error: "Unknown alert" }, 404);
+        alertRow = data;
+        body.kind = data.kind;
+        body.email = data.email;
+        body.displayName = data.display_name;
+        body.match = data.match_text;
+        body.sample = data.sample_text;
+        body.userId = data.user_id;
       } else if (!(await callerIsAdmin())) {
         return cors({ error: "Unauthorized" }, 401);
       }
@@ -100,6 +102,26 @@ Deno.serve(async (req) => {
       const match = String(body.match || "blocked language").slice(0, 120);
       const sample = String(body.sample || "").slice(0, 400);
       const strikes = Number(body.strikes || (kind === "ban" ? 2 : 1));
+
+      // Harbor Watch — separate AI moderator (not Angel) reviews every flag
+      let watch = null as null | { review: string; recommendation: string; source: string };
+      const needsWatch = action === "watch_review" || !alertRow?.ai_review;
+      if (needsWatch) {
+        watch = await harborWatchReview({ kind, who, match, sample, strikes });
+        if (alertId && watch) {
+          await supabase.from("harbor_mod_alerts").update({
+            ai_review: watch.review,
+            ai_recommendation: watch.recommendation,
+            ai_reviewed_at: new Date().toISOString(),
+            watched_by: "Harbor Watch",
+          }).eq("id", alertId);
+        }
+      }
+
+      if (action === "watch_review") {
+        return cors({ ok: true, watch, inbox: true });
+      }
+
       const subject = kind === "ban" ? `Harbor ban: ${who}` : `Harbor warning: ${who}`;
       const text = [
         kind === "ban" ? "Automatic ban after a second language strike." : "Formal warning after blocked language.",
@@ -108,7 +130,8 @@ Deno.serve(async (req) => {
         `Strikes: ${strikes}`,
         `Match: ${match}`,
         sample ? `Sample: ${sample}` : null,
-        "Review in Harbor → Account → Admin → Moderation alerts.",
+        watch ? `Harbor Watch: ${watch.recommendation} — ${watch.review}` : null,
+        "Flags land in Harbor → Account → Admin → Moderation alerts (Harbor Watch reviews them there).",
       ].filter(Boolean).join("\n");
 
       const resendKey = Deno.env.get("RESEND_API_KEY") || "";
@@ -126,12 +149,12 @@ Deno.serve(async (req) => {
         });
         if (!mail.ok) {
           const errText = await mail.text();
-          return cors({ ok: true, emailed: false, error: errText.slice(0, 300), inbox: true });
+          return cors({ ok: true, emailed: false, error: errText.slice(0, 300), inbox: true, watch });
         }
-        return cors({ ok: true, emailed: true });
+        return cors({ ok: true, emailed: true, watch });
       }
 
-      return cors({ ok: true, emailed: false, inbox: true });
+      return cors({ ok: true, emailed: false, inbox: true, watch });
     }
 
     // Admin-only below
@@ -225,4 +248,124 @@ function cors(payload: Record<string, unknown> | null, status = 200) {
       "Access-Control-Allow-Methods": "POST, OPTIONS",
     },
   });
+}
+
+/** Harbor Watch — AI moderator account that reviews language flags for the host. */
+async function harborWatchReview(input: {
+  kind: string;
+  who: string;
+  match: string;
+  sample: string;
+  strikes: number;
+}): Promise<{ review: string; recommendation: string; source: string }> {
+  const fallback = localWatchReview(input);
+  const groqKey = Deno.env.get("GROQ_API_KEY") || "";
+  const openAiKey = Deno.env.get("OPENAI_API_KEY") || "";
+  if (!groqKey && !openAiKey) return { ...fallback, source: "local" };
+
+  const apiUrl = groqKey
+    ? "https://api.groq.com/openai/v1/chat/completions"
+    : "https://api.openai.com/v1/chat/completions";
+  const apiKey = groqKey || openAiKey;
+  const model = Deno.env.get("HARBOR_WATCH_MODEL")
+    || (groqKey ? "llama-3.3-70b-versatile" : "gpt-4o-mini");
+
+  const system = `You are Harbor Watch — a separate AI moderator account for the Harbor community app.
+You are NOT the Angel companion. You only review language/hate flags for the human host.
+
+Harbor policy: first blocked-language strike = warning; second = ban.
+Respond with ONLY compact JSON (no markdown):
+{"recommendation":"keep_warning|ban_appropriate|review_manually|likely_false_positive","review":"1-2 short sentences for the host"}
+
+Be calm, practical, and specific. Flag hate/slurs/threats as serious. Mild edge cases may be likely_false_positive.`;
+
+  try {
+    const upstream = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        max_tokens: 180,
+        messages: [
+          { role: "system", content: system },
+          {
+            role: "user",
+            content: [
+              `Action already taken: ${input.kind}`,
+              `Strikes: ${input.strikes}`,
+              `Member: ${input.who}`,
+              `Matched: ${input.match}`,
+              `Sample: """${input.sample || "(empty)"}"""`,
+              "Review this flag for the host.",
+            ].join("\n"),
+          },
+        ],
+      }),
+    });
+    if (!upstream.ok) return { ...fallback, source: "local" };
+    const data = await upstream.json();
+    const raw = String(data?.choices?.[0]?.message?.content || "").trim();
+    const parsed = parseWatchJson(raw);
+    if (!parsed) return { ...fallback, source: "local" };
+    return { ...parsed, source: "ai" };
+  } catch (_) {
+    return { ...fallback, source: "local" };
+  }
+}
+
+function parseWatchJson(raw: string): { review: string; recommendation: string } | null {
+  try {
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start < 0 || end <= start) return null;
+    const obj = JSON.parse(raw.slice(start, end + 1));
+    const recommendation = String(obj.recommendation || "").trim();
+    const review = String(obj.review || "").trim().slice(0, 400);
+    const allowed = new Set([
+      "keep_warning",
+      "ban_appropriate",
+      "review_manually",
+      "likely_false_positive",
+    ]);
+    if (!review || !allowed.has(recommendation)) return null;
+    return { recommendation, review };
+  } catch (_) {
+    return null;
+  }
+}
+
+function localWatchReview(input: {
+  kind: string;
+  who: string;
+  match: string;
+  sample: string;
+  strikes: number;
+}): { review: string; recommendation: string; source: string } {
+  const sample = `${input.match} ${input.sample}`.toLowerCase();
+  const severe = /(kill|rape|nigger|faggot|gas the|lynch|genocide)/i.test(sample);
+  if (input.kind === "ban" || input.strikes >= 2) {
+    return {
+      recommendation: severe ? "ban_appropriate" : "ban_appropriate",
+      review: severe
+        ? `Harbor Watch: severe language from ${input.who}. Ban looks appropriate — check if you want a longer restriction.`
+        : `Harbor Watch: second strike for ${input.who}. Automatic ban applied; skim the sample if you want to reverse it.`,
+      source: "local",
+    };
+  }
+  if (severe) {
+    return {
+      recommendation: "review_manually",
+      review: `Harbor Watch: first strike, but the sample looks severe. Warning stands — consider watching this account closely.`,
+      source: "local",
+    };
+  }
+  return {
+    recommendation: "keep_warning",
+    review: `Harbor Watch: first-strike warning for “${input.match || "blocked language"}”. No extra action needed unless this keeps happening.`,
+    source: "local",
+  };
 }

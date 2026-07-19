@@ -308,14 +308,32 @@
     const c = writeClient();
     const { data, error } = await c
       .from('harbor_mod_alerts')
-      .select('id,kind,user_id,email,display_name,device_id,username,match_text,sample_text,created_at,read_at')
+      .select('id,kind,user_id,email,display_name,device_id,username,match_text,sample_text,created_at,read_at,ai_review,ai_recommendation,ai_reviewed_at,watched_by')
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) {
+      // Older DBs before Harbor Watch columns
+      if (/ai_review|watched_by|column/i.test(error.message || '')) {
+        const retry = await c
+          .from('harbor_mod_alerts')
+          .select('id,kind,user_id,email,display_name,device_id,username,match_text,sample_text,created_at,read_at')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+        if (retry.error) {
+          if (/relation|does not exist|PGRST/i.test(retry.error.message || '')) return [];
+          throw retry.error;
+        }
+        return retry.data || [];
+      }
       if (/relation|does not exist|PGRST/i.test(error.message || '')) return [];
       throw error;
     }
     return data || [];
+  }
+
+  async function requestWatchReview(alertId) {
+    if (!alertId) return null;
+    return modAction({ action: 'watch_review', alertId });
   }
 
   async function markModAlertRead(alertId) {
@@ -493,6 +511,7 @@
     recordLanguageStrike,
     listModAlerts,
     markModAlertRead,
+    requestWatchReview,
     modAction,
     validateInvite,
     listInvites,
