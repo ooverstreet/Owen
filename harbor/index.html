@@ -724,6 +724,39 @@ body {
   color: var(--ink-soft);
   line-height: 1.45;
 }
+.mod-alert-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.45);
+}
+.mod-alert-card.unread {
+  border-color: rgba(138, 74, 58, .35);
+  background: rgba(138, 74, 58, .06);
+}
+.mod-alert-card .mod-alert-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: .86rem;
+}
+.mod-alert-card .mod-alert-kind {
+  font-weight: 620;
+  color: var(--water-deep);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: .72rem;
+}
+.mod-alert-card.ban .mod-alert-kind { color: #8a4a3a; }
+.mod-alert-card .mod-alert-sample {
+  margin: 0;
+  font-size: .88rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
 .edit-composer textarea {
   min-height: 110px;
   width: 100%;
@@ -1072,6 +1105,16 @@ body {
       <div class="angel-label">Admin</div>
       <p class="angel-note" style="margin-bottom:8px">Only you see this after signing in as admin. Visitors never get these controls.</p>
       <p class="angel-note" style="margin-bottom:12px">Angel AI runs on the server. Only admins can create invite links.</p>
+
+      <div id="mod-alerts-box" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+          <p class="angel-note" style="margin:0;font-weight:560;color:var(--ink)">Moderation alerts</p>
+          <button class="btn btn-ghost btn-small" id="mod-alerts-refresh" type="button">Refresh</button>
+        </div>
+        <p class="angel-note" id="mod-alerts-empty" style="margin:0 0 8px">No alerts yet. Warnings and bans show up here.</p>
+        <div id="mod-alerts-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
       <button class="btn btn-primary btn-small" id="admin-generate-invite" type="button">Create invite link</button>
       <div id="invite-result" class="invite-result" aria-live="polite" data-invite-code="">
         <p class="invite-result-title" id="invite-result-title">Invite ready</p>
@@ -2154,6 +2197,13 @@ function beginEditPost(card, post) {
     saveBtn.textContent = cleanLanguage ? 'Saving…' : 'Submitting…';
     try {
       await saveEditedPost(post.id, next);
+      if (cleanLanguage && post.userId) {
+        await applyLanguageStrike({
+          sample: original,
+          match: contentBlocked(original).match || 'language cleanup',
+          targetUserId: post.userId,
+        });
+      }
       saveBtn.textContent = cleanLanguage ? 'Cleaned ✓' : 'Submitted ✓';
       await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
@@ -2203,6 +2253,13 @@ function beginEditReply(wrap, post, reply) {
     saveBtn.textContent = cleanLanguage ? 'Saving…' : 'Submitting…';
     try {
       await saveEditedReply(post.id, reply.id, next);
+      if (cleanLanguage && reply.userId) {
+        await applyLanguageStrike({
+          sample: original,
+          match: contentBlocked(original).match || 'language cleanup',
+          targetUserId: reply.userId,
+        });
+      }
       saveBtn.textContent = cleanLanguage ? 'Cleaned ✓' : 'Submitted ✓';
       await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
@@ -2480,7 +2537,10 @@ function syncAccountScreen() {
   userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
   // Cheap sync paint only — never kick off network on every auth tick
-  if (auth.isAdmin) paintStarterInvitesOnly();
+  if (auth.isAdmin) {
+    paintStarterInvitesOnly();
+    paintModAlerts();
+  }
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -2495,13 +2555,20 @@ function syncAccountScreen() {
     $('#auth-user-line').textContent = auth.user?.email || 'Signed in';
     if (auth.isAdmin) {
       roleLine.style.display = 'block';
-      roleLine.textContent = 'Admin — remove/ban tools unlocked on posts.';
+      roleLine.textContent = 'Admin — clean language, delete, bans, and moderation alerts.';
       accountSub.textContent = 'You’re signed in as Harbor admin.';
       if (idNote) idNote.textContent = 'Admin tools appear only while you’re signed in.';
     } else {
       roleLine.style.display = 'none';
       roleLine.textContent = '';
-      accountSub.textContent = 'Signed in. Choose how you appear on posts — anonymous is still fine.';
+      const strikes = Number(auth.profile?.strike_count || 0);
+      if (strikes >= 2) {
+        accountSub.textContent = 'This account can’t post right now due to a guidelines ban.';
+      } else if (strikes === 1) {
+        accountSub.textContent = 'You have a formal language warning. Another violation will ban posting.';
+      } else {
+        accountSub.textContent = 'Signed in. Choose how you appear on posts — anonymous is still fine.';
+      }
       if (idNote) idNote.textContent = 'You’re signed in. Preferences below apply on this device.';
     }
   }
@@ -2536,6 +2603,127 @@ function renderTagPicker() {
 function contentBlocked(text) {
   if (window.HarborMod && HarborMod.findBlocked) return HarborMod.findBlocked(text);
   return { blocked: false };
+}
+
+function formatAlertWhen(iso) {
+  try {
+    const t = new Date(iso).getTime();
+    if (!t) return '';
+    return formatWhen(t);
+  } catch (_) {
+    return '';
+  }
+}
+
+async function paintModAlerts() {
+  const list = $('#mod-alerts-list');
+  const empty = $('#mod-alerts-empty');
+  if (!list || !empty || !isHarborAdmin()) return;
+  if (!(window.HarborDB && HarborDB.isReady() && HarborDB.listModAlerts)) {
+    empty.textContent = 'Cloud not ready — alerts will appear after Supabase is connected.';
+    empty.style.display = 'block';
+    list.innerHTML = '';
+    return;
+  }
+  try {
+    const alerts = await HarborDB.listModAlerts({ limit: 40 });
+    if (!alerts.length) {
+      empty.textContent = 'No alerts yet. Warnings and bans show up here.';
+      empty.style.display = 'block';
+      list.innerHTML = '';
+      return;
+    }
+    empty.style.display = 'none';
+    const unread = alerts.filter((a) => !a.read_at).length;
+    empty.style.display = 'block';
+    empty.textContent = unread
+      ? `${unread} unread alert${unread === 1 ? '' : 's'} — first strike warns, second bans.`
+      : 'All caught up. First strike warns, second bans.';
+    list.innerHTML = alerts.map((a) => {
+      const kind = a.kind === 'ban' ? 'ban' : 'warning';
+      const who = escapeHtml(a.display_name || a.email || 'Member');
+      const mail = a.email ? ` · ${escapeHtml(a.email)}` : '';
+      const match = a.match_text ? escapeHtml(a.match_text) : 'blocked language';
+      const sample = a.sample_text ? escapeHtml(a.sample_text) : '';
+      const when = escapeHtml(formatAlertWhen(a.created_at));
+      const unreadClass = a.read_at ? '' : ' unread';
+      return `<article class="mod-alert-card ${kind}${unreadClass}" data-alert-id="${escapeHtml(a.id)}">
+        <div class="mod-alert-top">
+          <span class="mod-alert-kind">${kind}</span>
+          <span>${who}${mail}</span>
+          <span style="margin-left:auto;color:var(--ink-faint)">${when}</span>
+        </div>
+        <p class="mod-alert-sample"><strong>${match}</strong>${sample ? ` — ${sample}` : ''}</p>
+        ${a.read_at ? '' : '<button type="button" class="btn btn-ghost btn-small" data-alert-read style="margin-top:8px">Mark read</button>'}
+      </article>`;
+    }).join('');
+    list.querySelectorAll('[data-alert-read]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('[data-alert-id]');
+        const id = card?.getAttribute('data-alert-id');
+        if (!id) return;
+        btn.disabled = true;
+        try {
+          await HarborDB.markModAlertRead(id);
+          await paintModAlerts();
+        } catch (err) {
+          alert(err.message || 'Could not mark alert read.');
+          btn.disabled = false;
+        }
+      });
+    });
+  } catch (err) {
+    empty.style.display = 'block';
+    empty.textContent = /strikes|does not exist|PGRST/i.test(err.message || '')
+      ? 'Run supabase-strikes.sql in Supabase to enable alerts.'
+      : (err.message || 'Could not load alerts.');
+    list.innerHTML = '';
+  }
+}
+
+/** Record warn→ban strike when blocked language is attempted (or cleaned by admin). */
+async function applyLanguageStrike({ sample, match, targetUserId = null } = {}) {
+  if (!(window.HarborDB && HarborDB.isReady() && HarborDB.recordLanguageStrike)) return null;
+  if (!isLoggedIn()) return null;
+  if (isHarborAdmin() && !targetUserId) return { status: 'skipped', reason: 'admin' };
+  const identity = loadIdentity();
+  try {
+    return await HarborDB.recordLanguageStrike({
+      sample,
+      match,
+      deviceId: window.HarborMod ? HarborMod.deviceId() : null,
+      username: identity.mode === 'named' ? identity.username : null,
+      targetUserId,
+    });
+  } catch (err) {
+    console.warn('Harbor strike failed', err);
+    return { status: 'error', message: err.message || 'Could not record warning' };
+  }
+}
+
+async function handleBlockedLanguageAttempt(text, blocked) {
+  const result = await applyLanguageStrike({
+    sample: text,
+    match: blocked?.match || 'blocked language',
+  });
+  try {
+    if (window.HarborAuth && HarborAuth.refreshProfile) await HarborAuth.refreshProfile();
+    syncAccountScreen();
+  } catch (_) {}
+  if (result?.status === 'ban') {
+    alert(result.message || 'Your account has been banned from posting for repeated harmful language.');
+    return result;
+  }
+  if (result?.status === 'warning') {
+    alert(result.message || 'This language isn’t welcome in Harbor. This is your formal warning — another time will ban your account.');
+    return result;
+  }
+  if (result?.status === 'error' && /strikes\.sql|isn’t set up/i.test(result.message || '')) {
+    alert('That language isn’t welcome here. (Host still needs to run supabase-strikes.sql for warnings/bans.)');
+    return result;
+  }
+  alert('That language isn’t welcome here. Please keep it considerate and respectful.');
+  return result;
 }
 
 function updateToneAndCrisis() {
@@ -2579,6 +2767,8 @@ async function persistPost({ text, tags, privatePost }) {
   const author = currentAuthor();
   const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
 
+  const strikes = Number((window.HarborAuth && HarborAuth.getState()?.profile?.strike_count) || 0);
+  if (strikes >= 2) throw new Error('This account can’t post right now due to a guidelines ban.');
   if (window.HarborDB && HarborDB.isReady()) {
     const banned = await HarborDB.isBanned({
       deviceId,
@@ -2638,6 +2828,8 @@ async function release(privatePost) {
   const blocked = contentBlocked(text);
   if (blocked.blocked) {
     $('#tone-pill').classList.add('show');
+    $('#tone-pill').textContent = 'That language isn’t welcome here — a warning or ban may apply.';
+    await handleBlockedLanguageAttempt(text, blocked);
     return;
   }
   if (draftMode === 'named' && !$('#username-input').value.trim() && !loadIdentity().username) {
@@ -2690,7 +2882,7 @@ async function addReply() {
   if (!text || !currentThreadId) return;
   const blocked = contentBlocked(text);
   if (blocked.blocked) {
-    alert('That language isn’t welcome here. Please keep replies considerate and respectful.');
+    await handleBlockedLanguageAttempt(text, blocked);
     return;
   }
   const author = currentAuthor();
@@ -2823,6 +3015,10 @@ $('#home-invite-redeem').addEventListener('click', async () => {
   syncHomeInviteUI();
   pendingEntry = 'feed';
   openAccountForEntry('signup');
+});
+
+$('#mod-alerts-refresh')?.addEventListener('click', () => {
+  if (isHarborAdmin()) paintModAlerts();
 });
 
 $('#admin-generate-invite').addEventListener('click', async () => {

@@ -119,7 +119,7 @@
     }
     const { data, error } = await client
       .from('harbor_profiles')
-      .select('id,email,display_name,role,created_at,guidelines_accepted_at')
+      .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at')
       .eq('id', session.user.id)
       .maybeSingle();
     if (error) {

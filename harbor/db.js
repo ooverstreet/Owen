@@ -238,13 +238,98 @@
     return true;
   }
 
-  async function isBanned({ deviceId, username }) {
+  async function isBanned({ deviceId, username, userId } = {}) {
     if (!ready) return false;
+    const uid = userId || currentUserId();
     const checks = [];
-    if (deviceId) checks.push(client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'device').eq('ban_value', deviceId).limit(1));
-    if (username) checks.push(client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'username').eq('ban_value', String(username).toLowerCase()).limit(1));
+    if (uid) {
+      checks.push(
+        client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'user').eq('ban_value', String(uid).toLowerCase()).limit(1)
+      );
+    }
+    if (deviceId) {
+      checks.push(
+        client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'device').eq('ban_value', deviceId).limit(1)
+      );
+    }
+    if (username) {
+      checks.push(
+        client.from('harbor_bans').select('id').eq('active', true).eq('ban_type', 'username').eq('ban_value', String(username).toLowerCase()).limit(1)
+      );
+    }
+    if (!checks.length) return false;
     const results = await Promise.all(checks);
     return results.some((r) => !r.error && r.data && r.data.length);
+  }
+
+  async function recordLanguageStrike({
+    sample = '',
+    match = '',
+    deviceId = null,
+    username = null,
+    targetUserId = null,
+  } = {}) {
+    if (!ready) return null;
+    if (!currentUserId()) throw new Error('Sign in required');
+    const c = writeClient();
+    const rpc = await c.rpc('harbor_apply_language_strike', {
+      p_sample: String(sample || '').slice(0, 500),
+      p_match: String(match || '').slice(0, 120),
+      p_device_id: deviceId || null,
+      p_username: username || null,
+      p_target_user_id: targetUserId || null,
+    });
+    if (rpc.error) {
+      if (/function|does not exist|PGRST202/i.test(rpc.error.message || '')) {
+        throw new Error('Strike system isn’t set up yet — run supabase-strikes.sql in Supabase.');
+      }
+      throw new Error(rpc.error.message || 'Could not record warning');
+    }
+    const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
+    // Fire-and-forget email/push path via edge function (optional)
+    try {
+      await modAction({
+        action: 'notify_strike',
+        kind: row?.status || row?.kind,
+        email: row?.email,
+        displayName: row?.displayName,
+        match: row?.match,
+        sample: row?.sample,
+        strikes: row?.strikes,
+        userId: row?.userId,
+        alertId: row?.alertId,
+      });
+    } catch (_) {}
+    return row;
+  }
+
+  async function listModAlerts({ limit = 40 } = {}) {
+    if (!ready) return [];
+    const c = writeClient();
+    const { data, error } = await c
+      .from('harbor_mod_alerts')
+      .select('id,kind,user_id,email,display_name,device_id,username,match_text,sample_text,created_at,read_at')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) {
+      if (/relation|does not exist|PGRST/i.test(error.message || '')) return [];
+      throw error;
+    }
+    return data || [];
+  }
+
+  async function markModAlertRead(alertId) {
+    if (!ready || !alertId) return false;
+    const c = writeClient();
+    const rpc = await c.rpc('harbor_mark_mod_alert_read', { p_id: alertId });
+    if (rpc.error) {
+      const { error } = await c
+        .from('harbor_mod_alerts')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', alertId);
+      if (error) throw error;
+    }
+    return true;
   }
 
   async function modAction(payload, adminSecret) {
@@ -405,6 +490,9 @@
     hideReply,
     incrementFelt,
     isBanned,
+    recordLanguageStrike,
+    listModAlerts,
+    markModAlertRead,
     modAction,
     validateInvite,
     listInvites,

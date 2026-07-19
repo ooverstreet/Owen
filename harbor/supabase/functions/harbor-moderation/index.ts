@@ -75,6 +75,65 @@ Deno.serve(async (req) => {
       return cors({ ok: true, id });
     }
 
+    // Language strike notify — allowed when alert row exists (created by SQL RPC)
+    if (action === "notify_strike") {
+      const alertId = String(body.alertId || "");
+      if (alertId) {
+        const { data: alertRow } = await supabase
+          .from("harbor_mod_alerts")
+          .select("id,kind,email,display_name,match_text,sample_text,user_id")
+          .eq("id", alertId)
+          .maybeSingle();
+        if (!alertRow) return cors({ error: "Unknown alert" }, 404);
+        body.kind = alertRow.kind;
+        body.email = alertRow.email;
+        body.displayName = alertRow.display_name;
+        body.match = alertRow.match_text;
+        body.sample = alertRow.sample_text;
+        body.userId = alertRow.user_id;
+      } else if (!(await callerIsAdmin())) {
+        return cors({ error: "Unauthorized" }, 401);
+      }
+
+      const kind = String(body.kind || "warning");
+      const who = String(body.displayName || body.email || body.userId || "someone");
+      const match = String(body.match || "blocked language").slice(0, 120);
+      const sample = String(body.sample || "").slice(0, 400);
+      const strikes = Number(body.strikes || (kind === "ban" ? 2 : 1));
+      const subject = kind === "ban" ? `Harbor ban: ${who}` : `Harbor warning: ${who}`;
+      const text = [
+        kind === "ban" ? "Automatic ban after a second language strike." : "Formal warning after blocked language.",
+        `Who: ${who}`,
+        body.email ? `Email: ${body.email}` : null,
+        `Strikes: ${strikes}`,
+        `Match: ${match}`,
+        sample ? `Sample: ${sample}` : null,
+        "Review in Harbor → Account → Admin → Moderation alerts.",
+      ].filter(Boolean).join("\n");
+
+      const resendKey = Deno.env.get("RESEND_API_KEY") || "";
+      const toEmail = Deno.env.get("HARBOR_ALERT_EMAIL") || "owenstreet7@gmail.com";
+      const fromEmail = Deno.env.get("HARBOR_ALERT_FROM") || "Harbor <onboarding@resend.dev>";
+
+      if (resendKey) {
+        const mail = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ from: fromEmail, to: [toEmail], subject, text }),
+        });
+        if (!mail.ok) {
+          const errText = await mail.text();
+          return cors({ ok: true, emailed: false, error: errText.slice(0, 300), inbox: true });
+        }
+        return cors({ ok: true, emailed: true });
+      }
+
+      return cors({ ok: true, emailed: false, inbox: true });
+    }
+
     // Admin-only below
     if (!(await callerIsAdmin())) {
       return cors({ error: "Unauthorized" }, 401);
