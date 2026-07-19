@@ -757,6 +757,33 @@ body {
   line-height: 1.4;
   white-space: pre-wrap;
 }
+.mod-alert-watch {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(62, 122, 134, 0.08);
+  border: 1px solid rgba(62, 122, 134, 0.16);
+}
+.mod-alert-watch .watch-label {
+  margin: 0 0 4px;
+  font-size: .72rem;
+  font-weight: 620;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--water-deep);
+}
+.mod-alert-watch .watch-rec {
+  margin: 0 0 4px;
+  font-size: .84rem;
+  font-weight: 560;
+  color: var(--ink);
+}
+.mod-alert-watch p {
+  margin: 0;
+  font-size: .86rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
 .edit-composer textarea {
   min-height: 110px;
   width: 100%;
@@ -1111,7 +1138,10 @@ body {
           <p class="angel-note" style="margin:0;font-weight:560;color:var(--ink)">Moderation alerts</p>
           <button class="btn btn-ghost btn-small" id="mod-alerts-refresh" type="button">Refresh</button>
         </div>
-        <p class="angel-note" id="mod-alerts-empty" style="margin:0 0 8px">No alerts yet. Warnings and bans show up here.</p>
+        <p class="angel-note" style="margin:0 0 8px">
+          Flags land here — not in Angel chat. <strong>Harbor Watch</strong> (separate AI moderator) reviews each one after it’s filed.
+        </p>
+        <p class="angel-note" id="mod-alerts-empty" style="margin:0 0 8px">No alerts yet. Warnings and bans show up here for Harbor Watch and you.</p>
         <div id="mod-alerts-list" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
@@ -2615,6 +2645,16 @@ function formatAlertWhen(iso) {
   }
 }
 
+function watchRecLabel(code) {
+  switch (String(code || '')) {
+    case 'keep_warning': return 'Recommendation: keep the warning';
+    case 'ban_appropriate': return 'Recommendation: ban looks appropriate';
+    case 'likely_false_positive': return 'Recommendation: possible false positive — review';
+    case 'review_manually': return 'Recommendation: look at this manually';
+    default: return 'Harbor Watch review';
+  }
+}
+
 async function paintModAlerts() {
   const list = $('#mod-alerts-list');
   const empty = $('#mod-alerts-empty');
@@ -2637,8 +2677,8 @@ async function paintModAlerts() {
     const unread = alerts.filter((a) => !a.read_at).length;
     empty.style.display = 'block';
     empty.textContent = unread
-      ? `${unread} unread alert${unread === 1 ? '' : 's'} — first strike warns, second bans.`
-      : 'All caught up. First strike warns, second bans.';
+      ? `${unread} unread alert${unread === 1 ? '' : 's'} in your inbox — Harbor Watch reviews each one.`
+      : 'All caught up. Harbor Watch reviews new flags as they arrive.';
     list.innerHTML = alerts.map((a) => {
       const kind = a.kind === 'ban' ? 'ban' : 'warning';
       const who = escapeHtml(a.display_name || a.email || 'Member');
@@ -2647,6 +2687,16 @@ async function paintModAlerts() {
       const sample = a.sample_text ? escapeHtml(a.sample_text) : '';
       const when = escapeHtml(formatAlertWhen(a.created_at));
       const unreadClass = a.read_at ? '' : ' unread';
+      const watchBlock = a.ai_review
+        ? `<div class="mod-alert-watch">
+            <p class="watch-label">${escapeHtml(a.watched_by || 'Harbor Watch')}</p>
+            <p class="watch-rec">${escapeHtml(watchRecLabel(a.ai_recommendation))}</p>
+            <p>${escapeHtml(a.ai_review)}</p>
+          </div>`
+        : `<div class="mod-alert-watch">
+            <p class="watch-label">Harbor Watch</p>
+            <p>Waiting for AI review… Tap “Ask Watch” if this stays empty.</p>
+          </div>`;
       return `<article class="mod-alert-card ${kind}${unreadClass}" data-alert-id="${escapeHtml(a.id)}">
         <div class="mod-alert-top">
           <span class="mod-alert-kind">${kind}</span>
@@ -2654,7 +2704,11 @@ async function paintModAlerts() {
           <span style="margin-left:auto;color:var(--ink-faint)">${when}</span>
         </div>
         <p class="mod-alert-sample"><strong>${match}</strong>${sample ? ` — ${sample}` : ''}</p>
-        ${a.read_at ? '' : '<button type="button" class="btn btn-ghost btn-small" data-alert-read style="margin-top:8px">Mark read</button>'}
+        ${watchBlock}
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          ${a.read_at ? '' : '<button type="button" class="btn btn-ghost btn-small" data-alert-read>Mark read</button>'}
+          ${a.ai_review ? '' : '<button type="button" class="btn btn-secondary btn-small" data-alert-watch>Ask Watch</button>'}
+        </div>
       </article>`;
     }).join('');
     list.querySelectorAll('[data-alert-read]').forEach((btn) => {
@@ -2669,6 +2723,23 @@ async function paintModAlerts() {
         } catch (err) {
           alert(err.message || 'Could not mark alert read.');
           btn.disabled = false;
+        }
+      });
+    });
+    list.querySelectorAll('[data-alert-watch]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('[data-alert-id]');
+        const id = card?.getAttribute('data-alert-id');
+        if (!id || !HarborDB.requestWatchReview) return;
+        btn.disabled = true;
+        btn.textContent = 'Watch reviewing…';
+        try {
+          await HarborDB.requestWatchReview(id);
+          await paintModAlerts();
+        } catch (err) {
+          alert(err.message || 'Harbor Watch could not review that flag yet. Redeploy harbor-moderation if needed.');
+          btn.disabled = false;
+          btn.textContent = 'Ask Watch';
         }
       });
     });
