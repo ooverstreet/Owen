@@ -720,7 +720,16 @@ body {
   color: var(--ink);
   outline: none;
 }
-.edit-composer .actions { margin-top: 0; }
+.edit-composer .actions {
+  margin-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.edit-composer [data-edit-save] {
+  min-width: 8.5rem;
+}
 .reply-composer { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
 #reply-entry {
   min-height: 90px; width: 100%; resize: vertical; border: 1px solid var(--line);
@@ -1992,7 +2001,7 @@ function editComposerHtml(text, maxLen) {
     <div class="edit-composer">
       <textarea maxlength="${maxLen}">${escapeHtml(text)}</textarea>
       <div class="actions">
-        <button type="button" class="btn btn-primary btn-small" data-edit-save>Save</button>
+        <button type="button" class="btn btn-primary" data-edit-save>Submit</button>
         <button type="button" class="btn btn-ghost btn-small" data-edit-cancel>Cancel</button>
       </div>
     </div>
@@ -2048,14 +2057,16 @@ function beginEditPost(card, post) {
     }
     const saveBtn = composer.querySelector('[data-edit-save]');
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
+    saveBtn.textContent = 'Submitting…';
     try {
       await saveEditedPost(post.id, next);
+      saveBtn.textContent = 'Submitted ✓';
+      await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
     } catch (err) {
-      alert(err.message || 'Could not save edit.');
+      alert(err.message || 'Could not submit edit.');
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Save';
+      saveBtn.textContent = 'Submit';
     }
   });
 }
@@ -2086,14 +2097,16 @@ function beginEditReply(wrap, post, reply) {
     }
     const saveBtn = composer.querySelector('[data-edit-save]');
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
+    saveBtn.textContent = 'Submitting…';
     try {
       await saveEditedReply(post.id, reply.id, next);
+      saveBtn.textContent = 'Submitted ✓';
+      await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
     } catch (err) {
-      alert(err.message || 'Could not save edit.');
+      alert(err.message || 'Could not submit edit.');
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Save';
+      saveBtn.textContent = 'Submit';
     }
   });
 }
@@ -3348,7 +3361,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=50');
+      await navigator.serviceWorker.register('./sw.js?v=51');
     } catch (_) {}
   }
 }
