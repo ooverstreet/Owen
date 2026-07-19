@@ -718,6 +718,12 @@ body {
   gap: 10px;
   margin-top: 8px;
 }
+.edit-clean-note {
+  margin: 0;
+  font-size: .9rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
 .edit-composer textarea {
   min-height: 110px;
   width: 100%;
@@ -1874,11 +1880,20 @@ function isHarborAdmin() {
   return !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
 }
 
-/** Authors edit their own; admins can edit anyone’s (except First light for non-admins). */
+/** Authors edit their own wording; admins may clean bad language on anyone’s message. */
 function canEditMessage(msg) {
   if (!msg) return false;
   if (msg.id === FEATURED_POST.id || msg.featured) return isHarborAdmin();
   return isOwnMessage(msg) || isHarborAdmin();
+}
+
+/** Admin cleaning someone else’s post/reply (not rewriting your own). */
+function isLanguageClean(msg) {
+  return isHarborAdmin() && msg && !isOwnMessage(msg);
+}
+
+function languageActionLabel(msg) {
+  return isLanguageClean(msg) ? 'Clean language' : 'Edit';
 }
 
 function canDeleteMessage(msg) {
@@ -1898,7 +1913,7 @@ function postCardHtml(post, full = false) {
       ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
       <span class="author">${escapeHtml(displayName(post))}</span>
       <time>${escapeHtml(formatWhen(post.createdAt))}</time>
-      ${canEdit ? '<span class="msg-actions"><button type="button" class="edit-msg-btn" data-edit-post>Edit</button></span>' : ''}
+      ${canEdit ? `<span class="msg-actions"><button type="button" class="edit-msg-btn" data-edit-post>${escapeHtml(languageActionLabel(post))}</button></span>` : ''}
     </div>
     <div class="post-body" data-post-body>${escapeHtml(post.text)}</div>
     ${edited}
@@ -1993,6 +2008,7 @@ async function openThread(id) {
   const editPostBtn = $('#edit-post-btn');
   if (editPostBtn) {
     editPostBtn.hidden = !allowEdit;
+    editPostBtn.textContent = allowEdit ? languageActionLabel(post) : 'Edit';
     editPostBtn.onclick = allowEdit
       ? (e) => {
           e.preventDefault();
@@ -2020,7 +2036,7 @@ function renderReplies(post) {
         <span class="author">${escapeHtml(displayName(r))}</span>
         <time>${escapeHtml(formatWhen(r.createdAt))}</time>
         ${(canEditMessage(r) || canDeleteMessage(r)) ? `<span class="msg-actions">
-          ${canEditMessage(r) ? '<button type="button" class="edit-msg-btn" data-edit-reply>Edit</button>' : ''}
+          ${canEditMessage(r) ? `<button type="button" class="edit-msg-btn" data-edit-reply>${escapeHtml(languageActionLabel(r))}</button>` : ''}
           ${canDeleteMessage(r) ? '<button type="button" class="delete-msg-btn" data-delete-reply>Delete</button>' : ''}
         </span>` : ''}
       </div>
@@ -2032,12 +2048,17 @@ function renderReplies(post) {
   bindReplyDeletes(root, post);
 }
 
-function editComposerHtml(text, maxLen) {
+function editComposerHtml(text, maxLen, { cleanLanguage = false } = {}) {
+  const note = cleanLanguage
+    ? '<p class="edit-clean-note">Remove only inappropriate words. Keep the author’s meaning and voice.</p>'
+    : '';
+  const saveLabel = cleanLanguage ? 'Save cleanup' : 'Submit';
   return `
-    <div class="edit-composer">
+    <div class="edit-composer${cleanLanguage ? ' clean-language' : ''}">
+      ${note}
       <textarea maxlength="${maxLen}">${escapeHtml(text)}</textarea>
       <div class="actions">
-        <button type="button" class="btn btn-primary" data-edit-save>Submit</button>
+        <button type="button" class="btn btn-primary" data-edit-save>${saveLabel}</button>
         <button type="button" class="btn btn-ghost btn-small" data-edit-cancel>Cancel</button>
       </div>
     </div>
@@ -2097,14 +2118,18 @@ function beginEditPost(card, post) {
   const body = card.querySelector('[data-post-body]');
   const editBtn = card.querySelector('[data-edit-post]');
   if (!body || body.dataset.editing === '1') return;
+  const cleanLanguage = isLanguageClean(post);
   body.dataset.editing = '1';
   if (editBtn) editBtn.hidden = true;
+  const threadEditBtn = $('#edit-post-btn');
+  if (threadEditBtn) threadEditBtn.hidden = true;
   const original = post.text || '';
   const mount = document.createElement('div');
-  mount.innerHTML = editComposerHtml(original, 4000);
+  mount.innerHTML = editComposerHtml(original, 4000, { cleanLanguage });
   body.replaceWith(mount.firstElementChild);
   const composer = card.querySelector('.edit-composer');
   const ta = composer.querySelector('textarea');
+  const idleSave = cleanLanguage ? 'Save cleanup' : 'Submit';
   ta.focus();
   composer.querySelector('[data-edit-cancel]').addEventListener('click', () => openThread(post.id));
   composer.querySelector('[data-edit-save]').addEventListener('click', async () => {
@@ -2113,23 +2138,29 @@ function beginEditPost(card, post) {
       ta.focus();
       return;
     }
+    if (cleanLanguage && next === original.trim()) {
+      alert('Remove the inappropriate words, then save the cleanup.');
+      return;
+    }
     const blocked = contentBlocked(next);
     if (blocked.blocked) {
-      alert('That language isn’t welcome here. Please keep it considerate and respectful.');
+      alert(cleanLanguage
+        ? 'Cleanup still has blocked language. Remove those words before saving.'
+        : 'That language isn’t welcome here. Please keep it considerate and respectful.');
       return;
     }
     const saveBtn = composer.querySelector('[data-edit-save]');
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Submitting…';
+    saveBtn.textContent = cleanLanguage ? 'Saving…' : 'Submitting…';
     try {
       await saveEditedPost(post.id, next);
-      saveBtn.textContent = 'Submitted ✓';
+      saveBtn.textContent = cleanLanguage ? 'Cleaned ✓' : 'Submitted ✓';
       await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
     } catch (err) {
-      alert(err.message || 'Could not submit edit.');
+      alert(err.message || (cleanLanguage ? 'Could not save cleanup.' : 'Could not submit edit.'));
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Submit';
+      saveBtn.textContent = idleSave;
     }
   });
 }
@@ -2138,13 +2169,16 @@ function beginEditReply(wrap, post, reply) {
   const body = wrap.querySelector('[data-reply-body]');
   const editBtn = wrap.querySelector('[data-edit-reply]');
   if (!body || body.dataset.editing === '1') return;
+  const cleanLanguage = isLanguageClean(reply);
   body.dataset.editing = '1';
   if (editBtn) editBtn.hidden = true;
   const mount = document.createElement('div');
-  mount.innerHTML = editComposerHtml(reply.text || '', 2000);
+  mount.innerHTML = editComposerHtml(reply.text || '', 2000, { cleanLanguage });
   body.replaceWith(mount.firstElementChild);
   const composer = wrap.querySelector('.edit-composer');
   const ta = composer.querySelector('textarea');
+  const idleSave = cleanLanguage ? 'Save cleanup' : 'Submit';
+  const original = (reply.text || '').trim();
   ta.focus();
   composer.querySelector('[data-edit-cancel]').addEventListener('click', () => openThread(post.id));
   composer.querySelector('[data-edit-save]').addEventListener('click', async () => {
@@ -2153,23 +2187,29 @@ function beginEditReply(wrap, post, reply) {
       ta.focus();
       return;
     }
+    if (cleanLanguage && next === original) {
+      alert('Remove the inappropriate words, then save the cleanup.');
+      return;
+    }
     const blocked = contentBlocked(next);
     if (blocked.blocked) {
-      alert('That language isn’t welcome here. Please keep replies considerate and respectful.');
+      alert(cleanLanguage
+        ? 'Cleanup still has blocked language. Remove those words before saving.'
+        : 'That language isn’t welcome here. Please keep replies considerate and respectful.');
       return;
     }
     const saveBtn = composer.querySelector('[data-edit-save]');
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Submitting…';
+    saveBtn.textContent = cleanLanguage ? 'Saving…' : 'Submitting…';
     try {
       await saveEditedReply(post.id, reply.id, next);
-      saveBtn.textContent = 'Submitted ✓';
+      saveBtn.textContent = cleanLanguage ? 'Cleaned ✓' : 'Submitted ✓';
       await new Promise((r) => setTimeout(r, 450));
       await openThread(post.id);
     } catch (err) {
-      alert(err.message || 'Could not submit edit.');
+      alert(err.message || (cleanLanguage ? 'Could not save cleanup.' : 'Could not submit edit.'));
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Submit';
+      saveBtn.textContent = idleSave;
     }
   });
 }
