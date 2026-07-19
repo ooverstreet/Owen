@@ -685,6 +685,42 @@ body {
   border-radius: 16px; padding: 14px 16px; animation: fadeIn .35s ease both;
 }
 .reply .post-body { -webkit-line-clamp: unset; display: block; }
+.msg-edited {
+  font-size: .78rem;
+  color: var(--ink-faint);
+  margin: 6px 0 0;
+}
+.edit-msg-btn {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: .86rem;
+  color: var(--water);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.edit-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.edit-composer textarea {
+  min-height: 110px;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  background: var(--paper-solid);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font: inherit;
+  color: var(--ink);
+  outline: none;
+}
+.edit-composer .actions { margin-top: 0; }
 .reply-composer { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
 #reply-entry {
   min-height: 90px; width: 100%; resize: vertical; border: 1px solid var(--line);
@@ -1742,21 +1778,37 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function isOwnMessage(msg) {
+  if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
+  if (!isLoggedIn()) return false;
+  const uid = (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || '';
+  if (uid && msg.userId && msg.userId === uid) return true;
+  const did = window.HarborMod ? HarborMod.deviceId() : '';
+  if (did && msg.deviceId && msg.deviceId === did) return true;
+  return false;
+}
+
 function postCardHtml(post, full = false) {
   const replies = post.replies || [];
   const felt = post.feltCount || 0;
+  const canEdit = full && isOwnMessage(post);
+  const edited = post.editedAt
+    ? `<p class="msg-edited">Edited</p>`
+    : '';
   return `
     <div class="post-meta">
       ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
       <span class="author">${escapeHtml(displayName(post))}</span>
       <time>${escapeHtml(formatWhen(post.createdAt))}</time>
+      ${canEdit ? '<button type="button" class="edit-msg-btn" data-edit-post>Edit</button>' : ''}
     </div>
-    <div class="post-body">${escapeHtml(post.text)}</div>
+    <div class="post-body" data-post-body>${escapeHtml(post.text)}</div>
+    ${edited}
     ${renderTags(post.tags)}
-    <div class="post-foot">
+    ${full ? '' : `<div class="post-foot">
       <span>${replies.length ? `${replies.length} in thread` : 'Open thread'}</span>
       <span>${felt ? `${felt} felt this too` : 'Be the first to feel this'}</span>
-    </div>
+    </div>`}
   `;
 }
 
@@ -1823,6 +1875,7 @@ async function openThread(id) {
   const card = $('#thread-post');
   card.className = `post-card full${post.featured || post.id === FEATURED_POST.id ? ' featured' : ''}`;
   card.innerHTML = postCardHtml(post, true);
+  bindPostEdit(card, post);
   $('#angel-text').textContent = post.angelLine || craftAngel(post.text).line;
   const note = post.angelNote || ANGEL_NOTES[0];
   const sourceHint = post.angelSource === 'ai' ? ' · Angel AI' : '';
@@ -1852,14 +1905,189 @@ function renderReplies(post) {
     return;
   }
   root.innerHTML = replies.map((r) => `
-    <div class="reply">
+    <div class="reply" data-reply-id="${escapeHtml(r.id)}">
       <div class="post-meta">
         <span class="author">${escapeHtml(displayName(r))}</span>
         <time>${escapeHtml(formatWhen(r.createdAt))}</time>
+        ${isOwnMessage(r) ? '<button type="button" class="edit-msg-btn" data-edit-reply>Edit</button>' : ''}
       </div>
-      <div class="post-body">${escapeHtml(r.text)}</div>
+      <div class="post-body" data-reply-body>${escapeHtml(r.text)}</div>
+      ${r.editedAt ? '<p class="msg-edited">Edited</p>' : ''}
     </div>
   `).join('');
+  bindReplyEdits(root, post);
+}
+
+function editComposerHtml(text, maxLen) {
+  return `
+    <div class="edit-composer">
+      <textarea maxlength="${maxLen}">${escapeHtml(text)}</textarea>
+      <div class="actions">
+        <button type="button" class="btn btn-primary btn-small" data-edit-save>Save</button>
+        <button type="button" class="btn btn-ghost btn-small" data-edit-cancel>Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function bindPostEdit(card, post) {
+  const btn = card.querySelector('[data-edit-post]');
+  if (!btn) return;
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    beginEditPost(card, post);
+  });
+}
+
+function bindReplyEdits(root, post) {
+  root.querySelectorAll('[data-edit-reply]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const wrap = btn.closest('[data-reply-id]');
+      const id = wrap?.getAttribute('data-reply-id');
+      const reply = (post.replies || []).find((r) => r.id === id);
+      if (wrap && reply) beginEditReply(wrap, post, reply);
+    });
+  });
+}
+
+function beginEditPost(card, post) {
+  const body = card.querySelector('[data-post-body]');
+  const editBtn = card.querySelector('[data-edit-post]');
+  if (!body || body.dataset.editing === '1') return;
+  body.dataset.editing = '1';
+  if (editBtn) editBtn.hidden = true;
+  const original = post.text || '';
+  const mount = document.createElement('div');
+  mount.innerHTML = editComposerHtml(original, 4000);
+  body.replaceWith(mount.firstElementChild);
+  const composer = card.querySelector('.edit-composer');
+  const ta = composer.querySelector('textarea');
+  ta.focus();
+  composer.querySelector('[data-edit-cancel]').addEventListener('click', () => openThread(post.id));
+  composer.querySelector('[data-edit-save]').addEventListener('click', async () => {
+    const next = ta.value.trim();
+    if (!next) {
+      ta.focus();
+      return;
+    }
+    const blocked = contentBlocked(next);
+    if (blocked.blocked) {
+      alert('That language isn’t welcome here. Please keep it considerate and respectful.');
+      return;
+    }
+    const saveBtn = composer.querySelector('[data-edit-save]');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      await saveEditedPost(post.id, next);
+      await openThread(post.id);
+    } catch (err) {
+      alert(err.message || 'Could not save edit.');
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  });
+}
+
+function beginEditReply(wrap, post, reply) {
+  const body = wrap.querySelector('[data-reply-body]');
+  const editBtn = wrap.querySelector('[data-edit-reply]');
+  if (!body || body.dataset.editing === '1') return;
+  body.dataset.editing = '1';
+  if (editBtn) editBtn.hidden = true;
+  const mount = document.createElement('div');
+  mount.innerHTML = editComposerHtml(reply.text || '', 2000);
+  body.replaceWith(mount.firstElementChild);
+  const composer = wrap.querySelector('.edit-composer');
+  const ta = composer.querySelector('textarea');
+  ta.focus();
+  composer.querySelector('[data-edit-cancel]').addEventListener('click', () => openThread(post.id));
+  composer.querySelector('[data-edit-save]').addEventListener('click', async () => {
+    const next = ta.value.trim();
+    if (!next) {
+      ta.focus();
+      return;
+    }
+    const blocked = contentBlocked(next);
+    if (blocked.blocked) {
+      alert('That language isn’t welcome here. Please keep replies considerate and respectful.');
+      return;
+    }
+    const saveBtn = composer.querySelector('[data-edit-save]');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      await saveEditedReply(post.id, reply.id, next);
+      await openThread(post.id);
+    } catch (err) {
+      alert(err.message || 'Could not save edit.');
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  });
+}
+
+async function saveEditedPost(postId, text) {
+  const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
+  if (window.HarborDB && HarborDB.isReady() && HarborDB.updatePost) {
+    try {
+      await HarborDB.updatePost(postId, text, { deviceId });
+      await refreshCloudPosts();
+      return;
+    } catch (err) {
+      // Fall through to local if this post only lives on-device
+      if (!getPostById(postId)?.private && !loadPosts().some((p) => p.id === postId)) {
+        throw err;
+      }
+      console.warn('Harbor cloud edit failed, trying local', err);
+    }
+  }
+  const posts = loadPosts();
+  const idx = posts.findIndex((p) => p.id === postId);
+  if (idx < 0) throw new Error('Could not find that message to edit.');
+  if (!isOwnMessage(posts[idx])) throw new Error('You can only edit your own messages.');
+  posts[idx] = { ...posts[idx], text, editedAt: Date.now() };
+  savePosts(posts);
+}
+
+async function saveEditedReply(postId, replyId, text) {
+  const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
+  if (window.HarborDB && HarborDB.isReady() && HarborDB.updateReply) {
+    try {
+      await HarborDB.updateReply(replyId, text, { deviceId });
+      await refreshCloudPosts();
+      return;
+    } catch (err) {
+      const localPost = loadPosts().find((p) => p.id === postId);
+      const localFeatured = postId === FEATURED_POST.id;
+      if (!localPost && !localFeatured) throw err;
+      console.warn('Harbor cloud reply edit failed, trying local', err);
+    }
+  }
+
+  if (postId === FEATURED_POST.id) {
+    const key = `harbor.replies.${FEATURED_POST.id}`;
+    const replies = loadJSON(key, []);
+    const idx = replies.findIndex((r) => r.id === replyId);
+    if (idx < 0) throw new Error('Could not find that reply to edit.');
+    if (!isOwnMessage(replies[idx])) throw new Error('You can only edit your own messages.');
+    replies[idx] = { ...replies[idx], text, editedAt: Date.now() };
+    saveJSON(key, replies);
+    return;
+  }
+
+  const posts = loadPosts();
+  const pIdx = posts.findIndex((p) => p.id === postId);
+  if (pIdx < 0) throw new Error('Could not find that reply to edit.');
+  const replies = Array.isArray(posts[pIdx].replies) ? posts[pIdx].replies : [];
+  const rIdx = replies.findIndex((r) => r.id === replyId);
+  if (rIdx < 0) throw new Error('Could not find that reply to edit.');
+  if (!isOwnMessage(replies[rIdx])) throw new Error('You can only edit your own messages.');
+  replies[rIdx] = { ...replies[rIdx], text, editedAt: Date.now() };
+  posts[pIdx].replies = replies;
+  savePosts(posts);
 }
 
 function syncWriteIdentityUI() {
@@ -2173,6 +2401,7 @@ async function persistPost({ text, tags, privatePost }) {
   }
 
   const angel = await askAngel(text);
+  const userId = (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null;
   const post = {
     id: uid(),
     featured: false,
@@ -2187,6 +2416,7 @@ async function persistPost({ text, tags, privatePost }) {
     replies: [],
     angelSource: angel.source || 'local',
     deviceId,
+    userId,
   };
 
   if (!privatePost && window.HarborDB && HarborDB.isReady()) {
@@ -2282,6 +2512,7 @@ async function addReply() {
     text,
     createdAt: Date.now(),
     deviceId: window.HarborMod ? HarborMod.deviceId() : null,
+    userId: (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null,
   };
 
   if (window.HarborDB && HarborDB.isReady()) {
@@ -3037,7 +3268,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=47');
+      await navigator.serviceWorker.register('./sw.js?v=48');
     } catch (_) {}
   }
 }
