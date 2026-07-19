@@ -3,8 +3,8 @@
   // Crisis / self-harm — show help resources, do not treat as hate-ban alone
   const CRISIS_RE = /\b(kill myself|end my life|suicide|suicidal|want to die|don't want to (?:be )?alive|dont want to (?:be )?alive|self[- ]?harm|cut myself|hang myself)\b/i;
 
-  // Hate, slurs, violence promotion, discrimination, religious hate
-  // Intentionally broad for a calm community; refine over time.
+  // Hate, slurs, violence, heavy profanity — calm community; refine over time.
+  // Obfuscations (f*ck, sh1t) may still slip through — admins can Clean language.
   const BLOCKED_PATTERNS = [
     // racial / ethnic slurs & hate
     /\b(nigger|nigga|kike|spic|chink|gook|wetback|coon|raghead|towelhead|tranny)\b/i,
@@ -12,6 +12,15 @@
     /\b(faggot|fag\b|dyke\b|troon)\b/i,
     // ableist extreme slurs used as attacks
     /\b(retard(ed)?)\b/i,
+    // heavy profanity / insults that often slip past softer filters
+    /\b(fuck(?:ing|ed|er|ers)?|motherfuck(?:er|ing)?)\b/i,
+    /\b(shit(?:ty|s)?|bullshit|asshole|a-hole|dickhead|bastard)\b/i,
+    /\b(bitch(?:es|ing)?|cunt|twat|slut|whore)\b/i,
+    /\b(dumbass|jackass|dipshit|shithead)\b/i,
+    // common letter/symbol dodge attempts
+    /\bf+[\W_]*u+[\W_]*c+[\W_]*k+\b/i,
+    /\bs+h+[\W_]*i+[\W_]*t+\b/i,
+    /\ba+s+s+h+o+l+e+\b/i,
     // direct violent threats / promotion
     /\b(i('ll| will) (kill|shoot|stab|murder) you)\b/i,
     /\b(kill all|death to|rape you|gas the|lynch)\b/i,
