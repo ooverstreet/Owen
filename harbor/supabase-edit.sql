@@ -1,5 +1,6 @@
 -- Harbor message editing — run once in Supabase SQL Editor
--- Lets signed-in authors edit their own posts/replies.
+-- Only the currently signed-in author can edit their own posts/replies.
+-- (MFA can be added later; auth.uid() is required on every edit.)
 
 alter table public.harbor_posts
   add column if not exists user_id uuid references auth.users(id) on delete set null,

@@ -1824,7 +1824,6 @@ function syncMyAuthorsFromAuth() {
   if (!isLoggedIn()) return;
   try {
     const auth = window.HarborAuth ? HarborAuth.getState() : null;
-    const email = String(auth?.user?.email || auth?.profile?.email || '').trim().toLowerCase();
     const profileName = (auth?.profile?.display_name || '').trim();
     if (profileName) rememberAuthorName(profileName);
     const identity = loadIdentity();
@@ -1833,24 +1832,31 @@ function syncMyAuthorsFromAuth() {
     } else if (identity.username) {
       rememberAuthorName(identity.username);
     }
-    // Owner early-shore names used before user_id stamping
-    if (email === 'owenstreet7@gmail.com') {
-      rememberAuthorName('owen1');
-      rememberAuthorName('owen');
-    }
   } catch (_) {}
 }
 
+/** Only the signed-in account may edit — UI gate; server RPC enforces the same. */
 function isOwnMessage(msg) {
   if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
   if (!isLoggedIn()) return false;
-  const uid = (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || '';
-  if (uid && msg.userId && msg.userId === uid) return true;
-  const did = window.HarborMod ? HarborMod.deviceId() : '';
-  if (did && msg.deviceId && msg.deviceId === did) return true;
-  // Named posts: match usernames this account has used (survives cache refresh)
-  const author = String(msg.authorName || displayName(msg) || '').trim().toLowerCase();
-  if (author && author !== 'anonymous' && myAuthorNames().has(author)) return true;
+  const auth = window.HarborAuth ? HarborAuth.getState() : null;
+  const uid = auth?.user?.id || '';
+  if (!uid) return false;
+
+  // Strongest: message stamped with this account’s user id
+  if (msg.userId && msg.userId === uid) return true;
+
+  // Legacy messages (no user_id yet): same device, or current username/profile only
+  if (!msg.userId) {
+    const did = window.HarborMod ? HarborMod.deviceId() : '';
+    if (did && msg.deviceId && msg.deviceId === did) return true;
+    const author = String(msg.authorName || '').trim().toLowerCase();
+    if (msg.authorMode === 'named' && author && author !== 'anonymous') {
+      const identityName = String(loadIdentity().username || '').trim().toLowerCase();
+      const profileName = String(auth?.profile?.display_name || '').trim().toLowerCase();
+      if (author === identityName || author === profileName) return true;
+    }
+  }
   return false;
 }
 
@@ -2112,6 +2118,7 @@ function beginEditReply(wrap, post, reply) {
 }
 
 async function saveEditedPost(postId, text) {
+  if (!isLoggedIn()) throw new Error('Sign in to edit your message.');
   const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
   if (window.HarborDB && HarborDB.isReady() && HarborDB.updatePost) {
     try {
@@ -2135,6 +2142,7 @@ async function saveEditedPost(postId, text) {
 }
 
 async function saveEditedReply(postId, replyId, text) {
+  if (!isLoggedIn()) throw new Error('Sign in to edit your message.');
   const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
   if (window.HarborDB && HarborDB.isReady() && HarborDB.updateReply) {
     try {
@@ -3361,7 +3369,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=51');
+      await navigator.serviceWorker.register('./sw.js?v=52');
     } catch (_) {}
   }
 }
