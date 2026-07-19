@@ -74,6 +74,14 @@ begin
         and device_id is not null
         and device_id = p_device_id
       )
+      or (
+        user_id is null
+        and author_mode = 'named'
+        and lower(author_name) = lower(coalesce(
+          (select p.display_name from public.harbor_profiles p where p.id = uid),
+          split_part(coalesce(auth.jwt() ->> 'email', ''), '@', 1)
+        ))
+      )
     )
   returning * into row;
 
@@ -117,6 +125,14 @@ begin
         and p_device_id is not null
         and device_id is not null
         and device_id = p_device_id
+      )
+      or (
+        user_id is null
+        and author_mode = 'named'
+        and lower(author_name) = lower(coalesce(
+          (select p.display_name from public.harbor_profiles p where p.id = uid),
+          split_part(coalesce(auth.jwt() ->> 'email', ''), '@', 1)
+        ))
       )
     )
   returning * into row;

@@ -972,6 +972,7 @@ body {
       <article class="post-card full" id="thread-post" style="cursor:default"></article>
       <div class="actions" style="margin-top:0">
         <button class="felt-btn" id="felt-btn" type="button">I’ve felt this too</button>
+        <button class="btn btn-secondary btn-small" id="edit-post-btn" type="button" hidden>Edit</button>
         <button class="btn btn-secondary btn-small" id="report-btn" type="button">Report</button>
         <button class="btn btn-secondary btn-small" id="admin-hide-btn" type="button" hidden>Remove (admin)</button>
         <button class="btn btn-secondary btn-small" id="admin-ban-btn" type="button" hidden>Ban author (admin)</button>
@@ -1778,6 +1779,23 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function myAuthorNames() {
+  const names = new Set();
+  const identity = loadIdentity();
+  if (identity.username) names.add(String(identity.username).trim().toLowerCase());
+  try {
+    const auth = window.HarborAuth ? HarborAuth.getState() : null;
+    const profileName = auth?.profile?.display_name || '';
+    const email = auth?.user?.email || auth?.profile?.email || '';
+    if (profileName) names.add(String(profileName).trim().toLowerCase());
+    if (email && email.includes('@')) names.add(email.split('@')[0].trim().toLowerCase());
+  } catch (_) {}
+  names.delete('');
+  names.delete('anonymous');
+  names.delete('harbor');
+  return names;
+}
+
 function isOwnMessage(msg) {
   if (!msg || msg.id === FEATURED_POST.id || msg.featured) return false;
   if (!isLoggedIn()) return false;
@@ -1785,6 +1803,10 @@ function isOwnMessage(msg) {
   if (uid && msg.userId && msg.userId === uid) return true;
   const did = window.HarborMod ? HarborMod.deviceId() : '';
   if (did && msg.deviceId && msg.deviceId === did) return true;
+  // Older cloud posts may lack user_id/device_id — match named author on this account
+  if (msg.authorMode === 'named' && msg.authorName) {
+    if (myAuthorNames().has(String(msg.authorName).trim().toLowerCase())) return true;
+  }
   return false;
 }
 
@@ -1891,6 +1913,18 @@ async function openThread(id) {
     thanks.classList.remove('show');
   }
   updateReplyAsLabel();
+  const ownPost = isOwnMessage(post);
+  const editPostBtn = $('#edit-post-btn');
+  if (editPostBtn) {
+    editPostBtn.hidden = !ownPost;
+    editPostBtn.onclick = ownPost
+      ? (e) => {
+          e.preventDefault();
+          beginEditPost(card, post);
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      : null;
+  }
   const adminOn = !!(window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin());
   $('#admin-hide-btn').hidden = !adminOn || post.id === FEATURED_POST.id;
   $('#admin-ban-btn').hidden = !adminOn || post.id === FEATURED_POST.id || post.authorName === 'Harbor';
@@ -3268,7 +3302,7 @@ async function boot() {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=48');
+      await navigator.serviceWorker.register('./sw.js?v=49');
     } catch (_) {}
   }
 }
