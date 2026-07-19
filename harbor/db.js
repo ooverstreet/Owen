@@ -178,7 +178,13 @@
       p_body: cleaned,
       p_device_id: deviceId || null,
     });
-    if (rpc.error) throw new Error(rpc.error.message || 'Could not edit post');
+    if (rpc.error) {
+      const msg = rpc.error.message || '';
+      if (/function|does not exist|PGRST202/i.test(msg)) {
+        throw new Error('Edit isn’t set up in Supabase yet — run supabase-edit.sql, then try again.');
+      }
+      throw new Error(msg || 'Could not edit post');
+    }
     const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
     return row ? mapPost(row, []) : { id: postId, text: cleaned, editedAt: Date.now() };
   }
@@ -193,7 +199,13 @@
       p_body: cleaned,
       p_device_id: deviceId || null,
     });
-    if (rpc.error) throw new Error(rpc.error.message || 'Could not edit reply');
+    if (rpc.error) {
+      const msg = rpc.error.message || '';
+      if (/function|does not exist|PGRST202/i.test(msg)) {
+        throw new Error('Edit isn’t set up in Supabase yet — run supabase-edit.sql, then try again.');
+      }
+      throw new Error(msg || 'Could not edit reply');
+    }
     const row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
     return row ? mapReply(row) : { id: replyId, text: cleaned, editedAt: Date.now() };
   }
