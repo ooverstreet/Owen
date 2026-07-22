@@ -626,7 +626,15 @@ body {
 .avatar.lg { width: 72px; height: 72px; font-size: 1.45rem; }
 .avatar.named { background: rgba(62, 122, 134, 0.16); }
 .avatar.anon { background: rgba(184, 137, 74, 0.14); color: var(--warm); }
-.avatar.harbor { background: rgba(31, 79, 88, 0.18); color: var(--water-deep); }
+.avatar.harbor {
+  background: linear-gradient(165deg, #B8D4DE, #EAF2F4 55%, #DCE9EE);
+  color: var(--water-deep);
+  border: 1px solid rgba(62, 122, 134, 0.18);
+}
+.avatar.harbor img {
+  object-fit: cover;
+  background: transparent;
+}
 .avatar img {
   width: 100%;
   height: 100%;
@@ -1584,6 +1592,7 @@ const FEATURED_POST = {
   featured: true,
   authorMode: 'named',
   authorName: 'Harbor',
+  avatarUrl: 'icon.svg',
   text: 'Today I start a new and exciting chapter. Harbor. A place people can come and be themselves with no judgment. Say how you feel or what makes you excited, happy, disappointed etc. While respecting others and their opinions.',
   tags: ['welcome'],
   createdAt: Date.UTC(2026, 6, 17, 12, 0, 0),
@@ -1592,6 +1601,8 @@ const FEATURED_POST = {
   feltCount: 1,
   private: false,
 };
+
+const HARBOR_MARK_AVATAR = 'icon.svg';
 
 let cloudPosts = null; // null = not loaded / unavailable
 
@@ -2495,13 +2506,17 @@ function avatarHtml(msg, { size = '' } = {}) {
   const name = displayName(msg || {});
   const initial = (String(name || '?').trim().charAt(0) || '?').toUpperCase();
   const featured = !!(msg && (msg.featured || msg.id === FEATURED_POST.id));
+  const isHarborBrand = featured
+    || String(msg?.authorName || '').trim().toLowerCase() === 'harbor';
   const named = !!(msg && msg.authorMode === 'named');
-  // Photos only on named posts — anonymous stays faceless even if the account has a photo
-  const url = named && !featured ? (msg.avatarUrl || '') : '';
-  const tone = featured ? 'harbor' : (named ? 'named' : 'anon');
+  // Harbor system posts use the lighthouse mark; member photos only on named posts
+  const url = isHarborBrand
+    ? (msg.avatarUrl || HARBOR_MARK_AVATAR)
+    : (named ? (msg.avatarUrl || '') : '');
+  const tone = isHarborBrand ? 'harbor' : (named ? 'named' : 'anon');
   const sizeClass = size ? ` ${size}` : '';
   if (url) {
-    return `<span class="avatar${sizeClass}"><img src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async"></span>`;
+    return `<span class="avatar${sizeClass}${isHarborBrand ? ' harbor' : ''}"><img src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async"></span>`;
   }
   return `<span class="avatar${sizeClass} ${tone}" aria-hidden="true">${escapeHtml(initial)}</span>`;
 }
