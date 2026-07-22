@@ -119,11 +119,11 @@
     }
     const { data, error } = await client
       .from('harbor_profiles')
-      .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at')
+      .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at,avatar_url')
       .eq('id', session.user.id)
       .maybeSingle();
     if (error) {
-      // Older DBs may not have guidelines_accepted_at yet — retry without it
+      // Older DBs may not have newer columns yet — retry minimal set
       const retry = await client
         .from('harbor_profiles')
         .select('id,email,display_name,role,created_at')
@@ -246,6 +246,98 @@
     emit();
   }
 
+  async function uploadAvatar(file) {
+    if (!client || !session?.user) throw new Error('Sign in to add a photo.');
+    if (!file) throw new Error('Choose a photo first.');
+    const type = String(file.type || '').toLowerCase();
+    if (!/^image\/(jpeg|png|webp)$/.test(type)) {
+      throw new Error('Use a JPG, PNG, or WebP photo.');
+    }
+    if (file.size > 2.5 * 1024 * 1024) {
+      throw new Error('Keep photos under about 2 MB.');
+    }
+
+    const blob = await compressAvatar(file);
+    const path = `${session.user.id}/avatar.jpg`;
+    const { error: upErr } = await client.storage
+      .from('harbor-avatars')
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
+    if (upErr) {
+      if (/bucket|not found|row-level/i.test(upErr.message || '')) {
+        throw new Error('Photo storage isn’t set up yet — run supabase-avatars.sql, then try again.');
+      }
+      throw new Error(upErr.message || 'Could not upload photo.');
+    }
+
+    const { data: pub } = client.storage.from('harbor-avatars').getPublicUrl(path);
+    const avatarUrl = `${pub?.publicUrl || ''}?v=${Date.now()}`;
+    const { error } = await client
+      .from('harbor_profiles')
+      .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+      .eq('id', session.user.id);
+    if (error) {
+      if (/avatar_url|column/i.test(error.message || '')) {
+        throw new Error('Photo column isn’t set up yet — run supabase-avatars.sql, then try again.');
+      }
+      throw error;
+    }
+    await refreshProfile();
+    emit();
+    return avatarUrl;
+  }
+
+  async function removeAvatar() {
+    if (!client || !session?.user) throw new Error('Sign in to remove a photo.');
+    const path = `${session.user.id}/avatar.jpg`;
+    try {
+      await client.storage.from('harbor-avatars').remove([path]);
+    } catch (_) {}
+    const { error } = await client
+      .from('harbor_profiles')
+      .update({ avatar_url: null, updated_at: new Date().toISOString() })
+      .eq('id', session.user.id);
+    if (error) throw error;
+    await refreshProfile();
+    emit();
+  }
+
+  function compressAvatar(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const max = 512;
+          const scale = Math.min(1, max / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(url);
+              if (!blob) reject(new Error('Could not process that photo.'));
+              else resolve(blob);
+            },
+            'image/jpeg',
+            0.85
+          );
+        } catch (err) {
+          URL.revokeObjectURL(url);
+          reject(err);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Could not read that photo.'));
+      };
+      img.src = url;
+    });
+  }
+
   function onChange(fn) {
     listeners.add(fn);
     return () => listeners.delete(fn);
@@ -268,6 +360,8 @@
     signOut,
     refreshProfile,
     updateDisplayName,
+    uploadAvatar,
+    removeAvatar,
     acceptGuidelines,
     onChange,
     accessToken,

@@ -42,7 +42,8 @@
     return authedClient() || client;
   }
 
-  function mapPost(row, replies = []) {
+  function mapPost(row, replies = [], avatars = {}) {
+    const uid = row.user_id || null;
     return {
       id: row.id,
       featured: !!row.featured,
@@ -57,13 +58,15 @@
       feltCount: row.felt_count || 0,
       private: !!row.is_private,
       deviceId: row.device_id || null,
-      userId: row.user_id || null,
+      userId: uid,
+      avatarUrl: (uid && avatars[uid]) || null,
       replies,
       cloud: true,
     };
   }
 
-  function mapReply(row) {
+  function mapReply(row, avatars = {}) {
+    const uid = row.user_id || null;
     return {
       id: row.id,
       authorMode: row.author_mode,
@@ -72,9 +75,29 @@
       createdAt: new Date(row.created_at).getTime(),
       editedAt: row.edited_at ? new Date(row.edited_at).getTime() : null,
       deviceId: row.device_id || null,
-      userId: row.user_id || null,
+      userId: uid,
+      avatarUrl: (uid && avatars[uid]) || null,
       cloud: true,
     };
+  }
+
+  async function fetchAvatarMap(userIds) {
+    const ids = [...new Set((userIds || []).filter(Boolean))];
+    if (!ids.length || !ready) return {};
+    const c = writeClient();
+    const { data, error } = await c
+      .from('harbor_profiles')
+      .select('id,avatar_url')
+      .in('id', ids);
+    if (error) {
+      console.warn('Harbor avatar lookup failed', error.message || error);
+      return {};
+    }
+    const map = {};
+    (data || []).forEach((row) => {
+      if (row.avatar_url) map[row.id] = row.avatar_url;
+    });
+    return map;
   }
 
   async function listPosts() {
@@ -91,6 +114,7 @@
     const posts = (data || []).filter((p) => !p.is_hidden);
     const ids = posts.map((p) => p.id);
     let repliesByPost = {};
+    let replyRows = [];
     if (ids.length) {
       const { data: replies, error: rErr } = await client
         .from('harbor_replies')
@@ -98,13 +122,22 @@
         .in('post_id', ids)
         .order('created_at', { ascending: true });
       if (rErr) throw rErr;
-      (replies || []).forEach((r) => {
-        if (r.is_hidden) return;
+      replyRows = (replies || []).filter((r) => !r.is_hidden);
+      replyRows.forEach((r) => {
         if (!repliesByPost[r.post_id]) repliesByPost[r.post_id] = [];
-        repliesByPost[r.post_id].push(mapReply(r));
+        repliesByPost[r.post_id].push(r);
       });
     }
-    return posts.map((p) => mapPost(p, repliesByPost[p.id] || []));
+    const avatarIds = [
+      ...posts.map((p) => p.user_id),
+      ...replyRows.map((r) => r.user_id),
+    ];
+    const avatars = await fetchAvatarMap(avatarIds);
+    return posts.map((p) => mapPost(
+      p,
+      (repliesByPost[p.id] || []).map((r) => mapReply(r, avatars)),
+      avatars
+    ));
   }
 
   async function createPost(post) {
@@ -145,7 +178,12 @@
       .eq('post_id', id)
       .order('created_at', { ascending: true });
     if (rErr) throw rErr;
-    return mapPost(data, (replies || []).map(mapReply));
+    const replyRows = (replies || []).filter((r) => !r.is_hidden);
+    const avatars = await fetchAvatarMap([
+      data.user_id,
+      ...replyRows.map((r) => r.user_id),
+    ]);
+    return mapPost(data, replyRows.map((r) => mapReply(r, avatars)), avatars);
   }
 
   async function addReply(postId, reply) {
