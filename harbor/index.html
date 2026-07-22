@@ -72,6 +72,9 @@ body {
   display: flex;
   flex-direction: column;
 }
+#app.has-dock {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
 
 .screen { display: none; flex: 1; flex-direction: column; animation: rise .55s ease both; }
 .screen.active { display: flex; }
@@ -605,7 +608,169 @@ body {
   transition: opacity .35s ease;
 }
 .felt-thanks.show { opacity: 1; }
-.fab-wrap { position: sticky; bottom: 8px; display: flex; justify-content: flex-end; margin-top: 18px; }
+.fab-wrap { display: none; }
+
+.shore-write {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(165deg, rgba(255,252,248,.88), rgba(214,232,236,.55));
+}
+.shore-write p {
+  margin: 0;
+  color: var(--water-deep);
+  font-size: .98rem;
+  line-height: 1.35;
+  max-width: 28ch;
+}
+
+.harbor-guide {
+  margin: 0 0 16px;
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(184, 137, 74, 0.28);
+  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.72));
+  animation: fadeIn .55s ease both;
+}
+.harbor-guide .guide-step-label {
+  margin: 0 0 8px;
+  font-size: .72rem;
+  font-weight: 620;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--warm);
+}
+.harbor-guide .guide-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 560;
+  color: var(--water-deep);
+  letter-spacing: -0.02em;
+}
+.harbor-guide .guide-body {
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+.harbor-guide .guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.my-posts-box {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,252,248,.55);
+}
+.my-posts-box h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--water-deep);
+  font-weight: 560;
+}
+.my-posts-box .my-posts-sub {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: .92rem;
+  line-height: 1.4;
+}
+.my-post-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--paper-solid);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin: 0 0 8px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.my-post-item:last-child { margin-bottom: 0; }
+.my-post-item .my-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: .8rem;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.my-post-item .my-post-text {
+  color: var(--ink);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(720px, 100%);
+  z-index: 40;
+  display: none;
+  padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(234,243,246,.55), rgba(248,251,252,.94));
+  border-top: 1px solid rgba(62, 122, 134, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dock.show { display: block; }
+.dock-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,252,248,.88);
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(31, 79, 88, 0.08);
+}
+.dock-btn {
+  border: 0;
+  background: transparent;
+  border-radius: 14px;
+  padding: 10px 8px 8px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dock-btn span {
+  font-size: .78rem;
+  font-weight: 560;
+  letter-spacing: .01em;
+}
+.dock-btn svg {
+  width: 22px;
+  height: 22px;
+  opacity: .75;
+}
+.dock-btn.active {
+  background: rgba(62, 122, 134, 0.12);
+  color: var(--water-deep);
+}
+.dock-btn.active svg { opacity: 1; }
 
 /* ── Write ──────────────────────────────────────────────────── */
 .write-shell { flex: 1; display: flex; flex-direction: column; gap: 14px; }
@@ -968,41 +1133,47 @@ body {
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
       <div class="top-actions">
-        <button class="linkish" data-go="write">Write</button>
-        <button class="linkish" id="open-account" type="button">Account</button>
+        <button class="linkish" id="open-guide" type="button">Guide</button>
       </div>
     </div>
     <h2 class="section-title" id="feed-title">The shore</h2>
     <p class="section-sub" id="feed-sub">Start with First light. Then open any thread that meets you.</p>
+
+    <div class="shore-write">
+      <p>Ready to set something down?</p>
+      <button class="btn btn-primary btn-small" data-go="write" type="button">Write</button>
+    </div>
+
     <div class="room-bar">
       <label for="room-select">Room</label>
       <select id="room-select" class="room-select" aria-label="Choose a room"></select>
     </div>
     <p class="room-blurb" id="room-blurb">Everyone’s quiet notes.</p>
-    <aside id="welcome-ashore" class="welcome-ashore" hidden>
-      <p>Welcome ashore. Begin with <strong>First light</strong> — then share something of your own when you’re ready. You can stay anonymous.</p>
-      <div class="welcome-actions">
-        <button class="btn btn-primary btn-small" id="welcome-first-light" type="button">Open First light</button>
-        <button class="btn btn-secondary btn-small" id="welcome-share" type="button">Share something</button>
-        <button class="linkish" id="welcome-dismiss" type="button">Got it</button>
+
+    <aside id="harbor-guide" class="harbor-guide" hidden>
+      <p class="guide-step-label" id="guide-step-label">1 / 4</p>
+      <p class="guide-title" id="guide-title">The shore</p>
+      <p class="guide-body" id="guide-body">This is where quiet notes gather. Begin with First light, then open any thread that meets you.</p>
+      <div class="guide-actions">
+        <button class="btn btn-ghost btn-small" id="guide-back" type="button" hidden>Back</button>
+        <button class="btn btn-primary btn-small" id="guide-next" type="button">Next</button>
+        <button class="linkish" id="guide-skip" type="button">Skip</button>
       </div>
     </aside>
+
     <aside class="whisper-card" id="shore-whisper-card" aria-live="polite">
       <div class="whisper-label">Shore whisper</div>
       <p class="whisper-text" id="whisper-card-text"></p>
       <p class="whisper-source" id="whisper-card-source"></p>
     </aside>
     <div class="feed-list" id="feed-list"></div>
-    <div class="fab-wrap">
-      <button class="btn btn-primary btn-small" data-go="write">New post</button>
-    </div>
   </section>
 
   <!-- WRITE -->
   <section id="write" class="screen" aria-label="Write">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
-      <button class="linkish" data-go="feed">Feed</button>
+      <button class="linkish" data-go="feed">Back to shore</button>
     </div>
     <h2 class="section-title">What’s weighing on you?</h2>
     <p class="section-sub">Stay anonymous, or sign a name. Add a topic if you want — it’s just a label like “hope” or “goodbye.”</p>
@@ -1082,12 +1253,13 @@ body {
   </section>
 
   <!-- ACCOUNT / LOGIN -->
+  <!-- ACCOUNT / ME -->
   <section id="account" class="screen" aria-label="Account">
     <div class="topbar">
       <button class="brand-mini" data-go="home">Harbor</button>
       <button class="linkish" id="account-done" type="button">Done</button>
     </div>
-    <h2 class="section-title">Your account</h2>
+    <h2 class="section-title">Me</h2>
     <p class="section-sub" id="account-sub">Create an account or sign in to enter Harbor. Posting stays anonymous or named — your choice.</p>
 
     <div id="auth-guest" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px">
@@ -1125,7 +1297,14 @@ body {
       </label>
       <button class="btn btn-primary" id="save-identity" type="button">Save preferences</button>
       <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
+      <button class="linkish" id="open-guide-account" type="button">Replay Harbor guide</button>
       <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
+    </div>
+
+    <div id="my-posts-box" class="my-posts-box" hidden>
+      <h3>My posts</h3>
+      <p class="my-posts-sub">Notes you’ve set down — open one to see replies and how it was received.</p>
+      <div id="my-posts-list"></div>
     </div>
 
     <div id="admin-panel" class="angel-panel" style="margin-top:18px;display:none">
@@ -1163,6 +1342,23 @@ body {
 
     <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
   </section>
+
+  <nav id="harbor-dock" class="dock" aria-label="Harbor navigation" hidden>
+    <div class="dock-inner">
+      <button type="button" class="dock-btn" data-dock="feed" aria-label="Shore">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 14c4-3 7-3 9 0s5 3 9 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 18c3.5-2 6.5-2 8 0s4.5 2 8 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".55"/><circle cx="12" cy="8" r="2.2" fill="currentColor" opacity=".35"/></svg>
+        <span>Shore</span>
+      </button>
+      <button type="button" class="dock-btn" data-dock="write" aria-label="Write">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19l1.2-4.2L16.5 4.5a2 2 0 012.8 2.8L9 17.8 5 19z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14.2 6.8l2.8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>Write</span>
+      </button>
+      <button type="button" class="dock-btn" data-dock="account" aria-label="Me">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="9" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19c1.6-3.2 4-4.8 6.5-4.8S16.9 15.8 18.5 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>Me</span>
+      </button>
+    </div>
+  </nav>
 
 </div>
 
@@ -1211,6 +1407,7 @@ const STORAGE_LEGACY = 'harbor.entries.v1';
 const STORAGE_FELT = 'harbor.felt.v1';
 const STORAGE_WHISPERS = 'harbor.whispers.v1';
 const STORAGE_WELCOME = 'harbor.welcome.v1';
+const STORAGE_GUIDE = 'harbor.guide.v1';
 const STORAGE_INVITE = 'harbor.invite.v1';
 const STORAGE_ROOM = 'harbor.room.v1';
 const STORAGE_MY_AUTHORS = 'harbor.myAuthors.v1';
@@ -1299,7 +1496,28 @@ let currentThreadId = null;
 let draftMode = 'anonymous';
 let pendingEntry = 'feed';
 let authMode = 'signup';
+let guideStep = 0;
 const MEMBER_SCREENS = new Set(['feed', 'write', 'thread']);
+const DOCK_SCREENS = new Set(['feed', 'write', 'thread', 'account']);
+
+const GUIDE_STEPS = [
+  {
+    title: 'The shore',
+    body: 'This is where quiet notes gather. Start with First light, then open any thread that meets you.',
+  },
+  {
+    title: 'Rooms',
+    body: 'Rooms are gentle topics — grief, hope, worry, and more. Use them when you want a quieter corner.',
+  },
+  {
+    title: 'Write & Angel',
+    body: 'Set something down anytime from Write. Angel may leave a short companion note — presence, not advice.',
+  },
+  {
+    title: 'Keep it kind',
+    body: 'Harbor is a safe shore. Be considerate. You can stay anonymous, and Me keeps your posts in one place.',
+  },
+];
 
 function cfgInviteCodes() {
   const list = (window.HARBOR_CONFIG && HARBOR_CONFIG.inviteCodes) || [];
@@ -1628,29 +1846,123 @@ function showScreen(name) {
   const rail = $('#shore-whisper-rail');
   if (rail) rail.classList.toggle('show', name === 'feed' || name === 'home' || name === 'write');
   if (name === 'feed' || name === 'home') showNextWhisper();
+  updateDock(name);
+  if (name === 'account') paintMyPosts();
 }
 
 function hasSeenWelcome() {
-  try { return localStorage.getItem(STORAGE_WELCOME) === 'seen'; }
-  catch (_) { return false; }
+  try {
+    return localStorage.getItem(STORAGE_GUIDE) === 'seen'
+      || localStorage.getItem(STORAGE_WELCOME) === 'seen';
+  } catch (_) { return false; }
 }
 
 function markWelcomeSeen() {
-  try { localStorage.setItem(STORAGE_WELCOME, 'seen'); } catch (_) {}
-  const el = $('#welcome-ashore');
+  try {
+    localStorage.setItem(STORAGE_GUIDE, 'seen');
+    localStorage.setItem(STORAGE_WELCOME, 'seen');
+  } catch (_) {}
+  const el = $('#harbor-guide');
   if (el) el.hidden = true;
 }
 
+function paintGuideStep() {
+  const step = GUIDE_STEPS[guideStep] || GUIDE_STEPS[0];
+  const label = $('#guide-step-label');
+  const title = $('#guide-title');
+  const body = $('#guide-body');
+  const back = $('#guide-back');
+  const next = $('#guide-next');
+  if (label) label.textContent = `${guideStep + 1} / ${GUIDE_STEPS.length}`;
+  if (title) title.textContent = step.title;
+  if (body) body.textContent = step.body;
+  if (back) back.hidden = guideStep <= 0;
+  if (next) next.textContent = guideStep >= GUIDE_STEPS.length - 1 ? 'Begin' : 'Next';
+}
+
 function showWelcomeIfNeeded() {
-  const el = $('#welcome-ashore');
+  const el = $('#harbor-guide');
   if (!el) return;
-  el.hidden = hasSeenWelcome();
+  if (hasSeenWelcome()) {
+    el.hidden = true;
+  } else {
+    guideStep = 0;
+    paintGuideStep();
+    el.hidden = false;
+  }
   const sub = $('#feed-sub');
   if (sub) {
     sub.textContent = hasSeenWelcome()
       ? 'Start with First light. Then open any thread that meets you.'
-      : 'You’re new here — First light is a gentle place to begin.';
+      : 'A short guide will help you find your way around.';
   }
+}
+
+function openGuide({ force = false } = {}) {
+  const el = $('#harbor-guide');
+  if (!el) return;
+  if (force) {
+    try { localStorage.removeItem(STORAGE_GUIDE); } catch (_) {}
+  }
+  guideStep = 0;
+  paintGuideStep();
+  el.hidden = false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function updateDock(name) {
+  const dock = $('#harbor-dock');
+  const app = $('#app');
+  if (!dock) return;
+  const show = isLoggedIn() && DOCK_SCREENS.has(name);
+  dock.hidden = !show;
+  dock.classList.toggle('show', show);
+  if (app) app.classList.toggle('has-dock', show);
+  dock.querySelectorAll('[data-dock]').forEach((btn) => {
+    const key = btn.getAttribute('data-dock');
+    const active = (name === 'thread' && key === 'feed') || name === key;
+    btn.classList.toggle('active', active);
+  });
+}
+
+function myPostsList() {
+  return allPostsForFeed().filter((p) => isOwnMessage(p) && !p.featured && p.id !== FEATURED_POST.id);
+}
+
+function paintMyPosts() {
+  const box = $('#my-posts-box');
+  const list = $('#my-posts-list');
+  if (!box || !list) return;
+  if (!isLoggedIn()) {
+    box.hidden = true;
+    list.innerHTML = '';
+    return;
+  }
+  const posts = myPostsList();
+  box.hidden = false;
+  if (!posts.length) {
+    list.innerHTML = '<p class="empty" style="padding:8px 0;margin:0">You haven’t posted yet. When you do, they’ll gather here.</p>';
+    return;
+  }
+  list.innerHTML = posts.map((p) => {
+    const replies = (p.replies || []).length;
+    const felt = p.feltCount || 0;
+    const meta = [
+      formatWhen(p.createdAt),
+      replies ? `${replies} ${replies === 1 ? 'reply' : 'replies'}` : 'No replies yet',
+      felt ? `${felt} felt this` : null,
+    ].filter(Boolean).join(' · ');
+    return `<button type="button" class="my-post-item" data-my-post="${escapeHtml(p.id)}">
+      <div class="my-post-meta">${escapeHtml(meta)}</div>
+      <div class="my-post-text">${escapeHtml(p.text || '')}</div>
+    </button>`;
+  }).join('');
+  list.querySelectorAll('[data-my-post]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-my-post');
+      if (id) openThread(id);
+    });
+  });
 }
 
 async function enterHarbor(dest = 'feed') {
@@ -2571,6 +2883,7 @@ function syncAccountScreen() {
     paintStarterInvitesOnly();
     paintModAlerts();
   }
+  paintMyPosts();
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -3199,18 +3512,13 @@ $('#home-guidelines').addEventListener('click', () => {
   renderGuidelines();
   showScreen('guidelines');
 });
-$('#open-account').addEventListener('click', () => {
-  if (!isLoggedIn()) {
-    pendingEntry = 'feed';
-    openAccountForEntry('signin');
-    return;
-  }
-  syncAccountScreen();
-  showScreen('account');
-  // One gentle cloud refresh when opening Account (not on every auth event)
-  if (window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin()) {
-    renderInviteLinks({ force: false });
-  }
+$('#open-guide')?.addEventListener('click', () => {
+  openGuide({ force: true });
+});
+$('#open-guide-account')?.addEventListener('click', async () => {
+  try { localStorage.removeItem(STORAGE_GUIDE); } catch (_) {}
+  await enterHarbor('feed');
+  openGuide({ force: true });
 });
 $('#account-done').addEventListener('click', async () => {
   if (isLoggedIn() && hasAgreedGuidelines()) {
@@ -3219,17 +3527,37 @@ $('#account-done').addEventListener('click', async () => {
   }
   showScreen('home');
 });
-$('#welcome-first-light').addEventListener('click', () => {
-  markWelcomeSeen();
-  openThread(FEATURED_POST.id);
+$('#guide-next')?.addEventListener('click', () => {
+  if (guideStep >= GUIDE_STEPS.length - 1) {
+    markWelcomeSeen();
+    showWelcomeIfNeeded();
+    return;
+  }
+  guideStep += 1;
+  paintGuideStep();
 });
-$('#welcome-share').addEventListener('click', () => {
-  markWelcomeSeen();
-  enterHarbor('write');
+$('#guide-back')?.addEventListener('click', () => {
+  if (guideStep <= 0) return;
+  guideStep -= 1;
+  paintGuideStep();
 });
-$('#welcome-dismiss').addEventListener('click', () => {
+$('#guide-skip')?.addEventListener('click', () => {
   markWelcomeSeen();
   showWelcomeIfNeeded();
+});
+document.querySelectorAll('[data-dock]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const dest = btn.getAttribute('data-dock');
+    if (dest === 'account') {
+      syncAccountScreen();
+      showScreen('account');
+      if (window.HarborAuth && HarborAuth.isAdmin && HarborAuth.isAdmin()) {
+        renderInviteLinks({ force: false });
+      }
+      return;
+    }
+    await enterHarbor(dest || 'feed');
+  });
 });
 $('#entry').addEventListener('input', updateToneAndCrisis);
 $('#release-btn').addEventListener('click', () => release(false));
@@ -3311,8 +3639,6 @@ $('#auth-submit').addEventListener('click', async () => {
     }
     status.textContent = state.isAdmin ? 'Welcome, admin.' : 'Welcome ashore.';
     syncAccountScreen();
-    const btn = $('#open-account');
-    if (btn) btn.textContent = 'Account';
     if (!hasAgreedGuidelines()) {
       renderGuidelines();
       showScreen('guidelines');
@@ -3326,8 +3652,7 @@ $('#auth-submit').addEventListener('click', async () => {
 $('#auth-signout').addEventListener('click', async () => {
   if (window.HarborAuth) await HarborAuth.signOut();
   syncAccountScreen();
-  const btn = $('#open-account');
-  if (btn) btn.textContent = 'Sign in';
+  updateDock('home');
   showScreen('home');
 });
 
@@ -3689,18 +4014,18 @@ async function boot() {
           syncMyAuthorsFromAuth();
           syncAccountScreen();
           syncHomeInviteUI();
-          const btn = $('#open-account');
-          if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
           if (!HarborAuth.isLoggedIn()) {
             const active = document.querySelector('.screen.active');
             if (active && MEMBER_SCREENS.has(active.id)) showScreen('home');
+            else updateDock(active?.id || 'home');
+          } else {
+            const active = document.querySelector('.screen.active');
+            updateDock(active?.id || 'home');
           }
           if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
         }, 120);
       });
       syncMyAuthorsFromAuth();
-      const btn = $('#open-account');
-      if (btn) btn.textContent = HarborAuth.isLoggedIn() ? 'Account' : 'Sign in';
       if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
       syncHomeInviteUI();
     } catch (err) {
