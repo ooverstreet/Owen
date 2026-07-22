@@ -14,4 +14,6 @@ window.HARBOR_CONFIG = {
   // Early shore: new accounts need a valid invite code (sign-in still works)
   earlyAccess: true,
   inviteCodes: ['first-light', 'quiet-shore', 'harbor-friend'],
+  // After this many quiet days, returning members must set a new password before posting
+  inactiveDays: 90,
 };

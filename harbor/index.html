@@ -1462,7 +1462,21 @@ body {
     <div id="auth-user" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;display:none;margin-bottom:14px">
       <p id="auth-user-line" style="margin:0;color:var(--water-deep);font-weight:560"></p>
       <p id="auth-role-line" style="margin:0;font-size:.92rem;color:var(--ink-soft);display:none"></p>
+      <p id="auth-activity-line" style="margin:0;font-size:.9rem;color:var(--ink-faint)"></p>
       <button class="btn btn-secondary btn-small" id="auth-signout" type="button">Sign out</button>
+    </div>
+
+    <div id="password-refresh-box" class="angel-panel" style="margin:0 0 16px;display:none" hidden>
+      <div class="angel-label">Security check</div>
+      <p class="angel-note" id="password-refresh-note" style="margin-bottom:12px">
+        This account has been quiet for a while. Set a new password before posting again.
+      </p>
+      <input id="password-refresh-input" type="password" autocomplete="new-password" placeholder="New password (8+ characters)"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none;margin-bottom:10px">
+      <input id="password-refresh-confirm" type="password" autocomplete="new-password" placeholder="Confirm new password"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--paper-solid);border-radius:999px;padding:12px 16px;font:inherit;outline:none;margin-bottom:10px">
+      <button class="btn btn-primary btn-small" id="password-refresh-save" type="button">Save new password</button>
+      <p id="password-refresh-status" class="angel-note" style="margin:10px 0 0;min-height:1.2em"></p>
     </div>
 
     <div id="account-prefs" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;margin-top:8px">
@@ -1493,6 +1507,7 @@ body {
       <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
       <button class="linkish" id="open-guide-account" type="button">Replay Harbor guide</button>
       <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
+      <button class="linkish" id="delete-account-btn" type="button" style="color:var(--ink-faint);margin-top:4px;display:none">Delete my account</button>
     </div>
 
     <div id="my-posts-box" class="my-posts-box" hidden>
@@ -2344,6 +2359,39 @@ function formatWhen(ts) {
   } catch {
     return new Date(ts).toLocaleString();
   }
+}
+
+function formatRelativeAge(isoOrMs) {
+  if (!isoOrMs) return '';
+  const t = typeof isoOrMs === 'number' ? isoOrMs : new Date(isoOrMs).getTime();
+  if (!t || Number.isNaN(t)) return '';
+  const diff = Date.now() - t;
+  if (diff < 60 * 1000) return 'just now';
+  if (diff < 60 * 60 * 1000) {
+    const m = Math.floor(diff / 60000);
+    return `${m} minute${m === 1 ? '' : 's'} ago`;
+  }
+  if (diff < 24 * 60 * 60 * 1000) {
+    const h = Math.floor(diff / 3600000);
+    return `${h} hour${h === 1 ? '' : 's'} ago`;
+  }
+  const d = Math.floor(diff / 86400000);
+  if (d < 45) return `${d} day${d === 1 ? '' : 's'} ago`;
+  try {
+    return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(t));
+  } catch (_) {
+    return new Date(t).toLocaleDateString();
+  }
+}
+
+function needsHarborPasswordRefresh() {
+  return !!(window.HarborAuth && HarborAuth.needsPasswordRefresh && HarborAuth.needsPasswordRefresh());
+}
+
+function assertCanPostWithPassword() {
+  if (!needsHarborPasswordRefresh()) return;
+  const days = (window.HarborAuth && HarborAuth.inactiveDays && HarborAuth.inactiveDays()) || 90;
+  throw new Error(`This account has been quiet for ${days}+ days. Open Me and set a new password before posting.`);
 }
 
 function displayName(post) {
@@ -3365,11 +3413,17 @@ function syncAccountScreen() {
   const adminPanel = $('#admin-panel');
   const accountSub = $('#account-sub');
   const roleLine = $('#auth-role-line');
+  const activityLine = $('#auth-activity-line');
   const idNote = $('#identity-storage-note');
+  const pwBox = $('#password-refresh-box');
+  const deleteBtn = $('#delete-account-btn');
 
   guest.style.display = auth.isLoggedIn ? 'none' : 'flex';
   userBox.style.display = auth.isLoggedIn ? 'flex' : 'none';
   adminPanel.style.display = auth.isAdmin ? 'block' : 'none';
+  if (deleteBtn) {
+    deleteBtn.style.display = (auth.isLoggedIn && !auth.isAdmin) ? 'block' : 'none';
+  }
   // Cheap sync paint only — never kick off network on every auth tick
   if (auth.isAdmin) {
     paintStarterInvitesOnly();
@@ -3377,6 +3431,40 @@ function syncAccountScreen() {
   }
   paintMyPosts();
   paintAvatarPreview();
+
+  const needsPw = auth.isLoggedIn && needsHarborPasswordRefresh();
+  if (pwBox) {
+    pwBox.style.display = needsPw ? 'block' : 'none';
+    pwBox.hidden = !needsPw;
+    if (needsPw) {
+      const days = (window.HarborAuth && HarborAuth.inactiveDays && HarborAuth.inactiveDays()) || 90;
+      const note = $('#password-refresh-note');
+      if (note) {
+        note.textContent = `This account hasn’t been active in ${days}+ days. Set a new password before posting again.`;
+      }
+    }
+  }
+
+  if (activityLine) {
+    if (!auth.isLoggedIn) {
+      activityLine.textContent = '';
+    } else {
+      const last = auth.profile?.last_active_at || auth.profile?.created_at;
+      const age = formatRelativeAge(last);
+      const created = auth.profile?.created_at;
+      const parts = [];
+      if (age) parts.push(needsPw ? `Last active ${age}` : `Active ${age}`);
+      if (created) {
+        try {
+          const sinceLabel = new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' }).format(new Date(created));
+          parts.push(`Member since ${sinceLabel}`);
+        } catch (_) {
+          parts.push(`Member since ${formatRelativeAge(created)}`);
+        }
+      }
+      activityLine.textContent = parts.join(' · ');
+    }
+  }
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -3398,7 +3486,9 @@ function syncAccountScreen() {
       roleLine.style.display = 'none';
       roleLine.textContent = '';
       const strikes = Number(auth.profile?.strike_count || 0);
-      if (strikes >= 2) {
+      if (needsPw) {
+        accountSub.textContent = 'Welcome back — set a new password below before posting.';
+      } else if (strikes >= 2) {
         accountSub.textContent = 'This account can’t post right now due to a guidelines ban.';
       } else if (strikes === 1) {
         accountSub.textContent = 'You have a formal language warning. Another violation will ban posting.';
@@ -3644,6 +3734,7 @@ async function persistPost({ text, tags, privatePost }) {
   const author = currentAuthor();
   const deviceId = window.HarborMod ? HarborMod.deviceId() : null;
 
+  assertCanPostWithPassword();
   const strikes = Number((window.HarborAuth && HarborAuth.getState()?.profile?.strike_count) || 0);
   if (strikes >= 2) throw new Error('This account can’t post right now due to a guidelines ban.');
   if (window.HarborDB && HarborDB.isReady()) {
@@ -3680,6 +3771,7 @@ async function persistPost({ text, tags, privatePost }) {
     try {
       await HarborDB.createPost(post);
       await refreshCloudPosts();
+      if (window.HarborAuth && HarborAuth.touchActivity) HarborAuth.touchActivity();
       return post;
     } catch (err) {
       console.warn('Harbor cloud write failed, saving locally', err);
@@ -3689,6 +3781,7 @@ async function persistPost({ text, tags, privatePost }) {
   const posts = loadPosts();
   posts.push(post);
   savePosts(posts);
+  if (window.HarborAuth && HarborAuth.touchActivity) HarborAuth.touchActivity();
   return post;
 }
 
@@ -3697,6 +3790,11 @@ async function release(privatePost) {
     alert('Create an account or sign in before posting.');
     pendingEntry = 'write';
     openAccountForEntry('signup');
+    return;
+  }
+  if (needsHarborPasswordRefresh()) {
+    alert('This account has been quiet for a while. Open Me and set a new password before posting.');
+    showScreen('account');
     return;
   }
   const text = $('#entry').value.trim();
@@ -3757,6 +3855,11 @@ async function addReply() {
     openAccountForEntry('signup');
     return;
   }
+  if (needsHarborPasswordRefresh()) {
+    alert('This account has been quiet for a while. Open Me and set a new password before posting.');
+    showScreen('account');
+    return;
+  }
   const text = $('#reply-entry').value.trim();
   if (!text || !currentThreadId) return;
   const blocked = contentBlocked(text);
@@ -3794,6 +3897,7 @@ async function addReply() {
       }
       await HarborDB.addReply(currentThreadId, reply);
       await refreshCloudPosts();
+      if (window.HarborAuth && HarborAuth.touchActivity) HarborAuth.touchActivity();
       $('#reply-entry').value = '';
       await openThread(currentThreadId);
       return;
@@ -4180,6 +4284,50 @@ $('#auth-signout').addEventListener('click', async () => {
   showScreen('home');
 });
 
+$('#password-refresh-save')?.addEventListener('click', async () => {
+  const status = $('#password-refresh-status');
+  const next = ($('#password-refresh-input')?.value || '').trim();
+  const confirm = ($('#password-refresh-confirm')?.value || '').trim();
+  if (!window.HarborAuth || !HarborAuth.changePassword) return;
+  if (next.length < 8) {
+    if (status) status.textContent = 'Use at least 8 characters.';
+    return;
+  }
+  if (next !== confirm) {
+    if (status) status.textContent = 'Those passwords don’t match.';
+    return;
+  }
+  if (status) status.textContent = 'Saving…';
+  try {
+    await HarborAuth.changePassword(next);
+    if ($('#password-refresh-input')) $('#password-refresh-input').value = '';
+    if ($('#password-refresh-confirm')) $('#password-refresh-confirm').value = '';
+    if (status) status.textContent = 'Password updated. You’re clear to post again.';
+    syncAccountScreen();
+  } catch (err) {
+    if (status) status.textContent = err.message || 'Could not update password.';
+  }
+});
+
+$('#delete-account-btn')?.addEventListener('click', async () => {
+  if (!window.HarborAuth || !HarborAuth.deleteAccount) return;
+  if (!confirm('Delete your Harbor account permanently? Your profile photo is removed. Posts may stay on the shore without your account attached.')) return;
+  const typed = prompt('Type DELETE to confirm account removal:');
+  if (typed !== 'DELETE') {
+    alert('Account not deleted.');
+    return;
+  }
+  try {
+    await HarborAuth.deleteAccount();
+    syncAccountScreen();
+    updateDock('home');
+    showScreen('home');
+    alert('Your account was deleted.');
+  } catch (err) {
+    alert(err.message || 'Could not delete account. The host may still need to redeploy harbor-moderation.');
+  }
+});
+
 $('#report-btn').addEventListener('click', async () => {
   if (!currentThreadId) return;
   const reason = prompt('Why are you reporting this? (hate, threats, harassment, spam, other)', 'guidelines');
@@ -4552,6 +4700,10 @@ async function boot() {
       syncMyAuthorsFromAuth();
       if (note && HarborAuth.isLoggedIn()) note.textContent = cloudStatusText();
       syncHomeInviteUI();
+      if (HarborAuth.isLoggedIn() && HarborAuth.touchActivity) {
+        HarborAuth.touchActivity();
+      }
+      syncAccountScreen();
     } catch (err) {
       console.warn('Harbor auth init failed', err);
     }

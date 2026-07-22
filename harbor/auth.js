@@ -5,6 +5,7 @@
   let session = null;
   let profile = null;
   let adminPromoteTried = false;
+  let lastTouchAt = 0;
   const listeners = new Set();
 
   function configured() {
@@ -119,22 +120,31 @@
     }
     const { data, error } = await client
       .from('harbor_profiles')
-      .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at,avatar_url')
+      .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at,avatar_url,last_active_at,password_changed_at')
       .eq('id', session.user.id)
       .maybeSingle();
     if (error) {
-      // Older DBs may not have newer columns yet — retry minimal set
+      // Older DBs may not have newer columns yet — retry without activity fields
       const retry = await client
         .from('harbor_profiles')
-        .select('id,email,display_name,role,created_at')
+        .select('id,email,display_name,role,created_at,guidelines_accepted_at,strike_count,warned_at,avatar_url')
         .eq('id', session.user.id)
         .maybeSingle();
       if (retry.error) {
-        console.warn('Harbor profile load failed', error);
-        profile = null;
-        return null;
+        const minimal = await client
+          .from('harbor_profiles')
+          .select('id,email,display_name,role,created_at')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        if (minimal.error) {
+          console.warn('Harbor profile load failed', error);
+          profile = null;
+          return null;
+        }
+        profile = minimal.data || null;
+      } else {
+        profile = retry.data || null;
       }
-      profile = retry.data || null;
     } else if (!data) {
       const email = session.user.email || '';
       profile = {
@@ -143,6 +153,8 @@
         display_name: email.split('@')[0] || 'Harbor friend',
         role: email.toLowerCase() === 'owenstreet7@gmail.com' ? 'admin' : 'member',
         guidelines_accepted_at: null,
+        last_active_at: null,
+        password_changed_at: null,
       };
     } else {
       profile = data;
@@ -232,7 +244,98 @@
     await client.auth.signOut();
     session = null;
     profile = null;
+    lastTouchAt = 0;
     emit();
+  }
+
+  function inactiveCutoffMs() {
+    const days = Number(cfg.inactiveDays);
+    const safeDays = Number.isFinite(days) && days > 0 ? days : 90;
+    return safeDays * 24 * 60 * 60 * 1000;
+  }
+
+  function inactiveDays() {
+    const days = Number(cfg.inactiveDays);
+    return Number.isFinite(days) && days > 0 ? days : 90;
+  }
+
+  /** True when the account has been quiet long enough to require a fresh password. */
+  function needsPasswordRefresh() {
+    if (!profile || computeIsAdmin()) return false;
+    const last = profile.last_active_at || profile.created_at;
+    if (!last) return false;
+    return (Date.now() - new Date(last).getTime()) >= inactiveCutoffMs();
+  }
+
+  /** Bump last_active_at (throttled) when the person uses Harbor. */
+  async function touchActivity() {
+    if (!client || !session?.user) return null;
+    if (needsPasswordRefresh()) return null;
+    const now = Date.now();
+    if (now - lastTouchAt < 5 * 60 * 1000) return profile?.last_active_at || null;
+    lastTouchAt = now;
+    try {
+      const { data, error } = await client.rpc('harbor_touch_activity');
+      if (error) throw error;
+      if (profile && data) profile = { ...profile, last_active_at: data };
+      return data;
+    } catch (err) {
+      console.warn('Harbor activity touch skipped', err);
+      return null;
+    }
+  }
+
+  async function changePassword(newPassword) {
+    if (!client || !session?.user) throw new Error('Sign in first.');
+    const password = String(newPassword || '');
+    if (password.length < 8) {
+      throw new Error('Use at least 8 characters for your new password.');
+    }
+    const { error } = await client.auth.updateUser({ password });
+    if (error) throw error;
+    try {
+      const { data, error: markError } = await client.rpc('harbor_mark_password_changed');
+      if (markError) throw markError;
+      if (profile && data) {
+        profile = { ...profile, last_active_at: data, password_changed_at: data };
+      }
+    } catch (err) {
+      // Password already updated; activity SQL may not be run yet
+      console.warn('Harbor password stamp skipped', err);
+      const stamp = new Date().toISOString();
+      if (profile) profile = { ...profile, last_active_at: stamp, password_changed_at: stamp };
+    }
+    lastTouchAt = Date.now();
+    emit();
+    return profile;
+  }
+
+  /** Permanently delete this account (avatar storage, profile cascade, auth user). */
+  async function deleteAccount() {
+    if (!client || !session?.access_token) throw new Error('Sign in first.');
+    const base = String(cfg.supabaseUrl || '').replace(/\/$/, '');
+    const anon = cfg.supabaseAnonKey;
+    if (!base || !anon) throw new Error('Harbor is not configured.');
+
+    const response = await fetch(`${base}/functions/v1/harbor-moderation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: anon,
+      },
+      body: JSON.stringify({ action: 'delete_own_account' }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || 'Could not delete account.');
+    }
+    session = null;
+    profile = null;
+    lastTouchAt = 0;
+    try { await client.auth.signOut(); } catch (_) {}
+    emit();
+    return true;
   }
 
   async function updateDisplayName(name) {
@@ -377,6 +480,11 @@
     uploadAvatar,
     removeAvatar,
     acceptGuidelines,
+    touchActivity,
+    needsPasswordRefresh,
+    changePassword,
+    deleteAccount,
+    inactiveDays,
     onChange,
     accessToken,
     siteUrl,
