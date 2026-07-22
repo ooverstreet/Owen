@@ -546,12 +546,12 @@ body {
 .feed-list { display: flex; flex-direction: column; gap: 0; }
 .post-card {
   width: 100%; text-align: left; border: 0;
-  border-bottom: 1px solid rgba(62, 122, 134, 0.12);
-  background: transparent; border-radius: 0; padding: 14px 2px 15px;
+  border-bottom: 1px solid rgba(62, 122, 134, 0.11);
+  background: transparent; border-radius: 0; padding: 10px 2px 11px;
   cursor: pointer; font: inherit; color: inherit;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 2px 12px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 0 10px;
   transition: background .15s ease;
   animation: fadeIn .35s ease both;
 }
@@ -560,53 +560,56 @@ body {
 .post-card.featured {
   background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
   border: 1px solid rgba(184, 137, 74, 0.28);
-  border-radius: 18px;
-  padding: 14px 14px 15px;
-  margin: 4px 0 10px;
+  border-radius: 16px;
+  padding: 12px 12px 13px;
+  margin: 2px 0 8px;
   box-shadow: none;
+  grid-template-columns: 36px minmax(0, 1fr);
 }
 .post-card.full {
   border-bottom: 0;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 16px 16px 18px;
+  padding: 14px 14px 16px;
   margin: 0;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 2px 12px;
 }
 .post-card.full.featured {
   background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
   border-color: rgba(184, 137, 74, 0.28);
 }
-.post-avatar-col { padding-top: 2px; }
+.post-avatar-col { padding-top: 1px; }
 .post-main { min-width: 0; }
 .post-meta {
-  display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline;
-  margin-bottom: 4px; font-size: .84rem; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline;
+  margin-bottom: 2px; font-size: .8rem; color: var(--ink-faint);
 }
 .author { color: var(--water-deep); font-weight: 560; }
 .featured-badge {
   color: var(--warm); font-weight: 560; letter-spacing: .04em; text-transform: uppercase;
-  font-size: .72rem;
+  font-size: .7rem;
 }
 .post-body {
-  color: var(--ink); line-height: 1.55; white-space: pre-wrap;
-  font-size: 1.02rem;
+  color: var(--ink); line-height: 1.48; white-space: pre-wrap;
+  font-size: .98rem;
   display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
 }
-.post-card.full .post-body { display: block; -webkit-line-clamp: unset; line-height: 1.65; }
-.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.post-card.full .post-body { display: block; -webkit-line-clamp: unset; line-height: 1.6; font-size: 1.02rem; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .tag {
-  font-size: .78rem; font-weight: 560; color: var(--water);
-  background: rgba(62,122,134,.08); border-radius: 999px; padding: 4px 10px;
+  font-size: .74rem; font-weight: 560; color: var(--water);
+  background: rgba(62,122,134,.08); border-radius: 999px; padding: 3px 9px;
 }
 .post-foot {
-  margin-top: 10px; font-size: .82rem; color: var(--ink-faint);
+  margin-top: 8px; font-size: .78rem; color: var(--ink-faint);
   display: flex; justify-content: space-between; gap: 10px;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -616,10 +619,10 @@ body {
   background: rgba(62, 122, 134, 0.12);
   color: var(--water-deep);
   font-weight: 620;
-  font-size: .95rem;
+  font-size: .88rem;
   letter-spacing: .02em;
 }
-.avatar.sm { width: 32px; height: 32px; font-size: .82rem; }
+.avatar.sm { width: 28px; height: 28px; font-size: .76rem; }
 .avatar.lg { width: 72px; height: 72px; font-size: 1.45rem; }
 .avatar.named { background: rgba(62, 122, 134, 0.16); }
 .avatar.anon { background: rgba(184, 137, 74, 0.14); color: var(--warm); }
@@ -649,6 +652,98 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+.sr-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+.crop-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(20, 40, 48, 0.55);
+  backdrop-filter: blur(6px);
+}
+.crop-modal.show { display: flex; }
+.crop-sheet {
+  width: min(420px, 100%);
+  background: var(--paper-solid);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.crop-sheet h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--water-deep);
+  font-weight: 560;
+}
+.crop-sheet .crop-help {
+  margin: 0 0 12px;
+  font-size: .9rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.crop-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #10252b;
+  touch-action: none;
+  cursor: grab;
+}
+.crop-stage:active { cursor: grabbing; }
+.crop-stage img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.crop-mask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle closest-side, transparent 61%, rgba(8, 20, 24, 0.58) 62%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.crop-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+.crop-zoom-row label {
+  font-size: .84rem;
+  color: var(--ink-soft);
+  min-width: 3.5rem;
+}
+.crop-zoom-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--water-deep);
+}
+.crop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .empty { color: var(--ink-faint); padding: 22px 4px; line-height: 1.45; max-width: 36ch; }
 .welcome-ashore {
@@ -916,9 +1011,9 @@ body {
 .reply-list { display: flex; flex-direction: column; gap: 0; }
 .reply {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 2px 10px;
-  padding: 12px 2px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 0 8px;
+  padding: 9px 2px;
   border: 0;
   border-bottom: 1px solid rgba(62, 122, 134, 0.1);
   background: transparent;
@@ -1366,12 +1461,12 @@ body {
       <div class="avatar-editor">
         <span class="avatar lg named" id="pref-avatar-preview" aria-hidden="true">?</span>
         <div class="avatar-actions">
-          <label class="btn btn-secondary btn-small" for="pref-avatar-file" style="cursor:pointer;margin:0">Choose photo</label>
-          <input id="pref-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <button class="btn btn-secondary btn-small" id="pref-avatar-choose" type="button">Choose photo</button>
+          <input id="pref-avatar-file" class="sr-file" type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
           <button class="btn btn-ghost btn-small" id="pref-avatar-remove" type="button" hidden>Remove</button>
         </div>
       </div>
-      <p class="avatar-hint">Shown on named posts only. Anonymous posts stay without a face.</p>
+      <p class="avatar-hint">Shown on named posts only. You’ll crop it to a circle before saving.</p>
       <p id="pref-avatar-status" class="avatar-hint" style="min-height:1.2em"></p>
 
       <label for="pref-username" style="font-size:.95rem;color:var(--ink-soft)">How you appear on posts</label>
@@ -1432,6 +1527,25 @@ body {
 
     <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
   </section>
+
+  <div id="avatar-crop-modal" class="crop-modal" hidden aria-hidden="true">
+    <div class="crop-sheet" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+      <h3 id="crop-title">Crop your photo</h3>
+      <p class="crop-help">Drag to move. Use zoom so your face fits the circle.</p>
+      <div class="crop-stage" id="crop-stage">
+        <img id="crop-image" alt="">
+        <div class="crop-mask" aria-hidden="true"></div>
+      </div>
+      <div class="crop-zoom-row">
+        <label for="crop-zoom">Zoom</label>
+        <input id="crop-zoom" type="range" min="100" max="300" value="100" step="1">
+      </div>
+      <div class="crop-actions">
+        <button class="btn btn-primary" id="crop-save" type="button">Use photo</button>
+        <button class="btn btn-ghost btn-small" id="crop-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <nav id="harbor-dock" class="dock" aria-label="Harbor navigation" hidden>
     <div class="dock-inner">
@@ -3000,6 +3114,215 @@ function paintAvatarPreview() {
   if (status && !status.dataset.busy) status.textContent = '';
 }
 
+/* ── Avatar cropper ─────────────────────────────────────────── */
+const avatarCrop = {
+  objectUrl: '',
+  naturalW: 0,
+  naturalH: 0,
+  scale: 1,
+  minScale: 1,
+  offsetX: 0,
+  offsetY: 0,
+  dragging: false,
+  lastX: 0,
+  lastY: 0,
+};
+
+function closeAvatarCrop() {
+  const modal = $('#avatar-crop-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  if (avatarCrop.objectUrl) {
+    try { URL.revokeObjectURL(avatarCrop.objectUrl); } catch (_) {}
+  }
+  avatarCrop.objectUrl = '';
+  avatarCrop.dragging = false;
+  const img = $('#crop-image');
+  if (img) img.removeAttribute('src');
+}
+
+function applyCropTransform() {
+  const img = $('#crop-image');
+  if (!img) return;
+  img.style.transform = `translate(-50%, -50%) translate(${avatarCrop.offsetX}px, ${avatarCrop.offsetY}px) scale(${avatarCrop.scale})`;
+}
+
+function clampCropOffset() {
+  const stage = $('#crop-stage');
+  if (!stage || !avatarCrop.naturalW) return;
+  const size = stage.clientWidth || 280;
+  const dispW = avatarCrop.naturalW * avatarCrop.scale;
+  const dispH = avatarCrop.naturalH * avatarCrop.scale;
+  const maxX = Math.max(0, (dispW - size) / 2);
+  const maxY = Math.max(0, (dispH - size) / 2);
+  avatarCrop.offsetX = Math.max(-maxX, Math.min(maxX, avatarCrop.offsetX));
+  avatarCrop.offsetY = Math.max(-maxY, Math.min(maxY, avatarCrop.offsetY));
+}
+
+function openAvatarCrop(file) {
+  return new Promise((resolve, reject) => {
+    const modal = $('#avatar-crop-modal');
+    const img = $('#crop-image');
+    const zoom = $('#crop-zoom');
+    if (!modal || !img || !zoom) {
+      reject(new Error('Crop tool isn’t ready. Refresh and try again.'));
+      return;
+    }
+    if (avatarCrop.objectUrl) {
+      try { URL.revokeObjectURL(avatarCrop.objectUrl); } catch (_) {}
+    }
+    avatarCrop.objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      avatarCrop.naturalW = img.naturalWidth || 1;
+      avatarCrop.naturalH = img.naturalHeight || 1;
+      const stage = $('#crop-stage');
+      const size = stage?.clientWidth || 280;
+      avatarCrop.minScale = Math.max(size / avatarCrop.naturalW, size / avatarCrop.naturalH);
+      avatarCrop.scale = avatarCrop.minScale;
+      avatarCrop.offsetX = 0;
+      avatarCrop.offsetY = 0;
+      zoom.min = '100';
+      zoom.max = '300';
+      zoom.value = '100';
+      applyCropTransform();
+      modal.hidden = false;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    };
+    img.onerror = () => {
+      closeAvatarCrop();
+      reject(new Error('Could not open that photo. Try a JPG or PNG from your gallery.'));
+    };
+    img.src = avatarCrop.objectUrl;
+
+    const onZoom = () => {
+      const pct = Number(zoom.value || 100) / 100;
+      avatarCrop.scale = avatarCrop.minScale * pct;
+      clampCropOffset();
+      applyCropTransform();
+    };
+    zoom.oninput = onZoom;
+
+    const stage = $('#crop-stage');
+    const onPointerDown = (e) => {
+      avatarCrop.dragging = true;
+      avatarCrop.lastX = e.clientX;
+      avatarCrop.lastY = e.clientY;
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    const onPointerMove = (e) => {
+      if (!avatarCrop.dragging) return;
+      avatarCrop.offsetX += e.clientX - avatarCrop.lastX;
+      avatarCrop.offsetY += e.clientY - avatarCrop.lastY;
+      avatarCrop.lastX = e.clientX;
+      avatarCrop.lastY = e.clientY;
+      clampCropOffset();
+      applyCropTransform();
+    };
+    const onPointerUp = () => { avatarCrop.dragging = false; };
+    stage.onpointerdown = onPointerDown;
+    stage.onpointermove = onPointerMove;
+    stage.onpointerup = onPointerUp;
+    stage.onpointercancel = onPointerUp;
+
+    $('#crop-cancel').onclick = () => {
+      closeAvatarCrop();
+      reject(new Error('cancelled'));
+    };
+    $('#crop-save').onclick = async () => {
+      try {
+        const blob = await exportCroppedAvatar();
+        closeAvatarCrop();
+        resolve(blob);
+      } catch (err) {
+        reject(err);
+      }
+    };
+  });
+}
+
+function exportCroppedAvatar() {
+  return new Promise((resolve, reject) => {
+    const stage = $('#crop-stage');
+    const img = $('#crop-image');
+    if (!stage || !img || !avatarCrop.naturalW) {
+      reject(new Error('Nothing to crop.'));
+      return;
+    }
+    const view = stage.clientWidth || 280;
+    const out = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = out;
+    canvas.height = out;
+    const ctx = canvas.getContext('2d');
+    // Map view coords → image natural coords
+    // Image center in view = view/2 + offset
+    // A view pixel (vx,vy) maps to natural:
+    // nx = (vx - view/2 - offsetX) / scale + naturalW/2
+    const scale = avatarCrop.scale;
+    const nx0 = (0 - view / 2 - avatarCrop.offsetX) / scale + avatarCrop.naturalW / 2;
+    const ny0 = (0 - view / 2 - avatarCrop.offsetY) / scale + avatarCrop.naturalH / 2;
+    const nSize = view / scale;
+    ctx.fillStyle = '#10252b';
+    ctx.fillRect(0, 0, out, out);
+    ctx.drawImage(img, nx0, ny0, nSize, nSize, 0, 0, out, out);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) reject(new Error('Could not crop that photo.'));
+        else resolve(blob);
+      },
+      'image/jpeg',
+      0.9
+    );
+  });
+}
+
+async function handleAvatarFile(file) {
+  const status = $('#pref-avatar-status');
+  if (!file) return;
+  if (!isLoggedIn()) {
+    if (status) status.textContent = 'Sign in first, then choose a photo.';
+    else alert('Sign in first, then choose a photo.');
+    return;
+  }
+  if (!(window.HarborAuth && HarborAuth.uploadAvatar)) {
+    if (status) status.textContent = 'Photo upload isn’t ready. Refresh and try again.';
+    return;
+  }
+  try {
+    if (status) {
+      status.dataset.busy = '1';
+      status.textContent = 'Crop your photo…';
+    }
+    const blob = await openAvatarCrop(file);
+    if (status) status.textContent = 'Saving photo…';
+    await HarborAuth.uploadAvatar(blob);
+    if (status) {
+      status.textContent = 'Photo saved. It will show on your named posts.';
+      delete status.dataset.busy;
+    }
+    paintAvatarPreview();
+    try { await refreshCloudPosts(); } catch (_) {}
+  } catch (err) {
+    if (String(err?.message || err) === 'cancelled') {
+      if (status) {
+        status.textContent = '';
+        delete status.dataset.busy;
+      }
+      return;
+    }
+    const msg = err.message || 'Could not upload photo.';
+    if (status) {
+      status.textContent = msg;
+      delete status.dataset.busy;
+    }
+    alert(msg);
+  }
+}
+
 function syncAccountScreen() {
   const auth = window.HarborAuth ? HarborAuth.getState() : { isLoggedIn: false, isAdmin: false };
   const guest = $('#auth-guest');
@@ -3728,6 +4051,33 @@ $('#pref-named').addEventListener('click', () => {
   $('#pref-anon').classList.remove('active');
   $('#pref-username').disabled = false;
   $('#pref-username').focus();
+});
+$('#pref-avatar-choose')?.addEventListener('click', () => {
+  const input = $('#pref-avatar-file');
+  if (!isLoggedIn()) {
+    const status = $('#pref-avatar-status');
+    if (status) status.textContent = 'Sign in first, then choose a photo.';
+    return;
+  }
+  if (input) input.click();
+});
+$('#pref-avatar-file')?.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (file) await handleAvatarFile(file);
+});
+$('#pref-avatar-remove')?.addEventListener('click', async () => {
+  if (!(window.HarborAuth && HarborAuth.removeAvatar)) return;
+  if (!confirm('Remove your profile photo?')) return;
+  const status = $('#pref-avatar-status');
+  try {
+    await HarborAuth.removeAvatar();
+    if (status) status.textContent = 'Photo removed.';
+    paintAvatarPreview();
+    try { await refreshCloudPosts(); } catch (_) {}
+  } catch (err) {
+    alert(err.message || 'Could not remove photo.');
+  }
 });
 $('#save-identity').addEventListener('click', async () => {
   const named = $('#pref-named').classList.contains('active');
