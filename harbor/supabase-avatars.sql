@@ -1,5 +1,7 @@
 -- Harbor profile photos (optional)
 -- Run in Supabase SQL Editor (safe to re-run).
+-- If photo save shows “infinite recursion … harbor_profiles”, also run:
+--   supabase-profiles-rls-fix.sql
 
 alter table public.harbor_profiles
   add column if not exists avatar_url text;
