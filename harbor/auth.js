@@ -246,25 +246,39 @@
     emit();
   }
 
-  async function uploadAvatar(file) {
+  async function uploadAvatar(fileOrBlob) {
     if (!client || !session?.user) throw new Error('Sign in to add a photo.');
-    if (!file) throw new Error('Choose a photo first.');
-    const type = String(file.type || '').toLowerCase();
-    if (!/^image\/(jpeg|png|webp)$/.test(type)) {
-      throw new Error('Use a JPG, PNG, or WebP photo.');
+    if (!fileOrBlob) throw new Error('Choose a photo first.');
+
+    let blob = fileOrBlob;
+    const type = String(fileOrBlob.type || '').toLowerCase();
+    // Cropper already outputs a JPEG blob — upload as-is when small enough
+    const alreadyJpeg = type === 'image/jpeg' || type === 'image/jpg';
+    if (!alreadyJpeg || fileOrBlob.size > 900000) {
+      try {
+        blob = await compressAvatar(fileOrBlob);
+      } catch (err) {
+        throw new Error(err.message || 'Could not read that photo. Try a JPG or PNG.');
+      }
     }
-    if (file.size > 2.5 * 1024 * 1024) {
+    if (blob.size > 2.5 * 1024 * 1024) {
       throw new Error('Keep photos under about 2 MB.');
     }
 
-    const blob = await compressAvatar(file);
     const path = `${session.user.id}/avatar.jpg`;
-    const { error: upErr } = await client.storage
+    let upErr = null;
+    ({ error: upErr } = await client.storage
       .from('harbor-avatars')
-      .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' }));
+    // Some projects need update when the object already exists
+    if (upErr && /exist|duplicate|already/i.test(upErr.message || '')) {
+      ({ error: upErr } = await client.storage
+        .from('harbor-avatars')
+        .update(path, blob, { contentType: 'image/jpeg', cacheControl: '3600' }));
+    }
     if (upErr) {
-      if (/bucket|not found|row-level/i.test(upErr.message || '')) {
-        throw new Error('Photo storage isn’t set up yet — run supabase-avatars.sql, then try again.');
+      if (/bucket|not found|row-level|policy|Unauthorized|403/i.test(upErr.message || '')) {
+        throw new Error('Photo storage isn’t set up yet — run supabase-avatars.sql in Supabase, then try again.');
       }
       throw new Error(upErr.message || 'Could not upload photo.');
     }
