@@ -157,6 +157,53 @@ Deno.serve(async (req) => {
       return cors({ ok: true, emailed: false, inbox: true, watch });
     }
 
+    // Member deletes their own account (avatar + profile cascade + auth user)
+    if (action === "delete_own_account") {
+      const authHeader = req.headers.get("Authorization") || "";
+      const jwt = authHeader.replace(/^Bearer\s+/i, "").trim();
+      if (!jwt || !anonKey) return cors({ error: "Sign in first" }, 401);
+
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${jwt}` } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData?.user) return cors({ error: "Sign in first" }, 401);
+
+      const uid = userData.user.id;
+      const email = (userData.user.email || "").toLowerCase();
+      if (email === "owenstreet7@gmail.com") {
+        return cors({ error: "The Harbor host account can’t be deleted this way." }, 400);
+      }
+
+      // Remove avatar objects before auth cascade (trigger also cleans on profile delete)
+      try {
+        const folder = await supabase.storage.from("harbor-avatars").list(uid, { limit: 20 });
+        const names = (folder.data || []).map((f) => `${uid}/${f.name}`);
+        if (names.length) await supabase.storage.from("harbor-avatars").remove(names);
+        await supabase.storage.from("harbor-avatars").remove([`${uid}/avatar.jpg`]);
+      } catch (_) {
+        // Storage may already be empty
+      }
+
+      const { error: delErr } = await supabase.auth.admin.deleteUser(uid);
+      if (delErr) return cors({ error: delErr.message || "Could not delete account" }, 400);
+
+      try {
+        await supabase.from("harbor_moderation_events").insert({
+          id: crypto.randomUUID(),
+          action: "delete_own_account",
+          target_type: "user",
+          target_id: uid,
+          actor: email || uid,
+          reason: "Member deleted their own account",
+        });
+      } catch (_) {
+        // Audit trail is best-effort; account is already gone
+      }
+
+      return cors({ ok: true });
+    }
+
     // Admin-only below
     if (!(await callerIsAdmin())) {
       return cors({ error: "Unauthorized" }, 401);
