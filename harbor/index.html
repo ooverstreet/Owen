@@ -543,24 +543,45 @@ body {
   color: var(--water-deep);
   margin-bottom: 10px;
 }
-.feed-list { display: flex; flex-direction: column; gap: 16px; }
+.feed-list { display: flex; flex-direction: column; gap: 0; }
 .post-card {
-  width: 100%; text-align: left; border: 1px solid var(--line);
-  background: var(--paper); border-radius: 18px; padding: 16px 18px;
+  width: 100%; text-align: left; border: 0;
+  border-bottom: 1px solid rgba(62, 122, 134, 0.12);
+  background: transparent; border-radius: 0; padding: 14px 2px 15px;
   cursor: pointer; font: inherit; color: inherit;
-  transition: transform .15s ease, border-color .2s ease;
-  animation: fadeIn .4s ease both;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 2px 12px;
+  transition: background .15s ease;
+  animation: fadeIn .35s ease both;
 }
-.post-card:hover { border-color: rgba(62,122,134,.35); }
-.post-card:active { transform: scale(.99); }
+.post-card:hover { background: rgba(255,252,248,.35); }
+.post-card:active { background: rgba(255,252,248,.55); }
 .post-card.featured {
   background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
-  border-color: rgba(184, 137, 74, 0.28);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(184, 137, 74, 0.28);
+  border-radius: 18px;
+  padding: 14px 14px 15px;
+  margin: 4px 0 10px;
+  box-shadow: none;
 }
+.post-card.full {
+  border-bottom: 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px 16px 18px;
+  margin: 0;
+}
+.post-card.full.featured {
+  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
+  border-color: rgba(184, 137, 74, 0.28);
+}
+.post-avatar-col { padding-top: 2px; }
+.post-main { min-width: 0; }
 .post-meta {
-  display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center;
-  margin-bottom: 8px; font-size: .84rem; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline;
+  margin-bottom: 4px; font-size: .84rem; color: var(--ink-faint);
 }
 .author { color: var(--water-deep); font-weight: 560; }
 .featured-badge {
@@ -568,18 +589,66 @@ body {
   font-size: .72rem;
 }
 .post-body {
-  color: var(--ink); line-height: 1.65; white-space: pre-wrap;
+  color: var(--ink); line-height: 1.55; white-space: pre-wrap;
+  font-size: 1.02rem;
   display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
 }
-.post-card.full .post-body { display: block; -webkit-line-clamp: unset; }
-.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.post-card.full .post-body { display: block; -webkit-line-clamp: unset; line-height: 1.65; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .tag {
   font-size: .78rem; font-weight: 560; color: var(--water);
   background: rgba(62,122,134,.08); border-radius: 999px; padding: 4px 10px;
 }
 .post-foot {
-  margin-top: 12px; font-size: .86rem; color: var(--ink-faint);
+  margin-top: 10px; font-size: .82rem; color: var(--ink-faint);
   display: flex; justify-content: space-between; gap: 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(62, 122, 134, 0.12);
+  color: var(--water-deep);
+  font-weight: 620;
+  font-size: .95rem;
+  letter-spacing: .02em;
+}
+.avatar.sm { width: 32px; height: 32px; font-size: .82rem; }
+.avatar.lg { width: 72px; height: 72px; font-size: 1.45rem; }
+.avatar.named { background: rgba(62, 122, 134, 0.16); }
+.avatar.anon { background: rgba(184, 137, 74, 0.14); color: var(--warm); }
+.avatar.harbor { background: rgba(31, 79, 88, 0.18); color: var(--water-deep); }
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-hint {
+  margin: 0;
+  font-size: .86rem;
+  color: var(--ink-faint);
+  line-height: 1.35;
+  max-width: 34ch;
+}
+.avatar-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+.avatar-editor .avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 .empty { color: var(--ink-faint); padding: 22px 4px; line-height: 1.45; max-width: 36ch; }
 .welcome-ashore {
@@ -844,12 +913,21 @@ body {
   line-height: 1.45; color: var(--water-deep); margin-bottom: 10px;
 }
 .angel-note { font-size: .92rem; color: var(--ink-soft); }
-.reply-list { display: flex; flex-direction: column; gap: 10px; }
+.reply-list { display: flex; flex-direction: column; gap: 0; }
 .reply {
-  border: 1px solid var(--line); background: rgba(255,252,248,.55);
-  border-radius: 16px; padding: 14px 16px; animation: fadeIn .35s ease both;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 2px 10px;
+  padding: 12px 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(62, 122, 134, 0.1);
+  background: transparent;
+  border-radius: 0;
+  animation: fadeIn .35s ease both;
 }
-.reply .post-body { -webkit-line-clamp: unset; display: block; }
+.reply:last-child { border-bottom: 0; }
+.reply .post-meta { margin-bottom: 2px; }
+.reply .post-body { -webkit-line-clamp: unset; display: block; font-size: .98rem; line-height: 1.5; }
 .msg-edited {
   font-size: .78rem;
   color: var(--ink-faint);
@@ -1284,6 +1362,18 @@ body {
     </div>
 
     <div id="account-prefs" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;margin-top:8px">
+      <label style="font-size:.95rem;color:var(--ink-soft)">Profile photo <span style="color:var(--ink-faint);font-weight:420">(optional)</span></label>
+      <div class="avatar-editor">
+        <span class="avatar lg named" id="pref-avatar-preview" aria-hidden="true">?</span>
+        <div class="avatar-actions">
+          <label class="btn btn-secondary btn-small" for="pref-avatar-file" style="cursor:pointer;margin:0">Choose photo</label>
+          <input id="pref-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <button class="btn btn-ghost btn-small" id="pref-avatar-remove" type="button" hidden>Remove</button>
+        </div>
+      </div>
+      <p class="avatar-hint">Shown on named posts only. Anonymous posts stay without a face.</p>
+      <p id="pref-avatar-status" class="avatar-hint" style="min-height:1.2em"></p>
+
       <label for="pref-username" style="font-size:.95rem;color:var(--ink-soft)">How you appear on posts</label>
       <div class="seg" role="group" aria-label="Default identity">
         <button type="button" id="pref-anon" class="active">Anonymous</button>
@@ -2286,6 +2376,21 @@ function canDeleteMessage(msg) {
   return isHarborAdmin();
 }
 
+function avatarHtml(msg, { size = '' } = {}) {
+  const name = displayName(msg || {});
+  const initial = (String(name || '?').trim().charAt(0) || '?').toUpperCase();
+  const featured = !!(msg && (msg.featured || msg.id === FEATURED_POST.id));
+  const named = !!(msg && msg.authorMode === 'named');
+  // Photos only on named posts — anonymous stays faceless even if the account has a photo
+  const url = named && !featured ? (msg.avatarUrl || '') : '';
+  const tone = featured ? 'harbor' : (named ? 'named' : 'anon');
+  const sizeClass = size ? ` ${size}` : '';
+  if (url) {
+    return `<span class="avatar${sizeClass}"><img src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async"></span>`;
+  }
+  return `<span class="avatar${sizeClass} ${tone}" aria-hidden="true">${escapeHtml(initial)}</span>`;
+}
+
 function postCardHtml(post, full = false) {
   const replies = post.replies || [];
   const felt = post.feltCount || 0;
@@ -2294,19 +2399,22 @@ function postCardHtml(post, full = false) {
     ? `<p class="msg-edited">Edited</p>`
     : '';
   return `
-    <div class="post-meta">
-      ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
-      <span class="author">${escapeHtml(displayName(post))}</span>
-      <time>${escapeHtml(formatWhen(post.createdAt))}</time>
-      ${canEdit ? `<span class="msg-actions"><button type="button" class="edit-msg-btn" data-edit-post>${escapeHtml(languageActionLabel(post))}</button></span>` : ''}
+    <div class="post-avatar-col">${avatarHtml(post)}</div>
+    <div class="post-main">
+      <div class="post-meta">
+        ${post.featured ? '<span class="featured-badge">First light</span>' : ''}
+        <span class="author">${escapeHtml(displayName(post))}</span>
+        <time>${escapeHtml(formatWhen(post.createdAt))}</time>
+        ${canEdit ? `<span class="msg-actions"><button type="button" class="edit-msg-btn" data-edit-post>${escapeHtml(languageActionLabel(post))}</button></span>` : ''}
+      </div>
+      <div class="post-body" data-post-body>${escapeHtml(post.text)}</div>
+      ${edited}
+      ${renderTags(post.tags)}
+      ${full ? '' : `<div class="post-foot">
+        <span>${replies.length ? `${replies.length} in thread` : 'Open thread'}</span>
+        <span>${felt ? `${felt} felt this too` : 'Be the first to feel this'}</span>
+      </div>`}
     </div>
-    <div class="post-body" data-post-body>${escapeHtml(post.text)}</div>
-    ${edited}
-    ${renderTags(post.tags)}
-    ${full ? '' : `<div class="post-foot">
-      <span>${replies.length ? `${replies.length} in thread` : 'Open thread'}</span>
-      <span>${felt ? `${felt} felt this too` : 'Be the first to feel this'}</span>
-    </div>`}
   `;
 }
 
@@ -2417,16 +2525,19 @@ function renderReplies(post) {
   }
   root.innerHTML = replies.map((r) => `
     <div class="reply" data-reply-id="${escapeHtml(r.id)}">
-      <div class="post-meta">
-        <span class="author">${escapeHtml(displayName(r))}</span>
-        <time>${escapeHtml(formatWhen(r.createdAt))}</time>
-        ${(canEditMessage(r) || canDeleteMessage(r)) ? `<span class="msg-actions">
-          ${canEditMessage(r) ? `<button type="button" class="edit-msg-btn" data-edit-reply>${escapeHtml(languageActionLabel(r))}</button>` : ''}
-          ${canDeleteMessage(r) ? '<button type="button" class="delete-msg-btn" data-delete-reply>Delete</button>' : ''}
-        </span>` : ''}
+      <div class="post-avatar-col">${avatarHtml(r, { size: 'sm' })}</div>
+      <div class="post-main">
+        <div class="post-meta">
+          <span class="author">${escapeHtml(displayName(r))}</span>
+          <time>${escapeHtml(formatWhen(r.createdAt))}</time>
+          ${(canEditMessage(r) || canDeleteMessage(r)) ? `<span class="msg-actions">
+            ${canEditMessage(r) ? `<button type="button" class="edit-msg-btn" data-edit-reply>${escapeHtml(languageActionLabel(r))}</button>` : ''}
+            ${canDeleteMessage(r) ? '<button type="button" class="delete-msg-btn" data-delete-reply>Delete</button>' : ''}
+          </span>` : ''}
+        </div>
+        <div class="post-body" data-reply-body>${escapeHtml(r.text)}</div>
+        ${r.editedAt ? '<p class="msg-edited">Edited</p>' : ''}
       </div>
-      <div class="post-body" data-reply-body>${escapeHtml(r.text)}</div>
-      ${r.editedAt ? '<p class="msg-edited">Edited</p>' : ''}
     </div>
   `).join('');
   bindReplyEdits(root, post);
@@ -2866,6 +2977,29 @@ function syncHomeInviteUI() {
   }
 }
 
+function paintAvatarPreview() {
+  const preview = $('#pref-avatar-preview');
+  const removeBtn = $('#pref-avatar-remove');
+  const status = $('#pref-avatar-status');
+  if (!preview) return;
+  const auth = window.HarborAuth ? HarborAuth.getState() : null;
+  const url = auth?.profile?.avatar_url || '';
+  const name = auth?.profile?.display_name
+    || loadIdentity().username
+    || auth?.user?.email
+    || '?';
+  const initial = (String(name).trim().charAt(0) || '?').toUpperCase();
+  if (url) {
+    preview.className = 'avatar lg';
+    preview.innerHTML = `<img src="${escapeHtml(url)}" alt="" loading="lazy">`;
+  } else {
+    preview.className = 'avatar lg named';
+    preview.textContent = initial;
+  }
+  if (removeBtn) removeBtn.hidden = !url || !auth?.isLoggedIn;
+  if (status && !status.dataset.busy) status.textContent = '';
+}
+
 function syncAccountScreen() {
   const auth = window.HarborAuth ? HarborAuth.getState() : { isLoggedIn: false, isAdmin: false };
   const guest = $('#auth-guest');
@@ -2884,6 +3018,7 @@ function syncAccountScreen() {
     paintModAlerts();
   }
   paintMyPosts();
+  paintAvatarPreview();
 
   if (!auth.isLoggedIn) {
     if (earlyAccessOn() && !hasValidInvite()) {
@@ -3164,6 +3299,7 @@ async function persistPost({ text, tags, privatePost }) {
   const angel = await askAngel(text);
   const userId = (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null;
   if (author.authorMode === 'named') rememberAuthorName(author.authorName);
+  const profileAvatar = (window.HarborAuth && HarborAuth.getState()?.profile?.avatar_url) || null;
   const post = {
     id: uid(),
     featured: false,
@@ -3179,6 +3315,7 @@ async function persistPost({ text, tags, privatePost }) {
     angelSource: angel.source || 'local',
     deviceId,
     userId,
+    avatarUrl: author.authorMode === 'named' ? profileAvatar : null,
   };
 
   if (!privatePost && window.HarborDB && HarborDB.isReady()) {
@@ -3271,6 +3408,7 @@ async function addReply() {
   }
   const author = currentAuthor();
   if (author.authorMode === 'named') rememberAuthorName(author.authorName);
+  const profileAvatar = (window.HarborAuth && HarborAuth.getState()?.profile?.avatar_url) || null;
   const reply = {
     id: uid(),
     ...author,
@@ -3278,6 +3416,7 @@ async function addReply() {
     createdAt: Date.now(),
     deviceId: window.HarborMod ? HarborMod.deviceId() : null,
     userId: (window.HarborAuth && HarborAuth.getState && HarborAuth.getState().user?.id) || null,
+    avatarUrl: author.authorMode === 'named' ? profileAvatar : null,
   };
 
   if (window.HarborDB && HarborDB.isReady()) {
