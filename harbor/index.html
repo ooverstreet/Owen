@@ -722,8 +722,9 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle closest-side, transparent 61%, rgba(8, 20, 24, 0.58) 62%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+  /* Full inscribed circle — matches the square that becomes the round avatar */
+  background: radial-gradient(circle closest-side, transparent 69.5%, rgba(8, 20, 24, 0.55) 70%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
 }
 .crop-zoom-row {
   display: flex;
@@ -1531,14 +1532,14 @@ body {
   <div id="avatar-crop-modal" class="crop-modal" hidden aria-hidden="true">
     <div class="crop-sheet" role="dialog" aria-modal="true" aria-labelledby="crop-title">
       <h3 id="crop-title">Crop your photo</h3>
-      <p class="crop-help">Drag to move. Use zoom so your face fits the circle.</p>
+      <p class="crop-help">Drag to move. Zoom out to fit more of the photo in the circle.</p>
       <div class="crop-stage" id="crop-stage">
         <img id="crop-image" alt="">
         <div class="crop-mask" aria-hidden="true"></div>
       </div>
       <div class="crop-zoom-row">
         <label for="crop-zoom">Zoom</label>
-        <input id="crop-zoom" type="range" min="100" max="300" value="100" step="1">
+        <input id="crop-zoom" type="range" min="40" max="300" value="100" step="1">
       </div>
       <div class="crop-actions">
         <button class="btn btn-primary" id="crop-save" type="button">Use photo</button>
@@ -3120,7 +3121,9 @@ const avatarCrop = {
   naturalW: 0,
   naturalH: 0,
   scale: 1,
+  coverScale: 1,
   minScale: 1,
+  maxScale: 1,
   offsetX: 0,
   offsetY: 0,
   dragging: false,
@@ -3156,10 +3159,18 @@ function clampCropOffset() {
   const size = stage.clientWidth || 280;
   const dispW = avatarCrop.naturalW * avatarCrop.scale;
   const dispH = avatarCrop.naturalH * avatarCrop.scale;
-  const maxX = Math.max(0, (dispW - size) / 2);
-  const maxY = Math.max(0, (dispH - size) / 2);
+  // Allow panning both when zoomed in (overflow) and zoomed out (letterbox)
+  const maxX = Math.abs(dispW - size) / 2;
+  const maxY = Math.abs(dispH - size) / 2;
   avatarCrop.offsetX = Math.max(-maxX, Math.min(maxX, avatarCrop.offsetX));
   avatarCrop.offsetY = Math.max(-maxY, Math.min(maxY, avatarCrop.offsetY));
+}
+
+function scaleFromZoomSlider(pct) {
+  // 100 on the slider ≈ “fill the circle square” (cover)
+  // Below 100 zooms out so tall/wide photos can fit more content
+  const cover = avatarCrop.coverScale || 1;
+  return cover * (Number(pct) / 100);
 }
 
 function openAvatarCrop(file) {
@@ -3180,13 +3191,20 @@ function openAvatarCrop(file) {
       avatarCrop.naturalH = img.naturalHeight || 1;
       const stage = $('#crop-stage');
       const size = stage?.clientWidth || 280;
-      avatarCrop.minScale = Math.max(size / avatarCrop.naturalW, size / avatarCrop.naturalH);
-      avatarCrop.scale = avatarCrop.minScale;
+      const cover = Math.max(size / avatarCrop.naturalW, size / avatarCrop.naturalH);
+      const contain = Math.min(size / avatarCrop.naturalW, size / avatarCrop.naturalH);
+      avatarCrop.coverScale = cover;
+      // Allow zooming out well below cover so full-body / tall shots can fit
+      avatarCrop.minScale = Math.min(contain * 0.55, cover * 0.4);
+      avatarCrop.maxScale = cover * 3;
+      avatarCrop.scale = Math.min(cover, Math.max(avatarCrop.minScale, contain * 1.05));
       avatarCrop.offsetX = 0;
       avatarCrop.offsetY = 0;
-      zoom.min = '100';
+      const startPct = Math.round((avatarCrop.scale / cover) * 100);
+      zoom.min = String(Math.max(25, Math.floor((avatarCrop.minScale / cover) * 100)));
       zoom.max = '300';
-      zoom.value = '100';
+      zoom.value = String(Math.max(Number(zoom.min), Math.min(300, startPct)));
+      clampCropOffset();
       applyCropTransform();
       modal.hidden = false;
       modal.classList.add('show');
@@ -3199,8 +3217,10 @@ function openAvatarCrop(file) {
     img.src = avatarCrop.objectUrl;
 
     const onZoom = () => {
-      const pct = Number(zoom.value || 100) / 100;
-      avatarCrop.scale = avatarCrop.minScale * pct;
+      avatarCrop.scale = Math.min(
+        avatarCrop.maxScale,
+        Math.max(avatarCrop.minScale, scaleFromZoomSlider(zoom.value))
+      );
       clampCropOffset();
       applyCropTransform();
     };
