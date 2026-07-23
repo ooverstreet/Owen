@@ -4712,13 +4712,14 @@ async function clearHarborAppCache() {
   if ('caches' in window) {
     try {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => /harbor/i.test(k)).map((k) => caches.delete(k)));
+      await Promise.all(keys.map((k) => caches.delete(k)));
     } catch (_) {}
   }
   if ('serviceWorker' in navigator) {
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.update()));
+      // Unregister so the next load installs a fresh worker (update alone often sticks)
+      await Promise.all(regs.map((r) => r.unregister()));
     } catch (_) {}
   }
 }
@@ -4780,6 +4781,8 @@ $('#reset-device').addEventListener('click', async () => {
   const url = new URL(location.href);
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
+  // Bypass any leftover HTTP cache on the document itself
+  url.searchParams.set('v', '66');
   location.replace(url.toString());
 });
 
@@ -4963,9 +4966,27 @@ async function boot() {
 
   if ('serviceWorker' in navigator) {
     try {
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloading) return;
+        reloading = true;
+        location.reload();
+      });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      await navigator.serviceWorker.register('./sw.js?v=52');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=66');
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            nw.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
     } catch (_) {}
   }
 }
