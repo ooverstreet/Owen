@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#E8F1F4">
+<title>Privacy — Harbor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=Outfit:wght@420;560&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist: #E8F1F4;
+    --water-deep: #1F4F58;
+    --water: #3E7A86;
+    --ink: #1A2B32;
+    --ink-soft: #4A636C;
+    --ink-faint: #7A9199;
+    --paper: #FFFCF8;
+    --line: rgba(31, 79, 88, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Outfit", system-ui, sans-serif;
+    font-weight: 420;
+    line-height: 1.6;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 500px at 70% -10%, rgba(184, 212, 222, 0.85), transparent 60%),
+      linear-gradient(180deg, #EAF3F6 0%, var(--mist) 50%, #DCE9EE 100%);
+    min-height: 100dvh;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+  }
+  main { width: min(640px, 100%); margin: 0 auto; }
+  a { color: var(--water); }
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(2rem, 7vw, 2.6rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    color: var(--water-deep);
+    margin-bottom: 8px;
+  }
+  .sub { color: var(--ink-faint); font-size: .92rem; margin-bottom: 22px; }
+  .back {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: var(--water);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .card {
+    background: rgba(255, 252, 248, 0.78);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 18px 8px;
+  }
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 560;
+    color: var(--water-deep);
+    margin: 18px 0 8px;
+  }
+  p, li { color: var(--ink-soft); margin-bottom: 12px; }
+  ul { padding-left: 1.2em; margin-bottom: 12px; }
+  .short {
+    border-left: 2px solid rgba(184, 137, 74, 0.45);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: rgba(255, 252, 248, 0.55);
+    border-radius: 0 14px 14px 0;
+  }
+  .short strong { color: var(--water-deep); }
+  footer {
+    margin-top: 28px;
+    font-size: .86rem;
+    color: var(--ink-faint);
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← Back to Harbor</a>
+  <h1>Privacy</h1>
+  <p class="sub">Harbor · Last updated: July 2026</p>
+
+  <div class="card">
+    <div class="short">
+      <p><strong>Short version:</strong> Harbor stores your account and posts so the community works. We don’t sell your data. Angel and Harbor Watch may send short text to an AI provider to reply or review flags. You can delete your account from Me.</p>
+    </div>
+
+    <h2>Who we are</h2>
+    <p>Harbor is a small coastal community app hosted by Owen Overstreet at <a href="https://ooverstreet.github.io/Owen/harbor/">ooverstreet.github.io/Owen/harbor</a>. Contact: <a href="mailto:owenstreet7@gmail.com">owenstreet7@gmail.com</a>.</p>
+
+    <h2>What we store</h2>
+    <ul>
+      <li>Account details you provide (email, optional display name, optional profile photo)</li>
+      <li>Posts, replies, room/topic tags, and “I’ve felt this too” counts</li>
+      <li>Guidelines / Privacy &amp; Terms acceptance timestamps</li>
+      <li>Moderation signals (reports, language strikes, admin actions) for safety</li>
+      <li>Activity stamps (such as last active) to protect quiet accounts</li>
+      <li>On-device preferences (theme, identity, invite unlock) in your browser</li>
+    </ul>
+
+    <h2>Where it lives</h2>
+    <p>Cloud data is stored with <a href="https://supabase.com">Supabase</a> (auth, database, and optional photo storage). The app itself is served by GitHub Pages.</p>
+
+    <h2>AI features</h2>
+    <p><strong>Angel</strong> may send the text of a post (not your password) to an AI provider so it can leave a short companion note. <strong>Harbor Watch</strong> may review blocked-language samples for the host. If AI is unavailable, Harbor falls back to local wording. Do not put secrets or others’ private contact info in posts.</p>
+
+    <h2>What we don’t do</h2>
+    <ul>
+      <li>We don’t sell personal data</li>
+      <li>We don’t run advertising networks inside Harbor</li>
+      <li>We don’t ask for your phone contacts</li>
+    </ul>
+
+    <h2>Your choices</h2>
+    <ul>
+      <li>Post anonymously or with a username</li>
+      <li>Skip a profile photo</li>
+      <li>Delete your account from <strong>Me</strong> (removes login and profile photo; posts may remain on the shore without your account attached)</li>
+      <li>Clear local cache on this phone from Me</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>Harbor is meant for adults and older teens with care. It is not directed at children under 13. If you believe a child’s data was submitted, contact the host.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes in a meaningful way, we’ll update the date above. Continued use after updates means you accept the revised policy.</p>
+  </div>
+
+  <footer>
+    Also see <a href="./terms.html">Terms of use</a> · <a href="./">Harbor</a>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v69';
+const CACHE = 'harbor-v70';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
@@ -9,6 +9,8 @@ const URLS  = [
   '/Owen/harbor/auth.js',
   '/Owen/harbor/angel.js',
   '/Owen/harbor/moderation.js',
+  '/Owen/harbor/privacy.html',
+  '/Owen/harbor/terms.html',
 ];
 
 self.addEventListener('install', e => {
