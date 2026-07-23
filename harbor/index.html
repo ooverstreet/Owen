@@ -1577,7 +1577,7 @@ body {
         <a class="linkish" href="./terms.html" target="_blank" rel="noopener" style="padding:0;display:inline">Terms of use</a>
       </p>
       <p class="angel-note" style="margin:12px 0 0">
-        Questions for the host later? Use <strong>Me → Contact the host</strong> after you sign in — their personal email stays private.
+        Questions later? Open <strong>Help &amp; Support</strong> from Shore or Me — including a private note to the host.
       </p>
     </div>
     <label id="legal-agree-label" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
@@ -1633,6 +1633,7 @@ body {
         </span>
       </button>
       <div class="top-actions">
+        <button class="linkish" id="open-help-feed" type="button">Help</button>
         <button class="linkish" id="open-guide" type="button">Guide</button>
       </div>
     </div>
@@ -1864,15 +1865,7 @@ body {
       <button class="btn btn-primary" id="save-identity" type="button">Save preferences</button>
       <button class="btn btn-secondary btn-small" id="share-harbor" type="button">Share Harbor</button>
       <p id="share-harbor-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
-
-      <div id="contact-host-box" style="display:none;flex-direction:column;align-items:stretch;gap:10px;margin-top:4px">
-        <label for="contact-host-message" style="font-size:.95rem;color:var(--ink-soft)">Contact the host</label>
-        <p class="avatar-hint" style="margin:0">Private note to the Harbor host — not posted on the shore. Their personal email stays hidden.</p>
-        <textarea id="contact-host-message" maxlength="2000" rows="3" placeholder="A short question or note…"
-          style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--paper-solid);border-radius:16px;padding:12px 14px;font:inherit;color:var(--ink);outline:none;resize:vertical;min-height:88px"></textarea>
-        <button class="btn btn-secondary btn-small" id="contact-host-send" type="button">Send to host</button>
-        <p id="contact-host-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
-      </div>
+      <button class="btn btn-secondary btn-small" id="open-help-account" type="button">Help &amp; Support</button>
 
       <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
       <button class="linkish" id="open-legal-account" type="button">Privacy &amp; Terms</button>
@@ -1921,6 +1914,61 @@ body {
     </div>
 
     <p class="footer-help" id="identity-storage-note">Posting preferences stay on this device unless you sign in.</p>
+  </section>
+
+  <!-- HELP / SUPPORT -->
+  <section id="help" class="screen" aria-label="Help and Support">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
+      <button class="linkish" id="help-done" type="button">Done</button>
+    </div>
+    <h2 class="section-title">Help &amp; Support</h2>
+    <p class="section-sub">A quiet place for questions, problems, and safety reports — without posting them on the shore.</p>
+
+    <div class="angel-panel" style="margin-bottom:16px">
+      <div class="angel-label">Report a post</div>
+      <p class="angel-note" style="margin:0">
+        Open any thread, then tap <strong>Report</strong>. That flags the post for the Harbor host (and Harbor Watch when language is involved).
+      </p>
+    </div>
+
+    <div class="angel-panel" style="margin-bottom:16px">
+      <div class="angel-label">Quick answers</div>
+      <p class="angel-note" style="margin:0 0 8px"><strong>New account?</strong> Early shore is invite-only — open the invite link a friend sent you.</p>
+      <p class="angel-note" style="margin:0 0 8px"><strong>Anonymous?</strong> On Write or Me, choose Anonymous anytime.</p>
+      <p class="angel-note" style="margin:0 0 8px"><strong>Something broken?</strong> Me → Clear cache on this phone, then try again.</p>
+      <p class="angel-note" style="margin:0"><strong>Leave Harbor?</strong> Me → Delete my account.</p>
+    </div>
+
+    <div id="help-contact-box" class="identity-bar" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:16px">
+      <label for="help-topic" style="font-size:.95rem;color:var(--ink-soft)">Contact the host</label>
+      <p class="avatar-hint" style="margin:0">Private — not posted on the shore. The host’s personal email stays hidden.</p>
+      <select id="help-topic" class="room-select" aria-label="What is this about" style="flex:1 1 auto">
+        <option value="question">Question about Harbor</option>
+        <option value="bug">Something isn’t working</option>
+        <option value="safety">Safety / harassment concern</option>
+        <option value="account">Account help</option>
+        <option value="other">Something else</option>
+      </select>
+      <textarea id="help-message" maxlength="2000" rows="4" placeholder="Tell us what’s going on…"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--paper-solid);border-radius:16px;padding:12px 14px;font:inherit;color:var(--ink);outline:none;resize:vertical;min-height:110px"></textarea>
+      <button class="btn btn-primary btn-small" id="help-send" type="button">Send to host</button>
+      <p id="help-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
+      <p id="help-signin-note" class="avatar-hint" style="margin:0;display:none">Sign in to send a private note to the host.</p>
+    </div>
+
+    <div class="actions" style="flex-wrap:wrap">
+      <button class="btn btn-secondary btn-small" data-go="guidelines" type="button">Guidelines</button>
+      <button class="btn btn-ghost btn-small" id="help-open-legal" type="button">Privacy &amp; Terms</button>
+      <button class="btn btn-ghost btn-small" id="help-open-guide" type="button">Replay guide</button>
+    </div>
+    <p class="footer-help">If you or someone else is in immediate danger, contact local emergency services. In the US: call or text 988. Harbor is not a crisis line.</p>
   </section>
 
   <div id="avatar-crop-modal" class="crop-modal" hidden aria-hidden="true">
@@ -2101,6 +2149,7 @@ const screens = {
   account: $('#account'),
   guidelines: $('#guidelines'),
   legal: $('#legal'),
+  help: $('#help'),
 };
 
 let selectedTags = new Set();
@@ -2111,7 +2160,7 @@ let pendingEntry = 'feed';
 let authMode = 'signup';
 let guideStep = 0;
 const MEMBER_SCREENS = new Set(['feed', 'write', 'thread']);
-const DOCK_SCREENS = new Set(['feed', 'write', 'thread', 'account']);
+const DOCK_SCREENS = new Set(['feed', 'write', 'thread', 'account', 'help']);
 
 const GUIDE_STEPS = [
   {
@@ -2464,6 +2513,62 @@ async function shareHarborLink() {
   return ok;
 }
 
+function syncHelpContactUI() {
+  const signedIn = isLoggedIn();
+  const sendBtn = $('#help-send');
+  const note = $('#help-signin-note');
+  const topic = $('#help-topic');
+  const message = $('#help-message');
+  if (sendBtn) sendBtn.disabled = !signedIn;
+  if (topic) topic.disabled = !signedIn;
+  if (message) message.disabled = !signedIn;
+  if (note) note.style.display = signedIn ? 'none' : 'block';
+}
+
+function openHelpScreen() {
+  syncHelpContactUI();
+  const status = $('#help-status');
+  if (status && !status.dataset.keep) status.textContent = '';
+  showScreen('help');
+}
+
+async function sendHelpMessage() {
+  const status = $('#help-status');
+  const input = $('#help-message');
+  const topicEl = $('#help-topic');
+  const message = (input?.value || '').trim();
+  const topic = (topicEl?.value || 'other').trim();
+  if (!isLoggedIn()) {
+    if (status) status.textContent = 'Sign in first, then send your note.';
+    openAccountForEntry('signin');
+    return;
+  }
+  if (message.length < 8) {
+    if (status) status.textContent = 'Write a short note (at least a sentence).';
+    return;
+  }
+  if (!(window.HarborDB && HarborDB.modAction)) {
+    if (status) status.textContent = 'Cloud isn’t ready yet. Try again in a moment.';
+    return;
+  }
+  if (status) {
+    delete status.dataset.keep;
+    status.textContent = 'Sending…';
+  }
+  try {
+    await HarborDB.modAction({ action: 'contact_host', message, topic });
+    if (input) input.value = '';
+    if (status) {
+      status.textContent = 'Sent privately to the Harbor host. Thank you.';
+      status.dataset.keep = '1';
+    }
+  } catch (err) {
+    if (status) {
+      status.textContent = err.message || 'Could not send. The host may still need to redeploy harbor-moderation.';
+    }
+  }
+}
+
 function loadJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -2681,7 +2786,9 @@ function updateDock(name) {
   if (app) app.classList.toggle('has-dock', show);
   dock.querySelectorAll('[data-dock]').forEach((btn) => {
     const key = btn.getAttribute('data-dock');
-    const active = (name === 'thread' && key === 'feed') || name === key;
+    const active = (name === 'thread' && key === 'feed')
+      || (name === 'help' && key === 'account')
+      || name === key;
     btn.classList.toggle('active', active);
   });
   syncBackTop();
@@ -3969,6 +4076,7 @@ function syncAccountScreen() {
   if (deleteBtn) {
     deleteBtn.style.display = (auth.isLoggedIn && !auth.isAdmin) ? 'block' : 'none';
   }
+  syncHelpContactUI();
   // Cheap sync paint only — never kick off network on every auth tick
   if (auth.isAdmin) {
     paintStarterInvitesOnly();
@@ -4537,6 +4645,26 @@ $('#home-legal')?.addEventListener('click', () => {
 $('#share-harbor')?.addEventListener('click', () => {
   shareHarborLink();
 });
+$('#open-help-account')?.addEventListener('click', () => openHelpScreen());
+$('#open-help-feed')?.addEventListener('click', () => openHelpScreen());
+$('#help-done')?.addEventListener('click', async () => {
+  if (isLoggedIn() && hasAgreedGuidelines()) await enterHarbor('account');
+  else showScreen('home');
+});
+$('#help-send')?.addEventListener('click', () => sendHelpMessage());
+$('#help-open-legal')?.addEventListener('click', () => {
+  renderLegalScreen();
+  showScreen('legal');
+});
+$('#help-open-guide')?.addEventListener('click', async () => {
+  try { localStorage.removeItem(STORAGE_GUIDE); } catch (_) {}
+  if (isLoggedIn() && hasAgreedGuidelines()) {
+    await enterHarbor('feed');
+    openGuide({ force: true });
+  } else {
+    showScreen('home');
+  }
+});
 $('#open-legal-account')?.addEventListener('click', () => {
   renderLegalScreen();
   showScreen('legal');
@@ -5064,6 +5192,10 @@ document.querySelectorAll('[data-go]').forEach((el) => {
       showScreen('legal');
       return;
     }
+    if (dest === 'help') {
+      openHelpScreen();
+      return;
+    }
     if (dest === 'account') {
       if (!isLoggedIn()) openAccountForEntry('signin');
       else {
@@ -5165,7 +5297,7 @@ $('#reset-device').addEventListener('click', async () => {
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
   // Bypass any leftover HTTP cache on the document itself
-  url.searchParams.set('v', '70');
+  url.searchParams.set('v', '72');
   location.replace(url.toString());
 });
 
@@ -5193,7 +5325,7 @@ function mountScreenSkies() {
         </svg>
       </div>
     </div>`;
-  ['feed', 'write', 'thread', 'account', 'guidelines', 'legal'].forEach((id) => {
+  ['feed', 'write', 'thread', 'account', 'guidelines', 'legal', 'help'].forEach((id) => {
     const screen = document.getElementById(id);
     if (!screen || screen.querySelector('.screen-sky')) return;
     screen.insertAdjacentHTML('afterbegin', skyHtml);
@@ -5359,7 +5491,7 @@ async function boot() {
       });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      const reg = await navigator.serviceWorker.register('./sw.js?v=70');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=72');
       if (reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
