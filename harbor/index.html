@@ -622,6 +622,9 @@ body {
   font-size: .92rem;
   color: var(--ink-faint);
 }
+.write-room-bar { margin: 0 0 10px; }
+#write .room-blurb { margin: -2px 0 12px; }
+#write .section-sub { margin-bottom: 14px; }
 .invite-box {
   display: flex;
   flex-direction: column;
@@ -1522,7 +1525,12 @@ body {
       <button class="linkish" data-go="feed">Back to shore</button>
     </div>
     <h2 class="section-title">What’s weighing on you?</h2>
-    <p class="section-sub">Stay anonymous, or sign a name. Add a topic if you want — it’s just a label like “hope” or “goodbye.”</p>
+    <div class="room-bar write-room-bar">
+      <label for="write-room-select">Post in</label>
+      <select id="write-room-select" class="room-select" aria-label="Choose a room for this post"></select>
+    </div>
+    <p class="room-blurb" id="write-room-blurb">Everyone’s quiet notes.</p>
+    <p class="section-sub" id="write-sub">Stay anonymous, or sign a name. You can still add an extra topic below if you want.</p>
     <div class="write-shell">
       <div class="identity-bar">
         <div class="seg" role="group" aria-label="Post as">
@@ -2062,40 +2070,56 @@ function currentRoom() {
   return ROOMS.find((r) => r.id === activeRoomId) || ROOMS[0];
 }
 
-function setActiveRoom(roomId, { persist = true } = {}) {
+function setActiveRoom(roomId, { persist = true, syncWrite = true } = {}) {
   const room = ROOMS.find((r) => r.id === roomId) || ROOMS[0];
   activeRoomId = room.id;
   if (persist) {
     try { localStorage.setItem(STORAGE_ROOM, activeRoomId); } catch (_) {}
   }
-  const select = $('#room-select');
-  if (select && select.value !== activeRoomId) select.value = activeRoomId;
+  ['room-select', 'write-room-select'].forEach((id) => {
+    const select = document.getElementById(id);
+    if (select && select.value !== activeRoomId) select.value = activeRoomId;
+  });
   const blurb = $('#room-blurb');
   if (blurb) blurb.textContent = room.blurb;
+  const writeBlurb = $('#write-room-blurb');
+  if (writeBlurb) writeBlurb.textContent = room.blurb;
   const title = $('#feed-title');
   if (title) title.textContent = room.label;
+  if (syncWrite && document.getElementById('write')?.classList.contains('active')) {
+    applyRoomToWrite({ resetTags: true });
+  }
   return room;
 }
 
 function syncRoomPicker() {
-  const select = $('#room-select');
-  if (!select) return;
-  select.innerHTML = ROOMS.map((r) => (
+  const options = ROOMS.map((r) => (
     `<option value="${escapeHtml(r.id)}">${escapeHtml(r.label)}</option>`
   )).join('');
-  select.value = activeRoomId;
-  setActiveRoom(activeRoomId, { persist: false });
+  ['room-select', 'write-room-select'].forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = options;
+    select.value = activeRoomId;
+  });
+  setActiveRoom(activeRoomId, { persist: false, syncWrite: false });
 }
 
-function applyRoomToWrite() {
+function applyRoomToWrite({ resetTags = true } = {}) {
   const room = currentRoom();
-  selectedTags = new Set();
-  if (room.tag) selectedTags.add(room.tag);
-  const sub = document.querySelector('#write .section-sub');
+  if (resetTags) {
+    selectedTags = new Set();
+    if (room.tag) selectedTags.add(room.tag);
+  }
+  const writeSelect = $('#write-room-select');
+  if (writeSelect && writeSelect.value !== room.id) writeSelect.value = room.id;
+  const writeBlurb = $('#write-room-blurb');
+  if (writeBlurb) writeBlurb.textContent = room.blurb;
+  const sub = $('#write-sub') || document.querySelector('#write .section-sub');
   if (sub) {
     sub.textContent = room.tag
-      ? `You’re writing in ${room.label}. Stay anonymous, or sign a name.`
-      : 'Stay anonymous, or sign a name. Add a topic if you want — it’s just a label like “hope” or “goodbye.”';
+      ? `This will land in ${room.label}. Stay anonymous, or sign a name.`
+      : 'This will land on The shore for everyone. Stay anonymous, or sign a name.';
   }
   renderTagPicker();
 }
@@ -4323,8 +4347,11 @@ $('#home-invite-code').addEventListener('keydown', (e) => {
   }
 });
 $('#room-select').addEventListener('change', async () => {
-  setActiveRoom($('#room-select').value);
+  setActiveRoom($('#room-select').value, { syncWrite: false });
   await renderFeed();
+});
+$('#write-room-select')?.addEventListener('change', () => {
+  setActiveRoom($('#write-room-select').value, { syncWrite: true });
 });
 $('#home-guidelines').addEventListener('click', () => {
   pendingEntry = 'feed';
@@ -4782,7 +4809,7 @@ $('#reset-device').addEventListener('click', async () => {
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
   // Bypass any leftover HTTP cache on the document itself
-  url.searchParams.set('v', '66');
+  url.searchParams.set('v', '67');
   location.replace(url.toString());
 });
 
@@ -4976,7 +5003,7 @@ async function boot() {
       });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      const reg = await navigator.serviceWorker.register('./sw.js?v=66');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=67');
       if (reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
