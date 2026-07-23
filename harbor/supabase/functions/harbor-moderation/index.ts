@@ -157,6 +157,80 @@ Deno.serve(async (req) => {
       return cors({ ok: true, emailed: false, inbox: true, watch });
     }
 
+    // Signed-in member sends a private note to the host (email stays server-side)
+    if (action === "contact_host") {
+      const authHeader = req.headers.get("Authorization") || "";
+      const jwt = authHeader.replace(/^Bearer\s+/i, "").trim();
+      if (!jwt || !anonKey) return cors({ error: "Sign in first" }, 401);
+
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${jwt}` } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData?.user) return cors({ error: "Sign in first" }, 401);
+
+      const message = String(body?.message || "").trim().slice(0, 2000);
+      if (message.length < 8) {
+        return cors({ error: "Please write a short message (at least a sentence)." }, 400);
+      }
+
+      const uid = userData.user.id;
+      const email = userData.user.email || "";
+      const { data: prof } = await supabase
+        .from("harbor_profiles")
+        .select("display_name,email")
+        .eq("id", uid)
+        .maybeSingle();
+      const who = String(prof?.display_name || email || uid).slice(0, 120);
+
+      try {
+        await supabase.from("harbor_moderation_events").insert({
+          id: crypto.randomUUID(),
+          action: "contact_host",
+          target_type: "host",
+          target_id: "harbor-host",
+          actor: who,
+          reason: message.slice(0, 500),
+          meta: {
+            user_id: uid,
+            email: email || null,
+            message,
+          },
+        });
+      } catch (_) {
+        // Event trail is best-effort
+      }
+
+      const resendKey = Deno.env.get("RESEND_API_KEY") || "";
+      const toEmail = Deno.env.get("HARBOR_ALERT_EMAIL") || "";
+      const fromEmail = Deno.env.get("HARBOR_ALERT_FROM") || "Harbor <onboarding@resend.dev>";
+      let emailed = false;
+      if (resendKey && toEmail) {
+        const mail = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [toEmail],
+            subject: `Harbor message from ${who}`,
+            text: [
+              "Private member message (not posted on the shore).",
+              `From: ${who}`,
+              email ? `Account email: ${email}` : null,
+              "",
+              message,
+            ].filter(Boolean).join("\n"),
+          }),
+        });
+        emailed = mail.ok;
+      }
+
+      return cors({ ok: true, emailed, inbox: true });
+    }
+
     // Member deletes their own account (avatar + profile cascade + auth user)
     if (action === "delete_own_account") {
       const authHeader = req.headers.get("Authorization") || "";
