@@ -1,4 +1,4 @@
-const CACHE = 'harbor-v65';
+const CACHE = 'harbor-v66';
 const URLS  = [
   '/Owen/harbor/',
   '/Owen/harbor/index.html',
@@ -23,6 +23,10 @@ self.addEventListener('activate', e => {
   );
 });
 
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
@@ -33,7 +37,8 @@ self.addEventListener('fetch', e => {
     || url.pathname.endsWith('/harbor/db.js')
     || url.pathname.endsWith('/harbor/auth.js')
     || url.pathname.endsWith('/harbor/angel.js')
-    || url.pathname.endsWith('/harbor/moderation.js');
+    || url.pathname.endsWith('/harbor/moderation.js')
+    || url.pathname.endsWith('/harbor/sw.js');
 
   if (isAppShell) {
     e.respondWith(
