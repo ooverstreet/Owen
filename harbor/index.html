@@ -4966,9 +4966,11 @@ async function boot() {
 
   if ('serviceWorker' in navigator) {
     try {
+      const hadController = !!navigator.serviceWorker.controller;
       let reloading = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloading) return;
+        // Reload only when replacing an existing worker (not first install)
+        if (!hadController || reloading) return;
         reloading = true;
         location.reload();
       });
