@@ -1576,6 +1576,9 @@ body {
         ·
         <a class="linkish" href="./terms.html" target="_blank" rel="noopener" style="padding:0;display:inline">Terms of use</a>
       </p>
+      <p class="angel-note" style="margin:12px 0 0">
+        Questions for the host later? Use <strong>Me → Contact the host</strong> after you sign in — their personal email stays private.
+      </p>
     </div>
     <label id="legal-agree-label" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
       <input id="legal-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
@@ -1861,6 +1864,16 @@ body {
       <button class="btn btn-primary" id="save-identity" type="button">Save preferences</button>
       <button class="btn btn-secondary btn-small" id="share-harbor" type="button">Share Harbor</button>
       <p id="share-harbor-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
+
+      <div id="contact-host-box" style="display:none;flex-direction:column;align-items:stretch;gap:10px;margin-top:4px">
+        <label for="contact-host-message" style="font-size:.95rem;color:var(--ink-soft)">Contact the host</label>
+        <p class="avatar-hint" style="margin:0">Private note to the Harbor host — not posted on the shore. Their personal email stays hidden.</p>
+        <textarea id="contact-host-message" maxlength="2000" rows="3" placeholder="A short question or note…"
+          style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--paper-solid);border-radius:16px;padding:12px 14px;font:inherit;color:var(--ink);outline:none;resize:vertical;min-height:88px"></textarea>
+        <button class="btn btn-secondary btn-small" id="contact-host-send" type="button">Send to host</button>
+        <p id="contact-host-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
+      </div>
+
       <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
       <button class="linkish" id="open-legal-account" type="button">Privacy &amp; Terms</button>
       <button class="linkish" id="open-guide-account" type="button">Replay Harbor guide</button>
