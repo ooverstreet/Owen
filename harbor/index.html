@@ -1151,6 +1151,46 @@ body {
 }
 .dock-btn.active svg { opacity: 1; }
 
+.back-top {
+  position: fixed;
+  right: max(16px, calc((100vw - 720px) / 2 + 16px));
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 45;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper-solid);
+  color: var(--water-deep);
+  box-shadow: var(--dock-shadow);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity .25s ease, transform .25s ease, background .2s ease;
+}
+.back-top.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+#app.has-dock .back-top {
+  bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.back-top:hover { background: var(--wash-strong); }
+.back-top:active { transform: scale(.96); }
+.back-top svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .back-top { transition: opacity .2s ease; }
+  .back-top.show { transform: none; }
+}
+
 /* ── Write ──────────────────────────────────────────────────── */
 .write-shell { flex: 1; display: flex; flex-direction: column; gap: 14px; }
 .identity-bar {
@@ -1865,6 +1905,13 @@ body {
     </div>
   </nav>
 
+  <button type="button" class="back-top" id="back-top" aria-label="Back to top" hidden>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 19V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M7 12l5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
 </div>
 
 <aside class="whisper-rail" id="shore-whisper-rail" aria-live="polite">
@@ -2484,6 +2531,21 @@ function updateDock(name) {
     const active = (name === 'thread' && key === 'feed') || name === key;
     btn.classList.toggle('active', active);
   });
+  syncBackTop();
+}
+
+function syncBackTop() {
+  const btn = $('#back-top');
+  if (!btn) return;
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  const show = y > 420;
+  btn.hidden = !show;
+  btn.classList.toggle('show', show);
+}
+
+function scrollHarborTop() {
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
 }
 
 function myPostsList() {
@@ -4823,6 +4885,16 @@ document.querySelectorAll('[data-go]').forEach((el) => {
   });
 });
 
+$('#back-top')?.addEventListener('click', () => {
+  scrollHarborTop();
+});
+window.addEventListener('scroll', () => {
+  syncBackTop();
+}, { passive: true });
+window.addEventListener('resize', () => {
+  syncBackTop();
+}, { passive: true });
+
 async function clearHarborAppCache() {
   if ('caches' in window) {
     try {
@@ -4897,7 +4969,7 @@ $('#reset-device').addEventListener('click', async () => {
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
   // Bypass any leftover HTTP cache on the document itself
-  url.searchParams.set('v', '68');
+  url.searchParams.set('v', '69');
   location.replace(url.toString());
 });
 
@@ -5091,7 +5163,7 @@ async function boot() {
       });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      const reg = await navigator.serviceWorker.register('./sw.js?v=68');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=69');
       if (reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
@@ -5106,6 +5178,7 @@ async function boot() {
       });
     } catch (_) {}
   }
+  syncBackTop();
 }
 
 boot();
