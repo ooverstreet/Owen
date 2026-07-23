@@ -1,14 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="shore">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Harbor">
-<meta name="theme-color" content="#E8F1F4">
+<meta name="theme-color" content="#E8F1F4" id="meta-theme-color">
 <meta name="description" content="A peaceful place to set things down — anonymously or with a name — and find gentle company.">
 <title>Harbor — Set things down</title>
+<script>
+/* Apply saved look before paint to avoid a flash */
+(function () {
+  try {
+    var t = localStorage.getItem('harbor.theme.v1') || 'shore';
+    if (t !== 'night' && t !== 'leaf') t = 'shore';
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (_) {}
+})();
+</script>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +31,9 @@
 <script src="./angel.js"></script>
 <script src="./moderation.js"></script>
 <style>
-:root {
+:root,
+html[data-theme="shore"] {
+  color-scheme: light;
   --mist: #E8F1F4;
   --mist-deep: #D3E4EA;
   --water: #3E7A86;
@@ -29,6 +41,7 @@
   --lagoon: #5A9AA6;
   --sand: #E6DED0;
   --warm: #B8894A;
+  --lantern-core: #F2E2B8;
   --ink: #1A2B32;
   --ink-soft: #4A636C;
   --ink-faint: #7A9199;
@@ -41,6 +54,128 @@
   --radius: 22px;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Outfit", system-ui, sans-serif;
+  --theme-color: #E8F1F4;
+  --on-primary: #F4FBFC;
+  --btn-primary-hover: #163F47;
+  --cloud: rgba(255, 252, 248, 0.88);
+  --gull: rgba(31, 79, 88, 0.42);
+  --gull-soft: rgba(31, 79, 88, 0.32);
+  --horizon: rgba(62, 122, 134, 0.35);
+  --water-plane: linear-gradient(180deg, rgba(90, 154, 166, 0.18), rgba(62, 122, 134, 0.42));
+  --ripple: rgba(255, 252, 248, 0.55);
+  --wash: rgba(62, 122, 134, 0.12);
+  --wash-strong: rgba(62, 122, 134, 0.16);
+  --paper-soft: rgba(255, 252, 248, 0.55);
+  --paper-hover: rgba(255, 252, 248, 0.35);
+  --paper-press: rgba(255, 252, 248, 0.55);
+  --featured-grad: linear-gradient(160deg, rgba(255, 252, 248, 0.92), rgba(214, 232, 236, 0.78));
+  --featured-line: rgba(184, 137, 74, 0.28);
+  --dock-fade: linear-gradient(180deg, rgba(234, 243, 246, 0.55), rgba(248, 251, 252, 0.94));
+  --dock-edge: rgba(62, 122, 134, 0.14);
+  --dock-inner: rgba(255, 252, 248, 0.88);
+  --dock-shadow: 0 10px 30px rgba(31, 79, 88, 0.08);
+  --btn-secondary-bg: rgba(255, 252, 248, 0.7);
+  --avatar-harbor: linear-gradient(165deg, #B8D4DE, #EAF2F4 55%, #DCE9EE);
+  --body-bg:
+    radial-gradient(1200px 700px at 70% -10%, rgba(184, 212, 222, 0.9), transparent 60%),
+    radial-gradient(900px 500px at 10% 20%, rgba(230, 222, 208, 0.55), transparent 55%),
+    linear-gradient(180deg, #EAF3F6 0%, var(--mist) 42%, #DCE9EE 100%);
+}
+
+/* Moonlit harbor — deep teal night, not purple */
+html[data-theme="night"] {
+  color-scheme: dark;
+  --mist: #0E1A20;
+  --mist-deep: #081216;
+  --water: #6EB4C0;
+  --water-deep: #B7E0E8;
+  --lagoon: #4A96A4;
+  --sand: #243038;
+  --warm: #D4A86A;
+  --lantern-core: #FFE6B0;
+  --ink: #E6F1F4;
+  --ink-soft: #A9C2CA;
+  --ink-faint: #759099;
+  --paper: rgba(16, 30, 36, 0.78);
+  --paper-solid: #14242B;
+  --line: rgba(183, 224, 232, 0.14);
+  --warn: #E0A06A;
+  --safe: #E08A8A;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+  --theme-color: #0E1A20;
+  --on-primary: #0A1418;
+  --btn-primary-hover: #D2EEF3;
+  --cloud: rgba(180, 210, 220, 0.18);
+  --gull: rgba(183, 224, 232, 0.38);
+  --gull-soft: rgba(183, 224, 232, 0.26);
+  --horizon: rgba(110, 180, 192, 0.35);
+  --water-plane: linear-gradient(180deg, rgba(40, 90, 104, 0.45), rgba(18, 48, 58, 0.85));
+  --ripple: rgba(183, 224, 232, 0.28);
+  --wash: rgba(110, 180, 192, 0.14);
+  --wash-strong: rgba(110, 180, 192, 0.22);
+  --paper-soft: rgba(20, 36, 43, 0.72);
+  --paper-hover: rgba(28, 48, 56, 0.55);
+  --paper-press: rgba(32, 54, 62, 0.72);
+  --featured-grad: linear-gradient(160deg, rgba(22, 40, 48, 0.95), rgba(28, 58, 68, 0.88));
+  --featured-line: rgba(212, 168, 106, 0.35);
+  --dock-fade: linear-gradient(180deg, rgba(10, 20, 26, 0.55), rgba(14, 26, 32, 0.94));
+  --dock-edge: rgba(183, 224, 232, 0.12);
+  --dock-inner: rgba(18, 34, 40, 0.92);
+  --dock-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --btn-secondary-bg: rgba(24, 42, 48, 0.85);
+  --avatar-harbor: linear-gradient(165deg, #2A4A54, #1A3038 55%, #243840);
+  --body-bg:
+    radial-gradient(1000px 640px at 72% -8%, rgba(48, 96, 112, 0.55), transparent 58%),
+    radial-gradient(820px 480px at 8% 18%, rgba(30, 48, 40, 0.4), transparent 55%),
+    linear-gradient(180deg, #12242C 0%, var(--mist) 45%, #0A1418 100%);
+}
+
+/* Soft garden shore — light green, still calm */
+html[data-theme="leaf"] {
+  color-scheme: light;
+  --mist: #E7F3E8;
+  --mist-deep: #D2E6D5;
+  --water: #3F7D52;
+  --water-deep: #245538;
+  --lagoon: #5A9A6C;
+  --sand: #E6E8D2;
+  --warm: #B08A3A;
+  --lantern-core: #F3E7B4;
+  --ink: #1A2E22;
+  --ink-soft: #4A6354;
+  --ink-faint: #7A9184;
+  --paper: rgba(250, 253, 248, 0.74);
+  --paper-solid: #F7FCF6;
+  --line: rgba(36, 85, 56, 0.13);
+  --warn: #9A5B2E;
+  --safe: #8B3A3A;
+  --shadow: 0 18px 50px rgba(36, 85, 56, 0.10);
+  --theme-color: #E7F3E8;
+  --on-primary: #F3FBF5;
+  --btn-primary-hover: #1B452C;
+  --cloud: rgba(255, 252, 248, 0.9);
+  --gull: rgba(36, 85, 56, 0.4);
+  --gull-soft: rgba(36, 85, 56, 0.3);
+  --horizon: rgba(63, 125, 82, 0.35);
+  --water-plane: linear-gradient(180deg, rgba(90, 154, 108, 0.2), rgba(63, 125, 82, 0.42));
+  --ripple: rgba(255, 252, 248, 0.55);
+  --wash: rgba(63, 125, 82, 0.12);
+  --wash-strong: rgba(63, 125, 82, 0.18);
+  --paper-soft: rgba(250, 253, 248, 0.58);
+  --paper-hover: rgba(250, 253, 248, 0.38);
+  --paper-press: rgba(250, 253, 248, 0.58);
+  --featured-grad: linear-gradient(160deg, rgba(250, 253, 248, 0.94), rgba(214, 236, 218, 0.78));
+  --featured-line: rgba(176, 138, 58, 0.3);
+  --dock-fade: linear-gradient(180deg, rgba(231, 243, 232, 0.55), rgba(247, 252, 246, 0.94));
+  --dock-edge: rgba(36, 85, 56, 0.14);
+  --dock-inner: rgba(250, 253, 248, 0.9);
+  --dock-shadow: 0 10px 30px rgba(36, 85, 56, 0.08);
+  --btn-secondary-bg: rgba(250, 253, 248, 0.72);
+  --avatar-harbor: linear-gradient(165deg, #B8D8C0, #EAF4EC 55%, #D8EAD9);
+  --body-bg:
+    radial-gradient(1200px 700px at 70% -10%, rgba(186, 220, 190, 0.85), transparent 60%),
+    radial-gradient(900px 500px at 10% 20%, rgba(230, 232, 210, 0.55), transparent 55%),
+    linear-gradient(180deg, #EAF6EC 0%, var(--mist) 42%, #D8EAD9 100%);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -55,10 +190,8 @@ html, body {
 body {
   min-height: 100dvh;
   overflow-x: hidden;
-  background:
-    radial-gradient(1200px 700px at 70% -10%, rgba(184, 212, 222, 0.9), transparent 60%),
-    radial-gradient(900px 500px at 10% 20%, rgba(230, 222, 208, 0.55), transparent 55%),
-    linear-gradient(180deg, #EAF3F6 0%, var(--mist) 42%, #DCE9EE 100%);
+  background: var(--body-bg);
+  transition: background .45s ease, color .3s ease;
 }
 
 #app {
@@ -157,8 +290,8 @@ body {
   position: absolute;
   left: 0;
   opacity: .72;
-  color: rgba(255, 252, 248, 0.88);
-  filter: drop-shadow(0 1px 1px rgba(62, 122, 134, 0.08));
+  color: var(--cloud);
+  filter: drop-shadow(0 1px 1px var(--wash));
 }
 .sky-cloud svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .sky-cloud.c1 {
@@ -182,14 +315,14 @@ body {
   top: 28px;
   animation: gullA 28s linear infinite;
   animation-delay: -8s;
-  color: rgba(31, 79, 88, 0.42);
+  color: var(--gull);
   width: 20px; height: 11px;
 }
 .screen-sky .gull.sky-g2 {
   top: 56px;
   animation: gullB 36s linear infinite;
   animation-delay: -16s;
-  color: rgba(31, 79, 88, 0.34);
+  color: var(--gull-soft);
   width: 18px; height: 10px;
 }
 
@@ -212,16 +345,16 @@ body {
 .horizon {
   position: absolute; left: 50%; bottom: 38%; width: 140%; height: 1px;
   transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(62,122,134,.35), transparent);
+  background: linear-gradient(90deg, transparent, var(--horizon), transparent);
 }
 .water-plane {
   position: absolute; left: -10%; right: -10%; bottom: 0; height: 58%;
-  background: linear-gradient(180deg, rgba(90,154,166,.18), rgba(62,122,134,.42));
+  background: var(--water-plane);
   border-radius: 50% 50% 0 0 / 28% 28% 0 0;
 }
 .ripple {
   position: absolute; left: 50%; bottom: 34%; width: 160px; height: 18px;
-  margin-left: -80px; border: 1.5px solid rgba(255,252,248,.55); border-radius: 50%;
+  margin-left: -80px; border: 1.5px solid var(--ripple); border-radius: 50%;
   animation: ripple 4.8s ease-out infinite;
 }
 .ripple.r2 { animation-delay: 1.6s; width: 220px; margin-left: -110px; }
@@ -232,6 +365,18 @@ body {
   z-index: 2;
 }
 .mark svg { width: 100%; height: 100%; display: block; }
+/* Keep lighthouse / boat colors tied to the active look */
+.mark svg [fill="#1F4F58"],
+.ambient-boat svg [fill="#1F4F58"] { fill: var(--water-deep); }
+.mark svg [stroke="#1F4F58"],
+.ambient-boat svg [stroke="#1F4F58"] { stroke: var(--water-deep); }
+.mark svg [fill="#3E7A86"] { fill: var(--water); }
+.mark svg [stroke="#3E7A86"],
+.ambient-boat svg [stroke="#3E7A86"] { stroke: var(--water); }
+.mark svg [fill="#B8894A"],
+.mark svg [stroke="#B8894A"] { fill: var(--warm); stroke: var(--warm); }
+.mark svg [fill="#E8F1F4"] { fill: var(--mist); }
+.mark svg [fill="#F2E2B8"] { fill: var(--lantern-core); }
 
 /* Soft coastal silhouettes */
 .ambient-boat {
@@ -258,20 +403,20 @@ body {
   width: 22px;
   height: 12px;
   z-index: 3;
-  color: rgba(31, 79, 88, 0.45);
+  color: var(--gull);
 }
 .gull svg { width: 100%; height: 100%; display: block; transform-origin: center; animation: wingFlap 1.1s ease-in-out infinite; }
 .gull.g1 { animation: gullA 26s linear infinite; }
 .gull.g2 { top: 12%; animation: gullB 34s linear infinite; animation-delay: 7s; }
-.gull.g3 { top: 24%; width: 18px; height: 10px; animation: gullA 31s linear infinite; animation-delay: 15s; color: rgba(31, 79, 88, 0.32); }
+.gull.g3 { top: 24%; width: 18px; height: 10px; animation: gullA 31s linear infinite; animation-delay: 15s; color: var(--gull-soft); }
 .gull.g3 svg { animation-duration: 1.35s; }
 .hero-cloud {
   position: absolute;
   left: 0;
   z-index: 0;
   pointer-events: none;
-  color: rgba(255, 252, 248, 0.82);
-  filter: drop-shadow(0 1px 1px rgba(62, 122, 134, 0.06));
+  color: var(--cloud);
+  filter: drop-shadow(0 1px 1px var(--wash));
 }
 .hero-cloud svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .hero-cloud.h1 {
@@ -336,10 +481,10 @@ body {
   transition: transform .15s ease, background .2s ease;
 }
 .btn:active { transform: scale(.97); }
-.btn-primary { background: var(--water-deep); color: #F4FBFC; }
-.btn-primary:hover { background: #163F47; }
+.btn-primary { background: var(--water-deep); color: var(--on-primary); }
+.btn-primary:hover { background: var(--btn-primary-hover); }
 .btn-secondary {
-  background: rgba(255,252,248,.7); color: var(--water-deep);
+  background: var(--btn-secondary-bg); color: var(--water-deep);
   border: 1px solid var(--line);
 }
 .btn-ghost { background: transparent; color: var(--water); padding-left: 10px; padding-right: 10px; }
@@ -546,7 +691,7 @@ body {
 .feed-list { display: flex; flex-direction: column; gap: 0; }
 .post-card {
   width: 100%; text-align: left; border: 0;
-  border-bottom: 1px solid rgba(62, 122, 134, 0.11);
+  border-bottom: 1px solid var(--line);
   background: transparent; border-radius: 0; padding: 10px 2px 11px;
   cursor: pointer; font: inherit; color: inherit;
   display: grid;
@@ -555,11 +700,11 @@ body {
   transition: background .15s ease;
   animation: fadeIn .35s ease both;
 }
-.post-card:hover { background: rgba(255,252,248,.35); }
-.post-card:active { background: rgba(255,252,248,.55); }
+.post-card:hover { background: var(--paper-hover); }
+.post-card:active { background: var(--paper-press); }
 .post-card.featured {
-  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
-  border: 1px solid rgba(184, 137, 74, 0.28);
+  background: var(--featured-grad);
+  border: 1px solid var(--featured-line);
   border-radius: 16px;
   padding: 12px 12px 13px;
   margin: 2px 0 8px;
@@ -577,8 +722,8 @@ body {
   gap: 2px 12px;
 }
 .post-card.full.featured {
-  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.78));
-  border-color: rgba(184, 137, 74, 0.28);
+  background: var(--featured-grad);
+  border-color: var(--featured-line);
 }
 .post-avatar-col { padding-top: 1px; }
 .post-main { min-width: 0; }
@@ -600,7 +745,7 @@ body {
 .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .tag {
   font-size: .74rem; font-weight: 560; color: var(--water);
-  background: rgba(62,122,134,.08); border-radius: 999px; padding: 3px 9px;
+  background: var(--wash); border-radius: 999px; padding: 3px 9px;
 }
 .post-foot {
   margin-top: 8px; font-size: .78rem; color: var(--ink-faint);
@@ -616,7 +761,7 @@ body {
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-  background: rgba(62, 122, 134, 0.12);
+  background: var(--wash);
   color: var(--water-deep);
   font-weight: 620;
   font-size: .88rem;
@@ -624,12 +769,12 @@ body {
 }
 .avatar.sm { width: 28px; height: 28px; font-size: .76rem; }
 .avatar.lg { width: 72px; height: 72px; font-size: 1.45rem; }
-.avatar.named { background: rgba(62, 122, 134, 0.16); }
-.avatar.anon { background: rgba(184, 137, 74, 0.14); color: var(--warm); }
+.avatar.named { background: var(--wash-strong); }
+.avatar.anon { background: color-mix(in srgb, var(--warm) 18%, transparent); color: var(--warm); }
 .avatar.harbor {
-  background: linear-gradient(165deg, #B8D4DE, #EAF2F4 55%, #DCE9EE);
+  background: var(--avatar-harbor);
   color: var(--water-deep);
-  border: 1px solid rgba(62, 122, 134, 0.18);
+  border: 1px solid var(--line);
 }
 .avatar.harbor img {
   object-fit: cover;
@@ -900,8 +1045,8 @@ body {
   z-index: 40;
   display: none;
   padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(234,243,246,.55), rgba(248,251,252,.94));
-  border-top: 1px solid rgba(62, 122, 134, 0.14);
+  background: var(--dock-fade);
+  border-top: 1px solid var(--dock-edge);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -912,9 +1057,9 @@ body {
   gap: 6px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255,252,248,.88);
+  background: var(--dock-inner);
   padding: 6px;
-  box-shadow: 0 10px 30px rgba(31, 79, 88, 0.08);
+  box-shadow: var(--dock-shadow);
 }
 .dock-btn {
   border: 0;
@@ -940,7 +1085,7 @@ body {
   opacity: .75;
 }
 .dock-btn.active {
-  background: rgba(62, 122, 134, 0.12);
+  background: var(--wash);
   color: var(--water-deep);
 }
 .dock-btn.active svg { opacity: 1; }
@@ -950,7 +1095,7 @@ body {
 .identity-bar {
   display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line);
-  background: rgba(255,252,248,.55);
+  background: var(--paper-soft);
 }
 .seg {
   display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden;
@@ -959,7 +1104,26 @@ body {
   border: none; background: transparent; color: var(--ink-soft);
   font: inherit; font-weight: 560; font-size: .9rem; padding: 8px 14px; cursor: pointer;
 }
-.seg button.active { background: var(--water-deep); color: #F4FBFC; }
+.seg button.active { background: var(--water-deep); color: var(--on-primary); }
+.theme-seg { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 16px; overflow: hidden; }
+.theme-seg button {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; font-size: .86rem;
+}
+.theme-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.55);
+  box-shadow: inset 0 0 0 1px var(--line), 0 1px 3px rgba(0,0,0,.08);
+}
+.theme-swatch.shore {
+  background: linear-gradient(145deg, #EAF3F6 35%, #3E7A86 100%);
+}
+.theme-swatch.night {
+  background: linear-gradient(145deg, #12242C 35%, #6EB4C0 100%);
+}
+.theme-swatch.leaf {
+  background: linear-gradient(145deg, #EAF6EC 35%, #3F7D52 100%);
+}
 #username-input {
   flex: 1; min-width: 140px; border: 1px solid var(--line); background: var(--paper-solid);
   border-radius: 999px; padding: 10px 14px; font: inherit; color: var(--ink); outline: none;
@@ -1492,6 +1656,23 @@ body {
       <p class="avatar-hint">Shown on named posts only. You’ll crop it to a circle before saving.</p>
       <p id="pref-avatar-status" class="avatar-hint" style="min-height:1.2em"></p>
 
+      <label style="font-size:.95rem;color:var(--ink-soft)">Look</label>
+      <div class="seg theme-seg" role="group" aria-label="Harbor look">
+        <button type="button" id="theme-shore" data-theme-pick="shore" class="active" aria-pressed="true">
+          <span class="theme-swatch shore" aria-hidden="true"></span>
+          Shore
+        </button>
+        <button type="button" id="theme-night" data-theme-pick="night" aria-pressed="false">
+          <span class="theme-swatch night" aria-hidden="true"></span>
+          Night
+        </button>
+        <button type="button" id="theme-leaf" data-theme-pick="leaf" aria-pressed="false">
+          <span class="theme-swatch leaf" aria-hidden="true"></span>
+          Leaf
+        </button>
+      </div>
+      <p class="avatar-hint" style="margin-top:-4px">Shore is the classic coastal look. Night is moonlit. Leaf is a soft green shore.</p>
+
       <label for="pref-username" style="font-size:.95rem;color:var(--ink-soft)">How you appear on posts</label>
       <div class="seg" role="group" aria-label="Default identity">
         <button type="button" id="pref-anon" class="active">Anonymous</button>
@@ -1642,6 +1823,8 @@ const STORAGE_GUIDE = 'harbor.guide.v1';
 const STORAGE_INVITE = 'harbor.invite.v1';
 const STORAGE_ROOM = 'harbor.room.v1';
 const STORAGE_MY_AUTHORS = 'harbor.myAuthors.v1';
+const STORAGE_THEME = 'harbor.theme.v1';
+const HARBOR_THEMES = new Set(['shore', 'night', 'leaf']);
 
 /* Positive, non-political. Mostly secular; occasional gentle scripture. */
 const SHORE_WHISPERS = [
@@ -2010,6 +2193,41 @@ function loadWhisperPrefs() {
 
 function saveWhisperPrefs(prefs) {
   saveJSON(STORAGE_WHISPERS, prefs);
+}
+
+function loadTheme() {
+  try {
+    const t = localStorage.getItem(STORAGE_THEME) || 'shore';
+    return HARBOR_THEMES.has(t) ? t : 'shore';
+  } catch (_) {
+    return 'shore';
+  }
+}
+
+function applyTheme(theme, { persist = true } = {}) {
+  const next = HARBOR_THEMES.has(theme) ? theme : 'shore';
+  document.documentElement.setAttribute('data-theme', next);
+  const meta = document.getElementById('meta-theme-color');
+  if (meta) {
+    const color = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#E8F1F4';
+    meta.setAttribute('content', color);
+  }
+  const status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (status) status.setAttribute('content', next === 'night' ? 'black-translucent' : 'default');
+  if (persist) {
+    try { localStorage.setItem(STORAGE_THEME, next); } catch (_) {}
+  }
+  syncThemePicker(next);
+  return next;
+}
+
+function syncThemePicker(theme) {
+  const current = theme || loadTheme();
+  document.querySelectorAll('[data-theme-pick]').forEach((btn) => {
+    const on = btn.getAttribute('data-theme-pick') === current;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
 }
 
 let whisperTimer = null;
@@ -4191,6 +4409,11 @@ $('#pref-named').addEventListener('click', () => {
   $('#pref-username').disabled = false;
   $('#pref-username').focus();
 });
+document.querySelectorAll('[data-theme-pick]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    applyTheme(btn.getAttribute('data-theme-pick'));
+  });
+});
 $('#pref-avatar-choose')?.addEventListener('click', () => {
   const input = $('#pref-avatar-file');
   if (!isLoggedIn()) {
@@ -4511,6 +4734,7 @@ async function resetLocalHarbor({ reload = true, keepGuidelines = false } = {}) 
     'harbor.deviceId.v1',
     'harbor.identity.v1',
     STORAGE_MY_AUTHORS,
+    STORAGE_THEME,
     ...(keepGuidelines ? ['harbor.guidelines.v1'] : []),
   ]);
 
@@ -4596,11 +4820,11 @@ function renderGuidelines() {
   const list = $('#guidelines-list');
   if (!list) return;
   list.innerHTML = g.rules.map((rule) => `
-    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.55);color:var(--ink)">
+    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--paper-soft);color:var(--ink)">
       ${escapeHtml(rule)}
     </li>
   `).join('') + `
-    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,252,248,.35);color:var(--ink-soft);font-size:.92rem">
+    <li style="padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--paper-hover);color:var(--ink-soft);font-size:.92rem">
       ${escapeHtml(g.legal)}
     </li>`;
   const agreed = hasAgreedGuidelines();
@@ -4660,6 +4884,7 @@ async function boot() {
   const roomParam = params.get('room');
   if (roomParam && ROOMS.some((r) => r.id === roomParam)) activeRoomId = roomParam;
 
+  applyTheme(loadTheme(), { persist: false });
   mountScreenSkies();
   renderGuidelines();
   startWhispers();
@@ -4668,6 +4893,7 @@ async function boot() {
   syncRoomPicker();
   renderTagPicker();
   syncHomeInviteUI();
+  syncThemePicker();
   if (window.HarborMod && HarborMod.guidelinesAccepted()) {
     $('#write-guidelines-check').checked = true;
   }
