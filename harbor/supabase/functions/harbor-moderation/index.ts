@@ -173,6 +173,9 @@ Deno.serve(async (req) => {
       if (message.length < 8) {
         return cors({ error: "Please write a short message (at least a sentence)." }, 400);
       }
+      const topicRaw = String(body?.topic || "other").trim().toLowerCase();
+      const allowedTopics = new Set(["question", "bug", "safety", "account", "other"]);
+      const topic = allowedTopics.has(topicRaw) ? topicRaw : "other";
 
       const uid = userData.user.id;
       const email = userData.user.email || "";
@@ -182,6 +185,13 @@ Deno.serve(async (req) => {
         .eq("id", uid)
         .maybeSingle();
       const who = String(prof?.display_name || email || uid).slice(0, 120);
+      const topicLabel = {
+        question: "Question",
+        bug: "Bug / not working",
+        safety: "Safety concern",
+        account: "Account help",
+        other: "Other",
+      }[topic] || "Other";
 
       try {
         await supabase.from("harbor_moderation_events").insert({
@@ -190,11 +200,12 @@ Deno.serve(async (req) => {
           target_type: "host",
           target_id: "harbor-host",
           actor: who,
-          reason: message.slice(0, 500),
+          reason: `[${topicLabel}] ${message}`.slice(0, 500),
           meta: {
             user_id: uid,
             email: email || null,
             message,
+            topic,
           },
         });
       } catch (_) {
@@ -215,9 +226,10 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: fromEmail,
             to: [toEmail],
-            subject: `Harbor message from ${who}`,
+            subject: `Harbor ${topicLabel.toLowerCase()} from ${who}`,
             text: [
-              "Private member message (not posted on the shore).",
+              "Private Help & Support message (not posted on the shore).",
+              `Topic: ${topicLabel}`,
               `From: ${who}`,
               email ? `Account email: ${email}` : null,
               "",
