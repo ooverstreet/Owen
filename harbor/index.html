@@ -1545,9 +1545,47 @@ body {
         <button class="btn btn-secondary btn-small" id="home-invite-redeem" type="button">Unlock invite</button>
         <p class="invite-status" id="home-invite-status"></p>
       </div>
-      <p class="privacy-note">You’ll also agree to the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button> before entering.</p>
+      <p class="privacy-note">Before creating an account you’ll accept Harbor’s <button class="linkish" id="home-legal" type="button" style="padding:0">Privacy &amp; Terms</button>, then the <button class="linkish" id="home-guidelines" type="button" style="padding:0">community guidelines</button>.</p>
       <p class="privacy-note"><button class="linkish" id="enter-feed" type="button" style="padding:0">Already signed in? Enter Harbor</button></p>
     </div>
+  </section>
+
+  <!-- LEGAL: Privacy & Terms before login -->
+  <section id="legal" class="screen" aria-label="Privacy and Terms">
+    <div class="topbar">
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
+      <button class="linkish" id="legal-leave" type="button">Leave</button>
+    </div>
+    <h2 class="section-title">Privacy &amp; Terms</h2>
+    <p class="section-sub" id="legal-sub">Please read and accept before creating an account or signing in.</p>
+    <div class="angel-panel" style="margin-bottom:16px">
+      <div class="angel-label">In short</div>
+      <p class="angel-note" style="margin:0">
+        Harbor stores your account and posts so the shore works. We don’t sell your data.
+        Be considerate. Harbor isn’t crisis care. You can delete your account later from Me.
+      </p>
+      <p class="angel-note" style="margin:12px 0 0">
+        Full details:
+        <a class="linkish" href="./privacy.html" target="_blank" rel="noopener" style="padding:0;display:inline">Privacy Policy</a>
+        ·
+        <a class="linkish" href="./terms.html" target="_blank" rel="noopener" style="padding:0;display:inline">Terms of use</a>
+      </p>
+    </div>
+    <label id="legal-agree-label" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;color:var(--ink-soft)">
+      <input id="legal-check" type="checkbox" style="margin-top:4px;accent-color:var(--water-deep)">
+      <span>I have read and agree to Harbor’s Privacy Policy and Terms of use.</span>
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" id="accept-legal" type="button">I agree — continue</button>
+      <button class="btn btn-secondary" id="decline-legal" type="button">I do not agree</button>
+    </div>
+    <p class="footer-help" id="legal-gate-note">Agreement is required before you can create an account or sign in.</p>
   </section>
 
   <!-- GUIDELINES -->
@@ -1821,7 +1859,10 @@ body {
         <span>Include occasional gentle scripture in Shore whispers.</span>
       </label>
       <button class="btn btn-primary" id="save-identity" type="button">Save preferences</button>
+      <button class="btn btn-secondary btn-small" id="share-harbor" type="button">Share Harbor</button>
+      <p id="share-harbor-status" class="avatar-hint" style="min-height:1.2em;margin:0"></p>
       <button class="linkish" data-go="guidelines" type="button">Community guidelines</button>
+      <button class="linkish" id="open-legal-account" type="button">Privacy &amp; Terms</button>
       <button class="linkish" id="open-guide-account" type="button">Replay Harbor guide</button>
       <button class="linkish" id="reset-device" type="button">Clear cache on this phone</button>
       <button class="linkish" id="delete-account-btn" type="button" style="color:var(--ink-faint);margin-top:4px;display:none">Delete my account</button>
@@ -1967,6 +2008,7 @@ const STORAGE_INVITE = 'harbor.invite.v1';
 const STORAGE_ROOM = 'harbor.room.v1';
 const STORAGE_MY_AUTHORS = 'harbor.myAuthors.v1';
 const STORAGE_THEME = 'harbor.theme.v1';
+const STORAGE_LEGAL = 'harbor.legal.v1';
 const HARBOR_THEMES = new Set(['shore', 'night', 'leaf']);
 
 /* Positive, non-political. Mostly secular; occasional gentle scripture. */
@@ -2045,6 +2087,7 @@ const screens = {
   thread: $('#thread'),
   account: $('#account'),
   guidelines: $('#guidelines'),
+  legal: $('#legal'),
 };
 
 let selectedTags = new Set();
@@ -2264,6 +2307,50 @@ function hasAgreedGuidelines() {
   return !!(window.HarborMod && HarborMod.guidelinesAccepted && HarborMod.guidelinesAccepted());
 }
 
+function hasAgreedLegal() {
+  try {
+    return localStorage.getItem(STORAGE_LEGAL) === 'accepted';
+  } catch (_) {
+    return false;
+  }
+}
+
+function acceptLegalLocal() {
+  try {
+    localStorage.setItem(STORAGE_LEGAL, 'accepted');
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function renderLegalScreen() {
+  const agreed = hasAgreedLegal();
+  const check = $('#legal-check');
+  const acceptBtn = $('#accept-legal');
+  const declineBtn = $('#decline-legal');
+  const gateNote = $('#legal-gate-note');
+  const sub = $('#legal-sub');
+  if (check) {
+    check.checked = agreed;
+    check.disabled = agreed;
+  }
+  if (acceptBtn) {
+    acceptBtn.textContent = agreed ? 'Continue to account' : 'I agree — continue';
+  }
+  if (declineBtn) declineBtn.style.display = agreed ? 'none' : '';
+  if (gateNote) {
+    gateNote.textContent = agreed
+      ? 'You’ve already agreed. You can continue to create an account or sign in.'
+      : 'Agreement is required before you can create an account or sign in.';
+  }
+  if (sub) {
+    sub.textContent = agreed
+      ? 'Thank you. Continue when you’re ready.'
+      : 'Please read and accept before creating an account or signing in.';
+  }
+}
+
 async function persistGuidelinesAgreement() {
   let ok = false;
   if (window.HarborMod && HarborMod.acceptGuidelines) {
@@ -2297,6 +2384,12 @@ function setAuthMode(mode) {
 }
 
 function openAccountForEntry(mode = 'signup') {
+  if (!hasAgreedLegal()) {
+    pendingEntry = mode === 'signin' ? 'signin' : 'signup';
+    renderLegalScreen();
+    showScreen('legal');
+    return;
+  }
   if (mode === 'signup' && !canCreateAccount()) {
     syncHomeInviteUI();
     const status = $('#home-invite-status');
@@ -2317,6 +2410,45 @@ function openAccountForEntry(mode = 'signup') {
         : 'Create an account to enter Harbor.');
   }
   showScreen('account');
+}
+
+function harborPublicUrl() {
+  if (window.HarborAuth && HarborAuth.siteUrl) return HarborAuth.siteUrl();
+  const cfg = window.HARBOR_CONFIG && HARBOR_CONFIG.siteUrl;
+  if (cfg) return String(cfg).replace(/\/?$/, '/');
+  try {
+    const url = new URL(location.href);
+    const path = url.pathname.replace(/index\.html$/i, '');
+    const base = path.endsWith('/') ? path : path.replace(/\/[^/]*$/, '/');
+    return `${url.origin}${base}`;
+  } catch (_) {
+    return 'https://ooverstreet.github.io/Owen/harbor/';
+  }
+}
+
+async function shareHarborLink() {
+  const link = harborPublicUrl();
+  const status = $('#share-harbor-status');
+  const text = 'Harbor — a quiet coastal place to set things down.';
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Harbor', text, url: link });
+      if (status) status.textContent = 'Shared. New friends still need an invite to create an account.';
+      return true;
+    }
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      if (status) status.textContent = '';
+      return false;
+    }
+  }
+  const ok = copyTextSync(link);
+  if (status) {
+    status.textContent = ok
+      ? 'Harbor link copied. New friends still need an invite to create an account.'
+      : 'Could not copy — select and copy: ' + link;
+  }
+  return ok;
 }
 
 function loadJSON(key, fallback) {
@@ -2437,6 +2569,11 @@ function startWhispers() {
 }
 
 function showScreen(name) {
+  if (name === 'account' && !isLoggedIn() && !hasAgreedLegal()) {
+    pendingEntry = authMode === 'signin' ? 'signin' : 'signup';
+    renderLegalScreen();
+    name = 'legal';
+  }
   if (MEMBER_SCREENS.has(name)) {
     if (!hasAgreedGuidelines()) {
       pendingEntry = name;
@@ -2456,6 +2593,7 @@ function showScreen(name) {
   if (name === 'feed' || name === 'home') showNextWhisper();
   updateDock(name);
   if (name === 'account') paintMyPosts();
+  if (name === 'legal') renderLegalScreen();
 }
 
 function hasSeenWelcome() {
@@ -4376,6 +4514,42 @@ $('#home-signin').addEventListener('click', () => {
   pendingEntry = 'feed';
   openAccountForEntry('signin');
 });
+$('#home-legal')?.addEventListener('click', () => {
+  pendingEntry = 'feed';
+  renderLegalScreen();
+  showScreen('legal');
+});
+$('#share-harbor')?.addEventListener('click', () => {
+  shareHarborLink();
+});
+$('#open-legal-account')?.addEventListener('click', () => {
+  renderLegalScreen();
+  showScreen('legal');
+});
+$('#accept-legal')?.addEventListener('click', () => {
+  if (!hasAgreedLegal()) {
+    if (!$('#legal-check')?.checked) {
+      alert('Please check the box to agree before continuing.');
+      return;
+    }
+    if (!acceptLegalLocal()) {
+      alert('Could not save your agreement on this phone. Check that browser storage is allowed, then try again.');
+      return;
+    }
+  }
+  const mode = pendingEntry === 'signin' ? 'signin' : 'signup';
+  pendingEntry = 'feed';
+  openAccountForEntry(mode);
+});
+$('#decline-legal')?.addEventListener('click', () => {
+  pendingEntry = 'feed';
+  showScreen('home');
+  alert('Harbor requires agreement to Privacy & Terms before you can create an account or sign in.');
+});
+$('#legal-leave')?.addEventListener('click', () => {
+  pendingEntry = 'feed';
+  showScreen('home');
+});
 $('#home-invite-redeem').addEventListener('click', async () => {
   const raw = ($('#home-invite-code').value || '').trim();
   const code = extractInviteToken(raw);
@@ -4869,6 +5043,12 @@ document.querySelectorAll('[data-go]').forEach((el) => {
       showScreen('guidelines');
       return;
     }
+    if (dest === 'legal') {
+      pendingEntry = 'feed';
+      renderLegalScreen();
+      showScreen('legal');
+      return;
+    }
     if (dest === 'account') {
       if (!isLoggedIn()) openAccountForEntry('signin');
       else {
@@ -4923,6 +5103,7 @@ async function resetLocalHarbor({ reload = true, keepGuidelines = false } = {}) 
     'harbor.identity.v1',
     STORAGE_MY_AUTHORS,
     STORAGE_THEME,
+    STORAGE_LEGAL,
     ...(keepGuidelines ? ['harbor.guidelines.v1'] : []),
   ]);
 
@@ -4969,7 +5150,7 @@ $('#reset-device').addEventListener('click', async () => {
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
   // Bypass any leftover HTTP cache on the document itself
-  url.searchParams.set('v', '69');
+  url.searchParams.set('v', '70');
   location.replace(url.toString());
 });
 
@@ -4997,7 +5178,7 @@ function mountScreenSkies() {
         </svg>
       </div>
     </div>`;
-  ['feed', 'write', 'thread', 'account', 'guidelines'].forEach((id) => {
+  ['feed', 'write', 'thread', 'account', 'guidelines', 'legal'].forEach((id) => {
     const screen = document.getElementById(id);
     if (!screen || screen.querySelector('.screen-sky')) return;
     screen.insertAdjacentHTML('afterbegin', skyHtml);
@@ -5163,7 +5344,7 @@ async function boot() {
       });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      const reg = await navigator.serviceWorker.register('./sw.js?v=69');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=70');
       if (reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
