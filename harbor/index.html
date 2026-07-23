@@ -2569,11 +2569,6 @@ function startWhispers() {
 }
 
 function showScreen(name) {
-  if (name === 'account' && !isLoggedIn() && !hasAgreedLegal()) {
-    pendingEntry = authMode === 'signin' ? 'signin' : 'signup';
-    renderLegalScreen();
-    name = 'legal';
-  }
   if (MEMBER_SCREENS.has(name)) {
     if (!hasAgreedGuidelines()) {
       pendingEntry = name;
@@ -2585,6 +2580,13 @@ function showScreen(name) {
       syncAccountScreen();
       name = 'account';
     }
+  }
+  if (name === 'account' && !isLoggedIn() && !hasAgreedLegal()) {
+    if (pendingEntry !== 'signin' && pendingEntry !== 'signup') {
+      pendingEntry = authMode === 'signin' ? 'signin' : 'signup';
+    }
+    renderLegalScreen();
+    name = 'legal';
   }
   Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
   window.scrollTo({ top: 0, behavior: 'smooth' });
