@@ -76,6 +76,11 @@ html[data-theme="shore"] {
   --dock-shadow: 0 10px 30px rgba(31, 79, 88, 0.08);
   --btn-secondary-bg: rgba(255, 252, 248, 0.7);
   --avatar-harbor: linear-gradient(165deg, #B8D4DE, #EAF2F4 55%, #DCE9EE);
+  --panel-grad: linear-gradient(165deg, rgba(255, 252, 248, 0.88), rgba(214, 232, 236, 0.55));
+  --whisper-bg: rgba(255, 252, 248, 0.42);
+  --whisper-rail-bg: rgba(255, 252, 248, 0.55);
+  --guide-grad: linear-gradient(160deg, rgba(255, 252, 248, 0.92), rgba(214, 232, 236, 0.72));
+  --guide-line: rgba(184, 137, 74, 0.28);
   --body-bg:
     radial-gradient(1200px 700px at 70% -10%, rgba(184, 212, 222, 0.9), transparent 60%),
     radial-gradient(900px 500px at 10% 20%, rgba(230, 222, 208, 0.55), transparent 55%),
@@ -87,43 +92,48 @@ html[data-theme="night"] {
   color-scheme: dark;
   --mist: #0E1A20;
   --mist-deep: #081216;
-  --water: #6EB4C0;
-  --water-deep: #B7E0E8;
-  --lagoon: #4A96A4;
+  --water: #7EC4CF;
+  --water-deep: #D2EEF3;
+  --lagoon: #5AA8B6;
   --sand: #243038;
-  --warm: #D4A86A;
+  --warm: #E0B06E;
   --lantern-core: #FFE6B0;
-  --ink: #E6F1F4;
-  --ink-soft: #A9C2CA;
-  --ink-faint: #759099;
-  --paper: rgba(16, 30, 36, 0.78);
-  --paper-solid: #14242B;
-  --line: rgba(183, 224, 232, 0.14);
+  --ink: #F0F7F9;
+  --ink-soft: #C5D8DE;
+  --ink-faint: #A3B8C0;
+  --paper: rgba(22, 38, 46, 0.88);
+  --paper-solid: #1B3038;
+  --line: rgba(210, 238, 243, 0.18);
   --warn: #E0A06A;
   --safe: #E08A8A;
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
   --theme-color: #0E1A20;
   --on-primary: #0A1418;
-  --btn-primary-hover: #D2EEF3;
-  --cloud: rgba(180, 210, 220, 0.18);
-  --gull: rgba(183, 224, 232, 0.38);
-  --gull-soft: rgba(183, 224, 232, 0.26);
-  --horizon: rgba(110, 180, 192, 0.35);
+  --btn-primary-hover: #E8F7FA;
+  --cloud: rgba(180, 210, 220, 0.22);
+  --gull: rgba(210, 238, 243, 0.42);
+  --gull-soft: rgba(210, 238, 243, 0.3);
+  --horizon: rgba(126, 196, 207, 0.42);
   --water-plane: linear-gradient(180deg, rgba(40, 90, 104, 0.45), rgba(18, 48, 58, 0.85));
-  --ripple: rgba(183, 224, 232, 0.28);
-  --wash: rgba(110, 180, 192, 0.14);
-  --wash-strong: rgba(110, 180, 192, 0.22);
-  --paper-soft: rgba(20, 36, 43, 0.72);
-  --paper-hover: rgba(28, 48, 56, 0.55);
-  --paper-press: rgba(32, 54, 62, 0.72);
-  --featured-grad: linear-gradient(160deg, rgba(22, 40, 48, 0.95), rgba(28, 58, 68, 0.88));
-  --featured-line: rgba(212, 168, 106, 0.35);
+  --ripple: rgba(210, 238, 243, 0.3);
+  --wash: rgba(126, 196, 207, 0.16);
+  --wash-strong: rgba(126, 196, 207, 0.26);
+  --paper-soft: rgba(28, 48, 56, 0.88);
+  --paper-hover: rgba(36, 58, 68, 0.7);
+  --paper-press: rgba(40, 64, 74, 0.82);
+  --featured-grad: linear-gradient(160deg, rgba(30, 52, 62, 0.98), rgba(36, 64, 74, 0.92));
+  --featured-line: rgba(224, 176, 110, 0.4);
   --dock-fade: linear-gradient(180deg, rgba(10, 20, 26, 0.55), rgba(14, 26, 32, 0.94));
-  --dock-edge: rgba(183, 224, 232, 0.12);
-  --dock-inner: rgba(18, 34, 40, 0.92);
+  --dock-edge: rgba(210, 238, 243, 0.14);
+  --dock-inner: rgba(24, 42, 50, 0.94);
   --dock-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --btn-secondary-bg: rgba(24, 42, 48, 0.85);
+  --btn-secondary-bg: rgba(32, 52, 60, 0.92);
   --avatar-harbor: linear-gradient(165deg, #2A4A54, #1A3038 55%, #243840);
+  --panel-grad: linear-gradient(165deg, rgba(36, 58, 68, 0.96), rgba(28, 48, 58, 0.9));
+  --whisper-bg: rgba(30, 50, 58, 0.92);
+  --whisper-rail-bg: rgba(30, 50, 58, 0.9);
+  --guide-grad: linear-gradient(160deg, rgba(36, 58, 68, 0.96), rgba(32, 54, 62, 0.92));
+  --guide-line: rgba(224, 176, 110, 0.4);
   --body-bg:
     radial-gradient(1000px 640px at 72% -8%, rgba(48, 96, 112, 0.55), transparent 58%),
     radial-gradient(820px 480px at 8% 18%, rgba(30, 48, 40, 0.4), transparent 55%),
@@ -172,6 +182,11 @@ html[data-theme="leaf"] {
   --dock-shadow: 0 10px 30px rgba(24, 74, 58, 0.1);
   --btn-secondary-bg: rgba(236, 246, 240, 0.78);
   --avatar-harbor: linear-gradient(165deg, #7FB89A, #D5E8DC 55%, #B7D4C4);
+  --panel-grad: linear-gradient(165deg, rgba(236, 246, 240, 0.9), rgba(185, 214, 198, 0.55));
+  --whisper-bg: rgba(236, 246, 240, 0.55);
+  --whisper-rail-bg: rgba(236, 246, 240, 0.7);
+  --guide-grad: linear-gradient(160deg, rgba(236, 246, 240, 0.94), rgba(185, 214, 198, 0.75));
+  --guide-line: rgba(176, 138, 58, 0.32);
   --body-bg:
     radial-gradient(1200px 700px at 70% -10%, rgba(120, 180, 150, 0.55), transparent 60%),
     radial-gradient(900px 500px at 12% 22%, rgba(210, 220, 170, 0.4), transparent 55%),
@@ -495,9 +510,51 @@ body {
   gap: 12px; margin-bottom: 18px;
 }
 .brand-mini {
-  font-family: var(--font-display); font-size: 1.55rem; font-weight: 650;
-  color: var(--water-deep); letter-spacing: -0.03em;
-  background: none; border: none; cursor: pointer; padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 650;
+  color: var(--water-deep);
+  letter-spacing: -0.03em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px 2px 0;
+  border-radius: 12px;
+  line-height: 1.05;
+  text-align: left;
+}
+.brand-mini:hover { opacity: .9; }
+.brand-mini-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: block;
+  background: var(--avatar-harbor);
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
+.brand-mini-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.brand-mini-name {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+.brand-mini-sub {
+  font-family: var(--font-body);
+  font-size: .68rem;
+  font-weight: 560;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 .linkish {
   background: none; border: none; color: var(--water); font: inherit;
@@ -514,8 +571,8 @@ body {
 .whisper-card {
   margin: 0 0 18px;
   padding: 14px 16px 12px;
-  border-left: 2px solid rgba(184, 137, 74, 0.45);
-  background: rgba(255, 252, 248, 0.42);
+  border-left: 2px solid var(--guide-line);
+  background: var(--whisper-bg);
   border-radius: 0 14px 14px 0;
   animation: fadeIn .6s ease both;
 }
@@ -546,8 +603,8 @@ body {
   right: max(18px, calc((100vw - 720px) / 2 - 228px));
   width: 200px;
   padding: 16px 16px 14px;
-  border-left: 2px solid rgba(184, 137, 74, 0.4);
-  background: rgba(255, 252, 248, 0.55);
+  border-left: 2px solid var(--guide-line);
+  background: var(--whisper-rail-bg);
   backdrop-filter: blur(8px);
   border-radius: 0 16px 16px 0;
   pointer-events: none;
@@ -941,22 +998,23 @@ body {
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: linear-gradient(165deg, rgba(255,252,248,.88), rgba(214,232,236,.55));
+  background: var(--panel-grad);
 }
 .shore-write p {
   margin: 0;
-  color: var(--water-deep);
+  color: var(--ink);
   font-size: .98rem;
   line-height: 1.35;
   max-width: 28ch;
+  font-weight: 520;
 }
 
 .harbor-guide {
   margin: 0 0 16px;
   padding: 16px 16px 14px;
   border-radius: 18px;
-  border: 1px solid rgba(184, 137, 74, 0.28);
-  background: linear-gradient(160deg, rgba(255,252,248,.92), rgba(214,232,236,.72));
+  border: 1px solid var(--guide-line);
+  background: var(--guide-grad);
   animation: fadeIn .55s ease both;
 }
 .harbor-guide .guide-step-label {
@@ -993,7 +1051,7 @@ body {
   padding: 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: rgba(255,252,248,.55);
+  background: var(--paper-soft);
 }
 .my-posts-box h3 {
   margin: 0 0 6px;
@@ -1172,7 +1230,7 @@ body {
 .thread-stack { display: flex; flex-direction: column; gap: 14px; }
 .angel-panel {
   padding: 20px 20px 18px; border-radius: var(--radius);
-  background: linear-gradient(160deg, rgba(255,252,248,.88), rgba(214,232,236,.72));
+  background: var(--guide-grad);
   border: 1px solid var(--line); box-shadow: var(--shadow); animation: fadeIn .55s ease both;
 }
 .angel-label {
@@ -1191,7 +1249,7 @@ body {
   gap: 0 8px;
   padding: 9px 2px;
   border: 0;
-  border-bottom: 1px solid rgba(62, 122, 134, 0.1);
+  border-bottom: 1px solid var(--line);
   background: transparent;
   border-radius: 0;
   animation: fadeIn .35s ease both;
@@ -1455,7 +1513,13 @@ body {
   <!-- GUIDELINES -->
   <section id="guidelines" class="screen" aria-label="Guidelines">
     <div class="topbar">
-      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
       <button class="linkish" id="guidelines-leave" type="button">Leave</button>
     </div>
     <h2 class="section-title">Harbor Guidelines</h2>
@@ -1480,7 +1544,13 @@ body {
   <!-- FEED -->
   <section id="feed" class="screen" aria-label="Harbor feed">
     <div class="topbar">
-      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
       <div class="top-actions">
         <button class="linkish" id="open-guide" type="button">Guide</button>
       </div>
@@ -1521,7 +1591,13 @@ body {
   <!-- WRITE -->
   <section id="write" class="screen" aria-label="Write">
     <div class="topbar">
-      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
       <button class="linkish" data-go="feed">Back to shore</button>
     </div>
     <h2 class="section-title">What’s weighing on you?</h2>
@@ -1575,7 +1651,13 @@ body {
   <!-- THREAD -->
   <section id="thread" class="screen" aria-label="Thread">
     <div class="topbar">
-      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
       <button class="linkish" data-go="feed">Back to shore</button>
     </div>
     <div class="thread-stack">
@@ -1610,7 +1692,13 @@ body {
   <!-- ACCOUNT / ME -->
   <section id="account" class="screen" aria-label="Account">
     <div class="topbar">
-      <button class="brand-mini" data-go="home">Harbor</button>
+      <button class="brand-mini" data-go="home" type="button" aria-label="Home — Harbor welcome">
+        <img class="brand-mini-mark" src="icon.svg" alt="" width="28" height="28">
+        <span class="brand-mini-text">
+          <span class="brand-mini-name">Harbor</span>
+          <span class="brand-mini-sub">Home</span>
+        </span>
+      </button>
       <button class="linkish" id="account-done" type="button">Done</button>
     </div>
     <h2 class="section-title">Me</h2>
@@ -4809,7 +4897,7 @@ $('#reset-device').addEventListener('click', async () => {
   url.searchParams.set('fresh', String(Date.now()));
   url.searchParams.delete('reset');
   // Bypass any leftover HTTP cache on the document itself
-  url.searchParams.set('v', '67');
+  url.searchParams.set('v', '68');
   location.replace(url.toString());
 });
 
@@ -5003,7 +5091,7 @@ async function boot() {
       });
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.update()));
-      const reg = await navigator.serviceWorker.register('./sw.js?v=67');
+      const reg = await navigator.serviceWorker.register('./sw.js?v=68');
       if (reg.waiting) {
         reg.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
