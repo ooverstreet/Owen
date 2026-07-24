@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: Tellit API
+  version: 0.1.0
+  description: >
+    Web-first traffic issue reporting API for Tellit (Jacksonville MVP).
+    Public users can view active feed; authenticated users can report and confirm.
+servers:
+  - url: https://api.tellit.app
+    description: Production
+  - url: http://localhost:3000
+    description: Local
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Reports
+  - name: Uploads
+  - name: Me
+  - name: Admin
+
+paths:
+  /v1/reports:
+    get:
+      tags: [Reports]
+      summary: List active reports near a location
+      security: []
+      parameters:
+        - in: query
+          name: lat
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - in: query
+          name: lng
+          schema: { type: number, minimum: -180, maximum: 180 }
+        - in: query
+          name: radiusKm
+          schema: { type: number, minimum: 0.2, maximum: 50, default: 8 }
+        - in: query
+          name: issueType
+          schema: { $ref: "#/components/schemas/IssueType" }
+        - in: query
+          name: severity
+          schema: { $ref: "#/components/schemas/IssueSeverity" }
+        - in: query
+          name: sinceHours
+          schema: { type: integer, minimum: 1, maximum: 168, default: 24 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Active report feed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ReportFeedItem" }
+                  meta:
+                    type: object
+                    properties:
+                      count: { type: integer }
+    post:
+      tags: [Reports]
+      summary: Create a traffic report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportCreateRequest" }
+      responses:
+        "201":
+          description: Report created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/ReportDetail" }
+        "400":
+          description: Validation error
+
+  /v1/reports/{reportId}:
+    get:
+      tags: [Reports]
+      summary: Get report details
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: Report details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/ReportDetail" }
+        "404":
+          description: Not found
+
+  /v1/reports/{reportId}/confirm:
+    post:
+      tags: [Reports]
+      summary: Confirm (upvote) a report
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: Confirmation applied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmed: { type: boolean, example: true }
+                  confirmCount: { type: integer, example: 7 }
+    delete:
+      tags: [Reports]
+      summary: Remove my confirmation
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: Confirmation removed
+
+  /v1/reports/{reportId}/resolve:
+    post:
+      tags: [Admin]
+      summary: Resolve/hide/reject a report (moderator)
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toStatus]
+              properties:
+                toStatus:
+                  type: string
+                  enum: [resolved, hidden, rejected, expired]
+                note:
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Status updated
+        "403":
+          description: Moderator role required
+
+  /v1/uploads/report-photo-url:
+    post:
+      tags: [Uploads]
+      summary: Get signed upload URL for report photo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentType, extension]
+              properties:
+                contentType:
+                  type: string
+                  example: image/jpeg
+                extension:
+                  type: string
+                  enum: [jpg, jpeg, png, webp]
+      responses:
+        "200":
+          description: Signed URL payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl: { type: string, format: uri }
+                  publicUrl: { type: string, format: uri }
+                  path: { type: string }
+
+  /v1/me/reports:
+    get:
+      tags: [Me]
+      summary: List my submitted reports
+      responses:
+        "200":
+          description: User report list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ReportDetail" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ReportId:
+      in: path
+      name: reportId
+      required: true
+      schema: { type: integer, minimum: 1 }
+
+  schemas:
+    IssueType:
+      type: string
+      enum:
+        - accident
+        - pothole
+        - signal_out
+        - debris
+        - flooding
+        - roadwork
+        - congestion
+        - other
+
+    IssueSeverity:
+      type: string
+      enum: [low, medium, high]
+
+    ReportCreateRequest:
+      type: object
+      required:
+        - issueType
+        - severity
+        - description
+        - latitude
+        - longitude
+      properties:
+        issueType: { $ref: "#/components/schemas/IssueType" }
+        severity: { $ref: "#/components/schemas/IssueSeverity" }
+        description:
+          type: string
+          minLength: 8
+          maxLength: 500
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        locationText:
+          type: string
+          maxLength: 200
+        isAnonymous:
+          type: boolean
+          default: false
+        photoUrl:
+          type: string
+          format: uri
+          nullable: true
+
+    ReportFeedItem:
+      type: object
+      properties:
+        id: { type: integer }
+        issueType: { $ref: "#/components/schemas/IssueType" }
+        severity: { $ref: "#/components/schemas/IssueSeverity" }
+        description: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        locationText: { type: string, nullable: true }
+        photoUrl: { type: string, nullable: true }
+        reporterLabel: { type: string, example: Anonymous }
+        confirmCount: { type: integer }
+        status: { type: string, enum: [open, resolved, hidden, rejected, expired] }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time, nullable: true }
+
+    ReportDetail:
+      allOf:
+        - $ref: "#/components/schemas/ReportFeedItem"
+        - type: object
+          properties:
+            userCanConfirm: { type: boolean, nullable: true }
+            userHasConfirmed: { type: boolean, nullable: true }

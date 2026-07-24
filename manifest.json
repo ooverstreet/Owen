@@ -1,69 +1,21 @@
 {
-  "id": "/Owen/",
-  "name": "Car Audio Tuner",
-  "short_name": "Car Tuner",
-  "description": "Real-time car audio EQ calibration tool. Uses your phone's microphone to measure your car's frequency response and shows exactly how to adjust your head unit's equalizer to match the Harman in-car listening target curve.",
-  "start_url": "/Owen/",
-  "scope": "/Owen/",
+  "id": "/Owen/crypto/",
+  "name": "Crypto Signal",
+  "short_name": "Crypto Signal",
+  "description": "Real-time crypto technical analysis signals with Coinbase market data.",
+  "start_url": "/Owen/crypto/",
+  "scope": "/Owen/crypto/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#08080f",
-  "theme_color": "#08080f",
+  "background_color": "#060610",
+  "theme_color": "#060610",
   "orientation": "portrait-primary",
   "lang": "en-US",
-  "dir": "ltr",
-  "categories": ["music", "utilities"],
-  "iarc_rating_id": "",
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "shortcuts": [
-    {
-      "name": "Start Measuring",
-      "short_name": "Measure",
-      "description": "Open the RTA and start measuring",
-      "url": "/Owen/",
-      "icons": [{ "src": "/Owen/icon-192.png", "sizes": "192x192" }]
-    }
-  ],
+  "categories": ["finance", "utilities"],
   "icons": [
-    {
-      "src": "/Owen/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/Owen/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/Owen/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/Owen/icon-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/Owen/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/Owen/screenshot-portrait.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Real-time frequency analyzer with Harman target curve and 16-band delta corrections"
-    }
+    { "src": "/Owen/crypto/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/Owen/crypto/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/Owen/crypto/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/Owen/crypto/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/Owen/crypto/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
