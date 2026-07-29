@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plainly">
+<meta name="theme-color" content="#0B3D4A">
+<meta name="description" content="Photo a bill, letter, or form. Get plain English: what it is, what to do, by when, and what if you ignore it.">
+<title>Plainly — Paperwork in plain English</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root {
+  --ink: #0B3D4A;
+  --ink-deep: #062830;
+  --mist: #E8F3F1;
+  --paper: #F7FBFA;
+  --foam: #2EC4B6;
+  --foam-deep: #1FA89C;
+  --warn: #C45C26;
+  --danger: #B42318;
+  --ok: #1B7A4E;
+  --line: rgba(11, 61, 74, 0.12);
+  --muted: #5A7A82;
+  --shadow: 0 18px 50px rgba(6, 40, 48, 0.14);
+  --radius: 18px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Sora, sans-serif;
+}
+body { overflow-x: hidden; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+a { color: var(--foam-deep); }
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Screens ─────────────────────────────────────────────────── */
+.screen { display: none; flex: 1; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── Hero / Home ─────────────────────────────────────────────── */
+#home {
+  position: relative;
+  min-height: 100dvh;
+  color: #F4FFFD;
+  background:
+    radial-gradient(ellipse 90% 70% at 80% 10%, rgba(46, 196, 182, 0.35), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 10% 90%, rgba(11, 61, 74, 0.9), transparent 50%),
+    linear-gradient(165deg, #0B3D4A 0%, #0E5A63 42%, #134E5E 100%);
+  overflow: hidden;
+}
+#home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.05) 45%, transparent 50%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 28px,
+      rgba(255,255,255,0.025) 28px,
+      rgba(255,255,255,0.025) 29px
+    );
+  pointer-events: none;
+  animation: drift 18s linear infinite;
+}
+@keyframes drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-40px); }
+}
+
+.home-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(14px + var(--safe-top)) 20px 0;
+}
+.home-top button {
+  color: rgba(244, 255, 253, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 4px;
+}
+.home-top button:active { opacity: 0.7; }
+
+.hero {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px 24px calc(28px + var(--safe-bot));
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.brand {
+  font-family: Fraunces, serif;
+  font-size: clamp(52px, 14vw, 84px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  margin-bottom: 18px;
+  animation: rise 0.7s ease both;
+}
+.hero h1 {
+  font-family: Fraunces, serif;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 12ch;
+  margin-bottom: 14px;
+  animation: rise 0.7s ease 0.08s both;
+}
+.hero p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(244, 255, 253, 0.78);
+  max-width: 32ch;
+  margin-bottom: 28px;
+  animation: rise 0.7s ease 0.16s both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: rise 0.7s ease 0.24s both;
+}
+.btn-primary {
+  background: #F4FFFD;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 22px;
+  border-radius: 14px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn-primary:active { transform: scale(0.98); }
+.btn-ghost {
+  color: #F4FFFD;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid rgba(244,255,253,0.28);
+  border-radius: 14px;
+}
+.btn-ghost:active { background: rgba(255,255,255,0.08); }
+
+.paper-plane {
+  position: absolute;
+  right: -8%;
+  top: 18%;
+  width: min(58vw, 280px);
+  height: min(70vw, 340px);
+  background:
+    linear-gradient(160deg, rgba(244,255,253,0.95), rgba(232,243,241,0.75));
+  border-radius: 18px 18px 22px 22px;
+  transform: rotate(8deg);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+  animation: floaty 5.5s ease-in-out infinite;
+  overflow: hidden;
+}
+.paper-plane::before {
+  content: "";
+  position: absolute;
+  inset: 22px 22px auto 22px;
+  height: 14px;
+  border-radius: 8px;
+  background: rgba(11,61,74,0.8);
+}
+.paper-plane::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 40px;
+  top: 52px;
+  height: 90px;
+  background:
+    linear-gradient(var(--muted), var(--muted)) 0 0 / 100% 8px no-repeat,
+    linear-gradient(var(--muted), var(--muted)) 0 22px / 88% 8px no-repeat,
+    linear-gradient(var(--muted), var(--muted)) 0 44px / 72% 8px no-repeat,
+    linear-gradient(var(--foam), var(--foam)) 0 72px / 40% 10px no-repeat;
+  opacity: 0.55;
+}
+@keyframes floaty {
+  0%, 100% { transform: rotate(8deg) translateY(0); }
+  50% { transform: rotate(6deg) translateY(-12px); }
+}
+
+/* ── Inner screens chrome ────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(247, 251, 250, 0.92);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.topbar h2 {
+  font-family: Fraunces, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  flex: 1;
+}
+.icon-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  background: var(--mist);
+  font-size: 12px;
+  font-weight: 700;
+}
+.icon-btn:active { transform: scale(0.96); }
+
+.content {
+  flex: 1;
+  padding: 20px 18px calc(28px + var(--safe-bot));
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+/* ── Scan ────────────────────────────────────────────────────── */
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.upload-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px 16px;
+  min-height: 120px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.upload-tile:active { transform: scale(0.98); border-color: var(--foam); }
+.upload-tile strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+.upload-tile span {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.tile-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--mist);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: Fraunces, serif;
+  font-weight: 700;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 8px 0 12px;
+}
+
+.sample-list { display: flex; flex-direction: column; gap: 10px; }
+.sample-btn {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sample-btn:active { border-color: var(--foam); }
+.sample-btn strong { font-size: 14px; }
+.sample-btn span { font-size: 12px; color: var(--muted); }
+
+.preview-wrap {
+  display: none;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.preview-wrap.show { display: block; }
+.preview-wrap img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: var(--mist);
+  margin-bottom: 12px;
+}
+.preview-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.btn-action {
+  width: 100%;
+  background: var(--ink);
+  color: #F4FFFD;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 15px 18px;
+  border-radius: 14px;
+}
+.btn-action:disabled { opacity: 0.45; }
+.btn-action:not(:disabled):active { transform: scale(0.98); background: var(--ink-deep); }
+
+.disclaimer {
+  margin-top: 18px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ── Result ──────────────────────────────────────────────────── */
+.result-type {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--foam-deep);
+  margin-bottom: 8px;
+}
+.result-title {
+  font-family: Fraunces, serif;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  animation: rise 0.5s ease both;
+}
+
+.blocks { display: flex; flex-direction: column; gap: 12px; }
+.block {
+  padding: 16px 16px 14px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--foam);
+  animation: rise 0.5s ease both;
+}
+.block:nth-child(1) { animation-delay: 0.05s; }
+.block:nth-child(2) { animation-delay: 0.12s; border-left-color: var(--ink); }
+.block:nth-child(3) { animation-delay: 0.19s; border-left-color: var(--warn); }
+.block:nth-child(4) { animation-delay: 0.26s; border-left-color: var(--danger); }
+.block h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.block p { font-size: 15px; line-height: 1.55; }
+.block .deadline {
+  font-family: Fraunces, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--warn);
+  margin-top: 4px;
+}
+
+.result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn-secondary {
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--mist);
+  color: var(--ink);
+}
+.btn-secondary:active { transform: scale(0.98); }
+
+.legal-note {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(196, 92, 38, 0.08);
+  color: #7A3A16;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* ── History / Settings ──────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.hist-list { display: flex; flex-direction: column; gap: 10px; }
+.hist-item {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.hist-item strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.hist-item span { font-size: 12px; color: var(--muted); }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.field input {
+  padding: 14px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.field small { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--mist);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.status-pill.ok { background: rgba(27, 122, 78, 0.12); color: var(--ok); }
+.status-pill.warn { background: rgba(196, 92, 38, 0.12); color: var(--warn); }
+
+.loading {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 40, 48, 0.55);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.loading.show { display: flex; }
+.loading-card {
+  background: #fff;
+  color: var(--ink);
+  border-radius: 18px;
+  padding: 28px 24px;
+  width: min(320px, 100%);
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid var(--mist);
+  border-top-color: var(--foam);
+  margin: 0 auto 14px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-card p { font-size: 14px; color: var(--muted); }
+
+.error-banner {
+  display: none;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(180, 35, 24, 0.08);
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.error-banner.show { display: block; }
+
+@media (min-width: 720px) {
+  .hero { padding-bottom: 48px; }
+  .paper-plane { right: 12%; top: 16%; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <section id="home" class="screen active">
+    <div class="home-top">
+      <button type="button" id="btn-history-home">History</button>
+      <button type="button" id="btn-settings-home">Settings</button>
+    </div>
+    <div class="paper-plane" aria-hidden="true"></div>
+    <div class="hero">
+      <div class="brand">Plainly</div>
+      <h1>What does this letter actually want from you?</h1>
+      <p>Photo a bill, EOB, HOA notice, or form. Get plain English — not legalese.</p>
+      <div class="cta-row">
+        <button type="button" class="btn-primary" id="btn-start-scan">Scan a document</button>
+        <button type="button" class="btn-ghost" id="btn-try-sample">Try a sample first</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAN -->
+  <section id="scan" class="screen">
+    <div class="topbar">
+      <button type="button" class="icon-btn" data-go="home" aria-label="Back">Back</button>
+      <h2>Scan</h2>
+      <button type="button" class="icon-btn" data-go="settings" aria-label="Settings">Set</button>
+    </div>
+    <div class="content">
+      <p class="lead">Start with a photo or PDF. Best results: medical bills, insurance EOBs, utility notices, HOA letters.</p>
+      <div id="scan-error" class="error-banner"></div>
+
+      <div class="upload-grid">
+        <button type="button" class="upload-tile" id="btn-camera">
+          <span class="tile-mark">Cam</span>
+          <strong>Take photo</strong>
+          <span>Use your camera for a letter or bill</span>
+        </button>
+        <button type="button" class="upload-tile" id="btn-file">
+          <span class="tile-mark">File</span>
+          <strong>Upload file</strong>
+          <span>Photo or PDF from your phone</span>
+        </button>
+      </div>
+      <input type="file" id="file-camera" accept="image/*" capture="environment" hidden>
+      <input type="file" id="file-any" accept="image/*,application/pdf,.pdf" hidden>
+
+      <div id="preview" class="preview-wrap">
+        <img id="preview-img" alt="Document preview">
+        <div class="preview-meta" id="preview-meta"></div>
+        <button type="button" class="btn-action" id="btn-translate">Translate to plain English</button>
+      </div>
+
+      <div class="section-label">Or try a sample</div>
+      <div class="sample-list" id="sample-list"></div>
+
+      <p class="disclaimer">Plainly is a decision helper, not legal, medical, insurance, or financial advice. Always verify dates and amounts on the original document.</p>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen">
+    <div class="topbar">
+      <button type="button" class="icon-btn" data-go="scan" aria-label="Back">Back</button>
+      <h2>Plain English</h2>
+      <button type="button" class="icon-btn" data-go="home" aria-label="Home">Home</button>
+    </div>
+    <div class="content">
+      <div class="result-type" id="result-type">Document</div>
+      <h1 class="result-title" id="result-title">Here’s what this means</h1>
+      <div class="blocks">
+        <article class="block">
+          <h3>What it is</h3>
+          <p id="out-what"></p>
+        </article>
+        <article class="block">
+          <h3>What you should do</h3>
+          <p id="out-do"></p>
+        </article>
+        <article class="block">
+          <h3>By when</h3>
+          <p id="out-when"></p>
+          <div class="deadline" id="out-deadline"></div>
+        </article>
+        <article class="block">
+          <h3>If you ignore it</h3>
+          <p id="out-ignore"></p>
+        </article>
+      </div>
+      <div class="result-actions">
+        <button type="button" class="btn-secondary" id="btn-copy">Copy summary</button>
+        <button type="button" class="btn-secondary" id="btn-again">Scan another</button>
+      </div>
+      <div class="legal-note">Not legal, medical, insurance, or financial advice. Double-check every date, amount, and instruction against the original paperwork.</div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="history" class="screen">
+    <div class="topbar">
+      <button type="button" class="icon-btn" data-go="home" aria-label="Back">Back</button>
+      <h2>History</h2>
+      <button type="button" class="icon-btn" id="btn-clear-history" aria-label="Clear">Clear</button>
+    </div>
+    <div class="content">
+      <div id="history-empty" class="empty">No translations yet. Scan a document or try a sample.</div>
+      <div id="history-list" class="hist-list"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settings" class="screen">
+    <div class="topbar">
+      <button type="button" class="icon-btn" data-go="home" aria-label="Back">Back</button>
+      <h2>Settings</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="content">
+      <div id="key-status" class="status-pill warn">Samples work now · API key unlocks your own docs</div>
+      <div class="field">
+        <label for="api-key">Groq API key (stored only on this device)</label>
+        <input id="api-key" type="password" placeholder="gsk_…" autocomplete="off" spellcheck="false">
+        <small>Free key from console.groq.com. Used to read your photos/PDFs. Never uploaded to our servers — this MVP calls Groq directly from your browser.</small>
+      </div>
+      <button type="button" class="btn-action" id="btn-save-key">Save key</button>
+      <p class="disclaimer" style="margin-top:20px">
+        Plainly v0.1 MVP focuses on medical bills, insurance EOBs, utility shutoff notices, and HOA letters.
+        Your documents stay on-device except when you translate with an API key (then the file is sent to Groq for analysis).
+      </p>
+    </div>
+  </section>
+</div>
+
+<div class="loading" id="loading" aria-live="polite">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <strong>Reading your paperwork…</strong>
+    <p>Turning dense language into the four answers that matter.</p>
+  </div>
+</div>
+
+<script>
+const SAMPLES = [
+  {
+    id: 'eob',
+    title: 'Insurance EOB',
+    blurb: 'Explanation of Benefits after a clinic visit',
+    result: {
+      type: 'Insurance EOB',
+      title: 'This is not a bill — it’s a summary of what insurance paid',
+      what: 'An Explanation of Benefits from your health insurer for a clinic visit. It shows what was billed, what insurance allowed/paid, and what they say you may owe.',
+      do: 'Compare the “patient responsibility” to any bill from the clinic. If you already paid a copay, check you aren’t being asked twice. Call the insurer or clinic if numbers don’t match.',
+      when: 'No hard deadline on most EOBs, but act soon if a matching bill has a due date.',
+      deadline: 'Check related bills within 14 days',
+      ignore: 'You might overpay, miss a billing error, or let a real balance go to collections if you assume “EOB = paid in full.”'
+    }
+  },
+  {
+    id: 'utility',
+    title: 'Utility shutoff notice',
+    blurb: 'Past-due electric bill with disconnection date',
+    result: {
+      type: 'Utility notice',
+      title: 'Your power can be shut off if this balance isn’t handled',
+      what: 'A past-due utility notice. The company is warning that service may be disconnected unless payment or a payment plan is arranged.',
+      do: 'Pay the past-due amount, set up a payment arrangement, or contact the utility assistance program listed on the notice. Keep a confirmation number.',
+      when: 'Act before the disconnection date printed on the notice.',
+      deadline: 'Before the shutoff date on the letter',
+      ignore: 'Service can be disconnected, reconnection fees can apply, and the balance may be sent to collections.'
+    }
+  },
+  {
+    id: 'hoa',
+    title: 'HOA violation letter',
+    blurb: 'Architectural / maintenance compliance notice',
+    result: {
+      type: 'HOA letter',
+      title: 'The HOA wants a specific fix by a deadline',
+      what: 'A homeowners association notice saying something on your property doesn’t meet community rules (for example landscaping, paint, or an unapproved change).',
+      do: 'Read the exact violation, fix it or apply for approval if required, and reply in writing with photos or proof when done. Save everything.',
+      when: 'Follow the cure / response deadline in the letter.',
+      deadline: 'Usually 10–30 days — use the date on your letter',
+      ignore: 'Fines can increase, a lien may be threatened, and disputes get harder once deadlines pass.'
+    }
+  },
+  {
+    id: 'medical',
+    title: 'Medical bill',
+    blurb: 'Hospital / clinic balance due statement',
+    result: {
+      type: 'Medical bill',
+      title: 'A provider is asking you to pay a remaining balance',
+      what: 'A billing statement from a clinic or hospital for care you received. It lists charges and the amount they say you still owe.',
+      do: 'Confirm insurance already processed the claim. Ask about itemized charges, financial assistance, or a payment plan before paying if anything looks wrong.',
+      when: 'Pay or dispute by the due date on the statement.',
+      deadline: 'Due date printed on the bill',
+      ignore: 'Late fees, collections calls, and possible credit impact if it goes unpaid long enough.'
+    }
+  }
+];
+
+const KEY_STORAGE = 'plainly_groq_key';
+const HIST_STORAGE = 'plainly_history_v1';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
+
+let pendingFile = null; // { name, type, dataUrl, isPdf }
+
+const $ = (id) => document.getElementById(id);
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function setLoading(on) {
+  $('loading').classList.toggle('show', on);
+}
+
+function showScanError(msg) {
+  const el = $('scan-error');
+  if (!msg) {
+    el.classList.remove('show');
+    el.textContent = '';
+    return;
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function getKey() {
+  return (localStorage.getItem(KEY_STORAGE) || '').trim();
+}
+
+function updateKeyStatus() {
+  const has = !!getKey();
+  const el = $('key-status');
+  el.className = 'status-pill ' + (has ? 'ok' : 'warn');
+  el.textContent = has
+    ? 'API key saved on this device'
+    : 'Samples work now · API key unlocks your own docs';
+  $('api-key').value = getKey();
+}
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HIST_STORAGE) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(item) {
+  const list = loadHistory();
+  list.unshift({ ...item, savedAt: Date.now() });
+  localStorage.setItem(HIST_STORAGE, JSON.stringify(list.slice(0, 30)));
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  const empty = $('history-empty');
+  const wrap = $('history-list');
+  wrap.innerHTML = '';
+  if (!list.length) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hist-item';
+    const when = new Date(item.savedAt).toLocaleString();
+    btn.innerHTML = `<strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.type)} · ${escapeHtml(when)}</span>`;
+    btn.addEventListener('click', () => {
+      paintResult(item);
+      showScreen('result');
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function paintResult(r) {
+  $('result-type').textContent = r.type || 'Document';
+  $('result-title').textContent = r.title || 'Here’s what this means';
+  $('out-what').textContent = r.what || '';
+  $('out-do').textContent = r.do || '';
+  $('out-when').textContent = r.when || '';
+  $('out-deadline').textContent = r.deadline || '';
+  $('out-ignore').textContent = r.ignore || '';
+}
+
+function renderSamples() {
+  const wrap = $('sample-list');
+  wrap.innerHTML = '';
+  SAMPLES.forEach((s) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sample-btn';
+    btn.innerHTML = `<strong>${s.title}</strong><span>${s.blurb}</span>`;
+    btn.addEventListener('click', () => runSample(s));
+    wrap.appendChild(btn);
+  });
+}
+
+function runSample(sample) {
+  showScanError('');
+  setLoading(true);
+  setTimeout(() => {
+    const r = sample.result;
+    saveHistory(r);
+    paintResult(r);
+    setLoading(false);
+    showScreen('result');
+  }, 700);
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFile(file) {
+  if (!file) return;
+  showScanError('');
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  const isImage = file.type.startsWith('image/');
+  if (!isPdf && !isImage) {
+    showScanError('Please upload a photo or PDF.');
+    return;
+  }
+  if (file.size > 12 * 1024 * 1024) {
+    showScanError('File is too large. Try under 12MB.');
+    return;
+  }
+
+  const dataUrl = await readFileAsDataUrl(file);
+  pendingFile = { name: file.name, type: file.type || (isPdf ? 'application/pdf' : 'image/jpeg'), dataUrl, isPdf };
+
+  const preview = $('preview');
+  const img = $('preview-img');
+  if (isPdf) {
+    img.removeAttribute('src');
+    img.alt = 'PDF selected';
+    img.style.display = 'none';
+  } else {
+    img.style.display = 'block';
+    img.src = dataUrl;
+  }
+  $('preview-meta').textContent = `${file.name} · ${Math.round(file.size / 1024)} KB`;
+  preview.classList.add('show');
+}
+
+function extractJson(text) {
+  const trimmed = text.trim();
+  try { return JSON.parse(trimmed); } catch {}
+  const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) {
+    try { return JSON.parse(fence[1].trim()); } catch {}
+  }
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    try { return JSON.parse(trimmed.slice(start, end + 1)); } catch {}
+  }
+  throw new Error('Could not parse model response');
+}
+
+async function extractPdfText(dataUrl) {
+  if (!window.pdfjsLib) {
+    throw new Error('PDF reader failed to load. Try a photo of the page instead.');
+  }
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const base64 = dataUrl.split(',')[1] || '';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+  const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const maxPages = Math.min(pdf.numPages, 4);
+  const parts = [];
+  for (let i = 1; i <= maxPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const text = content.items.map((it) => it.str).join(' ').replace(/\s+/g, ' ').trim();
+    if (text) parts.push('Page ' + i + ': ' + text);
+  }
+  const joined = parts.join('\n\n').trim();
+  if (!joined || joined.length < 20) {
+    throw new Error('Could not read text from this PDF. Take a clear photo of the page instead.');
+  }
+  return joined.slice(0, 12000);
+}
+
+async function translateWithGroq() {
+  const key = getKey();
+  if (!key) {
+    throw new Error('Add a free Groq API key in Settings to translate your own documents. Or try a sample first.');
+  }
+  if (!pendingFile) throw new Error('Choose a photo or PDF first.');
+
+  const system = `You are Plainly, a paperwork translator for ordinary people.
+Read the document and return ONLY valid JSON with these keys:
+type (short doc type),
+title (one plain-English headline),
+what (what the document is),
+do (what the person should do next),
+when (timing guidance in plain English),
+deadline (short deadline line; use "Not stated" if unknown),
+ignore (what can happen if they ignore it).
+Be concrete and calm. Never invent exact dollar amounts or dates that are not visible.
+If unreadable, say so in "what" and set other fields helpfully.
+This is not legal, medical, insurance, or financial advice — phrase actions as practical next steps.
+Focus especially well on: medical bills, insurance EOBs, utility shutoff notices, HOA letters.`;
+
+  let userContent;
+  if (pendingFile.isPdf) {
+    const pdfText = await extractPdfText(pendingFile.dataUrl);
+    userContent = [
+      {
+        type: 'text',
+        text: 'Translate this PDF document text into the required JSON fields.\nFilename: ' +
+          pendingFile.name + '\n\nDOCUMENT TEXT:\n' + pdfText
+      }
+    ];
+  } else {
+    userContent = [
+      {
+        type: 'text',
+        text: 'Translate this document photo into the required JSON fields. Filename: ' + pendingFile.name
+      },
+      {
+        type: 'image_url',
+        image_url: { url: pendingFile.dataUrl }
+      }
+    ];
+  }
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + key
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      temperature: 0.2,
+      max_tokens: 900,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: userContent }
+      ]
+    })
+  });
+
+  const raw = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = raw?.error?.message || ('API error (' + res.status + ')');
+    if (!pendingFile.isPdf) {
+      throw new Error(msg + ' If the photo is blurry, retake it in good light.');
+    }
+    throw new Error(msg);
+  }
+
+  const content = raw?.choices?.[0]?.message?.content || '';
+  const parsed = extractJson(content);
+  return {
+    type: parsed.type || 'Document',
+    title: parsed.title || 'Here’s what this means',
+    what: parsed.what || '',
+    do: parsed.do || '',
+    when: parsed.when || '',
+    deadline: parsed.deadline || 'Not stated',
+    ignore: parsed.ignore || ''
+  };
+}
+
+async function onTranslate() {
+  showScanError('');
+  setLoading(true);
+  try {
+    const result = await translateWithGroq();
+    saveHistory(result);
+    paintResult(result);
+    showScreen('result');
+  } catch (err) {
+    showScanError(err.message || 'Translation failed');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function copySummary() {
+  const text = [
+    $('result-title').textContent,
+    '',
+    'What it is: ' + $('out-what').textContent,
+    'What you should do: ' + $('out-do').textContent,
+    'By when: ' + $('out-when').textContent,
+    'Deadline: ' + $('out-deadline').textContent,
+    'If you ignore it: ' + $('out-ignore').textContent,
+    '',
+    '— via Plainly (not legal/financial advice)'
+  ].join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = $('btn-copy');
+    const old = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = old; }, 1200);
+  }).catch(() => alert('Could not copy'));
+}
+
+// Wire UI
+document.querySelectorAll('[data-go]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const id = btn.getAttribute('data-go');
+    if (id === 'history') renderHistory();
+    if (id === 'settings') updateKeyStatus();
+    showScreen(id);
+  });
+});
+
+$('btn-history-home').addEventListener('click', () => { renderHistory(); showScreen('history'); });
+$('btn-settings-home').addEventListener('click', () => { updateKeyStatus(); showScreen('settings'); });
+$('btn-start-scan').addEventListener('click', () => { showScanError(''); showScreen('scan'); });
+$('btn-try-sample').addEventListener('click', () => { showScanError(''); showScreen('scan'); $('sample-list').scrollIntoView({ behavior: 'smooth' }); });
+$('btn-camera').addEventListener('click', () => $('file-camera').click());
+$('btn-file').addEventListener('click', () => $('file-any').click());
+$('file-camera').addEventListener('change', (e) => {
+  handleFile(e.target.files?.[0]).catch((err) => showScanError(err.message || 'Could not open file'));
+});
+$('file-any').addEventListener('change', (e) => {
+  handleFile(e.target.files?.[0]).catch((err) => showScanError(err.message || 'Could not open file'));
+});
+$('btn-translate').addEventListener('click', onTranslate);
+$('btn-copy').addEventListener('click', copySummary);
+$('btn-again').addEventListener('click', () => { pendingFile = null; $('preview').classList.remove('show'); showScreen('scan'); });
+$('btn-save-key').addEventListener('click', () => {
+  localStorage.setItem(KEY_STORAGE, $('api-key').value.trim());
+  updateKeyStatus();
+  const btn = $('btn-save-key');
+  const old = btn.textContent;
+  btn.textContent = 'Saved';
+  setTimeout(() => { btn.textContent = old; }, 1000);
+});
+$('btn-clear-history').addEventListener('click', () => {
+  if (confirm('Clear translation history on this device?')) {
+    localStorage.removeItem(HIST_STORAGE);
+    renderHistory();
+  }
+});
+
+renderSamples();
+updateKeyStatus();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
