@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Beacon — Campus Safety Alerts</title>
+  <meta name="description" content="Official campus tip reporting and parent safety alerts." />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #071c1b;
+      --bg1: #0b3d3a;
+      --bg2: #135e57;
+      --panel: rgba(244, 249, 247, 0.94);
+      --panel-solid: #f4f9f7;
+      --ink: #102422;
+      --muted: #4d6662;
+      --line: rgba(16, 36, 34, 0.12);
+      --accent: #1fa97a;
+      --accent-deep: #0f7a58;
+      --warn: #d97706;
+      --danger: #c23b22;
+      --ok: #1fa97a;
+      --gold: #f4c15d;
+      --shadow: 0 18px 50px rgba(4, 20, 18, 0.28);
+      --radius: 18px;
+      --font: "Manrope", sans-serif;
+      --display: "Syne", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(244, 193, 93, 0.22), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(31, 169, 122, 0.28), transparent 50%),
+        linear-gradient(165deg, var(--bg0), var(--bg1) 45%, #164e48 100%);
+      background-attachment: fixed;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--accent-deep); }
+
+    .app {
+      width: min(1120px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 20px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      animation: rise 0.55s ease both;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #f4f9f7;
+      text-decoration: none;
+    }
+    .brand img { width: 44px; height: 44px; border-radius: 12px; }
+    .brand-mark {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .brand-sub {
+      font-size: 0.78rem;
+      opacity: 0.78;
+      margin-top: 2px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(244, 249, 247, 0.12);
+      color: #f4f9f7;
+      font-size: 0.85rem;
+      border: 1px solid rgba(244, 249, 247, 0.18);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: calc(var(--radius) + 4px);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      animation: rise 0.65s ease both;
+    }
+
+    .hero-panel {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(244,249,247,0.96), rgba(232,243,240,0.9)),
+        url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23135e57' fill-opacity='0.05'%3E%3Cpath d='M0 80h160v2H0zM80 0v160h2V0z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,193,93,0.35), transparent 70%);
+      pointer-events: none;
+      animation: pulse 4.5s ease-in-out infinite;
+    }
+
+    h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; margin: 0 0 8px; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.05; }
+    h2 { font-size: 1.35rem; }
+    p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
+
+    .grid { display: grid; gap: 14px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 820px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .status-banner {
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      color: #fff;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .status-banner.normal { background: linear-gradient(135deg, #147a5f, #1fa97a); }
+    .status-banner.elevated { background: linear-gradient(135deg, #b45309, #d97706); }
+    .status-banner.emergency { background: linear-gradient(135deg, #9f1239, #c23b22); }
+    .status-banner.all_clear { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+    .status-banner strong { display: block; font-family: var(--display); font-size: 1.4rem; margin-bottom: 4px; }
+    .status-banner .meta { opacity: 0.9; font-size: 0.9rem; }
+
+    .911 {
+      background: #fff4f1;
+      border: 1px solid rgba(194, 59, 34, 0.28);
+      color: #7a1f12;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+    .field { margin-bottom: 12px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 13px;
+      color: var(--ink);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(31, 169, 122, 0.18);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      background: var(--ink);
+      color: #f4f9f7;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .btn.secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn.accent { background: linear-gradient(135deg, var(--accent-deep), var(--accent)); }
+    .btn.danger { background: linear-gradient(135deg, #9f1239, var(--danger)); }
+    .btn.warn { background: linear-gradient(135deg, #b45309, var(--warn)); }
+    .btn.ghost-light {
+      background: rgba(244,249,247,0.12);
+      color: #f4f9f7;
+      border: 1px solid rgba(244,249,247,0.2);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .tab.active {
+      background: var(--ink);
+      color: #f4f9f7;
+      border-color: var(--ink);
+    }
+
+    .card-list { display: grid; gap: 10px; }
+    .item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .item h3 { font-size: 1.05rem; }
+    .meta { color: var(--muted); font-size: 0.85rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #e8f3f0;
+      color: #0f7a58;
+    }
+    .badge.critical, .badge.high, .badge.emergency { background: #ffe4e1; color: #9f1239; }
+    .badge.medium, .badge.elevated { background: #fff7ed; color: #9a3412; }
+    .badge.low, .badge.normal, .badge.all_clear { background: #e8f3f0; color: #0f7a58; }
+
+    .login-accounts {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .account-btn {
+      text-align: left;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .account-btn strong { display: block; color: var(--ink); }
+    .account-btn span { color: var(--muted); font-size: 0.85rem; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(120%);
+      background: var(--ink);
+      color: #f4f9f7;
+      padding: 12px 16px;
+      border-radius: 12px;
+      z-index: 50;
+      transition: transform 0.25s ease;
+      max-width: min(520px, calc(100% - 24px));
+      box-shadow: var(--shadow);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .hidden { display: none !important; }
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .muted { color: var(--muted); }
+    .tiny { font-size: 0.8rem; }
+    .guidance {
+      background: #eef8f4;
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="#" onclick="event.preventDefault(); app.goHome();">
+        <img src="./icon.svg" alt="Beacon logo" />
+        <div>
+          <div class="brand-mark">Beacon</div>
+          <div class="brand-sub">Official campus safety alerts</div>
+        </div>
+      </a>
+      <div class="row" id="topActions"></div>
+    </header>
+
+    <main id="main"></main>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const state = {
+      token: localStorage.getItem('beacon_token') || '',
+      user: null,
+      campus: null,
+      tab: 'home',
+      tips: [],
+      alerts: [],
+      inbox: [],
+      incidents: [],
+      templates: {},
+      status: null,
+      selectedTipId: null,
+    };
+
+    const api = {
+      async request(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (state.token) headers.Authorization = `Bearer ${state.token}`;
+        const res = await fetch(path, { ...options, headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      },
+      login: (email, password) => api.request('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+      logout: () => api.request('/api/logout', { method: 'POST', body: '{}' }),
+      me: () => api.request('/api/me'),
+      accounts: () => api.request('/api/demo/accounts'),
+      reset: () => api.request('/api/demo/reset', { method: 'POST', body: '{}' }),
+      status: () => api.request('/api/campus/status'),
+      tipsMine: () => api.request('/api/tips/mine'),
+      createTip: (body) => api.request('/api/tips', { method: 'POST', body: JSON.stringify(body) }),
+      adminTips: () => api.request('/api/admin/tips'),
+      tipAction: (id, body) => api.request(`/api/admin/tips/${id}/actions`, { method: 'POST', body: JSON.stringify(body) }),
+      templates: () => api.request('/api/alerts/templates'),
+      alerts: () => api.request('/api/alerts'),
+      sendAlert: (body) => api.request('/api/admin/alerts', { method: 'POST', body: JSON.stringify(body) }),
+      escalate: (body) => api.request('/api/admin/escalate', { method: 'POST', body: JSON.stringify(body) }),
+      incidents: () => api.request('/api/authority/incidents'),
+      ack: (id) => api.request(`/api/authority/incidents/${id}/ack`, { method: 'POST', body: '{}' }),
+      inbox: () => api.request('/api/inbox'),
+      savePrefs: (body) => api.request('/api/notification-preferences', { method: 'PUT', body: JSON.stringify(body) }),
+    };
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
+    }
+
+    function fmtTime(iso) {
+      if (!iso) return '';
+      try {
+        return new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      } catch { return iso; }
+    }
+
+    function statusLabel(s) {
+      return ({
+        normal: 'All systems normal',
+        elevated: 'Elevated awareness',
+        emergency: 'Emergency on campus',
+        all_clear: 'All clear',
+      })[s] || s;
+    }
+
+    const app = {
+      async init() {
+        if (state.token) {
+          try {
+            const data = await api.me();
+            state.user = data.user;
+            state.campus = data.campus;
+            await this.refresh();
+            this.render();
+            return;
+          } catch {
+            state.token = '';
+            localStorage.removeItem('beacon_token');
+          }
+        }
+        this.renderLogin();
+      },
+
+      goHome() {
+        if (!state.user) return this.renderLogin();
+        state.tab = 'home';
+        this.render();
+      },
+
+      async refresh() {
+        if (!state.user) return;
+        state.status = await api.status();
+        state.campus = state.status.campus;
+        state.alerts = (await api.alerts()).alerts;
+        state.inbox = (await api.inbox()).items;
+        if (['student_reporter', 'staff', 'parent', 'safety_admin'].includes(state.user.role)) {
+          state.tips = (await api.tipsMine()).tips;
+        }
+        if (state.user.role === 'safety_admin') {
+          state.tips = (await api.adminTips()).tips;
+          state.templates = (await api.templates()).templates;
+          state.incidents = (await api.incidents()).incidents;
+        }
+        if (state.user.role === 'authority_liaison') {
+          state.incidents = (await api.incidents()).incidents;
+        }
+      },
+
+      async login(email, password) {
+        const data = await api.login(email, password);
+        state.token = data.token;
+        state.user = data.user;
+        state.campus = data.campus;
+        localStorage.setItem('beacon_token', state.token);
+        state.tab = 'home';
+        await this.refresh();
+        this.render();
+        toast(`Signed in as ${data.user.fullName}`);
+      },
+
+      async logout() {
+        try { await api.logout(); } catch {}
+        state.token = '';
+        state.user = null;
+        localStorage.removeItem('beacon_token');
+        this.renderLogin();
+      },
+
+      renderLogin() {
+        document.getElementById('topActions').innerHTML = '';
+        document.getElementById('main').innerHTML = `
+          <section class="panel hero-panel">
+            <div class="911">If someone is in immediate danger, call 911 first. Beacon is a parallel heads-up channel for school safety teams, parents, and authorities.</div>
+            <h1>Beacon</h1>
+            <p>Help protect kids with verified campus alerts, fast tip reporting, and clear guidance for families.</p>
+            <div class="split" style="margin-top:18px">
+              <form id="loginForm">
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" type="email" required placeholder="parent@demo.com" />
+                </div>
+                <div class="field">
+                  <label for="password">Password</label>
+                  <input id="password" type="password" required value="demo1234" />
+                </div>
+                <div class="row">
+                  <button class="btn accent" type="submit">Sign in</button>
+                  <button class="btn secondary" type="button" id="resetDemo">Reset demo data</button>
+                </div>
+                <p class="tiny muted" style="margin-top:10px">Pilot demo for one campus. Password for all accounts: <strong>demo1234</strong></p>
+              </form>
+              <div>
+                <h2>Try a role</h2>
+                <p>Pick a demo account to see parent alerts, tip intake, admin triage, or authority heads-up.</p>
+                <div class="login-accounts" id="accountList"><p class="muted">Loading accounts…</p></div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+          e.preventDefault();
+          try {
+            await app.login(email.value.trim(), password.value);
+          } catch (err) { toast(err.message); }
+        };
+        document.getElementById('resetDemo').onclick = async () => {
+          try {
+            await api.reset();
+            toast('Demo data reset');
+            app.renderLogin();
+          } catch (err) { toast(err.message); }
+        };
+        api.accounts().then(({ accounts }) => {
+          const labels = {
+            parent: 'Parent — feel safer with clear alerts',
+            safety_admin: 'Safety admin — triage & send alerts',
+            authority_liaison: 'Authority — receive heads-up',
+            staff: 'Staff — report & receive alerts',
+            student_reporter: 'Student — report a concern',
+          };
+          accountList.innerHTML = accounts.map((a) => `
+            <button class="account-btn" data-email="${esc(a.email)}">
+              <strong>${esc(a.fullName)} · ${esc(a.role.replaceAll('_', ' '))}</strong>
+              <span>${esc(labels[a.role] || a.email)}</span>
+            </button>
+          `).join('');
+          accountList.querySelectorAll('button').forEach((btn) => {
+            btn.onclick = () => {
+              email.value = btn.dataset.email;
+              password.value = 'demo1234';
+            };
+          });
+        }).catch(() => {
+          accountList.innerHTML = `<p class="muted">Start the Beacon server to load demo accounts.</p>`;
+        });
+      },
+
+      render() {
+        if (!state.user) return this.renderLogin();
+        const role = state.user.role;
+        document.getElementById('topActions').innerHTML = `
+          <span class="pill">${esc(state.campus?.name || 'Campus')}</span>
+          <span class="pill">${esc(state.user.fullName)}</span>
+          <button class="btn ghost-light" id="logoutBtn">Sign out</button>
+        `;
+        logoutBtn.onclick = () => app.logout();
+
+        const tabs = this.tabsFor(role);
+        document.getElementById('main').innerHTML = `
+          <div class="tabs">
+            ${tabs.map((t) => `<button class="tab ${state.tab === t.id ? 'active' : ''}" data-tab="${t.id}">${t.label}</button>`).join('')}
+          </div>
+          <section class="panel" id="view"></section>
+        `;
+        document.querySelectorAll('.tab').forEach((btn) => {
+          btn.onclick = async () => {
+            state.tab = btn.dataset.tab;
+            await app.refresh();
+            app.render();
+          };
+        });
+        this.renderTab();
+      },
+
+      tabsFor(role) {
+        if (role === 'parent') return [
+          { id: 'home', label: 'Safety status' },
+          { id: 'alerts', label: 'Alerts' },
+          { id: 'report', label: 'Report concern' },
+          { id: 'inbox', label: 'My notifications' },
+          { id: 'prefs', label: 'Preferences' },
+        ];
+        if (role === 'safety_admin') return [
+          { id: 'home', label: 'Overview' },
+          { id: 'triage', label: 'Tip triage' },
+          { id: 'send', label: 'Send alert' },
+          { id: 'authority', label: 'Notify authorities' },
+          { id: 'inbox', label: 'Deliveries' },
+        ];
+        if (role === 'authority_liaison') return [
+          { id: 'home', label: 'Heads-up feed' },
+          { id: 'incidents', label: 'Incidents' },
+          { id: 'inbox', label: 'Notifications' },
+        ];
+        return [
+          { id: 'home', label: 'Campus status' },
+          { id: 'report', label: 'Report tip' },
+          { id: 'alerts', label: 'Alerts' },
+          { id: 'mine', label: 'My tips' },
+          { id: 'inbox', label: 'Notifications' },
+        ];
+      },
+
+      renderTab() {
+        const view = document.getElementById('view');
+        const map = {
+          home: () => this.renderHome(view),
+          alerts: () => this.renderAlerts(view),
+          report: () => this.renderReport(view),
+          prefs: () => this.renderPrefs(view),
+          inbox: () => this.renderInbox(view),
+          triage: () => this.renderTriage(view),
+          send: () => this.renderSend(view),
+          authority: () => this.renderAuthorityAdmin(view),
+          incidents: () => this.renderIncidents(view),
+          mine: () => this.renderMine(view),
+        };
+        (map[state.tab] || map.home)();
+      },
+
+      renderHome(view) {
+        const st = state.status?.campus?.status || 'normal';
+        const active = state.status?.activeAlert;
+        const role = state.user.role;
+        view.innerHTML = `
+          <div class="911">Emergency? Call 911. Then report here so campus safety and families can get a verified heads-up.</div>
+          <div class="status-banner ${esc(st)}">
+            <strong>${esc(statusLabel(st))}</strong>
+            <div class="meta">${esc(state.campus.name)} · Updated ${esc(fmtTime(state.campus.statusUpdatedAt))}</div>
+          </div>
+          ${role === 'parent' ? `
+            <h2>Hello, ${esc(state.user.fullName.split(' ')[0])}</h2>
+            <p>Linked student: <strong>${esc(state.user.childName || 'Your child')}</strong>. You will receive official Beacon alerts for this campus.</p>
+          ` : `<h2>${esc(state.campus.name)}</h2><p>Signed in as ${esc(role.replaceAll('_', ' '))}.</p>`}
+          ${active ? `
+            <div class="item" style="margin-top:12px">
+              <div class="row" style="justify-content:space-between">
+                <h3>${esc(active.title)}</h3>
+                <span class="badge ${esc(active.type)}">${esc(active.type.replaceAll('_', ' '))}</span>
+              </div>
+              <p>${esc(active.body)}</p>
+              <div class="guidance">${esc(active.parentGuidance)}</div>
+              <p class="meta" style="margin-top:10px">Official update · ${esc(fmtTime(active.sentAt))} · Next update expected within ${esc(active.nextUpdateMinutes || 15)} minutes</p>
+            </div>
+          ` : `
+            <div class="item">
+              <h3>No active emergency alert</h3>
+              <p>Campus status is calm. Beacon will notify you here and by SMS/push/email if that changes.</p>
+            </div>
+          `}
+          ${role === 'safety_admin' ? `
+            <div class="grid grid-3" style="margin-top:14px">
+              <div class="item"><h3>${state.tips.filter(t => t.status === 'new').length}</h3><p>New tips</p></div>
+              <div class="item"><h3>${state.tips.filter(t => !['closed','false_alarm'].includes(t.status)).length}</h3><p>Open tips</p></div>
+              <div class="item"><h3>${state.incidents.filter(i => i.status === 'sent').length}</h3><p>Awaiting authority ack</p></div>
+            </div>
+          ` : ''}
+          ${role === 'authority_liaison' ? `
+            <div class="item" style="margin-top:14px">
+              <h3>Authority heads-up</h3>
+              <p>${state.incidents.length ? 'Open the Incidents tab to acknowledge school safety escalations.' : 'No escalations yet. When school safety sends a heads-up, it appears here instantly.'}</p>
+            </div>
+          ` : ''}
+        `;
+      },
+
+      renderAlerts(view) {
+        view.innerHTML = `
+          <h2>Official alerts</h2>
+          <p>Only verified messages from school safety. No rumor feed.</p>
+          <div class="card-list">
+            ${state.alerts.length ? state.alerts.map((a) => `
+              <article class="item">
+                <div class="row" style="justify-content:space-between">
+                  <h3>${esc(a.title)}</h3>
+                  <span class="badge ${esc(a.type)}">${esc(a.type.replaceAll('_', ' '))}</span>
+                </div>
+                <p>${esc(a.body)}</p>
+                <div class="guidance">${esc(a.parentGuidance)}</div>
+                <p class="meta" style="margin-top:8px">${esc(fmtTime(a.sentAt))} · Audience: ${esc(a.audience.join(', '))}</p>
+              </article>
+            `).join('') : `<div class="item"><p>No alerts yet for your role.</p></div>`}
+          </div>
+        `;
+      },
+
+      renderReport(view) {
+        view.innerHTML = `
+          <h2>Report a concern</h2>
+          <p>Share what you know. Safety staff will triage. If harm is happening now, call 911 first.</p>
+          <form id="tipForm">
+            <div class="grid grid-2">
+              <div class="field">
+                <label>Category</label>
+                <select name="category" required>
+                  <option value="suspicious">Suspicious activity</option>
+                  <option value="fight">Fight / altercation</option>
+                  <option value="weapon">Weapon concern</option>
+                  <option value="intruder">Intruder / unknown person</option>
+                  <option value="self_harm">Self-harm concern</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Location</label>
+                <input name="locationText" placeholder="Main entrance, gym hallway…" />
+              </div>
+            </div>
+            <div class="field">
+              <label>What is happening?</label>
+              <textarea name="description" required placeholder="Share clear facts only. Avoid naming students unless necessary for safety."></textarea>
+            </div>
+            <label class="checkline"><input type="checkbox" name="happeningNow" /> Happening now</label>
+            ${state.user.role !== 'parent' ? `<label class="checkline"><input type="checkbox" name="isAnonymous" /> Submit anonymously</label>` : ''}
+            <div class="row" style="margin-top:10px">
+              <button class="btn accent" type="submit">Submit tip</button>
+            </div>
+          </form>
+        `;
+        tipForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(tipForm);
+          try {
+            const res = await api.createTip({
+              category: fd.get('category'),
+              locationText: fd.get('locationText'),
+              description: fd.get('description'),
+              happeningNow: fd.get('happeningNow') === 'on',
+              isAnonymous: fd.get('isAnonymous') === 'on',
+            });
+            toast(res.message + (res.call911 ? ' If this is active danger, call 911.' : ''));
+            tipForm.reset();
+            await app.refresh();
+          } catch (err) { toast(err.message); }
+        };
+      },
+
+      renderMine(view) {
+        view.innerHTML = `
+          <h2>My tips</h2>
+          <div class="card-list">
+            ${state.tips.length ? state.tips.map((t) => `
+              <div class="item">
+                <div class="row" style="justify-content:space-between">
+                  <h3>${esc(t.category.replaceAll('_',' '))}</h3>
+                  <span class="badge ${esc(t.severityGuess)}">${esc(t.status.replaceAll('_',' '))}</span>
+                </div>
+                <p>${esc(t.description)}</p>
+                <p class="meta">${esc(fmtTime(t.createdAt))}${t.locationText ? ' · ' + esc(t.locationText) : ''}</p>
+              </div>
+            `).join('') : `<div class="item"><p>No tips submitted yet.</p></div>`}
+          </div>
+        `;
+      },
+
+      renderPrefs(view) {
+        const u = state.user;
+        view.innerHTML = `
+          <h2>Notification preferences</h2>
+          <p>Choose how Beacon reaches you when campus status changes.</p>
+          <form id="prefForm">
+            <label class="checkline"><input type="checkbox" name="notifySms" ${u.notifySms ? 'checked' : ''}/> SMS alerts</label>
+            <label class="checkline"><input type="checkbox" name="notifyPush" ${u.notifyPush ? 'checked' : ''}/> Push alerts</label>
+            <label class="checkline"><input type="checkbox" name="notifyEmail" ${u.notifyEmail ? 'checked' : ''}/> Email alerts</label>
+            <label class="checkline"><input type="checkbox" name="criticalOnly" ${u.criticalOnly ? 'checked' : ''}/> Critical alerts only</label>
+            <div class="row" style="margin-top:12px"><button class="btn accent" type="submit">Save preferences</button></div>
+          </form>
+        `;
+        prefForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(prefForm);
+          try {
+            const res = await api.savePrefs({
+              notifySms: fd.get('notifySms') === 'on',
+              notifyPush: fd.get('notifyPush') === 'on',
+              notifyEmail: fd.get('notifyEmail') === 'on',
+              criticalOnly: fd.get('criticalOnly') === 'on',
+            });
+            state.user = res.user;
+            toast('Preferences saved');
+          } catch (err) { toast(err.message); }
+        };
+      },
+
+      renderInbox(view) {
+        view.innerHTML = `
+          <h2>Notifications</h2>
+          <p>Simulated SMS / push / email deliveries for this pilot.</p>
+          <div class="card-list">
+            ${state.inbox.length ? state.inbox.map((n) => `
+              <div class="item">
+                <div class="row" style="justify-content:space-between">
+                  <span class="badge">${esc(n.channel)}</span>
+                  <span class="meta">${esc(fmtTime(n.createdAt))}</span>
+                </div>
+                <p style="margin-top:8px;color:var(--ink)">${esc(n.preview)}</p>
+              </div>
+            `).join('') : `<div class="item"><p>No deliveries yet. Send an alert from the safety admin account to see fan-out.</p></div>`}
+          </div>
+        `;
+      },
+
+      renderTriage(view) {
+        const selected = state.tips.find((t) => t.id === state.selectedTipId) || state.tips[0];
+        state.selectedTipId = selected?.id || null;
+        view.innerHTML = `
+          <h2>Tip triage</h2>
+          <p>Claim tips, add notes, escalate, or close false alarms. Humans decide before parent alerts go out.</p>
+          <div class="split">
+            <div class="card-list">
+              ${state.tips.length ? state.tips.map((t) => `
+                <button class="item account-btn" data-id="${t.id}" style="${t.id === state.selectedTipId ? 'border-color:#1fa97a;box-shadow:0 0 0 2px rgba(31,169,122,.2)' : ''}">
+                  <div class="row" style="justify-content:space-between">
+                    <strong>${esc(t.category.replaceAll('_',' '))} · ${esc(t.reporterName)}</strong>
+                    <span class="badge ${esc(t.severityGuess)}">${esc(t.severityGuess)}</span>
+                  </div>
+                  <span>${esc(t.description.slice(0, 110))}${t.description.length > 110 ? '…' : ''}</span>
+                  <span class="meta">${esc(t.status)} · ${esc(fmtTime(t.createdAt))}${t.happeningNow ? ' · HAPPENING NOW' : ''}</span>
+                </button>
+              `).join('') : `<div class="item"><p>No tips yet. Submit one from the student or staff demo account.</p></div>`}
+            </div>
+            <div>
+              ${selected ? `
+                <div class="item">
+                  <h3>${esc(selected.category.replaceAll('_',' '))}</h3>
+                  <p class="meta">${esc(selected.reporterName)} · ${esc(selected.status)} · ${esc(fmtTime(selected.createdAt))}</p>
+                  <p style="color:var(--ink)">${esc(selected.description)}</p>
+                  <p class="meta">Location: ${esc(selected.locationText || 'Not specified')}</p>
+                  <div class="row" style="margin-top:10px">
+                    <button class="btn secondary" data-act="claim">Claim</button>
+                    <button class="btn secondary" data-act="monitor">Monitor</button>
+                    <button class="btn warn" data-act="escalate">Mark escalated</button>
+                    <button class="btn secondary" data-act="false_alarm">False alarm</button>
+                    <button class="btn" data-act="close">Close</button>
+                  </div>
+                  <div class="field" style="margin-top:12px">
+                    <label>Note</label>
+                    <textarea id="triageNote" placeholder="Internal note for the safety team"></textarea>
+                  </div>
+                </div>
+              ` : `<div class="item"><p>Select a tip.</p></div>`}
+            </div>
+          </div>
+        `;
+        view.querySelectorAll('[data-id]').forEach((btn) => {
+          btn.onclick = () => { state.selectedTipId = btn.dataset.id; app.render(); };
+        });
+        view.querySelectorAll('[data-act]').forEach((btn) => {
+          btn.onclick = async () => {
+            try {
+              await api.tipAction(selected.id, { action: btn.dataset.act, notes: triageNote?.value || '' });
+              toast(`Tip ${btn.dataset.act.replaceAll('_',' ')}`);
+              await app.refresh();
+              app.render();
+            } catch (err) { toast(err.message); }
+          };
+        });
+      },
+
+      renderSend(view) {
+        const types = Object.keys(state.templates || {});
+        view.innerHTML = `
+          <h2>Send campus alert</h2>
+          <p>Parents receive clear guidance. Keep language calm, official, and actionable.</p>
+          <form id="alertForm">
+            <div class="grid grid-2">
+              <div class="field">
+                <label>Alert type</label>
+                <select name="type" id="alertType">
+                  ${types.map((t) => `<option value="${t}">${t.replaceAll('_',' ')}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Link tip (optional)</label>
+                <select name="tipId">
+                  <option value="">None</option>
+                  ${state.tips.map((t) => `<option value="${t.id}">${esc(t.category)} — ${esc(t.description.slice(0,40))}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Title</label><input name="title" id="alertTitle" /></div>
+            <div class="field"><label>Message</label><textarea name="body" id="alertBody"></textarea></div>
+            <div class="field"><label>Parent guidance</label><textarea name="parentGuidance" id="alertGuide"></textarea></div>
+            <div class="row">
+              <label class="checkline"><input type="checkbox" name="aud_parents" checked /> Parents</label>
+              <label class="checkline"><input type="checkbox" name="aud_staff" checked /> Staff</label>
+              <label class="checkline"><input type="checkbox" name="aud_students" /> Students</label>
+              <label class="checkline"><input type="checkbox" name="aud_authorities" checked /> Authorities</label>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn danger" type="submit">Send official alert</button>
+            </div>
+          </form>
+        `;
+        const fill = () => {
+          const t = state.templates[alertType.value];
+          if (!t) return;
+          alertTitle.value = t.title;
+          alertBody.value = t.body;
+          alertGuide.value = t.parentGuidance;
+        };
+        fill();
+        alertType.onchange = fill;
+        alertForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(alertForm);
+          const audience = [];
+          if (fd.get('aud_parents')) audience.push('parents');
+          if (fd.get('aud_staff')) audience.push('staff');
+          if (fd.get('aud_students')) audience.push('students');
+          if (fd.get('aud_authorities')) audience.push('authorities');
+          try {
+            const res = await api.sendAlert({
+              type: fd.get('type'),
+              title: fd.get('title'),
+              body: fd.get('body'),
+              parentGuidance: fd.get('parentGuidance'),
+              tipId: fd.get('tipId') || null,
+              audience,
+              channels: ['sms', 'push', 'email'],
+            });
+            toast(`Alert sent to ${res.deliveries.length} channel deliveries`);
+            await app.refresh();
+            state.tab = 'home';
+            app.render();
+          } catch (err) { toast(err.message); }
+        };
+      },
+
+      renderAuthorityAdmin(view) {
+        view.innerHTML = `
+          <h2>Notify authorities</h2>
+          <p>One-click heads-up for the SRO / PD liaison. Includes summary and campus contact.</p>
+          <form id="escForm">
+            <div class="field">
+              <label>Related tip</label>
+              <select name="tipId">
+                <option value="">None</option>
+                ${state.tips.map((t) => `<option value="${t.id}">${esc(t.category)} — ${esc(t.description.slice(0,48))}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Related alert</label>
+              <select name="alertId">
+                <option value="">None</option>
+                ${state.alerts.map((a) => `<option value="${a.id}">${esc(a.type)} — ${esc(a.title)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Summary for authorities</label>
+              <textarea name="summary" required placeholder="Brief, factual heads-up for responders"></textarea>
+            </div>
+            <button class="btn warn" type="submit">Send heads-up</button>
+          </form>
+          <h3 style="margin-top:18px">Recent escalations</h3>
+          <div class="card-list" style="margin-top:10px">
+            ${state.incidents.length ? state.incidents.map((i) => `
+              <div class="item">
+                <div class="row" style="justify-content:space-between">
+                  <strong>${esc(i.status)}</strong>
+                  <span class="meta">${esc(fmtTime(i.sentAt))}</span>
+                </div>
+                <p style="color:var(--ink)">${esc(i.summary)}</p>
+                <p class="meta">Contact ${esc(i.contactPhone)}${i.ackedAt ? ' · Acked ' + esc(fmtTime(i.ackedAt)) : ''}</p>
+              </div>
+            `).join('') : `<div class="item"><p>No escalations yet.</p></div>`}
+          </div>
+        `;
+        escForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(escForm);
+          try {
+            await api.escalate({
+              tipId: fd.get('tipId') || null,
+              alertId: fd.get('alertId') || null,
+              summary: fd.get('summary'),
+            });
+            toast('Authority heads-up sent');
+            await app.refresh();
+            app.render();
+          } catch (err) { toast(err.message); }
+        };
+      },
+
+      renderIncidents(view) {
+        view.innerHTML = `
+          <h2>Authority incident feed</h2>
+          <p>Secure heads-up from ${esc(state.campus.name)}. Acknowledge so school safety knows you received it.</p>
+          <div class="card-list">
+            ${state.incidents.length ? state.incidents.map((i) => `
+              <div class="item">
+                <div class="row" style="justify-content:space-between">
+                  <h3>${esc(i.campusName)}</h3>
+                  <span class="badge ${i.status === 'acked' ? 'normal' : 'elevated'}">${esc(i.status)}</span>
+                </div>
+                <p style="color:var(--ink)">${esc(i.summary)}</p>
+                <p class="meta">Sent ${esc(fmtTime(i.sentAt))} · School contact ${esc(i.contactPhone)}</p>
+                ${i.alert ? `<div class="guidance" style="margin-top:8px">Campus alert: ${esc(i.alert.title)} — ${esc(i.alert.parentGuidance)}</div>` : ''}
+                ${i.status !== 'acked' ? `<div class="row" style="margin-top:10px"><button class="btn accent" data-ack="${i.id}">Acknowledge</button></div>` : `<p class="meta">Acknowledged ${esc(fmtTime(i.ackedAt))}</p>`}
+              </div>
+            `).join('') : `<div class="item"><p>No heads-up packets yet.</p></div>`}
+          </div>
+        `;
+        view.querySelectorAll('[data-ack]').forEach((btn) => {
+          btn.onclick = async () => {
+            try {
+              await api.ack(btn.dataset.ack);
+              toast('Incident acknowledged');
+              await app.refresh();
+              app.render();
+            } catch (err) { toast(err.message); }
+          };
+        });
+      },
+    };
+
+    app.init();
+  </script>
+</body>
+</html>
