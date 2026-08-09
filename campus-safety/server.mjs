@@ -240,10 +240,16 @@ async function handleApi(req, res, url) {
   // Auth
   if (method === 'POST' && pathname === '/api/login') {
     const body = await readBody(req);
+    const email = String(body.email || '').trim().toLowerCase();
+    const password = String(body.password || '').trim();
     const user = db.users.find(
-      (u) => u.email.toLowerCase() === String(body.email || '').toLowerCase() && u.password === body.password
+      (u) => u.email.toLowerCase() === email && u.password === password
     );
-    if (!user) return send(res, 401, { error: 'Invalid email or password' });
+    if (!user) {
+      return send(res, 401, {
+        error: 'Invalid email or password. Use a demo account and password demo1234',
+      });
+    }
     const token = uid();
     db.sessions.push({ token, userId: user.id, createdAt: now() });
     audit(db, user.id, 'user', user.id, 'login', {});

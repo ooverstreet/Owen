@@ -368,9 +368,14 @@
       async request(path, options = {}) {
         const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
         if (state.token) headers.Authorization = `Bearer ${state.token}`;
-        const res = await fetch(path, { ...options, headers });
+        let res;
+        try {
+          res = await fetch(path, { ...options, headers });
+        } catch {
+          throw new Error('Cannot reach Beacon server. Run: cd campus-safety && node server.mjs');
+        }
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Request failed');
+        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
         return data;
       },
       login: (email, password) => api.request('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -494,34 +499,74 @@
             <h1>Beacon</h1>
             <p>Help protect kids with verified campus alerts, fast tip reporting, and clear guidance for families.</p>
             <div class="split" style="margin-top:18px">
-              <form id="loginForm">
+              <form id="loginForm" autocomplete="off">
                 <div class="field">
-                  <label for="email">Email</label>
-                  <input id="email" type="email" required placeholder="parent@demo.com" />
+                  <label for="loginEmail">Email</label>
+                  <input id="loginEmail" name="beacon_email" type="email" required placeholder="parent@demo.com" autocomplete="username" value="parent@demo.com" />
                 </div>
                 <div class="field">
-                  <label for="password">Password</label>
-                  <input id="password" type="password" required value="demo1234" />
+                  <label for="loginPassword">Password</label>
+                  <input id="loginPassword" name="beacon_password" type="text" required value="demo1234" autocomplete="off" spellcheck="false" />
                 </div>
                 <div class="row">
                   <button class="btn accent" type="submit">Sign in</button>
                   <button class="btn secondary" type="button" id="resetDemo">Reset demo data</button>
                 </div>
                 <p class="tiny muted" style="margin-top:10px">Pilot demo for one campus. Password for all accounts: <strong>demo1234</strong></p>
+                <p class="tiny muted">Tip: click a role on the right to sign in instantly.</p>
               </form>
               <div>
                 <h2>Try a role</h2>
-                <p>Pick a demo account to see parent alerts, tip intake, admin triage, or authority heads-up.</p>
+                <p>Click any account to sign in immediately (password <strong>demo1234</strong>).</p>
                 <div class="login-accounts" id="accountList"><p class="muted">Loading accounts…</p></div>
               </div>
             </div>
           </section>
         `;
 
+        const emailInput = document.getElementById('loginEmail');
+        const passwordInput = document.getElementById('loginPassword');
+        const fallbackAccounts = [
+          { email: 'parent@demo.com', role: 'parent', fullName: 'Alex Rivera' },
+          { email: 'safety@lincoln-hs.demo', role: 'safety_admin', fullName: 'Jordan Hale' },
+          { email: 'sro@citypd.demo', role: 'authority_liaison', fullName: 'Officer Morgan Lee' },
+          { email: 'teacher@lincoln-hs.demo', role: 'staff', fullName: 'Casey Nguyen' },
+          { email: 'student@demo.com', role: 'student_reporter', fullName: 'Sam Rivera' },
+        ];
+        const labels = {
+          parent: 'Parent — feel safer with clear alerts',
+          safety_admin: 'Safety admin — triage & send alerts',
+          authority_liaison: 'Authority — receive heads-up',
+          staff: 'Staff — report & receive alerts',
+          student_reporter: 'Student — report a concern',
+        };
+
+        const renderAccountButtons = (accounts) => {
+          accountList.innerHTML = accounts.map((a) => `
+            <button class="account-btn" type="button" data-email="${esc(a.email)}">
+              <strong>${esc(a.fullName)} · ${esc(a.role.replaceAll('_', ' '))}</strong>
+              <span>${esc(labels[a.role] || a.email)}</span>
+            </button>
+          `).join('');
+          accountList.querySelectorAll('button').forEach((btn) => {
+            btn.onclick = async () => {
+              emailInput.value = btn.dataset.email;
+              passwordInput.value = 'demo1234';
+              btn.disabled = true;
+              try {
+                await app.login(btn.dataset.email, 'demo1234');
+              } catch (err) {
+                toast(err.message);
+                btn.disabled = false;
+              }
+            };
+          });
+        };
+
         document.getElementById('loginForm').onsubmit = async (e) => {
           e.preventDefault();
           try {
-            await app.login(email.value.trim(), password.value);
+            await app.login(emailInput.value.trim(), passwordInput.value.trim());
           } catch (err) { toast(err.message); }
         };
         document.getElementById('resetDemo').onclick = async () => {
@@ -531,28 +576,11 @@
             app.renderLogin();
           } catch (err) { toast(err.message); }
         };
+        renderAccountButtons(fallbackAccounts);
         api.accounts().then(({ accounts }) => {
-          const labels = {
-            parent: 'Parent — feel safer with clear alerts',
-            safety_admin: 'Safety admin — triage & send alerts',
-            authority_liaison: 'Authority — receive heads-up',
-            staff: 'Staff — report & receive alerts',
-            student_reporter: 'Student — report a concern',
-          };
-          accountList.innerHTML = accounts.map((a) => `
-            <button class="account-btn" data-email="${esc(a.email)}">
-              <strong>${esc(a.fullName)} · ${esc(a.role.replaceAll('_', ' '))}</strong>
-              <span>${esc(labels[a.role] || a.email)}</span>
-            </button>
-          `).join('');
-          accountList.querySelectorAll('button').forEach((btn) => {
-            btn.onclick = () => {
-              email.value = btn.dataset.email;
-              password.value = 'demo1234';
-            };
-          });
+          renderAccountButtons(accounts);
         }).catch(() => {
-          accountList.innerHTML = `<p class="muted">Start the Beacon server to load demo accounts.</p>`;
+          accountList.insertAdjacentHTML('beforeend', `<p class="muted tiny">Server not detected yet — start with <code>node server.mjs</code> in <code>campus-safety</code>.</p>`);
         });
       },
 
