@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0a0c10"/>
+  <rect x="96" y="72" width="320" height="368" rx="28" fill="#151922" stroke="#e4b36a" stroke-width="14"/>
+  <rect x="136" y="128" width="168" height="18" rx="9" fill="#e4b36a"/>
+  <rect x="136" y="172" width="240" height="12" rx="6" fill="#5ee0c5" opacity=".85"/>
+  <rect x="136" y="204" width="210" height="12" rx="6" fill="#8b93a7" opacity=".55"/>
+  <rect x="136" y="236" width="186" height="12" rx="6" fill="#8b93a7" opacity=".4"/>
+  <circle cx="352" cy="360" r="54" fill="#e4b36a"/>
+  <text x="352" y="378" text-anchor="middle" font-family="Georgia, serif" font-size="64" font-weight="700" fill="#0a0c10">Ä</text>
+</svg>
