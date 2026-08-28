@@ -696,14 +696,16 @@ function filtered() {
   const q = state.q.trim().toLowerCase();
   return state.rows.filter(r => {
     if (r.netuid === 0) return false;
+    if (q) {
+      const blob = [r.name, 'sn'+r.netuid, r.netuid, r.description, r.brief?.tagline, r.brief?.does].join(' ').toLowerCase();
+      return blob.includes(q);
+    }
     if (state.filter === 'product' && !(r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed' || r.brief?.tags?.includes('product'))) return false;
     if (state.filter === 'compute' && !r.tags?.some(t => ['compute','inference'].includes(t))) return false;
     if (state.filter === 'agents' && !r.tags?.includes('agents')) return false;
     if (state.filter === 'science' && !r.tags?.includes('science')) return false;
     if (state.filter === 'paused' && r.emission_enabled !== false) return false;
-    if (!q) return true;
-    const blob = [r.name, r.netuid, r.description, r.brief?.tagline, r.brief?.does].join(' ').toLowerCase();
-    return blob.includes(q);
+    return true;
   });
 }
 
