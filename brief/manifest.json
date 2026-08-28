@@ -1,10 +1,9 @@
 {
-  "id": "/Owen/brief/",
   "name": "Subnet Brief",
   "short_name": "Brief",
-  "description": "Bittensor in plain English. What each subnet does, whether anyone pays, and what can go wrong.",
-  "start_url": "/Owen/brief/",
-  "scope": "/Owen/brief/",
+  "description": "Move TAO from Root into subnets you can actually explain. The brief is how you decide; the desk is the service.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0a0c10",
   "theme_color": "#0a0c10",

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
@@ -163,6 +164,30 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .guide-card ol, .guide-card ul { margin:8px 0 0 18px; }
 .guide-card li { margin-bottom:6px; }
 
+.sleeve {
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:14px 14px 8px; margin-bottom:10px;
+}
+.sleeve h3 { font-family:Fraunces, serif; font-size:18px; margin-bottom:4px; }
+.sleeve .why { color:var(--mute); font-size:13.5px; line-height:1.5; margin-bottom:10px; }
+.alloc {
+  display:flex; align-items:center; gap:8px; padding:8px 0;
+  border-top:1px solid var(--line); width:100%; text-align:left;
+}
+.alloc .bar {
+  height:6px; border-radius:99px; background:var(--paper2); flex:1; overflow:hidden;
+}
+.alloc .bar i { display:block; height:100%; background:var(--gold); }
+.alloc b { width:92px; font-size:13px; }
+.alloc span { width:64px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
+
+.pay {
+  background:linear-gradient(160deg, #10201c, var(--paper));
+  border:1px solid rgba(94,224,197,.28); border-radius:16px; padding:16px; margin:8px 0 16px;
+}
+.pay h3 { font-family:Fraunces, serif; font-size:17px; margin-bottom:6px; }
+.pay p { color:var(--mute); font-size:13.5px; line-height:1.55; }
+
 .foot { margin-top:22px; font-size:11px; color:var(--faint); line-height:1.5; }
 
 nav.tabs {
@@ -172,8 +197,8 @@ nav.tabs {
   border-top:1px solid var(--line);
 }
 .tab {
-  flex:1; height:44px; border-radius:12px; color:var(--faint); font-size:11px; font-weight:700;
-  letter-spacing:.06em; text-transform:uppercase;
+  flex:1; height:44px; border-radius:12px; color:var(--faint); font-size:10px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase;
 }
 .tab.on { color:var(--gold); background:var(--paper); }
 
@@ -201,6 +226,8 @@ nav.tabs {
       <div class="callout" id="take"></div>
       <div class="section-h"><h2>Worth a look</h2><button type="button" id="to-list">All subnets</button></div>
       <div class="movers" id="movers"></div>
+      <div class="section-h" style="margin-top:18px"><h2>The service</h2><button type="button" id="to-desk">Open desk</button></div>
+      <p class="lede" style="margin-top:0">Explorers are free. The desk is how idle Root TAO gets a job — three sleeves, live weights, take-rate on flow.</p>
     </section>
 
     <section id="list" class="screen">
@@ -212,6 +239,17 @@ nav.tabs {
     <section id="detail" class="screen">
       <button class="back" type="button" id="back">← Subnets</button>
       <div id="detail-body"></div>
+    </section>
+
+    <section id="desk" class="screen">
+      <div class="hero">Root is the savings account. Subnets are the job.</div>
+      <p class="lede" id="desk-lede">A subnet dashboard already exists, several times over. The missing product is a desk that gives idle TAO a small number of jobs it can defend — and gets paid the way Bitcoin mining pools got paid: a take-rate on flow, not a subscription to a table of numbers.</p>
+      <div class="pay">
+        <h3>How this is a business</h3>
+        <p id="pay-copy">Bitcoin explorers were free and crowded. Mining pools made money because hashpower flowed through them (about 1–2%). The Bittensor analog is stake flowing through a validator you operate. This UI is how people trust that flow. The protocol already pays the take-rate. We do not need to invent a SaaS meter.</p>
+      </div>
+      <div id="sleeves"></div>
+      <p class="foot">Hypothetical 100 TAO from Root. Not a stake button, not financial advice, not a promise of yield. Names and weights will change. The next build is wallet-signed allocation into these sleeves via a validator we run or partner with.</p>
     </section>
 
     <section id="guide" class="screen">
@@ -244,15 +282,15 @@ nav.tabs {
       </div>
       <div class="guide-card">
         <h3>Do not build another explorer</h3>
-        <p>taostats, TaoMarketCap, SubnetAIQ, SubnetRadar, SubnetStats, and TAOFlute already cover prices, explorers, health scores, and whale tape. A 40-column table is not a product.</p>
-        <p style="margin-top:8px">This prototype is the gap: a decision brief. One screen that says what the shop does, whether anyone pays, and what can go wrong — filtered by whether you are staking, mining, or building on it.</p>
+        <p>taostats, TaoMarketCap, SubnetAIQ, SubnetRadar, SubnetStats, and TAOFlute already cover prices, explorers, health scores, and whale tape. A prettier table is not a business — it is a Bitcoin block explorer in 2012: useful, crowded, and hard to charge for.</p>
+        <p style="margin-top:8px">Bittensor is early in the same way Bitcoin was early: TAO is the bet on the network, and most of the money in the next phase goes to picks-and-shovels that sit on <b style="color:var(--ink)">flow</b> (stake, inference, attention), not on screenshots of the chain.</p>
       </div>
       <div class="guide-card">
-        <h3>Where a UI can actually make money</h3>
+        <h3>Where we actually get paid</h3>
         <ol>
-          <li><b style="color:var(--ink)">Wallet briefs + alerts (SaaS).</b> Connect a coldkey, get “your positions in English,” and pings when an owner starts draining, emissions pause, or immunity ends. Charge monthly in TAO. ~72% of staked TAO is still in Root because people do not want to become amateur VCs. That is the customer.</li>
-          <li><b style="color:var(--ink)">Miner desk (SaaS).</b> Smaller audience, higher willingness to pay. “Given this GPU, this registration cost, and this full metagraph — should I enter, and what is my pay after take rate?” Existing calculators are thin.</li>
-          <li><b style="color:var(--ink)">Front door to using a subnet (take rate).</b> The durable money is not analytics. Ridgeline on Ridges, Chutes’ own app, Dippy on Targon — products that consume subnet work and charge users. Pick one job (inference, deepfake checks, coding agents) and be the Stripe-simple UI. Analytics is the wedge; usage is the business.</li>
+          <li><b style="color:var(--ink)">Validator desk (primary, Bitcoin-pool analog).</b> Most TAO is still in Root because allocating across 128 alpha tokens feels like becoming a VC. The needed service is a conservative sleeve plus a research sleeve, executed through a validator we run or partner with. Revenue is the protocol commission on dividends — already native, already how the chain pays judges. The UI is customer acquisition, not the SKU. See the Desk tab.</li>
+          <li><b style="color:var(--ink)">Front door to using a subnet (merchant analog).</b> Charge people who do not care about TAO: inference, authenticity checks, coding agents. Chutes, Ridgeline, and Dippy are the pattern. Analytics is the wedge; usage is the company.</li>
+          <li><b style="color:var(--ink)">Do not sell the map.</b> Paid pro dashboards exist and will keep existing. Competing with free taostats on columns is how you work for free.</li>
         </ol>
       </div>
       <p class="foot">Not financial advice. Emissions, alpha prices, and teams change fast. Briefs are dated August 2026 and should be treated as a starting point, not a score. Live numbers come from the public Metagraphed registry (metagraph.sh), which reads the Bittensor chain.</p>
@@ -261,6 +299,7 @@ nav.tabs {
   <nav class="tabs">
     <button class="tab on" data-tab="pulse" type="button">Pulse</button>
     <button class="tab" data-tab="list" type="button">Subnets</button>
+    <button class="tab" data-tab="desk" type="button">Desk</button>
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
@@ -623,7 +662,7 @@ function renderTake() {
   const copy = {
     staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. The job of this UI is not more candles — it is helping you decide whether a subnet is a business, a science experiment, or an emission farm before you swap TAO into its alpha.`,
     miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
-    builder: `The money in Bittensor UIs is rarely “another dashboard.” It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
+    builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
     curious: `Ignore the 40-column screens for a minute. Each subnet is a shop with its own token. A few have paying users. Most recycle TAO. Scroll the briefs; the Guide tab is the map.`
   };
   $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role]}</p>`;
@@ -752,6 +791,68 @@ async function renderDetail(id) {
   }
 }
 
+function sleeveRows(ids, fallback) {
+  const found = ids.map(id => rowBy(id)).filter(Boolean);
+  if (found.length >= 2) return found;
+  return fallback();
+}
+
+function weightsByPool(rows) {
+  const liqs = rows.map(r => Math.max(num(r.tao_in_pool_tao) || 0, 1));
+  const sum = liqs.reduce((a, b) => a + b, 0);
+  return rows.map((r, i) => ({ row: r, w: liqs[i] / sum }));
+}
+
+function renderSleeve(title, why, parts) {
+  return `<div class="sleeve">
+    <h3>${esc(title)}</h3>
+    <p class="why">${esc(why)}</p>
+    ${parts.map(({ row: r, w }) => {
+      const tao = 100 * w;
+      return `<button class="alloc" data-sn="${r.netuid}" type="button">
+        <b>SN${r.netuid} ${esc(r.name || '')}</b>
+        <div class="bar"><i style="width:${(w*100).toFixed(1)}%"></i></div>
+        <span>${tao.toFixed(1)} τ</span>
+      </button>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderDesk() {
+  const s = state.summary || {};
+  const root = num(s.total_root_value_tao) || 0;
+  const alpha = num(s.total_alpha_value_tao) || 0;
+  const tot = root + alpha;
+  const pctRoot = tot ? (root / tot * 100).toFixed(0) : '—';
+  const work = sleeveRows([64, 51, 4], () =>
+    state.rows.filter(r => r.netuid && (r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed')).slice(0, 3)
+  );
+  const research = sleeveRows([120, 62, 34], () =>
+    state.rows.filter(r => r.brief && !work.includes(r) && r.netuid !== 0).slice(0, 3)
+  );
+  const parkTao = tot ? (root / tot) * 100 : 63;
+  $('sleeves').innerHTML =
+    `<div class="sleeve">
+      <h3>Park · Root</h3>
+      <p class="why">Keep the savings account. ${pctRoot}% of the network is already doing this. You earn a simpler TAO-denominated product and skip alpha drawdowns. This is the honest default until a shop earns a seat.</p>
+      <div class="alloc" style="pointer-events:none">
+        <b>SN0 Root</b>
+        <div class="bar"><i style="width:${Math.min(parkTao, 100).toFixed(0)}%"></i></div>
+        <span>idle</span>
+      </div>
+    </div>` +
+    renderSleeve(
+      'Work · 100 τ sleeve',
+      'Names with a live product and a deep enough pool that you can exit. Weighted by TAO in the pool so you are not crowding the thinnest book. This is the validator-desk default.',
+      weightsByPool(work)
+    ) +
+    renderSleeve(
+      'Research · 100 τ sleeve',
+      'Smaller, noisier bets: founder-led training, coding agents, authenticity. Size this as optionality, not as yield. One identity-risk name (Teutonic / old Templar) is deliberately left out.',
+      weightsByPool(research)
+    );
+}
+
 function render() {
   const pill = $('live-pill');
   pill.textContent = state.live ? 'live' : 'snapshot';
@@ -765,6 +866,7 @@ function render() {
   renderTake();
   renderMovers();
   renderList();
+  renderDesk();
 }
 
 function openSn(id) {
@@ -780,7 +882,7 @@ function applyHash() {
     renderDetail(h.slice(3));
     return;
   }
-  if (h === 'list' || h === 'guide') setTab(h);
+  if (h === 'list' || h === 'guide' || h === 'desk') setTab(h);
   else setTab('pulse');
 }
 
@@ -804,6 +906,7 @@ document.addEventListener('click', e => {
   if (sn) { openSn(sn.dataset.sn); return; }
 });
 $('to-list').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
+$('to-desk').addEventListener('click', () => { location.hash = 'desk'; setTab('desk'); });
 $('back').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
 $('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
 window.addEventListener('hashchange', applyHash);
