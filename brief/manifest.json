@@ -1,0 +1,17 @@
+{
+  "name": "Subnet Brief",
+  "short_name": "Brief",
+  "description": "Move TAO from Root into subnets you can actually explain. The brief is how you decide; the desk is the service.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0c10",
+  "theme_color": "#0a0c10",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["finance", "utilities", "education"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

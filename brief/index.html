@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Subnet Brief">
+<meta name="theme-color" content="#0a0c10">
+<meta name="description" content="Bittensor in plain English. What each subnet does, whether anyone pays, and what can go wrong.">
+<title>Subnet Brief — Bittensor in plain English</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@380;460;560;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0c10; --paper:#12151c; --paper2:#181c26; --line:#232836;
+  --gold:#e4b36a; --mint:#5ee0c5; --ink:#eceae3; --mute:#8b93a7; --faint:#5a6276;
+  --ok:#5ee0a0; --bad:#ff5d6c; --warn:#f0b45a; --paused:#c084fc;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { min-height:100%; background:var(--bg); color:var(--ink); font-family:Outfit, system-ui, sans-serif; }
+body { overflow-x:hidden; }
+button, input { font:inherit; color:inherit; }
+button { cursor:pointer; border:none; background:none; }
+a { color:var(--mint); }
+.app { min-height:100dvh; display:flex; flex-direction:column; padding-bottom:calc(72px + var(--safe-b)); }
+
+header {
+  position:sticky; top:0; z-index:20;
+  padding:10px 16px 12px; padding-top:max(10px, var(--safe-t));
+  background:linear-gradient(180deg, #0a0c10 70%, transparent);
+  display:flex; align-items:center; gap:10px;
+}
+.mark {
+  width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  background:var(--gold); color:#0a0c10;
+  display:grid; place-items:center;
+  font-family:Fraunces, serif; font-weight:700; font-size:22px; line-height:1;
+}
+.brand { flex:1; min-width:0; }
+.brand h1 { font-size:15px; font-weight:700; letter-spacing:.04em; }
+.brand p { font-size:11px; color:var(--mute); margin-top:1px; }
+#live-pill {
+  font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  padding:5px 8px; border-radius:999px; border:1px solid var(--line); color:var(--faint);
+}
+#live-pill.on { color:var(--ok); border-color:rgba(94,224,160,.35); }
+#live-pill.snap { color:var(--warn); border-color:rgba(240,180,90,.35); }
+
+main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; }
+.screen { display:none; }
+.screen.on { display:block; }
+
+.hero {
+  font-family:Fraunces, serif; font-size:28px; font-weight:650; line-height:1.2;
+  letter-spacing:-.02em; margin:8px 0 10px;
+}
+.lede { color:var(--mute); font-size:14.5px; line-height:1.55; margin-bottom:18px; }
+
+.roles { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; }
+.role {
+  flex-shrink:0; height:34px; padding:0 12px; border-radius:999px;
+  border:1px solid var(--line); background:var(--paper); color:var(--mute);
+  font-size:12px; font-weight:560;
+}
+.role.on { background:var(--gold); color:#1a1408; border-color:var(--gold); }
+
+.stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px; }
+.stat { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+.stat b { display:block; font-family:Fraunces, serif; font-size:20px; font-weight:650; }
+.stat span { display:block; margin-top:3px; font-size:11px; color:var(--mute); letter-spacing:.04em; text-transform:uppercase; }
+
+.callout {
+  background:linear-gradient(160deg, #1a1710, var(--paper));
+  border:1px solid rgba(228,179,106,.28); border-radius:16px; padding:16px 16px 14px; margin-bottom:18px;
+}
+.callout h3 { font-family:Fraunces, serif; font-size:17px; font-weight:650; margin-bottom:6px; }
+.callout p { color:var(--mute); font-size:13.5px; line-height:1.55; }
+
+.section-h {
+  display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  margin:6px 0 10px;
+}
+.section-h h2 { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); font-weight:700; }
+.section-h button, .linkish { font-size:12px; color:var(--gold); font-weight:560; }
+
+.movers { display:flex; flex-direction:column; gap:8px; }
+.move {
+  display:flex; align-items:center; gap:10px; padding:12px;
+  background:var(--paper); border:1px solid var(--line); border-radius:14px; text-align:left; width:100%;
+}
+.move .sn { font-size:11px; color:var(--gold); font-weight:700; width:42px; }
+.move .nm { flex:1; min-width:0; }
+.move .nm b { display:block; font-size:14px; }
+.move .nm i { display:block; font-style:normal; font-size:12px; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.move .ch { font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; }
+.up { color:var(--ok); } .dn { color:var(--bad); }
+
+.search {
+  width:100%; height:42px; border-radius:12px; border:1px solid var(--line);
+  background:var(--paper); padding:0 14px; margin-bottom:10px; outline:none;
+}
+.search:focus { border-color:var(--gold); }
+.filters { display:flex; gap:6px; overflow-x:auto; margin-bottom:12px; }
+.chip {
+  flex-shrink:0; height:30px; padding:0 11px; border-radius:999px;
+  border:1px solid var(--line); background:transparent; color:var(--mute); font-size:12px; font-weight:560;
+}
+.chip.on { background:var(--paper2); color:var(--ink); border-color:#3a4254; }
+
+.card {
+  width:100%; text-align:left; background:var(--paper); border:1px solid var(--line);
+  border-radius:16px; padding:13px 14px; margin-bottom:8px;
+}
+.card-top { display:flex; align-items:baseline; gap:8px; }
+.badge {
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  padding:3px 7px; border-radius:999px; border:1px solid var(--line); color:var(--mute);
+}
+.badge.product { color:#0a0c10; background:var(--mint); border-color:var(--mint); }
+.badge.claimed { color:#1a1408; background:var(--gold); border-color:var(--gold); }
+.badge.caution { color:#1a1408; background:var(--warn); border-color:var(--warn); }
+.badge.paused { color:#1a0a22; background:var(--paused); border-color:var(--paused); }
+.badge.farm { color:var(--mute); }
+.meta { display:flex; gap:12px; margin-top:8px; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
+.meta b { color:var(--ink); font-weight:560; }
+.tagline { margin-top:6px; font-size:13px; color:var(--mute); line-height:1.45; }
+.roleline { margin-top:8px; font-size:12.5px; color:var(--gold); line-height:1.4; }
+
+.back { font-size:13px; color:var(--gold); margin:4px 0 10px; font-weight:560; }
+.k { font-family:Fraunces, serif; font-size:26px; font-weight:650; }
+.subk { color:var(--mute); margin:4px 0 14px; font-size:15px; line-height:1.45; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px; }
+.kv { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:10px; }
+.kv b { display:block; font-variant-numeric:tabular-nums; font-size:14px; }
+.kv span { font-size:10px; color:var(--mute); letter-spacing:.06em; text-transform:uppercase; }
+.prose { font-size:14.5px; line-height:1.6; color:var(--ink); }
+.prose p { margin:0 0 12px; color:var(--mute); }
+.prose h3 { font-family:Fraunces, serif; font-size:18px; margin:18px 0 8px; }
+.prose ul { margin:0 0 12px 18px; color:var(--mute); }
+.prose li { margin-bottom:6px; }
+.links { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 18px; }
+.links a {
+  display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid var(--line);
+  background:var(--paper); text-decoration:none; color:var(--ink); font-size:12px; font-weight:560;
+}
+.health { font-size:13px; color:var(--mute); margin-bottom:14px; }
+.flags { display:flex; flex-direction:column; gap:8px; margin:10px 0 16px; }
+.flag { padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--paper2); font-size:13px; color:var(--mute); line-height:1.45; }
+.flag b { color:var(--warn); }
+
+.guide-card {
+  background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:10px;
+}
+.guide-card h3 { font-family:Fraunces, serif; font-size:18px; margin-bottom:6px; }
+.guide-card p, .guide-card li { color:var(--mute); font-size:14px; line-height:1.55; }
+.guide-card ol, .guide-card ul { margin:8px 0 0 18px; }
+.guide-card li { margin-bottom:6px; }
+
+.sleeve {
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:14px 14px 8px; margin-bottom:10px;
+}
+.sleeve h3 { font-family:Fraunces, serif; font-size:18px; margin-bottom:4px; }
+.sleeve .why { color:var(--mute); font-size:13.5px; line-height:1.5; margin-bottom:10px; }
+.alloc {
+  display:flex; align-items:center; gap:8px; padding:8px 0;
+  border-top:1px solid var(--line); width:100%; text-align:left;
+}
+.alloc .bar {
+  height:6px; border-radius:99px; background:var(--paper2); flex:1; overflow:hidden;
+}
+.alloc .bar i { display:block; height:100%; background:var(--gold); }
+.alloc b { width:92px; font-size:13px; }
+.alloc span { width:64px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
+
+.pay {
+  background:linear-gradient(160deg, #10201c, var(--paper));
+  border:1px solid rgba(94,224,197,.28); border-radius:16px; padding:16px; margin:8px 0 16px;
+}
+.pay h3 { font-family:Fraunces, serif; font-size:17px; margin-bottom:6px; }
+.pay p { color:var(--mute); font-size:13.5px; line-height:1.55; }
+
+.foot { margin-top:22px; font-size:11px; color:var(--faint); line-height:1.5; }
+
+nav.tabs {
+  position:fixed; left:0; right:0; bottom:0; z-index:30;
+  display:flex; gap:4px; padding:8px 10px calc(8px + var(--safe-b));
+  background:rgba(10,12,16,.92); backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+}
+.tab {
+  flex:1; height:44px; border-radius:12px; color:var(--faint); font-size:10px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase;
+}
+.tab.on { color:var(--gold); background:var(--paper); }
+
+.empty { color:var(--mute); padding:28px 8px; text-align:center; }
+.spin { width:22px; height:22px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:sp .8s linear infinite; margin:24px auto; }
+@keyframes sp { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="mark">τ</div>
+    <div class="brand">
+      <h1>SUBNET BRIEF</h1>
+      <p id="subhead">Bittensor, in plain English</p>
+    </div>
+    <div id="live-pill">loading</div>
+  </header>
+  <main>
+    <section id="pulse" class="screen on">
+      <div class="hero">A market of AI shops, not one AI.</div>
+      <p class="lede" id="pulse-lede">Bittensor pays specialized networks — subnets — to do useful work. Staking into one is closer to backing a startup than parking yield.</p>
+      <div class="roles" id="roles"></div>
+      <div class="stats" id="stats"><div class="spin"></div></div>
+      <div class="callout" id="take"></div>
+      <div class="section-h"><h2>Worth a look</h2><button type="button" id="to-list">All subnets</button></div>
+      <div class="movers" id="movers"></div>
+      <div class="section-h" style="margin-top:18px"><h2>The service</h2><button type="button" id="to-desk">Open desk</button></div>
+      <p class="lede" style="margin-top:0">Explorers are free. The desk is how idle Root TAO gets a job — three sleeves, live weights, take-rate on flow.</p>
+    </section>
+
+    <section id="list" class="screen">
+      <input class="search" id="q" type="search" placeholder="Search name, SN, or what it does" autocomplete="off">
+      <div class="filters" id="filters"></div>
+      <div id="cards"></div>
+    </section>
+
+    <section id="detail" class="screen">
+      <button class="back" type="button" id="back">← Subnets</button>
+      <div id="detail-body"></div>
+    </section>
+
+    <section id="desk" class="screen">
+      <div class="hero">Root is the savings account. Subnets are the job.</div>
+      <p class="lede" id="desk-lede">A subnet dashboard already exists, several times over. The missing product is a desk that gives idle TAO a small number of jobs it can defend — and gets paid the way Bitcoin mining pools got paid: a take-rate on flow, not a subscription to a table of numbers.</p>
+      <div class="pay">
+        <h3>How this is a business</h3>
+        <p id="pay-copy">Bitcoin explorers were free and crowded. Mining pools made money because hashpower flowed through them (about 1–2%). The Bittensor analog is stake flowing through a validator you operate. This UI is how people trust that flow. The protocol already pays the take-rate. We do not need to invent a SaaS meter.</p>
+      </div>
+      <div id="sleeves"></div>
+      <p class="foot">Hypothetical 100 TAO from Root. Not a stake button, not financial advice, not a promise of yield. Names and weights will change. The next build is wallet-signed allocation into these sleeves via a validator we run or partner with.</p>
+    </section>
+
+    <section id="guide" class="screen">
+      <div class="hero">How this actually works</div>
+      <p class="lede">The chain does not run the AI. It keeps score, moves money, and ejects the shops nobody wants to fund.</p>
+
+      <div class="guide-card">
+        <h3>The three jobs</h3>
+        <ul>
+          <li><b style="color:var(--ink)">Miners</b> do the work: inference, GPUs, forecasts, agents, science.</li>
+          <li><b style="color:var(--ink)">Validators</b> test that work and submit scores. Those scores become rewards.</li>
+          <li><b style="color:var(--ink)">Owners</b> write the rules of the shop. They take about 18% of subnet emissions; miners and validators split the rest.</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>Why staking feels like venture, not yield</h3>
+        <p>When you stake TAO into a subnet you swap into that subnet’s <b style="color:var(--ink)">alpha</b> token. You can earn more alpha and still lose TAO if the shop’s price falls. Root staking is the conservative park. Direct subnet staking is an active bet on one team’s market.</p>
+      </div>
+      <div class="guide-card">
+        <h3>The six questions that matter</h3>
+        <ol>
+          <li>Is there a live product a stranger can use today?</li>
+          <li>Do customers pay in dollars, or only in emissions?</li>
+          <li>Can anyone outside the team verify usage (OpenRouter, Polymarket, a public dashboard)?</li>
+          <li>Is the team public, shipping, and still around?</li>
+          <li>Is liquidity thick enough that you can exit without wrecking the pool?</li>
+          <li>Is the owner selling alpha faster than the product is earning?</li>
+        </ol>
+        <p style="margin-top:10px">Most of the 128 shops fail several of those. A handful pass. That gap is the whole market.</p>
+      </div>
+      <div class="guide-card">
+        <h3>Do not build another explorer</h3>
+        <p>taostats, TaoMarketCap, SubnetAIQ, SubnetRadar, SubnetStats, and TAOFlute already cover prices, explorers, health scores, and whale tape. A prettier table is not a business — it is a Bitcoin block explorer in 2012: useful, crowded, and hard to charge for.</p>
+        <p style="margin-top:8px">Bittensor is early in the same way Bitcoin was early: TAO is the bet on the network, and most of the money in the next phase goes to picks-and-shovels that sit on <b style="color:var(--ink)">flow</b> (stake, inference, attention), not on screenshots of the chain.</p>
+      </div>
+      <div class="guide-card">
+        <h3>Where we actually get paid</h3>
+        <ol>
+          <li><b style="color:var(--ink)">Validator desk (primary, Bitcoin-pool analog).</b> Most TAO is still in Root because allocating across 128 alpha tokens feels like becoming a VC. The needed service is a conservative sleeve plus a research sleeve, executed through a validator we run or partner with. Revenue is the protocol commission on dividends — already native, already how the chain pays judges. The UI is customer acquisition, not the SKU. See the Desk tab.</li>
+          <li><b style="color:var(--ink)">Front door to using a subnet (merchant analog).</b> Charge people who do not care about TAO: inference, authenticity checks, coding agents. Chutes, Ridgeline, and Dippy are the pattern. Analytics is the wedge; usage is the company.</li>
+          <li><b style="color:var(--ink)">Do not sell the map.</b> Paid pro dashboards exist and will keep existing. Competing with free taostats on columns is how you work for free.</li>
+        </ol>
+      </div>
+      <p class="foot">Not financial advice. Emissions, alpha prices, and teams change fast. Briefs are dated August 2026 and should be treated as a starting point, not a score. Live numbers come from the public Metagraphed registry (metagraph.sh), which reads the Bittensor chain.</p>
+    </section>
+  </main>
+  <nav class="tabs">
+    <button class="tab on" data-tab="pulse" type="button">Pulse</button>
+    <button class="tab" data-tab="list" type="button">Subnets</button>
+    <button class="tab" data-tab="desk" type="button">Desk</button>
+    <button class="tab" data-tab="guide" type="button">Guide</button>
+  </nav>
+</div>
+<script>
+const API = 'https://api.metagraph.sh/api/v1';
+const ROLES = [
+  ['staker', 'Staker'],
+  ['miner', 'Miner'],
+  ['builder', 'Builder'],
+  ['curious', 'Just looking']
+];
+const FILTERS = [
+  ['all', 'All'],
+  ['product', 'Has a product'],
+  ['compute', 'Compute'],
+  ['agents', 'Agents'],
+  ['science', 'Science'],
+  ['paused', 'Emissions off']
+];
+const BRIEFS = {
+  64: {
+    tagline: 'Serverless GPU inference. The closest thing Bittensor has to a real SaaS.',
+    does: 'Chutes lets developers deploy and call models without running their own cluster. It is listed as a provider on OpenRouter, which is the one usage number in this whole network that a team cannot write itself.',
+    revenue: 'verified',
+    revenueNote: 'Independent OpenRouter throughput exists. Self-reported token counts have been higher than the public feed. Customer revenue is real and still small next to TAO emissions — the cheap-vs-AWS story is partly a subsidy.',
+    flags: ['Rayon Labs also runs Gradients and Nineteen; one operator still takes a large slice of network emissions.', 'If emissions fall faster than paid usage grows, list prices would have to rise.'],
+    staker: 'Highest-conviction “this is a business” name, not a free lunch. Watch OpenRouter volume and owner sell pressure, not just alpha candles.',
+    miner: 'Mature, usually full metagraph. Registration is a tax. You are competing on latency and reliability against an established set.',
+    builder: 'This is the default inference API if you want to ship a product on Bittensor compute. Start at chutes.ai.',
+    tags: ['compute', 'inference', 'product']
+  },
+  51: {
+    tagline: 'Peer-to-peer GPU rental. Currently the fattest pool of TAO among product subnets.',
+    does: 'Lium is a GPU marketplace: supply cards or rent them. The bull case is that rental revenue already outruns emissions. That claim is still mostly internal reporting — there is no public revenue dashboard a stranger can audit.',
+    revenue: 'claimed',
+    revenueNote: 'If a live third-party dashboard ever lands, this becomes the self-sufficiency story of the network. Until then, treat “revenue > emissions” as interesting if true.',
+    flags: ['Identity on-chain is lium.io; older writeups also say Celium/Datura. Confirm you are looking at the same shop.', 'Liquidity leadership can reverse quickly; this is a flow market, not a bond.'],
+    staker: 'You are underwriting GPU demand. Size the exit: tao-in-pool is the shock absorber.',
+    miner: 'If you already have spare GPUs, this is closer to a rental desk than a model bake-off. Compare utilization, not just incentive.',
+    builder: 'Useful when your product needs raw GPUs rather than an inference API.',
+    tags: ['compute', 'product']
+  },
+  4: {
+    tagline: 'Confidential GPU compute. The enterprise pitch: the host cannot read the job.',
+    does: 'Targon runs inference and compute inside trusted-execution style enclaves (Intel TDX / NVIDIA CC). Manifold Labs published a confidential-compute writeup with Intel. Dippy is the best-known consumer app sitting on top.',
+    revenue: 'claimed',
+    revenueNote: 'Headline ARR figures have been self-reported and have not stayed on a public dashboard. Confidential compute is a real buyer need in health and finance; contracts are the proof, not the blog post.',
+    flags: ['Unaudited revenue. Do not underwrite $10M ARR as if it were GAAP.', 'Hardware-attested supply is harder to scale than vanilla GPUs.'],
+    staker: 'This is a thesis on regulated AI workloads, not on cheapest tokens. Slow, contract-shaped upside.',
+    miner: 'You need the right hardware story, not just a 4090. Read the TVM / attestation docs before registering.',
+    builder: 'Reach for Targon when the user cannot put prompts on a random GPU. Otherwise Chutes is simpler.',
+    tags: ['compute', 'inference', 'product']
+  },
+  120: {
+    tagline: 'Reason mining. The protocol co-founder left the foundation to build this.',
+    does: 'Affine is a competitive training / reasoning market: miners improve models on program synthesis and related tasks. Winner-takes-quality by design. No consumer product and no revenue yet — the signal is who is building it (Const / Jacob Steeves).',
+    revenue: 'none',
+    revenueNote: 'Research subnet. You are funding an experiment, not buying cash flow.',
+    flags: ['Founder-attention is not a moat if the incentive mechanism is gameable.', 'Expect high miner churn and opaque “who is actually ahead” periods.'],
+    staker: 'Only size this as a research option. Liquidity is real; fundamentals are not yet a business.',
+    miner: 'Read the current competition rules. Winner-take-most means average work earns dust.',
+    builder: 'Not a drop-in API. Watch the model releases if you need open reasoners.',
+    tags: ['agents', 'science']
+  },
+  56: {
+    tagline: 'One-click fine-tuning. Rayon Labs’ training shop.',
+    does: 'Gradients is AutoML: upload data, pick a base model, train. The pitch is 10–100× cheaper than Vertex/AWS. Same caveat as Chutes: a lot of that gap is TAO paying the miners.',
+    revenue: 'claimed',
+    revenueNote: 'Product is live at gradients.io. Independent dollar revenue is thinner than the marketing comparisons.',
+    flags: ['Subnet code has been less public than Chutes, which makes verification harder.', 'Same-operator concentration with SN64 / SN19.'],
+    staker: 'A bet on “training as a button” staying cheaper than hyperscalers after the next emission cut.',
+    miner: 'Training jobs, not token-at-a-time inference. Watch VRAM and queue dynamics.',
+    builder: 'Use it as a back office to produce a model, then serve that model on Chutes/Targon.',
+    tags: ['compute', 'product']
+  },
+  62: {
+    tagline: 'Software-engineering agents that compete on benchmarks.',
+    does: 'Ridges is a marketplace of coding agents. Ridgeline is the front-door product (GitHub-shaped workflow). Inference often rides Targon and Chutes — a reminder that the winning UIs compose subnets instead of being one.',
+    revenue: 'none',
+    revenueNote: 'Product exists; verified customer revenue does not. This is the category where Bittensor’s bake-off structure is most plausible versus a single Copilot.',
+    flags: ['Agent quality is only as good as the hidden test suite. If miners overfit the bench, users feel it immediately.', 'Token price has been violent relative to shipped revenue.'],
+    staker: 'High-beta narrative paper. Size as an option on “decentralized Devin,” not as yield.',
+    miner: 'You are shipping agents, not GPUs. Read the current scoring harness before buying a slot.',
+    builder: 'If you want a coding-agent UI, start from Ridgeline rather than wrapping the metagraph yourself.',
+    tags: ['agents', 'product']
+  },
+  34: {
+    tagline: 'Is this image/video/audio fake? Incentivized detectors.',
+    does: 'BitMind pays miners to detect synthetic media. This is one of the few subnets with a civilian use case that does not require you to care about TAO.',
+    revenue: 'none',
+    revenueNote: 'Clear product story, unclear paid demand. Deepfake tooling is crowded; the edge has to be calibration plus price.',
+    flags: ['Accuracy claims need a public, dated eval set. Without it you are buying a vibe.'],
+    staker: 'A distribution bet: if a consumer or newsroom app sits on top, alpha follows usage. Until then, thin.',
+    miner: 'Classic model bake-off. Latency and calibration both matter.',
+    builder: 'This is a strong “front door” candidate: a simple authenticity API for journalists and platforms.',
+    tags: ['science', 'product']
+  },
+  44: {
+    tagline: 'Make every camera intelligent — sports vision in production.',
+    does: 'Score annotates sports video with decentralised computer vision. Older writeups tied it to DKING/SIRE sports-betting models and a large AUM claim. The current public face is wearescore.com.',
+    revenue: 'claimed',
+    revenueNote: 'Partnership headlines are easier to verify than ongoing P&L. Expired certs and quiet sites have shown up in this cluster before — check the live site before you size in.',
+    flags: ['Sports-betting revenue is opaque by nature.', 'Alpha has been jumpy; liquidity is mid-pack.'],
+    staker: 'Underwrite the vision product, not the hedge-fund rumor.',
+    miner: 'Vision/annotation workload. Bandwidth and GPU both matter.',
+    builder: 'If you need sports CV as an API, this is the subnet to probe — then confirm the current schema.',
+    tags: ['science', 'product']
+  },
+  68: {
+    tagline: 'Drug-discovery bake-off. Miners propose molecules; validators score binding.',
+    does: 'NOVA / Metanova screens huge chemical libraries with a learned oracle. Wet-lab confirmation is the only thing that turns this from a pretty leaderboard into a company.',
+    revenue: 'none',
+    revenueNote: 'Intellectually one of the best-specified science subnets. Revenue is still a future tense.',
+    flags: ['Virtual hits are cheap. Chemistry is not.', 'Smaller miner set than the inference shops — check whether that is quality or emptiness.'],
+    staker: 'DeSci optionality. Do not model a royalty stream that is not in a contract.',
+    miner: 'This is cheminformatics, not LLM serving. Read the current molecule format before you buy hardware for the wrong job.',
+    builder: 'Only integrate if you have a wet-lab or screening partner. The metagraph alone is not a drug.',
+    tags: ['science']
+  },
+  3: {
+    tagline: 'Coordinated learning — the shop that used to be Templar.',
+    does: 'Templar / Covenant trained Covenant-72B across the open internet, then the original team publicly left Bittensor in April 2026 after a governance fight. The netuid is still live as Teutonic / tplr.ai. That is a different risk than a boring compute subnet.',
+    revenue: 'caution',
+    revenueNote: 'Technical achievement is real and published. Continuity of the team that made it is not. Treat identity changes as a first-class risk.',
+    flags: ['Team-exit history. Read current owners before you assume you own “the 72B subnet.”', 'Validator count has been thin versus miner count — scoring power is concentrated.'],
+    staker: 'Only if you have done the identity homework this week, not last quarter.',
+    miner: 'Confirm the current incentive repo. Old Templar guides may be dead letters.',
+    builder: 'Prefer published weights on Hugging Face over assuming the subnet still produces them.',
+    tags: ['science', 'caution']
+  },
+  9: {
+    tagline: 'Liquid / distributed training from Macrocosmos.',
+    does: 'iota is Macrocosmos’ training subnet — consumer and clustered GPUs contributing to shared pretraining. Related family: Apex (SN1) and other Macrocosmos shops.',
+    revenue: 'none',
+    revenueNote: 'Infrastructure for training, not a consumer SKU. Value shows up as models and papers, then maybe as APIs.',
+    flags: ['Training subnets are hard to evaluate from alpha price alone. Look at published runs.'],
+    staker: 'A bet on Macrocosmos continuing to ship public training artifacts.',
+    miner: 'Bandwidth and sync code matter as much as FLOPs. Read the current client.',
+    builder: 'Watch for released checkpoints rather than calling this like Chutes.',
+    tags: ['compute', 'science']
+  },
+  8: {
+    tagline: 'Trustless execution / liquidity for prop desks and traders.',
+    does: 'Vanta pitches a decentralised execution engine for proprietary trading firms. Older maps called SN8 “prop trading.” Verify the live product; trading subnets have a habit of being more whitepaper than fill.',
+    revenue: 'caution',
+    revenueNote: 'If fills, latency, and audited P&L are not public, you are buying a story about traders, not a tape.',
+    flags: ['Easy to confuse “we have miners submitting signals” with “a desk will pay for this.”'],
+    staker: 'Need evidence of outside capital using the engine. Emissions are not that evidence.',
+    miner: 'Likely a signal/execution bake-off. Overfitting yesterday’s markets is the failure mode.',
+    builder: 'Only if you are already in that trading stack. Not a general AI API.',
+    tags: ['caution']
+  },
+  19: {
+    tagline: 'Low-latency inference (Nineteen / blockmachine lineage).',
+    does: 'SN19 has been Rayon Labs’ speed-focused inference shop, live at nineteen.ai for text and image. On-chain name may read as blockmachine — always match netuid, not the vibe.',
+    revenue: 'claimed',
+    revenueNote: 'Same family as Chutes, different optimisation (latency vs scale). Smaller emission share.',
+    flags: ['Name drift on explorers. Confirm website + repo before you allocate.'],
+    staker: 'A satellite of the Rayon cluster, not an independent universe.',
+    miner: 'Latency contest. Geography and interconnect matter.',
+    builder: 'Use when your UX dies above ~200ms. Otherwise Chutes is the broader catalog.',
+    tags: ['inference', 'compute', 'product']
+  },
+  107: {
+    tagline: 'Genomics as a foundational layer.',
+    does: 'Minos is pitching genomics infrastructure. High emission share with a science story needs a corresponding public artifact (paper, API, hospital design partner).',
+    revenue: 'none',
+    revenueNote: 'Emission leadership in a science vertical is not the same as demand. Ask what a non-token customer would buy tomorrow.',
+    flags: ['When a new name is taking a top emission slot, read the mechanism and the team before the candle.'],
+    staker: 'Treat as high-uncertainty until there is a third-party usage trail.',
+    miner: 'Check whether the job is actually genomics compute or a generic ML contest with a genomics skin.',
+    builder: 'Docs and schemas first. Do not wrap a genomics API that is only a README.',
+    tags: ['science']
+  },
+  93: {
+    tagline: 'Decentralised creator / influencer marketplace.',
+    does: 'Bitcast is a creator-economy subnet: attention, campaigns, and payouts rather than GPUs. That is a distribution business wearing a TAO jersey.',
+    revenue: 'claimed',
+    revenueNote: 'Creator marketplaces live or die on brands actually paying. Look for campaign receipts, not only miner counts.',
+    flags: ['Off-chain attention metrics are easy to fake. Prefer payable invoices.'],
+    staker: 'This is media, not compute. Underwrite go-to-market, not FLOPs.',
+    miner: 'You may be mining content/distribution, not models. Read the current task.',
+    builder: 'Interesting if you need incentivized distribution, not inference.',
+    tags: ['product']
+  },
+  75: {
+    tagline: 'Storage, VMs, and apps with a chain-backed cloud story.',
+    does: 'Hippius is trying to be a decentralised cloud: disks and machines, not just tokens. Overlaps the Akash/Render/Filecoin conversation.',
+    revenue: 'claimed',
+    revenueNote: 'Cloud is brutal on reliability SLAs. A pretty dashboard is not multi-AZ.',
+    flags: ['Compare real VM prices and uptime to Hetzner/AWS before calling it cheaper.'],
+    staker: 'A long-cycle infrastructure bet. Liquidity is mid-tier.',
+    miner: 'If you already run storage or hypervisor capacity, this is closer to your day job than an LLM subnet.',
+    builder: 'Use when you need persistence, not a chat completion.',
+    tags: ['compute', 'product']
+  },
+  1: {
+    tagline: 'Apex — Macrocosmos’ general intelligence / agent platform.',
+    does: 'Apex is the Macrocosmos flagship product surface sitting beside their training subnets. Strong docs and integration readiness relative to most of the network.',
+    revenue: 'none',
+    revenueNote: 'Platform, not a proven cash-flow loop. Quality of agents and public evals matter more than alpha beta.',
+    flags: ['Macrocosmos concentration across several netuids.'],
+    staker: 'You are backing a studio, not a single SKU.',
+    miner: 'Read current incentive; “general intelligence” can mean a new contest every tempo.',
+    builder: 'One of the better-documented integration targets. Start at the official docs.',
+    tags: ['agents', 'product']
+  }
+};
+
+const state = {
+  role: localStorage.getItem('sb-role') || 'staker',
+  tab: 'pulse',
+  filter: 'all',
+  q: '',
+  rows: [],
+  summary: null,
+  taoUsd: null,
+  generatedAt: null,
+  live: false
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = x => { const n = Number(x); return Number.isFinite(n) ? n : null; };
+function fmtUsd(n) {
+  if (n == null) return '—';
+  const a = Math.abs(n);
+  if (a >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if (a >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (a >= 1e3) return '$' + (n/1e3).toFixed(0) + 'k';
+  return '$' + n.toFixed(0);
+}
+function fmtTao(n, d=2) {
+  if (n == null) return '—';
+  if (Math.abs(n) >= 1000) return Math.round(n).toLocaleString() + ' τ';
+  return n.toFixed(d) + ' τ';
+}
+function fmtPct(n, d=2) {
+  if (n == null) return '—';
+  const s = (n >= 0 ? '+' : '') + n.toFixed(d) + '%';
+  return s;
+}
+function chClass(n) { return n == null ? '' : n >= 0 ? 'up' : 'dn'; }
+function gradeOf(row) {
+  if (row.emission_enabled === false && row.netuid !== 0) return 'paused';
+  const g = row.brief?.revenue;
+  if (g === 'verified') return 'product';
+  if (g === 'claimed') return 'claimed';
+  if (g === 'caution') return 'caution';
+  if (row.brief?.tags?.includes('product') || row.website_url) return 'farm';
+  return 'farm';
+}
+function gradeLabel(g) {
+  return { product:'Verified demand', claimed:'Claimed revenue', caution:'Identity risk', paused:'Emissions off', farm:'Unproven' }[g] || 'Unproven';
+}
+function oneLine(row) {
+  return row.brief?.tagline || row.description || 'No public one-liner on chain.';
+}
+function roleLine(row) {
+  const b = row.brief;
+  if (b) {
+    if (state.role === 'miner') return b.miner;
+    if (state.role === 'builder') return b.builder;
+    if (state.role === 'curious') return b.does;
+    return b.staker;
+  }
+  if (state.role === 'miner') {
+    const slots = num(row.open_slots);
+    const cost = num(row.registration_cost_tao);
+    const miners = num(row.miner_count);
+    return `~${miners ?? '—'} miners, ${slots == null ? '—' : slots} open slots, registration ${cost == null ? '—' : cost.toFixed(2) + ' τ'}.`;
+  }
+  if (state.role === 'builder') {
+    return row.website_url ? `Public site: ${row.website_url.replace(/^https?:\/\//,'')}` : 'No official website in the registry. Integration risk is high.';
+  }
+  const liq = num(row.tao_in_pool_tao);
+  const em = num(row.emission_share);
+  return `Pool ${fmtTao(liq, 0)} · emission share ${em == null ? '—' : (em*100).toFixed(2) + '%'}.`;
+}
+
+function merge(catalog, economics) {
+  const cby = new Map((catalog || []).map(c => [c.netuid, c]));
+  const eby = new Map((economics || []).map(e => [e.netuid, e]));
+  const ids = new Set([...cby.keys(), ...eby.keys()]);
+  const rows = [];
+  for (const id of ids) {
+    const c = cby.get(id) || {};
+    const e = eby.get(id) || {};
+    const cats = (c.categories || []).concat(BRIEFS[id]?.tags || []);
+    rows.push({
+      ...c, ...e,
+      brief: BRIEFS[id] || null,
+      tags: [...new Set(cats)]
+    });
+  }
+  return rows.sort((a, b) => (num(b.tao_in_pool_tao) || 0) - (num(a.tao_in_pool_tao) || 0));
+}
+
+async function load() {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 12000);
+    const [ecoRes, catRes] = await Promise.all([
+      fetch(API + '/economics', { signal: ctrl.signal }),
+      fetch(API + '/subnets?limit=130', { signal: ctrl.signal })
+    ]);
+    clearTimeout(t);
+    if (!ecoRes.ok || !catRes.ok) throw new Error('bad status');
+    const eco = await ecoRes.json();
+    const cat = await catRes.json();
+    state.rows = merge(cat.data.subnets, eco.data.subnets);
+    state.summary = eco.data.summary;
+    state.taoUsd = eco.data.tao_usd;
+    state.generatedAt = eco.data.generated_at || eco.meta?.published_at;
+    state.live = true;
+  } catch (err) {
+    const snap = await fetch('./snapshot.json').then(r => r.json());
+    state.rows = merge(snap.catalog, snap.economics);
+    state.summary = snap.summary;
+    state.taoUsd = snap.tao_usd;
+    state.generatedAt = snap.generated_at;
+    state.live = false;
+  }
+  render();
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  if (tab !== 'detail') location.hash = tab === 'pulse' ? '' : tab;
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === tab));
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab || (tab === 'detail' && b.dataset.tab === 'list')));
+}
+
+function renderRoles() {
+  $('roles').innerHTML = ROLES.map(([id, label]) =>
+    `<button class="role${state.role===id?' on':''}" data-role="${id}" type="button">${label}</button>`
+  ).join('');
+}
+
+function renderStats() {
+  const s = state.summary || {};
+  const root = num(s.total_root_value_tao);
+  const alpha = num(s.total_alpha_value_tao);
+  const tot = (root || 0) + (alpha || 0);
+  const px = num(state.taoUsd?.usd_per_tao);
+  const n = (state.rows || []).filter(r => r.netuid !== 0).length;
+  $('stats').innerHTML = `
+    <div class="stat"><b>${n}</b><span>Active subnets</span></div>
+    <div class="stat"><b>${px ? '$'+px.toFixed(0) : '—'}</b><span>TAO price</span></div>
+    <div class="stat"><b>${tot ? ((alpha||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>Stake in subnets</span></div>
+    <div class="stat"><b>${fmtUsd((alpha||0) * (px||0))}</b><span>Alpha value</span></div>`;
+}
+
+function renderTake() {
+  const s = state.summary || {};
+  const root = num(s.total_root_value_tao) || 0;
+  const alpha = num(s.total_alpha_value_tao) || 0;
+  const tot = root + alpha;
+  const pctRoot = tot ? (root/tot*100).toFixed(0) : '—';
+  const copy = {
+    staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. The job of this UI is not more candles — it is helping you decide whether a subnet is a business, a science experiment, or an emission farm before you swap TAO into its alpha.`,
+    miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
+    builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
+    curious: `Ignore the 40-column screens for a minute. Each subnet is a shop with its own token. A few have paying users. Most recycle TAO. Scroll the briefs; the Guide tab is the map.`
+  };
+  $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role]}</p>`;
+}
+
+function interesting() {
+  const rows = state.rows.filter(r => r.netuid !== 0 && num(r.tao_in_pool_tao) > 5000);
+  const byEm = [...rows].sort((a,b) => (num(b.emission_share)||0) - (num(a.emission_share)||0));
+  const byCh = [...rows].sort((a,b) => Math.abs(num(b.alpha_price_change_7d)||0) - Math.abs(num(a.alpha_price_change_7d)||0));
+  const featured = [];
+  const seen = new Set();
+  for (const r of [...byEm.slice(0,4), ...byCh.slice(0,4), ...rows.filter(r => r.brief?.revenue === 'verified')]) {
+    if (seen.has(r.netuid)) continue;
+    seen.add(r.netuid);
+    featured.push(r);
+    if (featured.length >= 6) break;
+  }
+  return featured;
+}
+
+function renderMovers() {
+  $('movers').innerHTML = interesting().map(r => `
+    <button class="move" data-sn="${r.netuid}" type="button">
+      <div class="sn">SN${r.netuid}</div>
+      <div class="nm"><b>${esc(r.name || 'Unknown')}</b><i>${esc(oneLine(r))}</i></div>
+      <div class="ch ${chClass(num(r.alpha_price_change_7d))}">${fmtPct(num(r.alpha_price_change_7d), 1)}</div>
+    </button>`).join('') || '<div class="empty">Loading network…</div>';
+}
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return state.rows.filter(r => {
+    if (r.netuid === 0) return false;
+    if (q) {
+      const blob = [r.name, 'sn'+r.netuid, r.netuid, r.description, r.brief?.tagline, r.brief?.does].join(' ').toLowerCase();
+      return blob.includes(q);
+    }
+    if (state.filter === 'product' && !(r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed' || r.brief?.tags?.includes('product'))) return false;
+    if (state.filter === 'compute' && !r.tags?.some(t => ['compute','inference'].includes(t))) return false;
+    if (state.filter === 'agents' && !r.tags?.includes('agents')) return false;
+    if (state.filter === 'science' && !r.tags?.includes('science')) return false;
+    if (state.filter === 'paused' && r.emission_enabled !== false) return false;
+    return true;
+  });
+}
+
+function renderList() {
+  $('filters').innerHTML = FILTERS.map(([id, label]) =>
+    `<button class="chip${state.filter===id?' on':''}" data-filter="${id}" type="button">${label}</button>`
+  ).join('');
+  const rows = filtered();
+  $('cards').innerHTML = rows.map(r => {
+    const g = gradeOf(r);
+    const px = num(r.alpha_price_tao);
+    const ch = num(r.alpha_price_change_7d);
+    const em = num(r.emission_share);
+    return `<button class="card" data-sn="${r.netuid}" type="button">
+      <div class="card-top">
+        <b>SN${r.netuid} · ${esc(r.name || 'Unknown')}</b>
+        <span class="badge ${g}">${gradeLabel(g)}</span>
+      </div>
+      <div class="tagline">${esc(oneLine(r))}</div>
+      <div class="meta">
+        <span><b>${px == null ? '—' : px.toFixed(4) + ' τ'}</b> price</span>
+        <span class="${chClass(ch)}"><b>${fmtPct(ch, 1)}</b> 7d</span>
+        <span><b>${em == null ? '—' : (em*100).toFixed(2)+'%'}</b> emissions</span>
+      </div>
+      <div class="roleline">${esc(roleLine(r))}</div>
+    </button>`;
+  }).join('') || '<div class="empty">Nothing matches.</div>';
+}
+
+function rowBy(id) { return state.rows.find(r => r.netuid === Number(id)); }
+
+async function renderDetail(id) {
+  const r = rowBy(id);
+  const el = $('detail-body');
+  if (!r) { el.innerHTML = '<div class="empty">Subnet not in the latest snapshot.</div>'; return; }
+  const g = gradeOf(r);
+  const px = num(r.alpha_price_tao);
+  const usd = num(r.alpha_price_usd);
+  const ch1 = num(r.alpha_price_change_1d);
+  const ch7 = num(r.alpha_price_change_7d);
+  const em = num(r.emission_share);
+  const b = r.brief;
+  el.innerHTML = `
+    <div class="k">SN${r.netuid} · ${esc(r.name || 'Unknown')}</div>
+    <div class="subk">${esc(oneLine(r))}</div>
+    <div><span class="badge ${g}">${gradeLabel(g)}</span></div>
+    <div class="grid3" style="margin-top:14px">
+      <div class="kv"><b>${px == null ? '—' : px.toFixed(4)}</b><span>α / TAO</span></div>
+      <div class="kv"><b class="${chClass(ch7)}">${fmtPct(ch7, 1)}</b><span>7d</span></div>
+      <div class="kv"><b>${em == null ? '—' : (em*100).toFixed(2)+'%'}</b><span>Emissions</span></div>
+      <div class="kv"><b>${fmtUsd(num(r.alpha_market_cap_usd))}</b><span>Mkt cap</span></div>
+      <div class="kv"><b>${fmtTao(num(r.tao_in_pool_tao), 0)}</b><span>TAO in pool</span></div>
+      <div class="kv"><b>${r.miner_count ?? '—'} / ${r.validator_count ?? '—'}</b><span>Miners / vals</span></div>
+      <div class="kv"><b>${num(r.registration_cost_tao)?.toFixed(2) ?? '—'} τ</b><span>Register</span></div>
+      <div class="kv"><b>${r.open_slots ?? '—'}</b><span>Open slots</span></div>
+      <div class="kv"><b class="${chClass(ch1)}">${fmtPct(ch1, 2)}</b><span>1d</span></div>
+    </div>
+    <div class="health" id="health">Checking public surfaces…</div>
+    <div class="prose">
+      ${b ? `<h3>What it actually does</h3><p>${esc(b.does)}</p>
+        <h3>Revenue honesty</h3><p>${esc(b.revenueNote)}</p>
+        <h3>If you are a ${esc(ROLES.find(x=>x[0]===state.role)[1].toLowerCase())}</h3><p>${esc(roleLine(r))}</p>
+        ${b.flags?.length ? `<h3>What can go wrong</h3><div class="flags">${b.flags.map(f=>`<div class="flag"><b>Watch.</b> ${esc(f)}</div>`).join('')}</div>` : ''}`
+        : `<h3>No editorial brief yet</h3><p>${esc(r.description || 'The registry has almost no human description for this netuid. That itself is a signal: if the team cannot explain the shop, you probably should not fund it.')}</p>
+           <p>${esc(roleLine(r))}</p>`}
+    </div>
+    <div class="links">
+      ${r.website_url ? `<a href="${esc(r.website_url)}" target="_blank" rel="noopener">Product</a>` : ''}
+      ${r.docs_url ? `<a href="${esc(r.docs_url)}" target="_blank" rel="noopener">Docs</a>` : ''}
+      ${r.source_repo ? `<a href="${esc(r.source_repo)}" target="_blank" rel="noopener">Code</a>` : ''}
+      ${r.dashboard_url ? `<a href="${esc(r.dashboard_url)}" target="_blank" rel="noopener">Market</a>` : ''}
+      <a href="https://taostats.io/subnets/${r.netuid}/chart" target="_blank" rel="noopener">taostats</a>
+    </div>
+    <p class="foot">${usd != null ? 'α ≈ $' + usd.toFixed(4) + ' · ' : ''}Not financial advice. Match the netuid, not the nickname — names on this chain drift.</p>`;
+
+  try {
+    const ov = await fetch(API + '/subnets/' + r.netuid + '/overview').then(x => x.json());
+    const h = ov?.data?.health;
+    if (h) {
+      const ok = h.status === 'ok';
+      $('health').innerHTML = `Public surfaces: <b style="color:${ok ? 'var(--ok)' : 'var(--warn)'}">${esc(h.status)}</b> · ${h.ok_count}/${h.surface_count} ok · ${h.avg_latency_ms ? Math.round(h.avg_latency_ms)+' ms' : 'n/a'} · ${r.github_stars != null ? r.github_stars + ' GitHub stars' : ''}`;
+    } else $('health').textContent = '';
+  } catch {
+    $('health').textContent = r.github_stars != null ? r.github_stars + ' GitHub stars' : '';
+  }
+}
+
+function sleeveRows(ids, fallback) {
+  const found = ids.map(id => rowBy(id)).filter(Boolean);
+  if (found.length >= 2) return found;
+  return fallback();
+}
+
+function weightsByPool(rows) {
+  const liqs = rows.map(r => Math.max(num(r.tao_in_pool_tao) || 0, 1));
+  const sum = liqs.reduce((a, b) => a + b, 0);
+  return rows.map((r, i) => ({ row: r, w: liqs[i] / sum }));
+}
+
+function renderSleeve(title, why, parts) {
+  return `<div class="sleeve">
+    <h3>${esc(title)}</h3>
+    <p class="why">${esc(why)}</p>
+    ${parts.map(({ row: r, w }) => {
+      const tao = 100 * w;
+      return `<button class="alloc" data-sn="${r.netuid}" type="button">
+        <b>SN${r.netuid} ${esc(r.name || '')}</b>
+        <div class="bar"><i style="width:${(w*100).toFixed(1)}%"></i></div>
+        <span>${tao.toFixed(1)} τ</span>
+      </button>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderDesk() {
+  const s = state.summary || {};
+  const root = num(s.total_root_value_tao) || 0;
+  const alpha = num(s.total_alpha_value_tao) || 0;
+  const tot = root + alpha;
+  const pctRoot = tot ? (root / tot * 100).toFixed(0) : '—';
+  const work = sleeveRows([64, 51, 4], () =>
+    state.rows.filter(r => r.netuid && (r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed')).slice(0, 3)
+  );
+  const research = sleeveRows([120, 62, 34], () =>
+    state.rows.filter(r => r.brief && !work.includes(r) && r.netuid !== 0).slice(0, 3)
+  );
+  const parkTao = tot ? (root / tot) * 100 : 63;
+  $('sleeves').innerHTML =
+    `<div class="sleeve">
+      <h3>Park · Root</h3>
+      <p class="why">Keep the savings account. ${pctRoot}% of the network is already doing this. You earn a simpler TAO-denominated product and skip alpha drawdowns. This is the honest default until a shop earns a seat.</p>
+      <div class="alloc" style="pointer-events:none">
+        <b>SN0 Root</b>
+        <div class="bar"><i style="width:${Math.min(parkTao, 100).toFixed(0)}%"></i></div>
+        <span>idle</span>
+      </div>
+    </div>` +
+    renderSleeve(
+      'Work · 100 τ sleeve',
+      'Names with a live product and a deep enough pool that you can exit. Weighted by TAO in the pool so you are not crowding the thinnest book. This is the validator-desk default.',
+      weightsByPool(work)
+    ) +
+    renderSleeve(
+      'Research · 100 τ sleeve',
+      'Smaller, noisier bets: founder-led training, coding agents, authenticity. Size this as optionality, not as yield. One identity-risk name (Teutonic / old Templar) is deliberately left out.',
+      weightsByPool(research)
+    );
+}
+
+function render() {
+  const pill = $('live-pill');
+  pill.textContent = state.live ? 'live' : 'snapshot';
+  pill.className = state.live ? 'on' : 'snap';
+  if (state.generatedAt) {
+    const t = new Date(state.generatedAt);
+    $('subhead').textContent = 'as of ' + t.toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  renderRoles();
+  renderStats();
+  renderTake();
+  renderMovers();
+  renderList();
+  renderDesk();
+}
+
+function openSn(id) {
+  location.hash = 'sn/' + id;
+  setTab('detail');
+  renderDetail(id);
+}
+
+function applyHash() {
+  const h = (location.hash || '').replace(/^#/, '');
+  if (h.startsWith('sn/')) {
+    setTab('detail');
+    renderDetail(h.slice(3));
+    return;
+  }
+  if (h === 'list' || h === 'guide' || h === 'desk') setTab(h);
+  else setTab('pulse');
+}
+
+document.addEventListener('click', e => {
+  const role = e.target.closest('[data-role]');
+  if (role) {
+    state.role = role.dataset.role;
+    localStorage.setItem('sb-role', state.role);
+    render();
+    if (state.tab === 'detail') {
+      const m = (location.hash || '').match(/sn\/(\d+)/);
+      if (m) renderDetail(m[1]);
+    }
+    return;
+  }
+  const tab = e.target.closest('.tab');
+  if (tab) { setTab(tab.dataset.tab); if (tab.dataset.tab !== 'detail') location.hash = tab.dataset.tab === 'pulse' ? '' : tab.dataset.tab; return; }
+  const filt = e.target.closest('[data-filter]');
+  if (filt) { state.filter = filt.dataset.filter; renderList(); return; }
+  const sn = e.target.closest('[data-sn]');
+  if (sn) { openSn(sn.dataset.sn); return; }
+});
+$('to-list').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
+$('to-desk').addEventListener('click', () => { location.hash = 'desk'; setTab('desk'); });
+$('back').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
+$('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
+window.addEventListener('hashchange', applyHash);
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+load().then(applyHash);
+</script>
+</body>
+</html>
