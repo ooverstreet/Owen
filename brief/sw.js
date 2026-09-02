@@ -1,4 +1,4 @@
-const CACHE = 'subnet-brief-v2';
+const CACHE = 'subnet-brief-v3';
 const URLS = ['./', './index.html', './manifest.json', './icon.svg', './snapshot.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(URLS.map(u => c.add(u)))));
