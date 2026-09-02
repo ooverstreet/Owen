@@ -3,7 +3,9 @@
 **Data Analyst · Technical Analyst · Business Analyst**  
 **QA testing · Technical documentation · Vibe coding (Cursor / AI agents)**
 
-Yulee, FL | 904-651-4256 | OwenOverstreet@ymail.com | [LinkedIn](https://www.linkedin.com/in/owen-overstreet-2119776)
+Yulee, FL  
+(P) 904-651-4256  (E) OwenOverstreet@ymail.com  
+[www.linkedin.com/in/owen-overstreet-2119776](https://www.linkedin.com/in/owen-overstreet-2119776)
 
 ---
 
