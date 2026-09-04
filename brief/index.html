@@ -344,7 +344,7 @@ nav.tabs {
       <p class="lede">A dashboard already exists. This desk is the service: read your public book, in English, without ever touching a key. When we take a fee it will be a validator take-rate you can see on-chain — never a seed phrase, never custody.</p>
 
       <div class="rules">
-        <div class="rule"><b>Secure.</b> Paste a public address only. We never ask for a seed, JSON wallet, or password. There is no stake button yet, on purpose.</div>
+        <div class="rule"><b>Secure.</b> Paste a public address only. We never ask for a seed, JSON wallet, or password. There is no stake button yet, on purpose — and we do not send you to another app to stake either.</div>
         <div class="rule"><b>Trustworthy.</b> Every number is a public chain read via Metagraphed. We say when revenue is verified vs claimed. Not financial advice.</div>
         <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: if you ever allocate through a validator we run, the protocol already pays the commission. Today this UI is free so you can check the work.</div>
       </div>
@@ -378,7 +378,7 @@ nav.tabs {
         <ul>
           <li>We never ask for a seed phrase, private key, or wallet JSON. If a screen ever does, it is not this app.</li>
           <li>Lookup is a GET to a public indexer. Your address is already on the chain; we do not “collect” it as an account.</li>
-          <li>No stake, unstake, or transfer in this build. The first signing extra will name the validator and the take-rate in the confirmation itself.</li>
+          <li>No stake, unstake, or transfer in this build. We also do not hand you to taostats or another desk to allocate. The first signing extra will name the validator and the take-rate in the confirmation itself.</li>
           <li>Briefs are editorial. Live prices are chain data. We label claimed revenue so it cannot hide as fact.</li>
         </ul>
       </div>
@@ -416,7 +416,7 @@ nav.tabs {
         <ol>
           <li><b style="color:var(--ink)">Validator desk (primary, Bitcoin-pool analog).</b> Most TAO is still in Root because allocating across 128 alpha tokens feels like becoming a VC. The needed service is a conservative sleeve plus a research sleeve, executed through a validator we run or partner with. Revenue is the protocol commission on dividends — already native, already how the chain pays judges. The UI is customer acquisition, not the SKU. See the Desk tab.</li>
           <li><b style="color:var(--ink)">Front door to using a subnet (merchant analog).</b> Charge people who do not care about TAO: inference, authenticity checks, coding agents. Chutes, Ridgeline, and Dippy are the pattern. Analytics is the wedge; usage is the company.</li>
-          <li><b style="color:var(--ink)">Do not sell the map.</b> Paid pro dashboards exist and will keep existing. Competing with free taostats on columns is how you work for free.</li>
+          <li><b style="color:var(--ink)">Do not sell the map.</b> Paid pro dashboards exist and will keep existing. Competing with free taostats on columns is how you work for free. Do not send people there to stake, either — that trains the habit of allocating TAO in someone else's product.</li>
         </ol>
       </div>
       <p class="foot">Not financial advice. Emissions, alpha prices, and teams change fast. Briefs are dated August 2026 and should be treated as a starting point, not a score. Live numbers come from the public Metagraphed registry (metagraph.sh), which reads the Bittensor chain.</p>
@@ -951,14 +951,12 @@ async function renderDetail(id) {
         : `<h3>No editorial brief yet</h3><p>${esc(r.description || 'The registry has almost no human description for this netuid. That itself is a signal: if the team cannot explain the shop, you probably should not fund it.')}</p>
            <p>${esc(roleLine(r))}</p>`}
     </div>
-    <div class="links">
+    ${(r.website_url || r.docs_url || r.source_repo) ? `<div class="links">
       ${r.website_url ? `<a href="${esc(r.website_url)}" target="_blank" rel="noopener">Product</a>` : ''}
       ${r.docs_url ? `<a href="${esc(r.docs_url)}" target="_blank" rel="noopener">Docs</a>` : ''}
       ${r.source_repo ? `<a href="${esc(r.source_repo)}" target="_blank" rel="noopener">Code</a>` : ''}
-      ${r.dashboard_url ? `<a href="${esc(r.dashboard_url)}" target="_blank" rel="noopener">Market</a>` : ''}
-      <a href="https://taostats.io/subnets/${r.netuid}/chart" target="_blank" rel="noopener">taostats</a>
-    </div>
-    <p class="foot">${usd != null ? 'α ≈ $' + usd.toFixed(4) + ' · ' : ''}Not financial advice. Match the netuid, not the nickname — names on this chain drift.</p>`;
+    </div>` : ''}
+    <p class="foot">${usd != null ? 'α ≈ $' + usd.toFixed(4) + ' · ' : ''}Not financial advice. We do not send you to another desk to stake. When this app can move TAO, it will be a wallet-signed extra on a named validator — take-rate in the prompt, not a handoff.</p>`;
 
   try {
     const ov = await fetch(API + '/subnets/' + r.netuid + '/overview').then(x => x.json());
