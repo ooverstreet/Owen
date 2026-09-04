@@ -7,11 +7,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
-<meta name="theme-color" content="#0a0c10">
-<meta name="description" content="Bittensor in plain English. What each subnet does, whether anyone pays, and what can go wrong.">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta name="description" content="Bittensor in plain English. What each subnet does, whether anyone pays, and what can go wrong. Public address only — no seed, no stake button.">
+<meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Bittensor in plain English</title>
+<link rel="canonical" href="https://ooverstreet.github.io/Owen/brief/">
+<meta property="og:title" content="Subnet Brief">
+<meta property="og:description" content="Bittensor in plain English. Read a public book. No seed. No stake button.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ooverstreet.github.io/Owen/brief/">
+<meta property="og:image" content="https://ooverstreet.github.io/Owen/brief/icon-512.png">
+<meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,6 +191,33 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .alloc b { width:92px; font-size:13px; }
 .alloc span { width:64px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
 
+.lookup { display:flex; gap:8px; margin:10px 0 8px; }
+.lookup input {
+  flex:1; min-width:0; height:42px; border-radius:12px; border:1px solid var(--line);
+  background:var(--paper); padding:0 12px; outline:none; font-size:13px;
+}
+.lookup input:focus { border-color:var(--gold); }
+.lookup button, .btn {
+  flex-shrink:0; height:42px; padding:0 14px; border-radius:12px;
+  background:var(--gold); color:#1a1408; font-size:13px; font-weight:700;
+}
+.btn-ghost {
+  background:transparent; color:var(--mute); border:1px solid var(--line);
+}
+.hint { font-size:12px; color:var(--faint); line-height:1.45; margin-bottom:12px; }
+.hint button { color:var(--gold); font-weight:560; }
+.rules { display:flex; flex-direction:column; gap:8px; margin:0 0 16px; }
+.rule {
+  background:var(--paper); border:1px solid var(--line); border-radius:12px;
+  padding:10px 12px; font-size:13px; color:var(--mute); line-height:1.45;
+}
+.rule b { color:var(--mint); }
+.pos {
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  padding:10px 0; border-top:1px solid var(--line);
+}
+.pos b { flex:1; font-size:13px; }
+.pos i { font-style:normal; color:var(--mute); font-size:12px; font-variant-numeric:tabular-nums; }
 .pay {
   background:linear-gradient(160deg, #10201c, var(--paper));
   border:1px solid rgba(94,224,197,.28); border-radius:16px; padding:16px; margin:8px 0 16px;
@@ -204,6 +241,33 @@ nav.tabs {
 
 .empty { color:var(--mute); padding:28px 8px; text-align:center; }
 .spin { width:22px; height:22px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:sp .8s linear infinite; margin:24px auto; }
+.lookup input { font-size:16px; }
+.search { font-size:16px; }
+#install {
+  display:none; align-items:center; gap:10px;
+  margin:0 auto 12px; padding:12px 14px; max-width:720px; width:calc(100% - 32px);
+  background:var(--paper); border:1px solid rgba(228,179,106,.35); border-radius:14px;
+}
+#install.show { display:flex; }
+#install p { flex:1; min-width:0; font-size:13px; color:var(--mute); line-height:1.4; }
+#install .go { height:36px; padding:0 12px; border-radius:10px; background:var(--gold); color:#1a1408; font-size:12px; font-weight:700; white-space:nowrap; }
+#install .x { width:36px; height:36px; color:var(--mute); font-size:18px; }
+#share {
+  width:34px; height:34px; border-radius:10px; border:1px solid var(--line);
+  color:var(--mute); font-size:16px; flex-shrink:0;
+}
+@media (max-width: 560px) {
+  .hero { font-size:24px; }
+  .lookup { flex-direction:column; }
+  .lookup button { width:100%; height:46px; }
+  .grid3 { grid-template-columns:1fr 1fr; }
+  .tab { min-height:48px; font-size:10px; }
+  .alloc b { width:auto; flex:1; min-width:0; }
+  .pos { flex-wrap:wrap; }
+  .pos i { margin-left:auto; }
+  .meta { flex-wrap:wrap; gap:8px 12px; }
+  .card-top { flex-wrap:wrap; }
+}
 @keyframes sp { to { transform:rotate(360deg); } }
 </style>
 </head>
@@ -216,7 +280,13 @@ nav.tabs {
       <p id="subhead">Bittensor, in plain English</p>
     </div>
     <div id="live-pill">loading</div>
+    <button type="button" id="share" title="Share" aria-label="Share">↗</button>
   </header>
+  <div id="install">
+    <p id="install-copy">Add this to your phone’s Home Screen. It opens like an app — no App Store, no seed, no download.</p>
+    <button class="go" type="button" id="install-go">Install</button>
+    <button class="x" type="button" id="install-x" aria-label="Dismiss">×</button>
+  </div>
   <main>
     <section id="pulse" class="screen on">
       <div class="hero">A market of AI shops, not one AI.</div>
@@ -243,19 +313,47 @@ nav.tabs {
 
     <section id="desk" class="screen">
       <div class="hero">Root is the savings account. Subnets are the job.</div>
-      <p class="lede" id="desk-lede">A subnet dashboard already exists, several times over. The missing product is a desk that gives idle TAO a small number of jobs it can defend — and gets paid the way Bitcoin mining pools got paid: a take-rate on flow, not a subscription to a table of numbers.</p>
+      <p class="lede">A dashboard already exists. This desk is the service: read your public book, in English, without ever touching a key. When we take a fee it will be a validator take-rate you can see on-chain — never a seed phrase, never custody.</p>
+
+      <div class="rules">
+        <div class="rule"><b>Secure.</b> Paste a public address only. We never ask for a seed, JSON wallet, or password. There is no stake button yet, on purpose.</div>
+        <div class="rule"><b>Trustworthy.</b> Every number is a public chain read via Metagraphed. We say when revenue is verified vs claimed. Not financial advice.</div>
+        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: if you ever allocate through a validator we run, the protocol already pays the commission. Today this UI is free so you can check the work.</div>
+      </div>
+
+      <h2 class="section-h" style="display:block;margin-bottom:6px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700">Your book · read only</span></h2>
+      <div class="lookup">
+        <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
+        <button type="button" id="ck-go">Look up</button>
+      </div>
+      <p class="hint">Public SS58 only. Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
+      <div id="you-book"></div>
+
       <div class="pay">
-        <h3>How this is a business</h3>
-        <p id="pay-copy">Bitcoin explorers were free and crowded. Mining pools made money because hashpower flowed through them (about 1–2%). The Bittensor analog is stake flowing through a validator you operate. This UI is how people trust that flow. The protocol already pays the take-rate. We do not need to invent a SaaS meter.</p>
+        <h3>How this becomes a business</h3>
+        <p>Bitcoin explorers were free and crowded. Mining pools made money because hashpower flowed through them (about 1–2%). The Bittensor analog is stake flowing through a validator. This UI is how people trust that flow. No take-rate until there is a named validator and a wallet-signed extra — not before.</p>
       </div>
       <div id="sleeves"></div>
-      <p class="foot">Hypothetical 100 TAO from Root. Not a stake button, not financial advice, not a promise of yield. Names and weights will change. The next build is wallet-signed allocation into these sleeves via a validator we run or partner with.</p>
+      <p class="foot">Hypothetical 100 TAO sleeves below. Not a stake button, not a promise of yield. Names and weights will change.</p>
     </section>
 
     <section id="guide" class="screen">
       <div class="hero">How this actually works</div>
       <p class="lede">The chain does not run the AI. It keeps score, moves money, and ejects the shops nobody wants to fund.</p>
 
+      <div class="guide-card">
+        <h3>Phone and site</h3>
+        <p>This <b style="color:var(--ink)">is</b> the site: a link you can open in any browser. On a phone it is also an app — Add to Home Screen (iPhone: Share → Add to Home Screen; Android: Install). No App Store review, no APK, no seed. Use Desk to look up a public address. That is the whole first version we can put in people’s hands.</p>
+      </div>
+      <div class="guide-card">
+        <h3>Trust, before a single τ moves</h3>
+        <ul>
+          <li>We never ask for a seed phrase, private key, or wallet JSON. If a screen ever does, it is not this app.</li>
+          <li>Lookup is a GET to a public indexer. Your address is already on the chain; we do not “collect” it as an account.</li>
+          <li>No stake, unstake, or transfer in this build. The first signing extra will name the validator and the take-rate in the confirmation itself.</li>
+          <li>Briefs are editorial. Live prices are chain data. We label claimed revenue so it cannot hide as fact.</li>
+        </ul>
+      </div>
       <div class="guide-card">
         <h3>The three jobs</h3>
         <ul>
@@ -305,6 +403,10 @@ nav.tabs {
 </div>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
+const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
+const WORK_IDS = [64, 51, 4];
+const RESEARCH_IDS = [120, 62, 34];
+const SS58_RE = /^5[1-9A-HJ-NP-Za-km-z]{46,48}$/;
 const ROLES = [
   ['staker', 'Staker'],
   ['miner', 'Miner'],
@@ -518,7 +620,8 @@ const state = {
   summary: null,
   taoUsd: null,
   generatedAt: null,
-  live: false
+  live: false,
+  ss58: localStorage.getItem('sb-ck') || ''
 };
 
 const $ = id => document.getElementById(id);
@@ -660,7 +763,7 @@ function renderTake() {
   const tot = root + alpha;
   const pctRoot = tot ? (root/tot*100).toFixed(0) : '—';
   const copy = {
-    staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. The job of this UI is not more candles — it is helping you decide whether a subnet is a business, a science experiment, or an emission farm before you swap TAO into its alpha.`,
+    staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. Open Desk, paste a public coldkey, and read the book in English — no seed, no stake button. That is the service. The fee, later, is a validator take-rate you can see on-chain.`,
     miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
     builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
     curious: `Ignore the 40-column screens for a minute. Each subnet is a shop with its own token. A few have paying users. Most recycle TAO. Scroll the briefs; the Guide tab is the map.`
@@ -820,6 +923,128 @@ function renderSleeve(title, why, parts) {
   </div>`;
 }
 
+function shortAddr(s) {
+  return s.length < 12 ? s : s.slice(0, 6) + '…' + s.slice(-4);
+}
+
+function aggregatePositions(positions) {
+  const by = new Map();
+  for (const p of positions || []) {
+    const id = Number(p.netuid);
+    const tao = num(p.stake_tao) || 0;
+    const cur = by.get(id) || { netuid: id, tao: 0, hotkeys: 0 };
+    cur.tao += tao;
+    cur.hotkeys += 1;
+    by.set(id, cur);
+  }
+  return [...by.values()].sort((a, b) => b.tao - a.tao);
+}
+
+function renderYouBook() {
+  const el = $('you-book');
+  if (!el) return;
+  const y = state.you;
+  if (y === 'loading') {
+    el.innerHTML = '<div class="spin"></div>';
+    return;
+  }
+  if (y && y.error) {
+    el.innerHTML = `<div class="empty">${esc(y.error)}</div>`;
+    return;
+  }
+  if (!y) {
+    el.innerHTML = '';
+    return;
+  }
+  const rows = y.agg;
+  const total = rows.reduce((a, r) => a + r.tao, 0);
+  const free = y.balance || 0;
+  const workTao = rows.filter(r => WORK_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
+  const researchTao = rows.filter(r => RESEARCH_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
+  const briefed = rows.filter(r => BRIEFS[r.netuid]);
+  const workPct = total ? workTao / total : 0;
+  let verdict;
+  if (!rows.length && free < 0.01) {
+    verdict = 'No delegated alpha and almost no free TAO on this key. Empty book, or it is a hotkey rather than a coldkey.';
+  } else if (!rows.length) {
+    verdict = `This key has ${fmtTao(free, 2)} free and nothing in subnet shops. That is a cash balance, not a desk. Root vs alpha still has to be chosen.`;
+  } else if (workPct >= 0.45) {
+    verdict = `A large slice of this book (${(workPct*100).toFixed(0)}%) already sits in the Work sleeve (Chutes / Lium / Targon). The next question is concentration and whether those shops still have paying users.`;
+  } else if (rows.length >= 8) {
+    verdict = `${rows.length} shops. That is the amateur-VC problem: a dashboard can list them, a desk should make you pick a few you can explain.`;
+  } else {
+    verdict = `This book is in ${rows.length} shop${rows.length===1?'':'s'}. Read the grades below — claimed is not verified, and identity-risk names do not belong in a default sleeve.`;
+  }
+  const top = rows.slice(0, 10);
+  el.innerHTML = `
+    <div class="sleeve">
+      <h3>Public book · ${esc(shortAddr(y.ss58))}</h3>
+      <p class="why">${esc(verdict)}</p>
+      <div class="meta" style="margin:8px 0 4px">
+        <span><b>${fmtTao(total, 1)}</b> in shops</span>
+        <span><b>${fmtTao(free, 2)}</b> free TAO</span>
+        <span><b>${rows.length}</b> subnets</span>
+        <span><b>${(workPct*100).toFixed(0)}%</b> work sleeve</span>
+      </div>
+      ${top.map(p => {
+        const row = rowBy(p.netuid) || { netuid: p.netuid, name: 'SN'+p.netuid };
+        const g = gradeOf(row);
+        const pct = total ? (p.tao / total * 100) : 0;
+        return `<button class="pos" data-sn="${p.netuid}" type="button">
+          <span class="badge ${g}">${gradeLabel(g)}</span>
+          <b>SN${p.netuid} ${esc(row.name || '')}</b>
+          <i>${fmtTao(p.tao, 1)} · ${pct.toFixed(1)}%</i>
+        </button>`;
+      }).join('')}
+      ${rows.length > 10 ? `<p class="hint" style="margin-top:8px">${rows.length - 10} more shops not shown. A desk is supposed to shrink this list.</p>` : ''}
+      <p class="hint" style="margin-top:8px">Read-only chain data. ${briefed.length} of ${rows.length} names have an editorial brief here. Research sleeve overlap: ${fmtTao(researchTao, 1)}.</p>
+    </div>`;
+}
+
+async function lookupCk(raw) {
+  const ss58 = String(raw || '').trim();
+  if (ss58.split(/\s+/).length >= 8) {
+    state.you = { error: 'Stop. That looks like a seed phrase. This app only accepts a public address starting with 5. Nothing was sent.' };
+    renderYouBook();
+    return;
+  }
+  const el = $('you-book');
+  if (!SS58_RE.test(ss58)) {
+    state.you = { error: 'That does not look like a Bittensor address (public key starting with 5, 47–49 characters). Never paste a seed phrase here.' };
+    renderYouBook();
+    return;
+  }
+  if (/seed|mnemonic|\/\/| /i.test(ss58)) {
+    state.you = { error: 'Stop. That looks like a secret. This app only accepts a public address.' };
+    renderYouBook();
+    return;
+  }
+  state.ss58 = ss58;
+  localStorage.setItem('sb-ck', ss58);
+  state.you = 'loading';
+  renderYouBook();
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 15000);
+    const [posRes, balRes] = await Promise.all([
+      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/positions', { signal: ctrl.signal }),
+      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/balance', { signal: ctrl.signal })
+    ]);
+    clearTimeout(t);
+    if (!posRes.ok) throw new Error('lookup failed');
+    const pos = await posRes.json();
+    const bal = balRes.ok ? await balRes.json() : { data: {} };
+    state.you = {
+      ss58,
+      agg: aggregatePositions(pos.data?.positions),
+      balance: num(bal.data?.balance_tao) || 0
+    };
+  } catch {
+    state.you = { error: 'Could not read this address from the public indexer. Try again in a moment, or check the address.' };
+  }
+  renderYouBook();
+}
+
 function renderDesk() {
   const s = state.summary || {};
   const root = num(s.total_root_value_tao) || 0;
@@ -911,10 +1136,84 @@ $('to-list').addEventListener('click', () => { location.hash = 'list'; setTab('l
 $('to-desk').addEventListener('click', () => { location.hash = 'desk'; setTab('desk'); });
 $('back').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
 $('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
+$('ck-go').addEventListener('click', () => lookupCk($('ck').value));
+$('ck').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); lookupCk($('ck').value); } });
+$('ck-demo').addEventListener('click', () => { $('ck').value = DEMO_SS58; lookupCk(DEMO_SS58); });
+$('ck-clear').addEventListener('click', () => {
+  $('ck').value = '';
+  state.ss58 = '';
+  state.you = null;
+  localStorage.removeItem('sb-ck');
+  renderYouBook();
+});
+
+const SITE = 'https://ooverstreet.github.io/Owen/brief/';
+const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+let deferredPrompt = null;
+function showInstall(kind) {
+  if (standalone || localStorage.getItem('sb-a2hs') === '1') return;
+  const go = $('install-go');
+  const copy = $('install-copy');
+  $('install').dataset.kind = kind;
+  if (kind === 'ios') {
+    copy.textContent = 'On iPhone: tap Share, then Add to Home Screen. It sits next to your other apps — no App Store, no seed.';
+    go.textContent = 'Got it';
+  } else {
+    copy.textContent = 'Install Brief on this phone. Same site, full screen, no App Store and no seed.';
+    go.textContent = 'Install';
+  }
+  $('install').classList.add('show');
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstall('android');
+});
+$('install-x').addEventListener('click', () => {
+  localStorage.setItem('sb-a2hs', '1');
+  $('install').classList.remove('show');
+});
+$('install-go').addEventListener('click', async () => {
+  const kind = $('install').dataset.kind;
+  if (kind === 'android' && deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    localStorage.setItem('sb-a2hs', '1');
+    $('install').classList.remove('show');
+    return;
+  }
+  localStorage.setItem('sb-a2hs', '1');
+  $('install').classList.remove('show');
+});
+$('share').addEventListener('click', async () => {
+  const data = { title: 'Subnet Brief', text: 'Bittensor in plain English.', url: SITE };
+  if (navigator.share) {
+    try { await navigator.share(data); } catch (e) {}
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(SITE);
+    $('share').textContent = '✓';
+    setTimeout(() => { $('share').textContent = '↗'; }, 1400);
+  } catch (e) {}
+});
+{
+  const ua = navigator.userAgent || '';
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios && !standalone) showInstall('ios');
+}
+
 window.addEventListener('hashchange', applyHash);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-load().then(applyHash);
+load().then(() => {
+  applyHash();
+  if (state.ss58) {
+    $('ck').value = state.ss58;
+    lookupCk(state.ss58);
+  }
+});
 </script>
 </body>
 </html>

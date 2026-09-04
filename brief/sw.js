@@ -1,5 +1,9 @@
-const CACHE = 'subnet-brief-v2';
-const URLS = ['./', './index.html', './manifest.json', './icon.svg', './snapshot.json'];
+const CACHE = 'subnet-brief-v4';
+const URLS = [
+  './', './index.html', './manifest.json',
+  './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
+  './snapshot.json'
+];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.allSettled(URLS.map(u => c.add(u)))));
   self.skipWaiting();
