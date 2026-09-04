@@ -42,10 +42,12 @@ button { cursor:pointer; border:none; background:none; }
 a { color:var(--mint); }
 .app { min-height:100dvh; display:flex; flex-direction:column; padding-bottom:calc(72px + var(--safe-b)); }
 
-header {
+.topbar {
   position:sticky; top:0; z-index:20;
-  padding:10px 16px 12px; padding-top:max(10px, var(--safe-t));
-  background:linear-gradient(180deg, #0a0c10 70%, transparent);
+  background:var(--bg);
+}
+header {
+  padding:10px 16px 8px; padding-top:max(10px, var(--safe-t));
   display:flex; align-items:center; gap:10px;
 }
 .mark {
@@ -268,11 +270,35 @@ nav.tabs {
   .meta { flex-wrap:wrap; gap:8px 12px; }
   .card-top { flex-wrap:wrap; }
 }
-@keyframes sp { to { transform:rotate(360deg); } }
+@keyframes tape {
+  from { transform:translateX(0); }
+  to { transform:translateX(-50%); }
+}
+#tape {
+  height:34px; overflow:hidden; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  background:var(--paper);
+  mask-image:linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+}
+.tape-track {
+  display:flex; align-items:center; width:max-content; height:34px;
+  animation:tape var(--tape-s, 48s) linear infinite;
+}
+#tape:hover .tape-track, #tape:focus-within .tape-track { animation-play-state:paused; }
+.tape-item {
+  display:flex; align-items:center; gap:7px; height:34px; padding:0 14px;
+  white-space:nowrap; font-size:12px; font-weight:560; color:var(--ink);
+}
+.tape-item .sn { color:var(--gold); font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+.tape-item .nm { color:var(--ink); max-width:9.5em; overflow:hidden; text-overflow:ellipsis; }
+.tape-item .px { font-variant-numeric:tabular-nums; color:var(--mute); }
+.tape-item .sep { color:var(--line); font-weight:400; }
+.tape-clone { display:flex; align-items:center; }
 </style>
 </head>
 <body>
 <div class="app">
+  <div class="topbar">
   <header>
     <div class="mark">τ</div>
     <div class="brand">
@@ -282,6 +308,8 @@ nav.tabs {
     <div id="live-pill">loading</div>
     <button type="button" id="share" title="Share" aria-label="Share">↗</button>
   </header>
+  <div id="tape" aria-label="Live top subnets"></div>
+  </div>
   <div id="install">
     <p id="install-copy">Add this to your phone’s Home Screen. It opens like an app — no App Store, no seed, no download.</p>
     <button class="go" type="button" id="install-go">Install</button>
@@ -786,6 +814,54 @@ function interesting() {
   return featured;
 }
 
+function tapeRows() {
+  const rows = state.rows.filter(r => r.netuid !== 0 && num(r.alpha_price_tao) != null);
+  const byPool = [...rows].sort((a, b) => (num(b.tao_in_pool_tao) || 0) - (num(a.tao_in_pool_tao) || 0));
+  const byMove = [...rows].sort((a, b) =>
+    Math.abs(num(b.alpha_price_change_1d) || 0) - Math.abs(num(a.alpha_price_change_1d) || 0)
+  );
+  const out = [];
+  const seen = new Set();
+  for (const r of [...byPool.slice(0, 10), ...byMove.slice(0, 8)]) {
+    if (seen.has(r.netuid)) continue;
+    seen.add(r.netuid);
+    out.push(r);
+    if (out.length >= 14) break;
+  }
+  return out;
+}
+
+function tapeChip(r) {
+  const ch = num(r.alpha_price_change_1d) ?? num(r.alpha_price_change_7d);
+  const px = num(r.alpha_price_tao);
+  const em = num(r.emission_share);
+  return `<button class="tape-item" data-sn="${r.netuid}" type="button">
+    <span class="sn">SN${r.netuid}</span>
+    <span class="nm">${esc(r.name || '—')}</span>
+    <span class="px">${px == null ? '—' : px.toFixed(4)} τ</span>
+    <span class="${chClass(ch)}">${fmtPct(ch, 1)}</span>
+    <span class="px">${em == null ? '' : (em * 100).toFixed(1) + '% em'}</span>
+  </button>`;
+}
+
+function renderTape() {
+  const el = $('tape');
+  if (!el) return;
+  const rows = tapeRows();
+  if (!rows.length) {
+    el.innerHTML = '<div class="tape-track"><span class="tape-item">Waiting on live subnet prices…</span></div>';
+    return;
+  }
+  const chips = rows.map(tapeChip).join('');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    el.innerHTML = `<div class="tape-track">${chips}</div>`;
+    return;
+  }
+  const sec = Math.max(40, rows.length * 3.8);
+  el.innerHTML = `<div class="tape-track" style="--tape-s:${sec}s">${chips}<span class="tape-clone" aria-hidden="true">${chips}</span></div>`;
+}
+
 function renderMovers() {
   $('movers').innerHTML = interesting().map(r => `
     <button class="move" data-sn="${r.netuid}" type="button">
@@ -1091,6 +1167,7 @@ function render() {
   renderRoles();
   renderStats();
   renderTake();
+  renderTape();
   renderMovers();
   renderList();
   renderDesk();
