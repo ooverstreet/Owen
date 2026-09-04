@@ -1,0 +1,19 @@
+{
+  "name": "fl-lotto-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight Florida lottery picker API service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "lottery:pick": "node ../backend/scripts/fl-lottery-picker.js --input ../backend/data/fl-lottery-analysis.json --game pick3 --profile blended --sets 5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0"
+  }
+}

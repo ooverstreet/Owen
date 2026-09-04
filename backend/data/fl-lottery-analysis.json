@@ -1,0 +1,5906 @@
+{
+  "generatedAt": "2026-04-23T17:05:04.681Z",
+  "source": "Official Florida Lottery history PDFs",
+  "windows": [
+    "allTime",
+    "last5Years",
+    "last12Months"
+  ],
+  "games": [
+    {
+      "game": "pick2",
+      "name": "Pick 2",
+      "sourceUrl": "https://files.floridalottery.com/exptkt/p2.pdf",
+      "drawCount": 7104,
+      "coverage": {
+        "from": "2016-08-01",
+        "to": "2026-04-22"
+      },
+      "windows": {
+        "allTime": {
+          "count": 7104,
+          "from": "2016-08-01",
+          "to": "2026-04-22",
+          "uniqueDates": 3552,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 34.3,
+          "numberFrequency": {
+            "0": 1433,
+            "1": 1409,
+            "2": 1380,
+            "3": 1399,
+            "4": 1417,
+            "5": 1388,
+            "6": 1463,
+            "7": 1482,
+            "8": 1479,
+            "9": 1358
+          },
+          "topNumbers": [
+            {
+              "value": "7",
+              "count": 1482
+            },
+            {
+              "value": "8",
+              "count": 1479
+            },
+            {
+              "value": "6",
+              "count": 1463
+            },
+            {
+              "value": "0",
+              "count": 1433
+            },
+            {
+              "value": "4",
+              "count": 1417
+            },
+            {
+              "value": "1",
+              "count": 1409
+            },
+            {
+              "value": "3",
+              "count": 1399
+            },
+            {
+              "value": "5",
+              "count": 1388
+            },
+            {
+              "value": "2",
+              "count": 1380
+            },
+            {
+              "value": "9",
+              "count": 1358
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "9",
+              "count": 1358
+            },
+            {
+              "value": "2",
+              "count": 1380
+            },
+            {
+              "value": "5",
+              "count": 1388
+            },
+            {
+              "value": "3",
+              "count": 1399
+            },
+            {
+              "value": "1",
+              "count": 1409
+            },
+            {
+              "value": "4",
+              "count": 1417
+            },
+            {
+              "value": "0",
+              "count": 1433
+            },
+            {
+              "value": "6",
+              "count": 1463
+            },
+            {
+              "value": "8",
+              "count": 1479
+            },
+            {
+              "value": "7",
+              "count": 1482
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "27",
+              "count": 88
+            },
+            {
+              "value": "98",
+              "count": 87
+            },
+            {
+              "value": "47",
+              "count": 86
+            },
+            {
+              "value": "48",
+              "count": 86
+            },
+            {
+              "value": "57",
+              "count": 85
+            },
+            {
+              "value": "74",
+              "count": 85
+            },
+            {
+              "value": "20",
+              "count": 84
+            },
+            {
+              "value": "81",
+              "count": 84
+            },
+            {
+              "value": "30",
+              "count": 83
+            },
+            {
+              "value": "58",
+              "count": 83
+            }
+          ],
+          "topSums": [
+            {
+              "value": "9",
+              "count": 759
+            },
+            {
+              "value": "8",
+              "count": 669
+            },
+            {
+              "value": "10",
+              "count": 617
+            },
+            {
+              "value": "11",
+              "count": 594
+            },
+            {
+              "value": "7",
+              "count": 567
+            },
+            {
+              "value": "12",
+              "count": 509
+            },
+            {
+              "value": "6",
+              "count": 464
+            },
+            {
+              "value": "13",
+              "count": 428
+            },
+            {
+              "value": "5",
+              "count": 388
+            },
+            {
+              "value": "14",
+              "count": 343
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 3552
+            },
+            {
+              "value": "E",
+              "count": 3552
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 690,
+              "1": 696,
+              "2": 723,
+              "3": 706,
+              "4": 722,
+              "5": 721,
+              "6": 728,
+              "7": 725,
+              "8": 709,
+              "9": 684
+            },
+            {
+              "0": 743,
+              "1": 713,
+              "2": 657,
+              "3": 693,
+              "4": 695,
+              "5": 667,
+              "6": 735,
+              "7": 757,
+              "8": 770,
+              "9": 674
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "6",
+                "count": 728
+              },
+              {
+                "value": "7",
+                "count": 725
+              },
+              {
+                "value": "2",
+                "count": 723
+              },
+              {
+                "value": "4",
+                "count": 722
+              },
+              {
+                "value": "5",
+                "count": 721
+              },
+              {
+                "value": "8",
+                "count": 709
+              },
+              {
+                "value": "3",
+                "count": 706
+              },
+              {
+                "value": "1",
+                "count": 696
+              },
+              {
+                "value": "0",
+                "count": 690
+              },
+              {
+                "value": "9",
+                "count": 684
+              }
+            ],
+            [
+              {
+                "value": "8",
+                "count": 770
+              },
+              {
+                "value": "7",
+                "count": 757
+              },
+              {
+                "value": "0",
+                "count": 743
+              },
+              {
+                "value": "6",
+                "count": 735
+              },
+              {
+                "value": "1",
+                "count": 713
+              },
+              {
+                "value": "4",
+                "count": 695
+              },
+              {
+                "value": "3",
+                "count": 693
+              },
+              {
+                "value": "9",
+                "count": 674
+              },
+              {
+                "value": "5",
+                "count": 667
+              },
+              {
+                "value": "2",
+                "count": 657
+              }
+            ]
+          ]
+        },
+        "last5Years": {
+          "count": 3654,
+          "from": "2021-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 1827,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 34.11,
+          "numberFrequency": {
+            "0": 737,
+            "1": 707,
+            "2": 684,
+            "3": 695,
+            "4": 727,
+            "5": 746,
+            "6": 770,
+            "7": 773,
+            "8": 752,
+            "9": 717
+          },
+          "topNumbers": [
+            {
+              "value": "7",
+              "count": 773
+            },
+            {
+              "value": "6",
+              "count": 770
+            },
+            {
+              "value": "8",
+              "count": 752
+            },
+            {
+              "value": "5",
+              "count": 746
+            },
+            {
+              "value": "0",
+              "count": 737
+            },
+            {
+              "value": "4",
+              "count": 727
+            },
+            {
+              "value": "9",
+              "count": 717
+            },
+            {
+              "value": "1",
+              "count": 707
+            },
+            {
+              "value": "3",
+              "count": 695
+            },
+            {
+              "value": "2",
+              "count": 684
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "2",
+              "count": 684
+            },
+            {
+              "value": "3",
+              "count": 695
+            },
+            {
+              "value": "1",
+              "count": 707
+            },
+            {
+              "value": "9",
+              "count": 717
+            },
+            {
+              "value": "4",
+              "count": 727
+            },
+            {
+              "value": "0",
+              "count": 737
+            },
+            {
+              "value": "5",
+              "count": 746
+            },
+            {
+              "value": "8",
+              "count": 752
+            },
+            {
+              "value": "6",
+              "count": 770
+            },
+            {
+              "value": "7",
+              "count": 773
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "48",
+              "count": 55
+            },
+            {
+              "value": "47",
+              "count": 52
+            },
+            {
+              "value": "26",
+              "count": 51
+            },
+            {
+              "value": "60",
+              "count": 51
+            },
+            {
+              "value": "57",
+              "count": 48
+            },
+            {
+              "value": "97",
+              "count": 48
+            },
+            {
+              "value": "58",
+              "count": 47
+            },
+            {
+              "value": "21",
+              "count": 45
+            },
+            {
+              "value": "20",
+              "count": 44
+            },
+            {
+              "value": "30",
+              "count": 44
+            }
+          ],
+          "topSums": [
+            {
+              "value": "9",
+              "count": 354
+            },
+            {
+              "value": "8",
+              "count": 348
+            },
+            {
+              "value": "10",
+              "count": 316
+            },
+            {
+              "value": "11",
+              "count": 314
+            },
+            {
+              "value": "7",
+              "count": 294
+            },
+            {
+              "value": "12",
+              "count": 294
+            },
+            {
+              "value": "6",
+              "count": 244
+            },
+            {
+              "value": "13",
+              "count": 226
+            },
+            {
+              "value": "5",
+              "count": 196
+            },
+            {
+              "value": "4",
+              "count": 168
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 1827
+            },
+            {
+              "value": "E",
+              "count": 1827
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 349,
+              "1": 348,
+              "2": 372,
+              "3": 364,
+              "4": 381,
+              "5": 388,
+              "6": 373,
+              "7": 377,
+              "8": 347,
+              "9": 355
+            },
+            {
+              "0": 388,
+              "1": 359,
+              "2": 312,
+              "3": 331,
+              "4": 346,
+              "5": 358,
+              "6": 397,
+              "7": 396,
+              "8": 405,
+              "9": 362
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "5",
+                "count": 388
+              },
+              {
+                "value": "4",
+                "count": 381
+              },
+              {
+                "value": "7",
+                "count": 377
+              },
+              {
+                "value": "6",
+                "count": 373
+              },
+              {
+                "value": "2",
+                "count": 372
+              },
+              {
+                "value": "3",
+                "count": 364
+              },
+              {
+                "value": "9",
+                "count": 355
+              },
+              {
+                "value": "0",
+                "count": 349
+              },
+              {
+                "value": "1",
+                "count": 348
+              },
+              {
+                "value": "8",
+                "count": 347
+              }
+            ],
+            [
+              {
+                "value": "8",
+                "count": 405
+              },
+              {
+                "value": "6",
+                "count": 397
+              },
+              {
+                "value": "7",
+                "count": 396
+              },
+              {
+                "value": "0",
+                "count": 388
+              },
+              {
+                "value": "9",
+                "count": 362
+              },
+              {
+                "value": "1",
+                "count": 359
+              },
+              {
+                "value": "5",
+                "count": 358
+              },
+              {
+                "value": "4",
+                "count": 346
+              },
+              {
+                "value": "3",
+                "count": 331
+              },
+              {
+                "value": "2",
+                "count": 312
+              }
+            ]
+          ]
+        },
+        "last12Months": {
+          "count": 732,
+          "from": "2025-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 366,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 35.57,
+          "numberFrequency": {
+            "0": 156,
+            "1": 145,
+            "2": 124,
+            "3": 134,
+            "4": 152,
+            "5": 129,
+            "6": 160,
+            "7": 167,
+            "8": 146,
+            "9": 151
+          },
+          "topNumbers": [
+            {
+              "value": "7",
+              "count": 167
+            },
+            {
+              "value": "6",
+              "count": 160
+            },
+            {
+              "value": "0",
+              "count": 156
+            },
+            {
+              "value": "4",
+              "count": 152
+            },
+            {
+              "value": "9",
+              "count": 151
+            },
+            {
+              "value": "8",
+              "count": 146
+            },
+            {
+              "value": "1",
+              "count": 145
+            },
+            {
+              "value": "3",
+              "count": 134
+            },
+            {
+              "value": "5",
+              "count": 129
+            },
+            {
+              "value": "2",
+              "count": 124
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "2",
+              "count": 124
+            },
+            {
+              "value": "5",
+              "count": 129
+            },
+            {
+              "value": "3",
+              "count": 134
+            },
+            {
+              "value": "1",
+              "count": 145
+            },
+            {
+              "value": "8",
+              "count": 146
+            },
+            {
+              "value": "9",
+              "count": 151
+            },
+            {
+              "value": "4",
+              "count": 152
+            },
+            {
+              "value": "0",
+              "count": 156
+            },
+            {
+              "value": "6",
+              "count": 160
+            },
+            {
+              "value": "7",
+              "count": 167
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "47",
+              "count": 15
+            },
+            {
+              "value": "06",
+              "count": 13
+            },
+            {
+              "value": "40",
+              "count": 13
+            },
+            {
+              "value": "97",
+              "count": 13
+            },
+            {
+              "value": "03",
+              "count": 12
+            },
+            {
+              "value": "10",
+              "count": 12
+            },
+            {
+              "value": "26",
+              "count": 12
+            },
+            {
+              "value": "78",
+              "count": 12
+            },
+            {
+              "value": "08",
+              "count": 11
+            },
+            {
+              "value": "48",
+              "count": 11
+            }
+          ],
+          "topSums": [
+            {
+              "value": "9",
+              "count": 74
+            },
+            {
+              "value": "8",
+              "count": 70
+            },
+            {
+              "value": "7",
+              "count": 65
+            },
+            {
+              "value": "11",
+              "count": 63
+            },
+            {
+              "value": "12",
+              "count": 59
+            },
+            {
+              "value": "10",
+              "count": 57
+            },
+            {
+              "value": "6",
+              "count": 51
+            },
+            {
+              "value": "4",
+              "count": 38
+            },
+            {
+              "value": "15",
+              "count": 38
+            },
+            {
+              "value": "13",
+              "count": 37
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 366
+            },
+            {
+              "value": "E",
+              "count": 366
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 75,
+              "1": 70,
+              "2": 68,
+              "3": 62,
+              "4": 78,
+              "5": 77,
+              "6": 79,
+              "7": 80,
+              "8": 69,
+              "9": 74
+            },
+            {
+              "0": 81,
+              "1": 75,
+              "2": 56,
+              "3": 72,
+              "4": 74,
+              "5": 52,
+              "6": 81,
+              "7": 87,
+              "8": 77,
+              "9": 77
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "7",
+                "count": 80
+              },
+              {
+                "value": "6",
+                "count": 79
+              },
+              {
+                "value": "4",
+                "count": 78
+              },
+              {
+                "value": "5",
+                "count": 77
+              },
+              {
+                "value": "0",
+                "count": 75
+              },
+              {
+                "value": "9",
+                "count": 74
+              },
+              {
+                "value": "1",
+                "count": 70
+              },
+              {
+                "value": "8",
+                "count": 69
+              },
+              {
+                "value": "2",
+                "count": 68
+              },
+              {
+                "value": "3",
+                "count": 62
+              }
+            ],
+            [
+              {
+                "value": "7",
+                "count": 87
+              },
+              {
+                "value": "0",
+                "count": 81
+              },
+              {
+                "value": "6",
+                "count": 81
+              },
+              {
+                "value": "8",
+                "count": 77
+              },
+              {
+                "value": "9",
+                "count": 77
+              },
+              {
+                "value": "1",
+                "count": 75
+              },
+              {
+                "value": "4",
+                "count": 74
+              },
+              {
+                "value": "3",
+                "count": 72
+              },
+              {
+                "value": "2",
+                "count": 56
+              },
+              {
+                "value": "5",
+                "count": 52
+              }
+            ]
+          ]
+        }
+      },
+      "detectedFormatTransitions": [
+        {
+          "date": "2020-11-10",
+          "reason": "bonus-rate 0.00 -> 0.73"
+        },
+        {
+          "date": "2021-03-15",
+          "reason": "bonus-rate 0.23 -> 1.00"
+        }
+      ],
+      "formatSegments": [
+        {
+          "segment": "segment-1",
+          "from": "2016-08-01",
+          "to": "2020-11-10",
+          "count": 3124,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-2",
+          "from": "2020-11-10",
+          "to": "2021-03-15",
+          "count": 250,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 44.8
+        },
+        {
+          "segment": "segment-3",
+          "from": "2021-03-15",
+          "to": "2026-04-22",
+          "count": 3730,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 100
+        }
+      ]
+    },
+    {
+      "game": "pick3",
+      "name": "Pick 3",
+      "sourceUrl": "https://files.floridalottery.com/exptkt/p3.pdf",
+      "drawCount": 20417,
+      "coverage": {
+        "from": "1988-04-29",
+        "to": "2026-04-22"
+      },
+      "windows": {
+        "allTime": {
+          "count": 20417,
+          "from": "1988-04-29",
+          "to": "2026-04-22",
+          "uniqueDates": 13869,
+          "avgDrawsPerDate": 1.472,
+          "repeatFromPriorPct": 60.3,
+          "numberFrequency": {
+            "0": 6090,
+            "1": 6113,
+            "2": 6152,
+            "3": 6139,
+            "4": 6259,
+            "5": 6182,
+            "6": 6019,
+            "7": 6098,
+            "8": 6009,
+            "9": 6190
+          },
+          "topNumbers": [
+            {
+              "value": "4",
+              "count": 6259
+            },
+            {
+              "value": "9",
+              "count": 6190
+            },
+            {
+              "value": "5",
+              "count": 6182
+            },
+            {
+              "value": "2",
+              "count": 6152
+            },
+            {
+              "value": "3",
+              "count": 6139
+            },
+            {
+              "value": "1",
+              "count": 6113
+            },
+            {
+              "value": "7",
+              "count": 6098
+            },
+            {
+              "value": "0",
+              "count": 6090
+            },
+            {
+              "value": "6",
+              "count": 6019
+            },
+            {
+              "value": "8",
+              "count": 6009
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "8",
+              "count": 6009
+            },
+            {
+              "value": "6",
+              "count": 6019
+            },
+            {
+              "value": "0",
+              "count": 6090
+            },
+            {
+              "value": "7",
+              "count": 6098
+            },
+            {
+              "value": "1",
+              "count": 6113
+            },
+            {
+              "value": "3",
+              "count": 6139
+            },
+            {
+              "value": "2",
+              "count": 6152
+            },
+            {
+              "value": "5",
+              "count": 6182
+            },
+            {
+              "value": "9",
+              "count": 6190
+            },
+            {
+              "value": "4",
+              "count": 6259
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "950",
+              "count": 36
+            },
+            {
+              "value": "309",
+              "count": 35
+            },
+            {
+              "value": "224",
+              "count": 34
+            },
+            {
+              "value": "499",
+              "count": 33
+            },
+            {
+              "value": "504",
+              "count": 33
+            },
+            {
+              "value": "044",
+              "count": 32
+            },
+            {
+              "value": "374",
+              "count": 32
+            },
+            {
+              "value": "462",
+              "count": 32
+            },
+            {
+              "value": "908",
+              "count": 32
+            },
+            {
+              "value": "987",
+              "count": 32
+            }
+          ],
+          "topSums": [
+            {
+              "value": "13",
+              "count": 1561
+            },
+            {
+              "value": "14",
+              "count": 1536
+            },
+            {
+              "value": "12",
+              "count": 1509
+            },
+            {
+              "value": "16",
+              "count": 1432
+            },
+            {
+              "value": "15",
+              "count": 1415
+            },
+            {
+              "value": "11",
+              "count": 1392
+            },
+            {
+              "value": "10",
+              "count": 1279
+            },
+            {
+              "value": "17",
+              "count": 1254
+            },
+            {
+              "value": "18",
+              "count": 1166
+            },
+            {
+              "value": "9",
+              "count": 1112
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "E",
+              "count": 13869
+            },
+            {
+              "value": "M",
+              "count": 6548
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 2054,
+              "1": 2032,
+              "2": 2051,
+              "3": 2022,
+              "4": 2126,
+              "5": 2098,
+              "6": 1963,
+              "7": 2064,
+              "8": 1927,
+              "9": 2080
+            },
+            {
+              "0": 2020,
+              "1": 2011,
+              "2": 2062,
+              "3": 2068,
+              "4": 2018,
+              "5": 2047,
+              "6": 2049,
+              "7": 2042,
+              "8": 2045,
+              "9": 2055
+            },
+            {
+              "0": 2016,
+              "1": 2070,
+              "2": 2039,
+              "3": 2049,
+              "4": 2115,
+              "5": 2037,
+              "6": 2007,
+              "7": 1992,
+              "8": 2037,
+              "9": 2055
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "4",
+                "count": 2126
+              },
+              {
+                "value": "5",
+                "count": 2098
+              },
+              {
+                "value": "9",
+                "count": 2080
+              },
+              {
+                "value": "7",
+                "count": 2064
+              },
+              {
+                "value": "0",
+                "count": 2054
+              },
+              {
+                "value": "2",
+                "count": 2051
+              },
+              {
+                "value": "1",
+                "count": 2032
+              },
+              {
+                "value": "3",
+                "count": 2022
+              },
+              {
+                "value": "6",
+                "count": 1963
+              },
+              {
+                "value": "8",
+                "count": 1927
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 2068
+              },
+              {
+                "value": "2",
+                "count": 2062
+              },
+              {
+                "value": "9",
+                "count": 2055
+              },
+              {
+                "value": "6",
+                "count": 2049
+              },
+              {
+                "value": "5",
+                "count": 2047
+              },
+              {
+                "value": "8",
+                "count": 2045
+              },
+              {
+                "value": "7",
+                "count": 2042
+              },
+              {
+                "value": "0",
+                "count": 2020
+              },
+              {
+                "value": "4",
+                "count": 2018
+              },
+              {
+                "value": "1",
+                "count": 2011
+              }
+            ],
+            [
+              {
+                "value": "4",
+                "count": 2115
+              },
+              {
+                "value": "1",
+                "count": 2070
+              },
+              {
+                "value": "9",
+                "count": 2055
+              },
+              {
+                "value": "3",
+                "count": 2049
+              },
+              {
+                "value": "2",
+                "count": 2039
+              },
+              {
+                "value": "5",
+                "count": 2037
+              },
+              {
+                "value": "8",
+                "count": 2037
+              },
+              {
+                "value": "0",
+                "count": 2016
+              },
+              {
+                "value": "6",
+                "count": 2007
+              },
+              {
+                "value": "7",
+                "count": 1992
+              }
+            ]
+          ]
+        },
+        "last5Years": {
+          "count": 3654,
+          "from": "2021-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 1827,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 59.79,
+          "numberFrequency": {
+            "0": 1104,
+            "1": 1104,
+            "2": 1081,
+            "3": 1111,
+            "4": 1070,
+            "5": 1194,
+            "6": 1059,
+            "7": 1046,
+            "8": 1116,
+            "9": 1077
+          },
+          "topNumbers": [
+            {
+              "value": "5",
+              "count": 1194
+            },
+            {
+              "value": "8",
+              "count": 1116
+            },
+            {
+              "value": "3",
+              "count": 1111
+            },
+            {
+              "value": "0",
+              "count": 1104
+            },
+            {
+              "value": "1",
+              "count": 1104
+            },
+            {
+              "value": "2",
+              "count": 1081
+            },
+            {
+              "value": "9",
+              "count": 1077
+            },
+            {
+              "value": "4",
+              "count": 1070
+            },
+            {
+              "value": "6",
+              "count": 1059
+            },
+            {
+              "value": "7",
+              "count": 1046
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "7",
+              "count": 1046
+            },
+            {
+              "value": "6",
+              "count": 1059
+            },
+            {
+              "value": "4",
+              "count": 1070
+            },
+            {
+              "value": "9",
+              "count": 1077
+            },
+            {
+              "value": "2",
+              "count": 1081
+            },
+            {
+              "value": "0",
+              "count": 1104
+            },
+            {
+              "value": "1",
+              "count": 1104
+            },
+            {
+              "value": "3",
+              "count": 1111
+            },
+            {
+              "value": "8",
+              "count": 1116
+            },
+            {
+              "value": "5",
+              "count": 1194
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "211",
+              "count": 12
+            },
+            {
+              "value": "570",
+              "count": 10
+            },
+            {
+              "value": "040",
+              "count": 9
+            },
+            {
+              "value": "462",
+              "count": 9
+            },
+            {
+              "value": "536",
+              "count": 9
+            },
+            {
+              "value": "590",
+              "count": 9
+            },
+            {
+              "value": "754",
+              "count": 9
+            },
+            {
+              "value": "803",
+              "count": 9
+            },
+            {
+              "value": "950",
+              "count": 9
+            },
+            {
+              "value": "974",
+              "count": 9
+            }
+          ],
+          "topSums": [
+            {
+              "value": "14",
+              "count": 302
+            },
+            {
+              "value": "12",
+              "count": 284
+            },
+            {
+              "value": "11",
+              "count": 265
+            },
+            {
+              "value": "13",
+              "count": 265
+            },
+            {
+              "value": "16",
+              "count": 261
+            },
+            {
+              "value": "15",
+              "count": 259
+            },
+            {
+              "value": "10",
+              "count": 227
+            },
+            {
+              "value": "18",
+              "count": 204
+            },
+            {
+              "value": "17",
+              "count": 201
+            },
+            {
+              "value": "9",
+              "count": 190
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 1827
+            },
+            {
+              "value": "E",
+              "count": 1827
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 375,
+              "1": 343,
+              "2": 342,
+              "3": 372,
+              "4": 369,
+              "5": 410,
+              "6": 343,
+              "7": 360,
+              "8": 367,
+              "9": 373
+            },
+            {
+              "0": 345,
+              "1": 369,
+              "2": 366,
+              "3": 355,
+              "4": 341,
+              "5": 390,
+              "6": 366,
+              "7": 369,
+              "8": 368,
+              "9": 385
+            },
+            {
+              "0": 384,
+              "1": 392,
+              "2": 373,
+              "3": 384,
+              "4": 360,
+              "5": 394,
+              "6": 350,
+              "7": 317,
+              "8": 381,
+              "9": 319
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "5",
+                "count": 410
+              },
+              {
+                "value": "0",
+                "count": 375
+              },
+              {
+                "value": "9",
+                "count": 373
+              },
+              {
+                "value": "3",
+                "count": 372
+              },
+              {
+                "value": "4",
+                "count": 369
+              },
+              {
+                "value": "8",
+                "count": 367
+              },
+              {
+                "value": "7",
+                "count": 360
+              },
+              {
+                "value": "1",
+                "count": 343
+              },
+              {
+                "value": "6",
+                "count": 343
+              },
+              {
+                "value": "2",
+                "count": 342
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 390
+              },
+              {
+                "value": "9",
+                "count": 385
+              },
+              {
+                "value": "1",
+                "count": 369
+              },
+              {
+                "value": "7",
+                "count": 369
+              },
+              {
+                "value": "8",
+                "count": 368
+              },
+              {
+                "value": "2",
+                "count": 366
+              },
+              {
+                "value": "6",
+                "count": 366
+              },
+              {
+                "value": "3",
+                "count": 355
+              },
+              {
+                "value": "0",
+                "count": 345
+              },
+              {
+                "value": "4",
+                "count": 341
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 394
+              },
+              {
+                "value": "1",
+                "count": 392
+              },
+              {
+                "value": "0",
+                "count": 384
+              },
+              {
+                "value": "3",
+                "count": 384
+              },
+              {
+                "value": "8",
+                "count": 381
+              },
+              {
+                "value": "2",
+                "count": 373
+              },
+              {
+                "value": "4",
+                "count": 360
+              },
+              {
+                "value": "6",
+                "count": 350
+              },
+              {
+                "value": "9",
+                "count": 319
+              },
+              {
+                "value": "7",
+                "count": 317
+              }
+            ]
+          ]
+        },
+        "last12Months": {
+          "count": 732,
+          "from": "2025-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 366,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 58.14,
+          "numberFrequency": {
+            "0": 238,
+            "1": 224,
+            "2": 217,
+            "3": 237,
+            "4": 211,
+            "5": 227,
+            "6": 230,
+            "7": 190,
+            "8": 222,
+            "9": 200
+          },
+          "topNumbers": [
+            {
+              "value": "0",
+              "count": 238
+            },
+            {
+              "value": "3",
+              "count": 237
+            },
+            {
+              "value": "6",
+              "count": 230
+            },
+            {
+              "value": "5",
+              "count": 227
+            },
+            {
+              "value": "1",
+              "count": 224
+            },
+            {
+              "value": "8",
+              "count": 222
+            },
+            {
+              "value": "2",
+              "count": 217
+            },
+            {
+              "value": "4",
+              "count": 211
+            },
+            {
+              "value": "9",
+              "count": 200
+            },
+            {
+              "value": "7",
+              "count": 190
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "7",
+              "count": 190
+            },
+            {
+              "value": "9",
+              "count": 200
+            },
+            {
+              "value": "4",
+              "count": 211
+            },
+            {
+              "value": "2",
+              "count": 217
+            },
+            {
+              "value": "8",
+              "count": 222
+            },
+            {
+              "value": "1",
+              "count": 224
+            },
+            {
+              "value": "5",
+              "count": 227
+            },
+            {
+              "value": "6",
+              "count": 230
+            },
+            {
+              "value": "3",
+              "count": 237
+            },
+            {
+              "value": "0",
+              "count": 238
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "006",
+              "count": 4
+            },
+            {
+              "value": "255",
+              "count": 4
+            },
+            {
+              "value": "363",
+              "count": 4
+            },
+            {
+              "value": "665",
+              "count": 4
+            },
+            {
+              "value": "803",
+              "count": 4
+            },
+            {
+              "value": "943",
+              "count": 4
+            },
+            {
+              "value": "002",
+              "count": 3
+            },
+            {
+              "value": "055",
+              "count": 3
+            },
+            {
+              "value": "058",
+              "count": 3
+            },
+            {
+              "value": "088",
+              "count": 3
+            }
+          ],
+          "topSums": [
+            {
+              "value": "12",
+              "count": 64
+            },
+            {
+              "value": "15",
+              "count": 53
+            },
+            {
+              "value": "16",
+              "count": 53
+            },
+            {
+              "value": "11",
+              "count": 51
+            },
+            {
+              "value": "17",
+              "count": 51
+            },
+            {
+              "value": "14",
+              "count": 49
+            },
+            {
+              "value": "13",
+              "count": 45
+            },
+            {
+              "value": "8",
+              "count": 42
+            },
+            {
+              "value": "10",
+              "count": 40
+            },
+            {
+              "value": "9",
+              "count": 38
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 366
+            },
+            {
+              "value": "E",
+              "count": 366
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 79,
+              "1": 76,
+              "2": 76,
+              "3": 76,
+              "4": 75,
+              "5": 69,
+              "6": 73,
+              "7": 65,
+              "8": 73,
+              "9": 70
+            },
+            {
+              "0": 84,
+              "1": 68,
+              "2": 75,
+              "3": 74,
+              "4": 59,
+              "5": 83,
+              "6": 77,
+              "7": 69,
+              "8": 78,
+              "9": 65
+            },
+            {
+              "0": 75,
+              "1": 80,
+              "2": 66,
+              "3": 87,
+              "4": 77,
+              "5": 75,
+              "6": 80,
+              "7": 56,
+              "8": 71,
+              "9": 65
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "0",
+                "count": 79
+              },
+              {
+                "value": "1",
+                "count": 76
+              },
+              {
+                "value": "2",
+                "count": 76
+              },
+              {
+                "value": "3",
+                "count": 76
+              },
+              {
+                "value": "4",
+                "count": 75
+              },
+              {
+                "value": "6",
+                "count": 73
+              },
+              {
+                "value": "8",
+                "count": 73
+              },
+              {
+                "value": "9",
+                "count": 70
+              },
+              {
+                "value": "5",
+                "count": 69
+              },
+              {
+                "value": "7",
+                "count": 65
+              }
+            ],
+            [
+              {
+                "value": "0",
+                "count": 84
+              },
+              {
+                "value": "5",
+                "count": 83
+              },
+              {
+                "value": "8",
+                "count": 78
+              },
+              {
+                "value": "6",
+                "count": 77
+              },
+              {
+                "value": "2",
+                "count": 75
+              },
+              {
+                "value": "3",
+                "count": 74
+              },
+              {
+                "value": "7",
+                "count": 69
+              },
+              {
+                "value": "1",
+                "count": 68
+              },
+              {
+                "value": "9",
+                "count": 65
+              },
+              {
+                "value": "4",
+                "count": 59
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 87
+              },
+              {
+                "value": "1",
+                "count": 80
+              },
+              {
+                "value": "6",
+                "count": 80
+              },
+              {
+                "value": "4",
+                "count": 77
+              },
+              {
+                "value": "0",
+                "count": 75
+              },
+              {
+                "value": "5",
+                "count": 75
+              },
+              {
+                "value": "8",
+                "count": 71
+              },
+              {
+                "value": "2",
+                "count": 66
+              },
+              {
+                "value": "9",
+                "count": 65
+              },
+              {
+                "value": "7",
+                "count": 56
+              }
+            ]
+          ]
+        }
+      },
+      "detectedFormatTransitions": [
+        {
+          "date": "2007-01-09",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2007-05-14",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2007-09-16",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2008-01-19",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2020-11-04",
+          "reason": "bonus-rate 0.00 -> 0.70"
+        },
+        {
+          "date": "2021-03-09",
+          "reason": "bonus-rate 0.20 -> 1.00"
+        }
+      ],
+      "formatSegments": [
+        {
+          "segment": "segment-1",
+          "from": "1988-04-29",
+          "to": "2007-01-09",
+          "count": 6825,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-2",
+          "from": "2007-01-09",
+          "to": "2007-05-14",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-3",
+          "from": "2007-05-14",
+          "to": "2007-09-16",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-4",
+          "from": "2007-09-16",
+          "to": "2008-01-19",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-5",
+          "from": "2008-01-19",
+          "to": "2020-11-04",
+          "count": 9225,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-6",
+          "from": "2020-11-04",
+          "to": "2021-03-09",
+          "count": 250,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 40
+        },
+        {
+          "segment": "segment-7",
+          "from": "2021-03-09",
+          "to": "2026-04-22",
+          "count": 3742,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 100
+        }
+      ]
+    },
+    {
+      "game": "pick4",
+      "name": "Pick 4",
+      "sourceUrl": "https://files.floridalottery.com/exptkt/p4.pdf",
+      "drawCount": 19259,
+      "coverage": {
+        "from": "1991-07-04",
+        "to": "2026-04-22"
+      },
+      "windows": {
+        "allTime": {
+          "count": 19259,
+          "from": "1991-07-04",
+          "to": "2026-04-22",
+          "uniqueDates": 12711,
+          "avgDrawsPerDate": 1.515,
+          "repeatFromPriorPct": 80.17,
+          "numberFrequency": {
+            "0": 7737,
+            "1": 7702,
+            "2": 7767,
+            "3": 7814,
+            "4": 7696,
+            "5": 7674,
+            "6": 7664,
+            "7": 7714,
+            "8": 7630,
+            "9": 7638
+          },
+          "topNumbers": [
+            {
+              "value": "3",
+              "count": 7814
+            },
+            {
+              "value": "2",
+              "count": 7767
+            },
+            {
+              "value": "0",
+              "count": 7737
+            },
+            {
+              "value": "7",
+              "count": 7714
+            },
+            {
+              "value": "1",
+              "count": 7702
+            },
+            {
+              "value": "4",
+              "count": 7696
+            },
+            {
+              "value": "5",
+              "count": 7674
+            },
+            {
+              "value": "6",
+              "count": 7664
+            },
+            {
+              "value": "9",
+              "count": 7638
+            },
+            {
+              "value": "8",
+              "count": 7630
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "8",
+              "count": 7630
+            },
+            {
+              "value": "9",
+              "count": 7638
+            },
+            {
+              "value": "6",
+              "count": 7664
+            },
+            {
+              "value": "5",
+              "count": 7674
+            },
+            {
+              "value": "4",
+              "count": 7696
+            },
+            {
+              "value": "1",
+              "count": 7702
+            },
+            {
+              "value": "7",
+              "count": 7714
+            },
+            {
+              "value": "0",
+              "count": 7737
+            },
+            {
+              "value": "2",
+              "count": 7767
+            },
+            {
+              "value": "3",
+              "count": 7814
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "0293",
+              "count": 8
+            },
+            {
+              "value": "1791",
+              "count": 8
+            },
+            {
+              "value": "2179",
+              "count": 8
+            },
+            {
+              "value": "3086",
+              "count": 8
+            },
+            {
+              "value": "3115",
+              "count": 8
+            },
+            {
+              "value": "3729",
+              "count": 8
+            },
+            {
+              "value": "6172",
+              "count": 8
+            },
+            {
+              "value": "7337",
+              "count": 8
+            },
+            {
+              "value": "7542",
+              "count": 8
+            },
+            {
+              "value": "9409",
+              "count": 8
+            }
+          ],
+          "topSums": [
+            {
+              "value": "18",
+              "count": 1297
+            },
+            {
+              "value": "17",
+              "count": 1285
+            },
+            {
+              "value": "19",
+              "count": 1265
+            },
+            {
+              "value": "16",
+              "count": 1231
+            },
+            {
+              "value": "21",
+              "count": 1194
+            },
+            {
+              "value": "20",
+              "count": 1176
+            },
+            {
+              "value": "15",
+              "count": 1152
+            },
+            {
+              "value": "14",
+              "count": 1105
+            },
+            {
+              "value": "22",
+              "count": 1025
+            },
+            {
+              "value": "23",
+              "count": 940
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "E",
+              "count": 12711
+            },
+            {
+              "value": "M",
+              "count": 6548
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 1948,
+              "1": 1911,
+              "2": 1949,
+              "3": 1953,
+              "4": 1903,
+              "5": 1940,
+              "6": 1852,
+              "7": 1979,
+              "8": 1933,
+              "9": 1891
+            },
+            {
+              "0": 1872,
+              "1": 1872,
+              "2": 1950,
+              "3": 1940,
+              "4": 1956,
+              "5": 1897,
+              "6": 1927,
+              "7": 2014,
+              "8": 1924,
+              "9": 1907
+            },
+            {
+              "0": 1896,
+              "1": 1978,
+              "2": 1963,
+              "3": 1981,
+              "4": 1931,
+              "5": 1893,
+              "6": 1943,
+              "7": 1908,
+              "8": 1862,
+              "9": 1904
+            },
+            {
+              "0": 2021,
+              "1": 1941,
+              "2": 1905,
+              "3": 1940,
+              "4": 1906,
+              "5": 1944,
+              "6": 1942,
+              "7": 1813,
+              "8": 1911,
+              "9": 1936
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "7",
+                "count": 1979
+              },
+              {
+                "value": "3",
+                "count": 1953
+              },
+              {
+                "value": "2",
+                "count": 1949
+              },
+              {
+                "value": "0",
+                "count": 1948
+              },
+              {
+                "value": "5",
+                "count": 1940
+              },
+              {
+                "value": "8",
+                "count": 1933
+              },
+              {
+                "value": "1",
+                "count": 1911
+              },
+              {
+                "value": "4",
+                "count": 1903
+              },
+              {
+                "value": "9",
+                "count": 1891
+              },
+              {
+                "value": "6",
+                "count": 1852
+              }
+            ],
+            [
+              {
+                "value": "7",
+                "count": 2014
+              },
+              {
+                "value": "4",
+                "count": 1956
+              },
+              {
+                "value": "2",
+                "count": 1950
+              },
+              {
+                "value": "3",
+                "count": 1940
+              },
+              {
+                "value": "6",
+                "count": 1927
+              },
+              {
+                "value": "8",
+                "count": 1924
+              },
+              {
+                "value": "9",
+                "count": 1907
+              },
+              {
+                "value": "5",
+                "count": 1897
+              },
+              {
+                "value": "0",
+                "count": 1872
+              },
+              {
+                "value": "1",
+                "count": 1872
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 1981
+              },
+              {
+                "value": "1",
+                "count": 1978
+              },
+              {
+                "value": "2",
+                "count": 1963
+              },
+              {
+                "value": "6",
+                "count": 1943
+              },
+              {
+                "value": "4",
+                "count": 1931
+              },
+              {
+                "value": "7",
+                "count": 1908
+              },
+              {
+                "value": "9",
+                "count": 1904
+              },
+              {
+                "value": "0",
+                "count": 1896
+              },
+              {
+                "value": "5",
+                "count": 1893
+              },
+              {
+                "value": "8",
+                "count": 1862
+              }
+            ],
+            [
+              {
+                "value": "0",
+                "count": 2021
+              },
+              {
+                "value": "5",
+                "count": 1944
+              },
+              {
+                "value": "6",
+                "count": 1942
+              },
+              {
+                "value": "1",
+                "count": 1941
+              },
+              {
+                "value": "3",
+                "count": 1940
+              },
+              {
+                "value": "9",
+                "count": 1936
+              },
+              {
+                "value": "8",
+                "count": 1911
+              },
+              {
+                "value": "4",
+                "count": 1906
+              },
+              {
+                "value": "2",
+                "count": 1905
+              },
+              {
+                "value": "7",
+                "count": 1813
+              }
+            ]
+          ]
+        },
+        "last5Years": {
+          "count": 3654,
+          "from": "2021-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 1827,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 80.59,
+          "numberFrequency": {
+            "0": 1482,
+            "1": 1465,
+            "2": 1490,
+            "3": 1487,
+            "4": 1425,
+            "5": 1489,
+            "6": 1476,
+            "7": 1427,
+            "8": 1451,
+            "9": 1424
+          },
+          "topNumbers": [
+            {
+              "value": "2",
+              "count": 1490
+            },
+            {
+              "value": "5",
+              "count": 1489
+            },
+            {
+              "value": "3",
+              "count": 1487
+            },
+            {
+              "value": "0",
+              "count": 1482
+            },
+            {
+              "value": "6",
+              "count": 1476
+            },
+            {
+              "value": "1",
+              "count": 1465
+            },
+            {
+              "value": "8",
+              "count": 1451
+            },
+            {
+              "value": "7",
+              "count": 1427
+            },
+            {
+              "value": "4",
+              "count": 1425
+            },
+            {
+              "value": "9",
+              "count": 1424
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "9",
+              "count": 1424
+            },
+            {
+              "value": "4",
+              "count": 1425
+            },
+            {
+              "value": "7",
+              "count": 1427
+            },
+            {
+              "value": "8",
+              "count": 1451
+            },
+            {
+              "value": "1",
+              "count": 1465
+            },
+            {
+              "value": "6",
+              "count": 1476
+            },
+            {
+              "value": "0",
+              "count": 1482
+            },
+            {
+              "value": "3",
+              "count": 1487
+            },
+            {
+              "value": "5",
+              "count": 1489
+            },
+            {
+              "value": "2",
+              "count": 1490
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "7185",
+              "count": 5
+            },
+            {
+              "value": "7382",
+              "count": 5
+            },
+            {
+              "value": "7156",
+              "count": 4
+            },
+            {
+              "value": "7542",
+              "count": 4
+            },
+            {
+              "value": "8821",
+              "count": 4
+            },
+            {
+              "value": "0001",
+              "count": 3
+            },
+            {
+              "value": "0074",
+              "count": 3
+            },
+            {
+              "value": "0169",
+              "count": 3
+            },
+            {
+              "value": "0240",
+              "count": 3
+            },
+            {
+              "value": "0319",
+              "count": 3
+            }
+          ],
+          "topSums": [
+            {
+              "value": "21",
+              "count": 254
+            },
+            {
+              "value": "17",
+              "count": 251
+            },
+            {
+              "value": "20",
+              "count": 239
+            },
+            {
+              "value": "19",
+              "count": 238
+            },
+            {
+              "value": "18",
+              "count": 237
+            },
+            {
+              "value": "16",
+              "count": 229
+            },
+            {
+              "value": "14",
+              "count": 219
+            },
+            {
+              "value": "15",
+              "count": 213
+            },
+            {
+              "value": "22",
+              "count": 192
+            },
+            {
+              "value": "23",
+              "count": 169
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 1827
+            },
+            {
+              "value": "E",
+              "count": 1827
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 361,
+              "1": 371,
+              "2": 398,
+              "3": 368,
+              "4": 354,
+              "5": 364,
+              "6": 380,
+              "7": 350,
+              "8": 355,
+              "9": 353
+            },
+            {
+              "0": 358,
+              "1": 359,
+              "2": 352,
+              "3": 364,
+              "4": 400,
+              "5": 388,
+              "6": 367,
+              "7": 392,
+              "8": 334,
+              "9": 340
+            },
+            {
+              "0": 369,
+              "1": 392,
+              "2": 378,
+              "3": 386,
+              "4": 317,
+              "5": 348,
+              "6": 373,
+              "7": 335,
+              "8": 389,
+              "9": 367
+            },
+            {
+              "0": 394,
+              "1": 343,
+              "2": 362,
+              "3": 369,
+              "4": 354,
+              "5": 389,
+              "6": 356,
+              "7": 350,
+              "8": 373,
+              "9": 364
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "2",
+                "count": 398
+              },
+              {
+                "value": "6",
+                "count": 380
+              },
+              {
+                "value": "1",
+                "count": 371
+              },
+              {
+                "value": "3",
+                "count": 368
+              },
+              {
+                "value": "5",
+                "count": 364
+              },
+              {
+                "value": "0",
+                "count": 361
+              },
+              {
+                "value": "8",
+                "count": 355
+              },
+              {
+                "value": "4",
+                "count": 354
+              },
+              {
+                "value": "9",
+                "count": 353
+              },
+              {
+                "value": "7",
+                "count": 350
+              }
+            ],
+            [
+              {
+                "value": "4",
+                "count": 400
+              },
+              {
+                "value": "7",
+                "count": 392
+              },
+              {
+                "value": "5",
+                "count": 388
+              },
+              {
+                "value": "6",
+                "count": 367
+              },
+              {
+                "value": "3",
+                "count": 364
+              },
+              {
+                "value": "1",
+                "count": 359
+              },
+              {
+                "value": "0",
+                "count": 358
+              },
+              {
+                "value": "2",
+                "count": 352
+              },
+              {
+                "value": "9",
+                "count": 340
+              },
+              {
+                "value": "8",
+                "count": 334
+              }
+            ],
+            [
+              {
+                "value": "1",
+                "count": 392
+              },
+              {
+                "value": "8",
+                "count": 389
+              },
+              {
+                "value": "3",
+                "count": 386
+              },
+              {
+                "value": "2",
+                "count": 378
+              },
+              {
+                "value": "6",
+                "count": 373
+              },
+              {
+                "value": "0",
+                "count": 369
+              },
+              {
+                "value": "9",
+                "count": 367
+              },
+              {
+                "value": "5",
+                "count": 348
+              },
+              {
+                "value": "7",
+                "count": 335
+              },
+              {
+                "value": "4",
+                "count": 317
+              }
+            ],
+            [
+              {
+                "value": "0",
+                "count": 394
+              },
+              {
+                "value": "5",
+                "count": 389
+              },
+              {
+                "value": "8",
+                "count": 373
+              },
+              {
+                "value": "3",
+                "count": 369
+              },
+              {
+                "value": "9",
+                "count": 364
+              },
+              {
+                "value": "2",
+                "count": 362
+              },
+              {
+                "value": "6",
+                "count": 356
+              },
+              {
+                "value": "4",
+                "count": 354
+              },
+              {
+                "value": "7",
+                "count": 350
+              },
+              {
+                "value": "1",
+                "count": 343
+              }
+            ]
+          ]
+        },
+        "last12Months": {
+          "count": 732,
+          "from": "2025-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 366,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 81.94,
+          "numberFrequency": {
+            "0": 287,
+            "1": 308,
+            "2": 321,
+            "3": 296,
+            "4": 261,
+            "5": 302,
+            "6": 278,
+            "7": 305,
+            "8": 287,
+            "9": 283
+          },
+          "topNumbers": [
+            {
+              "value": "2",
+              "count": 321
+            },
+            {
+              "value": "1",
+              "count": 308
+            },
+            {
+              "value": "7",
+              "count": 305
+            },
+            {
+              "value": "5",
+              "count": 302
+            },
+            {
+              "value": "3",
+              "count": 296
+            },
+            {
+              "value": "0",
+              "count": 287
+            },
+            {
+              "value": "8",
+              "count": 287
+            },
+            {
+              "value": "9",
+              "count": 283
+            },
+            {
+              "value": "6",
+              "count": 278
+            },
+            {
+              "value": "4",
+              "count": 261
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "4",
+              "count": 261
+            },
+            {
+              "value": "6",
+              "count": 278
+            },
+            {
+              "value": "9",
+              "count": 283
+            },
+            {
+              "value": "0",
+              "count": 287
+            },
+            {
+              "value": "8",
+              "count": 287
+            },
+            {
+              "value": "3",
+              "count": 296
+            },
+            {
+              "value": "5",
+              "count": 302
+            },
+            {
+              "value": "7",
+              "count": 305
+            },
+            {
+              "value": "1",
+              "count": 308
+            },
+            {
+              "value": "2",
+              "count": 321
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "8821",
+              "count": 3
+            },
+            {
+              "value": "0319",
+              "count": 2
+            },
+            {
+              "value": "0657",
+              "count": 2
+            },
+            {
+              "value": "1245",
+              "count": 2
+            },
+            {
+              "value": "1356",
+              "count": 2
+            },
+            {
+              "value": "2139",
+              "count": 2
+            },
+            {
+              "value": "2305",
+              "count": 2
+            },
+            {
+              "value": "2366",
+              "count": 2
+            },
+            {
+              "value": "2752",
+              "count": 2
+            },
+            {
+              "value": "3291",
+              "count": 2
+            }
+          ],
+          "topSums": [
+            {
+              "value": "15",
+              "count": 51
+            },
+            {
+              "value": "17",
+              "count": 48
+            },
+            {
+              "value": "18",
+              "count": 47
+            },
+            {
+              "value": "19",
+              "count": 47
+            },
+            {
+              "value": "16",
+              "count": 46
+            },
+            {
+              "value": "14",
+              "count": 43
+            },
+            {
+              "value": "20",
+              "count": 43
+            },
+            {
+              "value": "21",
+              "count": 41
+            },
+            {
+              "value": "12",
+              "count": 38
+            },
+            {
+              "value": "22",
+              "count": 36
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 366
+            },
+            {
+              "value": "E",
+              "count": 366
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 75,
+              "1": 74,
+              "2": 77,
+              "3": 71,
+              "4": 69,
+              "5": 77,
+              "6": 69,
+              "7": 70,
+              "8": 77,
+              "9": 73
+            },
+            {
+              "0": 78,
+              "1": 76,
+              "2": 84,
+              "3": 70,
+              "4": 79,
+              "5": 70,
+              "6": 64,
+              "7": 81,
+              "8": 65,
+              "9": 65
+            },
+            {
+              "0": 66,
+              "1": 85,
+              "2": 82,
+              "3": 85,
+              "4": 58,
+              "5": 70,
+              "6": 72,
+              "7": 75,
+              "8": 69,
+              "9": 70
+            },
+            {
+              "0": 68,
+              "1": 73,
+              "2": 78,
+              "3": 70,
+              "4": 55,
+              "5": 85,
+              "6": 73,
+              "7": 79,
+              "8": 76,
+              "9": 75
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "2",
+                "count": 77
+              },
+              {
+                "value": "5",
+                "count": 77
+              },
+              {
+                "value": "8",
+                "count": 77
+              },
+              {
+                "value": "0",
+                "count": 75
+              },
+              {
+                "value": "1",
+                "count": 74
+              },
+              {
+                "value": "9",
+                "count": 73
+              },
+              {
+                "value": "3",
+                "count": 71
+              },
+              {
+                "value": "7",
+                "count": 70
+              },
+              {
+                "value": "4",
+                "count": 69
+              },
+              {
+                "value": "6",
+                "count": 69
+              }
+            ],
+            [
+              {
+                "value": "2",
+                "count": 84
+              },
+              {
+                "value": "7",
+                "count": 81
+              },
+              {
+                "value": "4",
+                "count": 79
+              },
+              {
+                "value": "0",
+                "count": 78
+              },
+              {
+                "value": "1",
+                "count": 76
+              },
+              {
+                "value": "3",
+                "count": 70
+              },
+              {
+                "value": "5",
+                "count": 70
+              },
+              {
+                "value": "8",
+                "count": 65
+              },
+              {
+                "value": "9",
+                "count": 65
+              },
+              {
+                "value": "6",
+                "count": 64
+              }
+            ],
+            [
+              {
+                "value": "1",
+                "count": 85
+              },
+              {
+                "value": "3",
+                "count": 85
+              },
+              {
+                "value": "2",
+                "count": 82
+              },
+              {
+                "value": "7",
+                "count": 75
+              },
+              {
+                "value": "6",
+                "count": 72
+              },
+              {
+                "value": "5",
+                "count": 70
+              },
+              {
+                "value": "9",
+                "count": 70
+              },
+              {
+                "value": "8",
+                "count": 69
+              },
+              {
+                "value": "0",
+                "count": 66
+              },
+              {
+                "value": "4",
+                "count": 58
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 85
+              },
+              {
+                "value": "7",
+                "count": 79
+              },
+              {
+                "value": "2",
+                "count": 78
+              },
+              {
+                "value": "8",
+                "count": 76
+              },
+              {
+                "value": "9",
+                "count": 75
+              },
+              {
+                "value": "1",
+                "count": 73
+              },
+              {
+                "value": "6",
+                "count": 73
+              },
+              {
+                "value": "3",
+                "count": 70
+              },
+              {
+                "value": "0",
+                "count": 68
+              },
+              {
+                "value": "4",
+                "count": 55
+              }
+            ]
+          ]
+        }
+      },
+      "detectedFormatTransitions": [
+        {
+          "date": "2007-01-17",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2007-05-22",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2007-09-24",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2008-01-27",
+          "reason": "draw-labels E -> E,M"
+        },
+        {
+          "date": "2020-11-08",
+          "reason": "bonus-rate 0.00 -> 0.72"
+        },
+        {
+          "date": "2021-03-13",
+          "reason": "bonus-rate 0.22 -> 1.00"
+        }
+      ],
+      "formatSegments": [
+        {
+          "segment": "segment-1",
+          "from": "1991-07-04",
+          "to": "2007-01-17",
+          "count": 5675,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-2",
+          "from": "2007-01-17",
+          "to": "2007-05-22",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-3",
+          "from": "2007-05-22",
+          "to": "2007-09-24",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-4",
+          "from": "2007-09-24",
+          "to": "2008-01-27",
+          "count": 125,
+          "labelsSeen": [
+            "E"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-5",
+          "from": "2008-01-27",
+          "to": "2020-11-08",
+          "count": 9225,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-6",
+          "from": "2020-11-08",
+          "to": "2021-03-13",
+          "count": 250,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 43.2
+        },
+        {
+          "segment": "segment-7",
+          "from": "2021-03-13",
+          "to": "2026-04-22",
+          "count": 3734,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 100
+        }
+      ]
+    },
+    {
+      "game": "pick5",
+      "name": "Pick 5",
+      "sourceUrl": "https://files.floridalottery.com/exptkt/p5.pdf",
+      "drawCount": 7104,
+      "coverage": {
+        "from": "2016-08-01",
+        "to": "2026-04-22"
+      },
+      "windows": {
+        "allTime": {
+          "count": 7104,
+          "from": "2016-08-01",
+          "to": "2026-04-22",
+          "uniqueDates": 3552,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 92,
+          "numberFrequency": {
+            "0": 3451,
+            "1": 3553,
+            "2": 3533,
+            "3": 3617,
+            "4": 3517,
+            "5": 3593,
+            "6": 3514,
+            "7": 3657,
+            "8": 3527,
+            "9": 3558
+          },
+          "topNumbers": [
+            {
+              "value": "7",
+              "count": 3657
+            },
+            {
+              "value": "3",
+              "count": 3617
+            },
+            {
+              "value": "5",
+              "count": 3593
+            },
+            {
+              "value": "9",
+              "count": 3558
+            },
+            {
+              "value": "1",
+              "count": 3553
+            },
+            {
+              "value": "2",
+              "count": 3533
+            },
+            {
+              "value": "8",
+              "count": 3527
+            },
+            {
+              "value": "4",
+              "count": 3517
+            },
+            {
+              "value": "6",
+              "count": 3514
+            },
+            {
+              "value": "0",
+              "count": 3451
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "0",
+              "count": 3451
+            },
+            {
+              "value": "6",
+              "count": 3514
+            },
+            {
+              "value": "4",
+              "count": 3517
+            },
+            {
+              "value": "8",
+              "count": 3527
+            },
+            {
+              "value": "2",
+              "count": 3533
+            },
+            {
+              "value": "1",
+              "count": 3553
+            },
+            {
+              "value": "9",
+              "count": 3558
+            },
+            {
+              "value": "5",
+              "count": 3593
+            },
+            {
+              "value": "3",
+              "count": 3617
+            },
+            {
+              "value": "7",
+              "count": 3657
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "05663",
+              "count": 3
+            },
+            {
+              "value": "56460",
+              "count": 3
+            },
+            {
+              "value": "96593",
+              "count": 3
+            },
+            {
+              "value": "97810",
+              "count": 3
+            },
+            {
+              "value": "99877",
+              "count": 3
+            },
+            {
+              "value": "00109",
+              "count": 2
+            },
+            {
+              "value": "00743",
+              "count": 2
+            },
+            {
+              "value": "01022",
+              "count": 2
+            },
+            {
+              "value": "01687",
+              "count": 2
+            },
+            {
+              "value": "01733",
+              "count": 2
+            }
+          ],
+          "topSums": [
+            {
+              "value": "22",
+              "count": 454
+            },
+            {
+              "value": "23",
+              "count": 450
+            },
+            {
+              "value": "21",
+              "count": 418
+            },
+            {
+              "value": "24",
+              "count": 404
+            },
+            {
+              "value": "25",
+              "count": 404
+            },
+            {
+              "value": "20",
+              "count": 399
+            },
+            {
+              "value": "26",
+              "count": 379
+            },
+            {
+              "value": "19",
+              "count": 370
+            },
+            {
+              "value": "27",
+              "count": 355
+            },
+            {
+              "value": "18",
+              "count": 345
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 3552
+            },
+            {
+              "value": "E",
+              "count": 3552
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 697,
+              "1": 700,
+              "2": 696,
+              "3": 669,
+              "4": 709,
+              "5": 727,
+              "6": 711,
+              "7": 715,
+              "8": 716,
+              "9": 764
+            },
+            {
+              "0": 676,
+              "1": 786,
+              "2": 681,
+              "3": 692,
+              "4": 682,
+              "5": 727,
+              "6": 735,
+              "7": 703,
+              "8": 724,
+              "9": 698
+            },
+            {
+              "0": 661,
+              "1": 723,
+              "2": 735,
+              "3": 739,
+              "4": 669,
+              "5": 704,
+              "6": 717,
+              "7": 752,
+              "8": 692,
+              "9": 712
+            },
+            {
+              "0": 700,
+              "1": 645,
+              "2": 702,
+              "3": 767,
+              "4": 753,
+              "5": 699,
+              "6": 701,
+              "7": 738,
+              "8": 680,
+              "9": 719
+            },
+            {
+              "0": 717,
+              "1": 699,
+              "2": 719,
+              "3": 750,
+              "4": 704,
+              "5": 736,
+              "6": 650,
+              "7": 749,
+              "8": 715,
+              "9": 665
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "9",
+                "count": 764
+              },
+              {
+                "value": "5",
+                "count": 727
+              },
+              {
+                "value": "8",
+                "count": 716
+              },
+              {
+                "value": "7",
+                "count": 715
+              },
+              {
+                "value": "6",
+                "count": 711
+              },
+              {
+                "value": "4",
+                "count": 709
+              },
+              {
+                "value": "1",
+                "count": 700
+              },
+              {
+                "value": "0",
+                "count": 697
+              },
+              {
+                "value": "2",
+                "count": 696
+              },
+              {
+                "value": "3",
+                "count": 669
+              }
+            ],
+            [
+              {
+                "value": "1",
+                "count": 786
+              },
+              {
+                "value": "6",
+                "count": 735
+              },
+              {
+                "value": "5",
+                "count": 727
+              },
+              {
+                "value": "8",
+                "count": 724
+              },
+              {
+                "value": "7",
+                "count": 703
+              },
+              {
+                "value": "9",
+                "count": 698
+              },
+              {
+                "value": "3",
+                "count": 692
+              },
+              {
+                "value": "4",
+                "count": 682
+              },
+              {
+                "value": "2",
+                "count": 681
+              },
+              {
+                "value": "0",
+                "count": 676
+              }
+            ],
+            [
+              {
+                "value": "7",
+                "count": 752
+              },
+              {
+                "value": "3",
+                "count": 739
+              },
+              {
+                "value": "2",
+                "count": 735
+              },
+              {
+                "value": "1",
+                "count": 723
+              },
+              {
+                "value": "6",
+                "count": 717
+              },
+              {
+                "value": "9",
+                "count": 712
+              },
+              {
+                "value": "5",
+                "count": 704
+              },
+              {
+                "value": "8",
+                "count": 692
+              },
+              {
+                "value": "4",
+                "count": 669
+              },
+              {
+                "value": "0",
+                "count": 661
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 767
+              },
+              {
+                "value": "4",
+                "count": 753
+              },
+              {
+                "value": "7",
+                "count": 738
+              },
+              {
+                "value": "9",
+                "count": 719
+              },
+              {
+                "value": "2",
+                "count": 702
+              },
+              {
+                "value": "6",
+                "count": 701
+              },
+              {
+                "value": "0",
+                "count": 700
+              },
+              {
+                "value": "5",
+                "count": 699
+              },
+              {
+                "value": "8",
+                "count": 680
+              },
+              {
+                "value": "1",
+                "count": 645
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 750
+              },
+              {
+                "value": "7",
+                "count": 749
+              },
+              {
+                "value": "5",
+                "count": 736
+              },
+              {
+                "value": "2",
+                "count": 719
+              },
+              {
+                "value": "0",
+                "count": 717
+              },
+              {
+                "value": "8",
+                "count": 715
+              },
+              {
+                "value": "4",
+                "count": 704
+              },
+              {
+                "value": "1",
+                "count": 699
+              },
+              {
+                "value": "9",
+                "count": 665
+              },
+              {
+                "value": "6",
+                "count": 650
+              }
+            ]
+          ]
+        },
+        "last5Years": {
+          "count": 3654,
+          "from": "2021-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 1827,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 91.95,
+          "numberFrequency": {
+            "0": 1716,
+            "1": 1814,
+            "2": 1773,
+            "3": 1871,
+            "4": 1802,
+            "5": 1879,
+            "6": 1814,
+            "7": 1943,
+            "8": 1841,
+            "9": 1817
+          },
+          "topNumbers": [
+            {
+              "value": "7",
+              "count": 1943
+            },
+            {
+              "value": "5",
+              "count": 1879
+            },
+            {
+              "value": "3",
+              "count": 1871
+            },
+            {
+              "value": "8",
+              "count": 1841
+            },
+            {
+              "value": "9",
+              "count": 1817
+            },
+            {
+              "value": "1",
+              "count": 1814
+            },
+            {
+              "value": "6",
+              "count": 1814
+            },
+            {
+              "value": "4",
+              "count": 1802
+            },
+            {
+              "value": "2",
+              "count": 1773
+            },
+            {
+              "value": "0",
+              "count": 1716
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "0",
+              "count": 1716
+            },
+            {
+              "value": "2",
+              "count": 1773
+            },
+            {
+              "value": "4",
+              "count": 1802
+            },
+            {
+              "value": "1",
+              "count": 1814
+            },
+            {
+              "value": "6",
+              "count": 1814
+            },
+            {
+              "value": "9",
+              "count": 1817
+            },
+            {
+              "value": "8",
+              "count": 1841
+            },
+            {
+              "value": "3",
+              "count": 1871
+            },
+            {
+              "value": "5",
+              "count": 1879
+            },
+            {
+              "value": "7",
+              "count": 1943
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "96593",
+              "count": 3
+            },
+            {
+              "value": "01687",
+              "count": 2
+            },
+            {
+              "value": "07414",
+              "count": 2
+            },
+            {
+              "value": "08325",
+              "count": 2
+            },
+            {
+              "value": "09708",
+              "count": 2
+            },
+            {
+              "value": "10038",
+              "count": 2
+            },
+            {
+              "value": "10608",
+              "count": 2
+            },
+            {
+              "value": "12326",
+              "count": 2
+            },
+            {
+              "value": "15633",
+              "count": 2
+            },
+            {
+              "value": "16427",
+              "count": 2
+            }
+          ],
+          "topSums": [
+            {
+              "value": "22",
+              "count": 259
+            },
+            {
+              "value": "23",
+              "count": 231
+            },
+            {
+              "value": "24",
+              "count": 222
+            },
+            {
+              "value": "21",
+              "count": 209
+            },
+            {
+              "value": "20",
+              "count": 200
+            },
+            {
+              "value": "25",
+              "count": 198
+            },
+            {
+              "value": "19",
+              "count": 191
+            },
+            {
+              "value": "26",
+              "count": 180
+            },
+            {
+              "value": "27",
+              "count": 174
+            },
+            {
+              "value": "18",
+              "count": 164
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 1827
+            },
+            {
+              "value": "E",
+              "count": 1827
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 342,
+              "1": 361,
+              "2": 330,
+              "3": 352,
+              "4": 366,
+              "5": 370,
+              "6": 371,
+              "7": 391,
+              "8": 396,
+              "9": 375
+            },
+            {
+              "0": 354,
+              "1": 387,
+              "2": 348,
+              "3": 367,
+              "4": 347,
+              "5": 389,
+              "6": 379,
+              "7": 354,
+              "8": 375,
+              "9": 354
+            },
+            {
+              "0": 321,
+              "1": 386,
+              "2": 363,
+              "3": 369,
+              "4": 360,
+              "5": 390,
+              "6": 363,
+              "7": 379,
+              "8": 354,
+              "9": 369
+            },
+            {
+              "0": 357,
+              "1": 320,
+              "2": 361,
+              "3": 405,
+              "4": 375,
+              "5": 354,
+              "6": 355,
+              "7": 411,
+              "8": 355,
+              "9": 361
+            },
+            {
+              "0": 342,
+              "1": 360,
+              "2": 371,
+              "3": 378,
+              "4": 354,
+              "5": 376,
+              "6": 346,
+              "7": 408,
+              "8": 361,
+              "9": 358
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "8",
+                "count": 396
+              },
+              {
+                "value": "7",
+                "count": 391
+              },
+              {
+                "value": "9",
+                "count": 375
+              },
+              {
+                "value": "6",
+                "count": 371
+              },
+              {
+                "value": "5",
+                "count": 370
+              },
+              {
+                "value": "4",
+                "count": 366
+              },
+              {
+                "value": "1",
+                "count": 361
+              },
+              {
+                "value": "3",
+                "count": 352
+              },
+              {
+                "value": "0",
+                "count": 342
+              },
+              {
+                "value": "2",
+                "count": 330
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 389
+              },
+              {
+                "value": "1",
+                "count": 387
+              },
+              {
+                "value": "6",
+                "count": 379
+              },
+              {
+                "value": "8",
+                "count": 375
+              },
+              {
+                "value": "3",
+                "count": 367
+              },
+              {
+                "value": "0",
+                "count": 354
+              },
+              {
+                "value": "7",
+                "count": 354
+              },
+              {
+                "value": "9",
+                "count": 354
+              },
+              {
+                "value": "2",
+                "count": 348
+              },
+              {
+                "value": "4",
+                "count": 347
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 390
+              },
+              {
+                "value": "1",
+                "count": 386
+              },
+              {
+                "value": "7",
+                "count": 379
+              },
+              {
+                "value": "3",
+                "count": 369
+              },
+              {
+                "value": "9",
+                "count": 369
+              },
+              {
+                "value": "2",
+                "count": 363
+              },
+              {
+                "value": "6",
+                "count": 363
+              },
+              {
+                "value": "4",
+                "count": 360
+              },
+              {
+                "value": "8",
+                "count": 354
+              },
+              {
+                "value": "0",
+                "count": 321
+              }
+            ],
+            [
+              {
+                "value": "7",
+                "count": 411
+              },
+              {
+                "value": "3",
+                "count": 405
+              },
+              {
+                "value": "4",
+                "count": 375
+              },
+              {
+                "value": "2",
+                "count": 361
+              },
+              {
+                "value": "9",
+                "count": 361
+              },
+              {
+                "value": "0",
+                "count": 357
+              },
+              {
+                "value": "6",
+                "count": 355
+              },
+              {
+                "value": "8",
+                "count": 355
+              },
+              {
+                "value": "5",
+                "count": 354
+              },
+              {
+                "value": "1",
+                "count": 320
+              }
+            ],
+            [
+              {
+                "value": "7",
+                "count": 408
+              },
+              {
+                "value": "3",
+                "count": 378
+              },
+              {
+                "value": "5",
+                "count": 376
+              },
+              {
+                "value": "2",
+                "count": 371
+              },
+              {
+                "value": "8",
+                "count": 361
+              },
+              {
+                "value": "1",
+                "count": 360
+              },
+              {
+                "value": "9",
+                "count": 358
+              },
+              {
+                "value": "4",
+                "count": 354
+              },
+              {
+                "value": "6",
+                "count": 346
+              },
+              {
+                "value": "0",
+                "count": 342
+              }
+            ]
+          ]
+        },
+        "last12Months": {
+          "count": 732,
+          "from": "2025-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 366,
+          "avgDrawsPerDate": 2,
+          "repeatFromPriorPct": 90.56,
+          "numberFrequency": {
+            "0": 335,
+            "1": 376,
+            "2": 342,
+            "3": 407,
+            "4": 368,
+            "5": 365,
+            "6": 356,
+            "7": 376,
+            "8": 360,
+            "9": 375
+          },
+          "topNumbers": [
+            {
+              "value": "3",
+              "count": 407
+            },
+            {
+              "value": "1",
+              "count": 376
+            },
+            {
+              "value": "7",
+              "count": 376
+            },
+            {
+              "value": "9",
+              "count": 375
+            },
+            {
+              "value": "4",
+              "count": 368
+            },
+            {
+              "value": "5",
+              "count": 365
+            },
+            {
+              "value": "8",
+              "count": 360
+            },
+            {
+              "value": "6",
+              "count": 356
+            },
+            {
+              "value": "2",
+              "count": 342
+            },
+            {
+              "value": "0",
+              "count": 335
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "0",
+              "count": 335
+            },
+            {
+              "value": "2",
+              "count": 342
+            },
+            {
+              "value": "6",
+              "count": 356
+            },
+            {
+              "value": "8",
+              "count": 360
+            },
+            {
+              "value": "5",
+              "count": 365
+            },
+            {
+              "value": "4",
+              "count": 368
+            },
+            {
+              "value": "9",
+              "count": 375
+            },
+            {
+              "value": "1",
+              "count": 376
+            },
+            {
+              "value": "7",
+              "count": 376
+            },
+            {
+              "value": "3",
+              "count": 407
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "39578",
+              "count": 2
+            },
+            {
+              "value": "78564",
+              "count": 2
+            },
+            {
+              "value": "00611",
+              "count": 1
+            },
+            {
+              "value": "00824",
+              "count": 1
+            },
+            {
+              "value": "00835",
+              "count": 1
+            },
+            {
+              "value": "00949",
+              "count": 1
+            },
+            {
+              "value": "01432",
+              "count": 1
+            },
+            {
+              "value": "01566",
+              "count": 1
+            },
+            {
+              "value": "01717",
+              "count": 1
+            },
+            {
+              "value": "01725",
+              "count": 1
+            }
+          ],
+          "topSums": [
+            {
+              "value": "21",
+              "count": 46
+            },
+            {
+              "value": "24",
+              "count": 43
+            },
+            {
+              "value": "17",
+              "count": 42
+            },
+            {
+              "value": "22",
+              "count": 42
+            },
+            {
+              "value": "20",
+              "count": 41
+            },
+            {
+              "value": "18",
+              "count": 40
+            },
+            {
+              "value": "19",
+              "count": 40
+            },
+            {
+              "value": "23",
+              "count": 40
+            },
+            {
+              "value": "27",
+              "count": 38
+            },
+            {
+              "value": "25",
+              "count": 36
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "M",
+              "count": 366
+            },
+            {
+              "value": "E",
+              "count": 366
+            }
+          ],
+          "positionFrequency": [
+            {
+              "0": 64,
+              "1": 71,
+              "2": 60,
+              "3": 72,
+              "4": 85,
+              "5": 63,
+              "6": 74,
+              "7": 82,
+              "8": 80,
+              "9": 81
+            },
+            {
+              "0": 76,
+              "1": 91,
+              "2": 65,
+              "3": 81,
+              "4": 73,
+              "5": 72,
+              "6": 68,
+              "7": 62,
+              "8": 69,
+              "9": 75
+            },
+            {
+              "0": 57,
+              "1": 75,
+              "2": 77,
+              "3": 82,
+              "4": 66,
+              "5": 88,
+              "6": 73,
+              "7": 80,
+              "8": 59,
+              "9": 75
+            },
+            {
+              "0": 66,
+              "1": 61,
+              "2": 70,
+              "3": 91,
+              "4": 70,
+              "5": 65,
+              "6": 73,
+              "7": 81,
+              "8": 84,
+              "9": 71
+            },
+            {
+              "0": 72,
+              "1": 78,
+              "2": 70,
+              "3": 81,
+              "4": 74,
+              "5": 77,
+              "6": 68,
+              "7": 71,
+              "8": 68,
+              "9": 73
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "4",
+                "count": 85
+              },
+              {
+                "value": "7",
+                "count": 82
+              },
+              {
+                "value": "9",
+                "count": 81
+              },
+              {
+                "value": "8",
+                "count": 80
+              },
+              {
+                "value": "6",
+                "count": 74
+              },
+              {
+                "value": "3",
+                "count": 72
+              },
+              {
+                "value": "1",
+                "count": 71
+              },
+              {
+                "value": "0",
+                "count": 64
+              },
+              {
+                "value": "5",
+                "count": 63
+              },
+              {
+                "value": "2",
+                "count": 60
+              }
+            ],
+            [
+              {
+                "value": "1",
+                "count": 91
+              },
+              {
+                "value": "3",
+                "count": 81
+              },
+              {
+                "value": "0",
+                "count": 76
+              },
+              {
+                "value": "9",
+                "count": 75
+              },
+              {
+                "value": "4",
+                "count": 73
+              },
+              {
+                "value": "5",
+                "count": 72
+              },
+              {
+                "value": "8",
+                "count": 69
+              },
+              {
+                "value": "6",
+                "count": 68
+              },
+              {
+                "value": "2",
+                "count": 65
+              },
+              {
+                "value": "7",
+                "count": 62
+              }
+            ],
+            [
+              {
+                "value": "5",
+                "count": 88
+              },
+              {
+                "value": "3",
+                "count": 82
+              },
+              {
+                "value": "7",
+                "count": 80
+              },
+              {
+                "value": "2",
+                "count": 77
+              },
+              {
+                "value": "1",
+                "count": 75
+              },
+              {
+                "value": "9",
+                "count": 75
+              },
+              {
+                "value": "6",
+                "count": 73
+              },
+              {
+                "value": "4",
+                "count": 66
+              },
+              {
+                "value": "8",
+                "count": 59
+              },
+              {
+                "value": "0",
+                "count": 57
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 91
+              },
+              {
+                "value": "8",
+                "count": 84
+              },
+              {
+                "value": "7",
+                "count": 81
+              },
+              {
+                "value": "6",
+                "count": 73
+              },
+              {
+                "value": "9",
+                "count": 71
+              },
+              {
+                "value": "2",
+                "count": 70
+              },
+              {
+                "value": "4",
+                "count": 70
+              },
+              {
+                "value": "0",
+                "count": 66
+              },
+              {
+                "value": "5",
+                "count": 65
+              },
+              {
+                "value": "1",
+                "count": 61
+              }
+            ],
+            [
+              {
+                "value": "3",
+                "count": 81
+              },
+              {
+                "value": "1",
+                "count": 78
+              },
+              {
+                "value": "5",
+                "count": 77
+              },
+              {
+                "value": "4",
+                "count": 74
+              },
+              {
+                "value": "9",
+                "count": 73
+              },
+              {
+                "value": "0",
+                "count": 72
+              },
+              {
+                "value": "7",
+                "count": 71
+              },
+              {
+                "value": "2",
+                "count": 70
+              },
+              {
+                "value": "6",
+                "count": 68
+              },
+              {
+                "value": "8",
+                "count": 68
+              }
+            ]
+          ]
+        }
+      },
+      "detectedFormatTransitions": [
+        {
+          "date": "2020-11-10",
+          "reason": "bonus-rate 0.00 -> 0.73"
+        },
+        {
+          "date": "2021-03-15",
+          "reason": "bonus-rate 0.23 -> 1.00"
+        }
+      ],
+      "formatSegments": [
+        {
+          "segment": "segment-1",
+          "from": "2016-08-01",
+          "to": "2020-11-10",
+          "count": 3124,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 0
+        },
+        {
+          "segment": "segment-2",
+          "from": "2020-11-10",
+          "to": "2021-03-15",
+          "count": 250,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 44.8
+        },
+        {
+          "segment": "segment-3",
+          "from": "2021-03-15",
+          "to": "2026-04-22",
+          "count": 3730,
+          "labelsSeen": [
+            "E",
+            "M"
+          ],
+          "bonusRatePct": 100
+        }
+      ]
+    },
+    {
+      "game": "cashpop",
+      "name": "Cash Pop",
+      "sourceUrl": "https://files.floridalottery.com/exptkt/cp.pdf",
+      "drawCount": 7855,
+      "coverage": {
+        "from": "2022-01-03",
+        "to": "2026-04-22"
+      },
+      "windows": {
+        "allTime": {
+          "count": 7855,
+          "from": "2022-01-03",
+          "to": "2026-04-22",
+          "uniqueDates": 1571,
+          "avgDrawsPerDate": 5,
+          "repeatFromPriorPct": 6.38,
+          "numberFrequency": {
+            "1": 533,
+            "2": 491,
+            "3": 525,
+            "4": 525,
+            "5": 505,
+            "6": 510,
+            "7": 512,
+            "8": 560,
+            "9": 555,
+            "10": 526,
+            "11": 515,
+            "12": 503,
+            "13": 554,
+            "14": 490,
+            "15": 551
+          },
+          "topNumbers": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "14",
+              "count": 490
+            },
+            {
+              "value": "2",
+              "count": 491
+            },
+            {
+              "value": "12",
+              "count": 503
+            },
+            {
+              "value": "5",
+              "count": 505
+            },
+            {
+              "value": "6",
+              "count": 510
+            },
+            {
+              "value": "7",
+              "count": 512
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "10",
+              "count": 526
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "topSums": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "Morning",
+              "count": 1571
+            },
+            {
+              "value": "Matinee",
+              "count": 1571
+            },
+            {
+              "value": "Afternoon",
+              "count": 1571
+            },
+            {
+              "value": "Evening",
+              "count": 1571
+            },
+            {
+              "value": "LateNight",
+              "count": 1571
+            }
+          ],
+          "positionFrequency": [
+            {
+              "1": 533,
+              "2": 491,
+              "3": 525,
+              "4": 525,
+              "5": 505,
+              "6": 510,
+              "7": 512,
+              "8": 560,
+              "9": 555,
+              "10": 526,
+              "11": 515,
+              "12": 503,
+              "13": 554,
+              "14": 490,
+              "15": 551
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "8",
+                "count": 560
+              },
+              {
+                "value": "9",
+                "count": 555
+              },
+              {
+                "value": "13",
+                "count": 554
+              },
+              {
+                "value": "15",
+                "count": 551
+              },
+              {
+                "value": "1",
+                "count": 533
+              },
+              {
+                "value": "10",
+                "count": 526
+              },
+              {
+                "value": "3",
+                "count": 525
+              },
+              {
+                "value": "4",
+                "count": 525
+              },
+              {
+                "value": "11",
+                "count": 515
+              },
+              {
+                "value": "7",
+                "count": 512
+              }
+            ]
+          ]
+        },
+        "last5Years": {
+          "count": 7855,
+          "from": "2022-01-03",
+          "to": "2026-04-22",
+          "uniqueDates": 1571,
+          "avgDrawsPerDate": 5,
+          "repeatFromPriorPct": 6.38,
+          "numberFrequency": {
+            "1": 533,
+            "2": 491,
+            "3": 525,
+            "4": 525,
+            "5": 505,
+            "6": 510,
+            "7": 512,
+            "8": 560,
+            "9": 555,
+            "10": 526,
+            "11": 515,
+            "12": 503,
+            "13": 554,
+            "14": 490,
+            "15": 551
+          },
+          "topNumbers": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "14",
+              "count": 490
+            },
+            {
+              "value": "2",
+              "count": 491
+            },
+            {
+              "value": "12",
+              "count": 503
+            },
+            {
+              "value": "5",
+              "count": 505
+            },
+            {
+              "value": "6",
+              "count": 510
+            },
+            {
+              "value": "7",
+              "count": 512
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "10",
+              "count": 526
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "topSums": [
+            {
+              "value": "8",
+              "count": 560
+            },
+            {
+              "value": "9",
+              "count": 555
+            },
+            {
+              "value": "13",
+              "count": 554
+            },
+            {
+              "value": "15",
+              "count": 551
+            },
+            {
+              "value": "1",
+              "count": 533
+            },
+            {
+              "value": "10",
+              "count": 526
+            },
+            {
+              "value": "3",
+              "count": 525
+            },
+            {
+              "value": "4",
+              "count": 525
+            },
+            {
+              "value": "11",
+              "count": 515
+            },
+            {
+              "value": "7",
+              "count": 512
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "Morning",
+              "count": 1571
+            },
+            {
+              "value": "Matinee",
+              "count": 1571
+            },
+            {
+              "value": "Afternoon",
+              "count": 1571
+            },
+            {
+              "value": "Evening",
+              "count": 1571
+            },
+            {
+              "value": "LateNight",
+              "count": 1571
+            }
+          ],
+          "positionFrequency": [
+            {
+              "1": 533,
+              "2": 491,
+              "3": 525,
+              "4": 525,
+              "5": 505,
+              "6": 510,
+              "7": 512,
+              "8": 560,
+              "9": 555,
+              "10": 526,
+              "11": 515,
+              "12": 503,
+              "13": 554,
+              "14": 490,
+              "15": 551
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "8",
+                "count": 560
+              },
+              {
+                "value": "9",
+                "count": 555
+              },
+              {
+                "value": "13",
+                "count": 554
+              },
+              {
+                "value": "15",
+                "count": 551
+              },
+              {
+                "value": "1",
+                "count": 533
+              },
+              {
+                "value": "10",
+                "count": 526
+              },
+              {
+                "value": "3",
+                "count": 525
+              },
+              {
+                "value": "4",
+                "count": 525
+              },
+              {
+                "value": "11",
+                "count": 515
+              },
+              {
+                "value": "7",
+                "count": 512
+              }
+            ]
+          ]
+        },
+        "last12Months": {
+          "count": 1830,
+          "from": "2025-04-22",
+          "to": "2026-04-22",
+          "uniqueDates": 366,
+          "avgDrawsPerDate": 5,
+          "repeatFromPriorPct": 6.51,
+          "numberFrequency": {
+            "1": 111,
+            "2": 116,
+            "3": 112,
+            "4": 118,
+            "5": 130,
+            "6": 116,
+            "7": 123,
+            "8": 123,
+            "9": 125,
+            "10": 143,
+            "11": 122,
+            "12": 115,
+            "13": 124,
+            "14": 120,
+            "15": 132
+          },
+          "topNumbers": [
+            {
+              "value": "10",
+              "count": 143
+            },
+            {
+              "value": "15",
+              "count": 132
+            },
+            {
+              "value": "5",
+              "count": 130
+            },
+            {
+              "value": "9",
+              "count": 125
+            },
+            {
+              "value": "13",
+              "count": 124
+            },
+            {
+              "value": "7",
+              "count": 123
+            },
+            {
+              "value": "8",
+              "count": 123
+            },
+            {
+              "value": "11",
+              "count": 122
+            },
+            {
+              "value": "14",
+              "count": 120
+            },
+            {
+              "value": "4",
+              "count": 118
+            }
+          ],
+          "coldNumbers": [
+            {
+              "value": "1",
+              "count": 111
+            },
+            {
+              "value": "3",
+              "count": 112
+            },
+            {
+              "value": "12",
+              "count": 115
+            },
+            {
+              "value": "2",
+              "count": 116
+            },
+            {
+              "value": "6",
+              "count": 116
+            },
+            {
+              "value": "4",
+              "count": 118
+            },
+            {
+              "value": "14",
+              "count": 120
+            },
+            {
+              "value": "11",
+              "count": 122
+            },
+            {
+              "value": "7",
+              "count": 123
+            },
+            {
+              "value": "8",
+              "count": 123
+            }
+          ],
+          "topCombos": [
+            {
+              "value": "10",
+              "count": 143
+            },
+            {
+              "value": "15",
+              "count": 132
+            },
+            {
+              "value": "5",
+              "count": 130
+            },
+            {
+              "value": "9",
+              "count": 125
+            },
+            {
+              "value": "13",
+              "count": 124
+            },
+            {
+              "value": "7",
+              "count": 123
+            },
+            {
+              "value": "8",
+              "count": 123
+            },
+            {
+              "value": "11",
+              "count": 122
+            },
+            {
+              "value": "14",
+              "count": 120
+            },
+            {
+              "value": "4",
+              "count": 118
+            }
+          ],
+          "topSums": [
+            {
+              "value": "10",
+              "count": 143
+            },
+            {
+              "value": "15",
+              "count": 132
+            },
+            {
+              "value": "5",
+              "count": 130
+            },
+            {
+              "value": "9",
+              "count": 125
+            },
+            {
+              "value": "13",
+              "count": 124
+            },
+            {
+              "value": "7",
+              "count": 123
+            },
+            {
+              "value": "8",
+              "count": 123
+            },
+            {
+              "value": "11",
+              "count": 122
+            },
+            {
+              "value": "14",
+              "count": 120
+            },
+            {
+              "value": "4",
+              "count": 118
+            }
+          ],
+          "drawTypeDistribution": [
+            {
+              "value": "Morning",
+              "count": 366
+            },
+            {
+              "value": "Matinee",
+              "count": 366
+            },
+            {
+              "value": "Afternoon",
+              "count": 366
+            },
+            {
+              "value": "Evening",
+              "count": 366
+            },
+            {
+              "value": "LateNight",
+              "count": 366
+            }
+          ],
+          "positionFrequency": [
+            {
+              "1": 111,
+              "2": 116,
+              "3": 112,
+              "4": 118,
+              "5": 130,
+              "6": 116,
+              "7": 123,
+              "8": 123,
+              "9": 125,
+              "10": 143,
+              "11": 122,
+              "12": 115,
+              "13": 124,
+              "14": 120,
+              "15": 132
+            }
+          ],
+          "positionFrequencies": [
+            [
+              {
+                "value": "10",
+                "count": 143
+              },
+              {
+                "value": "15",
+                "count": 132
+              },
+              {
+                "value": "5",
+                "count": 130
+              },
+              {
+                "value": "9",
+                "count": 125
+              },
+              {
+                "value": "13",
+                "count": 124
+              },
+              {
+                "value": "7",
+                "count": 123
+              },
+              {
+                "value": "8",
+                "count": 123
+              },
+              {
+                "value": "11",
+                "count": 122
+              },
+              {
+                "value": "14",
+                "count": 120
+              },
+              {
+                "value": "4",
+                "count": 118
+              }
+            ]
+          ]
+        }
+      },
+      "detectedFormatTransitions": [],
+      "formatSegments": [
+        {
+          "segment": "segment-1",
+          "from": "2022-01-03",
+          "to": "2026-04-22",
+          "count": 7855,
+          "labelsSeen": [
+            "Afternoon",
+            "Evening",
+            "LateNight",
+            "Matinee",
+            "Morning"
+          ],
+          "bonusRatePct": 0
+        }
+      ]
+    }
+  ]
+}
