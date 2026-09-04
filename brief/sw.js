@@ -1,4 +1,4 @@
-const CACHE = 'subnet-brief-v4';
+const CACHE = 'subnet-brief-v5';
 const URLS = [
   './', './index.html', './manifest.json',
   './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
