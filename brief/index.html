@@ -270,6 +270,39 @@ nav.tabs {
   .meta { flex-wrap:wrap; gap:8px 12px; }
   .card-top { flex-wrap:wrap; }
 }
+@media (pointer: fine) and (min-width: 760px) {
+  #install, #install.show { display:none !important; }
+}
+@media (min-width: 880px) {
+  main { max-width:1180px; padding:8px 28px 36px; }
+  header { max-width:1180px; margin:0 auto; width:100%; padding-left:28px; padding-right:28px; }
+  .hero { font-size:36px; }
+  .lede { font-size:16px; max-width:62ch; }
+  .stats { grid-template-columns:repeat(4, 1fr); gap:10px; }
+  .movers { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #cards { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .card { margin-bottom:0; }
+  #cards .empty, #cards .spin { grid-column:1 / -1; }
+  .rules { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  #sleeves { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
+  .sleeve { margin-bottom:0; }
+  #guide.screen.on { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
+  #guide .hero, #guide .lede, #guide .foot { grid-column:1 / -1; }
+  .guide-card { margin-bottom:0; }
+  .grid3 { grid-template-columns:repeat(3, 1fr); gap:10px; }
+  nav.tabs {
+    left:50%; right:auto; width:min(1180px, calc(100% - 48px));
+    transform:translateX(-50%);
+    border-radius:16px 16px 0 0;
+    border:1px solid var(--line); border-bottom:none;
+    padding:6px 8px;
+  }
+  .tab { height:40px; font-size:11px; }
+}
+@media (min-width: 1280px) {
+  #cards { grid-template-columns:1fr 1fr 1fr; }
+  #sleeves { grid-template-columns:1fr 1fr 1fr; }
+}
 @keyframes tape {
   from { transform:translateX(0); }
   to { transform:translateX(-50%); }
@@ -1225,8 +1258,14 @@ $('ck-clear').addEventListener('click', () => {
 const SITE = 'https://ooverstreet.github.io/Owen/brief/';
 const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 let deferredPrompt = null;
+function isPhone() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPod/.test(ua)) return true;
+  if (/Android/i.test(ua) && /Mobile/i.test(ua)) return true;
+  return false;
+}
 function showInstall(kind) {
-  if (standalone || localStorage.getItem('sb-a2hs') === '1') return;
+  if (!isPhone() || standalone || localStorage.getItem('sb-a2hs') === '1') return;
   const go = $('install-go');
   const copy = $('install-copy');
   $('install').dataset.kind = kind;
@@ -1242,7 +1281,7 @@ function showInstall(kind) {
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  showInstall('android');
+  if (isPhone()) showInstall('android');
 });
 $('install-x').addEventListener('click', () => {
   localStorage.setItem('sb-a2hs', '1');
@@ -1275,8 +1314,8 @@ $('share').addEventListener('click', async () => {
 });
 {
   const ua = navigator.userAgent || '';
-  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (ios && !standalone) showInstall('ios');
+  const iosPhone = /iPhone|iPod/.test(ua);
+  if (iosPhone && !standalone) showInstall('ios');
 }
 
 window.addEventListener('hashchange', applyHash);
