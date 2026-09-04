@@ -274,12 +274,12 @@ nav.tabs {
   #install, #install.show { display:none !important; }
 }
 @media (min-width: 880px) {
-  main { max-width:1180px; padding:8px 28px 36px; }
-  header { max-width:1180px; margin:0 auto; width:100%; padding-left:28px; padding-right:28px; }
+  main { max-width:1560px; padding:8px 40px 36px; }
+  header { max-width:1560px; margin:0 auto; width:100%; padding-left:40px; padding-right:40px; }
   .hero { font-size:36px; }
   .lede { font-size:16px; max-width:62ch; }
   .stats { grid-template-columns:repeat(4, 1fr); gap:10px; }
-  .movers { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .movers, #movers { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   #cards { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .card { margin-bottom:0; }
   #cards .empty, #cards .spin { grid-column:1 / -1; }
@@ -291,7 +291,7 @@ nav.tabs {
   .guide-card { margin-bottom:0; }
   .grid3 { grid-template-columns:repeat(3, 1fr); gap:10px; }
   nav.tabs {
-    left:50%; right:auto; width:min(1180px, calc(100% - 48px));
+    left:50%; right:auto; width:min(1560px, calc(100% - 80px));
     transform:translateX(-50%);
     border-radius:16px 16px 0 0;
     border:1px solid var(--line); border-bottom:none;
