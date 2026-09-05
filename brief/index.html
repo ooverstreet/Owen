@@ -1412,11 +1412,10 @@ function renderAllocate() {
   const isRoot = Number(a.netuid) === 0;
   const take = val ? takePctLabel(val.take) : '…';
   const cta = stakeCta(a.amount, a.netuid);
-  const ready = !a.busy && !!a.amount && !!a.hotkey && signing;
   el.innerHTML = `<div class="alloc-box">
     <h3>Stake</h3>
     <p class="why">Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.</p>
-    ${!signing ? `<p class="warn-line">This browser cannot sign. Open Nova → Browser → this same link, then Show my book.</p>` : ''}
+    ${!signing ? `<p class="warn-line">This browser can show the extra, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
     <div class="alloc-fields">
       <label>How much · ${fmtTao(free, 2)} free</label>
       <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}" aria-label="Amount in TAO">
@@ -1433,7 +1432,7 @@ function renderAllocate() {
           return `<button type="button" class="tippy ${Number(a.netuid)===Number(id)?'on':''}" data-dest="${id}" data-tip="${esc(destTip(id))}"><span>${esc(pill.title)}</span><small>${esc(pill.sub)}</small></button>`;
         }).join('')}
       </div>
-      <p class="dest-tip">${esc(destTip(a.netuid))}</p>
+      <p class="dest-tip" id="alloc-dest-tip">${esc(destTip(a.netuid))}</p>
       <button type="button" class="hint-btn tippy" id="alloc-val-hint" data-tip="The validator is who your stake sits with. Their fee comes out of emissions — not an extra charge from Brief. We picked the lowest fee we could find on this shop.">
         Validator fee ${esc(take)} · we pick this for you
       </button>
@@ -1441,7 +1440,7 @@ function renderAllocate() {
       ${q ? `<p class="hint" style="margin:0">${isRoot ? 'Root stays TAO. No pool slip.' : `You get about ${Number(q.expected_out||0).toFixed(4)} of this shop’s token · ${Number(q.price_impact_pct||0).toFixed(3)}% pool move`}</p>` : ''}
       ${a.err ? `<p class="warn-line">${esc(a.err)}</p>` : ''}
       ${!a.hotkey && a.vals.length === 0 ? `<p class="hint" style="margin:0">Looking for a validator…</p>` : ''}
-      <button type="button" class="btn stake-go" id="alloc-review" ${ready ? '' : 'disabled'}>${esc(cta)}</button>
+      <button type="button" class="btn stake-go" id="alloc-review" ${a.busy ? 'disabled' : ''}>${esc(cta)}</button>
     </div>
   </div>`;
 }
@@ -1826,6 +1825,19 @@ document.addEventListener('click', e => {
     state.allocate.tip = state.allocate.tip === 'val' ? '' : 'val';
     renderAllocate();
   }
+});
+document.addEventListener('mouseover', e => {
+  const pill = e.target.closest && e.target.closest('#alloc-dests [data-dest]');
+  const tip = $('alloc-dest-tip');
+  if (pill && tip) tip.textContent = destTip(Number(pill.dataset.dest));
+});
+document.addEventListener('mouseout', e => {
+  const pills = $('alloc-dests');
+  const tip = $('alloc-dest-tip');
+  if (!pills || !tip || !e.relatedTarget) return;
+  if (pills.contains(e.relatedTarget)) return;
+  if (!pills.contains(e.target)) return;
+  tip.textContent = destTip(state.allocate.netuid);
 });
 
 const SITE = 'https://ooverstreet.github.io/Owen/brief/';
