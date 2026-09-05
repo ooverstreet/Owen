@@ -1,3 +1,5 @@
 node_modules/
 package.json
 package-lock.json
+!brief/package.json
+!brief/package-lock.json

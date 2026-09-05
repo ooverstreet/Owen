@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
-<meta name="description" content="Bittensor in plain English. What each subnet does, whether anyone pays, and what can go wrong. Public address only — no seed, no stake button.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta name="description" content="Bittensor in plain English. Show a public book. Allocate only with a wallet-signed extra — no seed, no custody.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Bittensor in plain English</title>
 <link rel="canonical" href="https://ooverstreet.github.io/Owen/brief/">
 <meta property="og:title" content="Subnet Brief">
-<meta property="og:description" content="Bittensor in plain English. Read a public book. No seed. No stake button.">
+<meta property="og:description" content="Bittensor in plain English. Read a public book. Allocate only with a wallet signature. No seed.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ooverstreet.github.io/Owen/brief/">
 <meta property="og:image" content="https://ooverstreet.github.io/Owen/brief/icon-512.png">
@@ -193,6 +193,60 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .alloc b { width:92px; font-size:13px; }
 .alloc span { width:64px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
 
+#desk-grid { display:flex; flex-direction:column; gap:16px; }
+.connect-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0 10px; }
+#ck-connect {
+  height:46px; padding:0 16px; border-radius:12px;
+  background:var(--gold); color:#1a1408; font-size:14px; font-weight:700;
+}
+#ck-connect.ghost { background:transparent; color:var(--mute); border:1px solid var(--line); }
+.acct {
+  display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;
+}
+.acct button {
+  height:34px; padding:0 10px; border-radius:999px; border:1px solid var(--line);
+  background:var(--paper); color:var(--mute); font-size:12px; font-weight:560;
+}
+.acct button.on { background:var(--gold); color:#1a1408; border-color:var(--gold); }
+.alloc-box {
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:14px 14px 12px;
+}
+.alloc-box h3 { font-family:Fraunces, serif; font-size:18px; margin-bottom:6px; }
+.alloc-box .why { color:var(--mute); font-size:13.5px; line-height:1.5; margin-bottom:12px; }
+.alloc-fields { display:flex; flex-direction:column; gap:8px; }
+.alloc-fields label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); font-weight:700; }
+.alloc-fields input, .alloc-fields select {
+  width:100%; height:42px; border-radius:12px; border:1px solid var(--line);
+  background:var(--paper2); padding:0 12px; outline:none; font-size:16px; color:var(--ink);
+}
+.alloc-fields input:focus, .alloc-fields select:focus { border-color:var(--gold); }
+.dests { display:flex; flex-wrap:wrap; gap:6px; }
+.dests button {
+  height:32px; padding:0 10px; border-radius:999px; border:1px solid var(--line);
+  background:transparent; color:var(--mute); font-size:12px; font-weight:560;
+}
+.dests button.on { background:var(--paper2); color:var(--ink); border-color:#3a4254; }
+#sheet {
+  display:none; position:fixed; inset:0; z-index:50;
+  background:rgba(6,8,12,.72); padding:24px 16px;
+}
+#sheet.show { display:grid; place-items:center; }
+.sheet-card {
+  width:min(480px, 100%); background:var(--paper); border:1px solid var(--line);
+  border-radius:18px; padding:18px 16px 14px; max-height:min(88dvh, 720px); overflow:auto;
+}
+.sheet-card h3 { font-family:Fraunces, serif; font-size:22px; margin-bottom:8px; }
+.sheet-card p { color:var(--mute); font-size:14px; line-height:1.5; margin-bottom:10px; }
+.sheet-row {
+  display:flex; justify-content:space-between; gap:12px;
+  padding:8px 0; border-top:1px solid var(--line); font-size:13px;
+}
+.sheet-row b { color:var(--ink); font-weight:560; text-align:right; }
+.sheet-actions { display:flex; gap:8px; margin-top:14px; }
+.sheet-actions .btn { flex:1; }
+.warn-line { color:var(--warn); font-size:13px; line-height:1.45; }
+.ok-line { color:var(--ok); font-size:13px; }
 .lookup { display:flex; gap:8px; margin:10px 0 8px; }
 .lookup input {
   flex:1; min-width:0; height:42px; border-radius:12px; border:1px solid var(--line);
@@ -285,6 +339,7 @@ nav.tabs {
   #cards { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
   .card { margin-bottom:0; min-width:0; }
   #cards .empty, #cards .spin { grid-column:1 / -1; }
+  #desk-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
   .rules { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   #sleeves { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
   .sleeve { margin-bottom:0; }
@@ -376,29 +431,42 @@ nav.tabs {
 
     <section id="desk" class="screen">
       <div class="hero">Root is the savings account. Subnets are the job.</div>
-      <p class="lede">A dashboard already exists. This desk is the service: read your public book, in English, without ever touching a key. When we take a fee it will be a validator take-rate you can see on-chain — never a seed phrase, never custody.</p>
+      <p class="lede">Show your book, then allocate only if you mean to. A wallet signature is the only thing that can move TAO. We never see a seed, and we do not send you to another desk to stake.</p>
 
       <div class="rules">
-        <div class="rule"><b>Secure.</b> Paste a public address only. We never ask for a seed, JSON wallet, or password. There is no stake button yet, on purpose — and we do not send you to another app to stake either.</div>
-        <div class="rule"><b>Trustworthy.</b> Every number is a public chain read via Metagraphed. We say when revenue is verified vs claimed. Not financial advice.</div>
-        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: if you ever allocate through a validator we run, the protocol already pays the commission. Today this UI is free so you can check the work.</div>
+        <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
+        <div class="rule"><b>Trustworthy.</b> Reads are public chain data via Metagraphed. A stake extra names the validator and the take in the wallet prompt. Not financial advice.</div>
+        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: when this desk names its own validator, the protocol already pays the commission. Until then the extra still names whoever you pick, and the take is in the prompt.</div>
       </div>
 
-      <h2 class="section-h" style="display:block;margin-bottom:6px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700">Your book · read only</span></h2>
-      <div class="lookup">
-        <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
-        <button type="button" id="ck-go">Look up</button>
+      <div id="desk-grid">
+        <div>
+          <h2 class="section-h" style="display:block;margin-bottom:6px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700">Your book</span></h2>
+          <div class="connect-row">
+            <button type="button" id="ck-connect">Show my book</button>
+            <button type="button" id="ck-disconnect" class="btn btn-ghost" hidden>Disconnect</button>
+          </div>
+          <p class="hint" id="ck-connect-hint">Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.</p>
+          <div class="acct" id="acct-pick" hidden></div>
+          <p class="hint">or paste a public address — read only, cannot sign</p>
+          <div class="lookup">
+            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
+            <button type="button" id="ck-go">Look up</button>
+          </div>
+          <p class="hint">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
+          <div id="you-book"></div>
+        </div>
+        <div id="allocate"></div>
       </div>
-      <p class="hint">Public SS58 only. Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
-      <div id="you-book"></div>
 
       <div class="pay">
         <h3>How this becomes a business</h3>
-        <p>Bitcoin explorers were free and crowded. Mining pools made money because hashpower flowed through them (about 1–2%). The Bittensor analog is stake flowing through a validator. This UI is how people trust that flow. No take-rate until there is a named validator and a wallet-signed extra — not before.</p>
+        <p>The extra is a Subtensor stake call. TAO leaves your free balance and sits on a named validator. On a subnet it swaps into alpha; on Root it stays TAO. The protocol pays that validator’s take. When Brief runs its own hotkey, this list locks to us.</p>
       </div>
       <div id="sleeves"></div>
-      <p class="foot">Hypothetical 100 TAO sleeves below. Not a stake button, not a promise of yield. Names and weights will change.</p>
+      <p class="foot">Hypothetical 100 TAO sleeves below are still a sketch. Allocate above is the real extra. Names and weights will change.</p>
     </section>
+    <div id="sheet" hidden></div>
 
     <section id="guide" class="screen">
       <div class="hero">How this actually works</div>
@@ -413,7 +481,7 @@ nav.tabs {
         <ul>
           <li>We never ask for a seed phrase, private key, or wallet JSON. If a screen ever does, it is not this app.</li>
           <li>Lookup is a GET to a public indexer. Your address is already on the chain; we do not “collect” it as an account.</li>
-          <li>No stake, unstake, or transfer in this build. We also do not hand you to taostats or another desk to allocate. The first signing extra will name the validator and the take-rate in the confirmation itself.</li>
+          <li>Allocate is a wallet-signed extra. The confirmation names the validator and the take. We also do not hand you to taostats to do it.</li>
           <li>Briefs are editorial. Live prices are chain data. We label claimed revenue so it cannot hide as fact.</li>
         </ul>
       </div>
@@ -464,12 +532,19 @@ nav.tabs {
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
+<script src="chain.js"></script>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
 const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
 const WORK_IDS = [64, 51, 4];
 const RESEARCH_IDS = [120, 62, 34];
 const SS58_RE = /^5[1-9A-HJ-NP-Za-km-z]{46,48}$/;
+const DESK = {
+  name: 'Brief desk',
+  hotkey: '',
+  slippage: 0.05,
+  minTao: 0.002
+};
 const ROLES = [
   ['staker', 'Staker'],
   ['miner', 'Miner'],
@@ -684,7 +759,11 @@ const state = {
   taoUsd: null,
   generatedAt: null,
   live: false,
-  ss58: localStorage.getItem('sb-ck') || ''
+  ss58: localStorage.getItem('sb-ck') || '',
+  wallet: null,
+  accounts: [],
+  connectErr: '',
+  allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false }
 };
 
 const $ = id => document.getElementById(id);
@@ -826,7 +905,7 @@ function renderTake() {
   const tot = root + alpha;
   const pctRoot = tot ? (root/tot*100).toFixed(0) : '—';
   const copy = {
-    staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. Open Desk, paste a public coldkey, and read the book in English — no seed, no stake button. That is the service. The fee, later, is a validator take-rate you can see on-chain.`,
+    staker: `About ${pctRoot}% of the value is still sitting in Root. Most holders have not picked a shop. Open Desk and tap Show my book — the wallet shares a public address, then you can allocate with a signed extra. The take is in the prompt.`,
     miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
     builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
     curious: `Ignore the 40-column screens for a minute. Each subnet is a shop with its own token. A few have paying users. Most recycle TAO. Scroll the briefs; the Guide tab is the map.`
@@ -1055,14 +1134,17 @@ function renderYouBook() {
   const y = state.you;
   if (y === 'loading') {
     el.innerHTML = '<div class="spin"></div>';
+    renderAllocate();
     return;
   }
   if (y && y.error) {
     el.innerHTML = `<div class="empty">${esc(y.error)}</div>`;
+    renderAllocate();
     return;
   }
   if (!y) {
     el.innerHTML = '';
+    renderAllocate();
     return;
   }
   const rows = y.agg;
@@ -1099,15 +1181,321 @@ function renderYouBook() {
         const row = rowBy(p.netuid) || { netuid: p.netuid, name: 'SN'+p.netuid };
         const g = gradeOf(row);
         const pct = total ? (p.tao / total * 100) : 0;
-        return `<button class="pos" data-sn="${p.netuid}" type="button">
-          <span class="badge ${g}">${gradeLabel(g)}</span>
-          <b>SN${p.netuid} ${esc(row.name || '')}</b>
-          <i>${fmtTao(p.tao, 1)} · ${pct.toFixed(1)}%</i>
-        </button>`;
+        const canSign = !!(state.wallet && state.wallet.address === y.ss58);
+        const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
+        return `<div class="pos">
+          <button data-sn="${p.netuid}" type="button" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:left">
+            <span class="badge ${g}">${gradeLabel(g)}</span>
+            <b>SN${p.netuid} ${esc(row.name || '')}</b>
+            <i>${fmtTao(p.tao, 1)} · ${pct.toFixed(1)}%</i>
+          </button>
+          ${canSign && pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
+        </div>`;
       }).join('')}
       ${rows.length > 10 ? `<p class="hint" style="margin-top:8px">${rows.length - 10} more shops not shown. A desk is supposed to shrink this list.</p>` : ''}
-      <p class="hint" style="margin-top:8px">Read-only chain data. ${briefed.length} of ${rows.length} names have an editorial brief here. Research sleeve overlap: ${fmtTao(researchTao, 1)}.</p>
+      <p class="hint" style="margin-top:8px">${state.wallet && state.wallet.address === y.ss58 ? 'Connected book — allocate on the right. ' : 'Read-only chain data. '}${briefed.length} of ${rows.length} names have an editorial brief here. Research sleeve overlap: ${fmtTao(researchTao, 1)}.</p>
     </div>`;
+  renderAllocate();
+}
+
+function fmtTake(t) {
+  const n = num(t);
+  if (n == null) return 'take unknown';
+  return (n * 100).toFixed(n && n < 0.01 ? 2 : 1) + '% take';
+}
+
+function destName(id) {
+  if (Number(id) === 0) return 'SN0 Root';
+  const r = rowBy(id);
+  return r ? `SN${r.netuid} ${r.name || ''}` : 'SN' + id;
+}
+
+function renderConnect() {
+  const btn = $('ck-connect');
+  const disc = $('ck-disconnect');
+  const hint = $('ck-connect-hint');
+  const pick = $('acct-pick');
+  if (!btn) return;
+  const w = state.wallet;
+  if (w) {
+    btn.textContent = 'Connected · ' + shortAddr(w.address);
+    btn.classList.add('ghost');
+    disc.hidden = false;
+    hint.textContent = (w.name ? w.name + ' · ' : '') + (w.source || 'wallet') + '. This address can sign. Paste below is still read-only.';
+  } else {
+    btn.textContent = 'Show my book';
+    btn.classList.remove('ghost');
+    disc.hidden = true;
+    hint.textContent = state.connectErr || 'Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.';
+  }
+  if (state.accounts.length > 1) {
+    pick.hidden = false;
+    pick.innerHTML = state.accounts.map(a =>
+      `<button type="button" data-acct="${esc(a.address)}" class="${w && w.address === a.address ? 'on' : ''}">${esc(a.name || shortAddr(a.address))}</button>`
+    ).join('');
+  } else {
+    pick.hidden = true;
+    pick.innerHTML = '';
+  }
+}
+
+function featuredDests() {
+  const ids = [0, ...WORK_IDS, ...RESEARCH_IDS];
+  const out = [];
+  const seen = new Set();
+  for (const id of ids) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+
+async function loadValidators(netuid) {
+  try {
+    const res = await fetch(API + '/subnets/' + netuid + '/validators?fields=hotkey,stake_tao,take,uid');
+    const js = await res.json();
+    const vals = (js.data && js.data.validators) || [];
+    const pinned = DESK.hotkey && SS58_RE.test(DESK.hotkey) ? DESK.hotkey : '';
+    const ranked = [...vals].sort((a, b) => (num(b.stake_tao) || 0) - (num(a.stake_tao) || 0));
+    let list = ranked.slice(0, 8);
+    if (pinned && !list.some(v => v.hotkey === pinned)) {
+      const extra = ranked.find(v => v.hotkey === pinned);
+      list = extra ? [extra, ...list].slice(0, 8) : [{ hotkey: pinned, take: null, stake_tao: null, uid: null, desk: true }, ...list].slice(0, 8);
+    }
+    if (pinned) list = list.map(v => v.hotkey === pinned ? { ...v, desk: true } : v);
+    state.allocate.vals = list;
+    if (pinned) state.allocate.hotkey = pinned;
+    else if (!list.some(v => v.hotkey === state.allocate.hotkey)) state.allocate.hotkey = list[0] ? list[0].hotkey : '';
+  } catch {
+    state.allocate.vals = DESK.hotkey ? [{ hotkey: DESK.hotkey, take: null, desk: true }] : [];
+    state.allocate.hotkey = DESK.hotkey || '';
+  }
+}
+
+async function loadQuote() {
+  const a = state.allocate;
+  const amt = Number(a.amount);
+  if (!amt || amt <= 0) { a.quote = null; return; }
+  try {
+    const res = await fetch(API + '/subnets/' + a.netuid + '/stake-quote?amount=' + encodeURIComponent(amt) + '&direction=stake');
+    const js = await res.json();
+    a.quote = js.ok ? js.data : null;
+    if (!js.ok) a.err = (js.error && js.error.message) || '';
+    else a.err = '';
+  } catch {
+    a.quote = null;
+  }
+}
+
+function selectedVal() {
+  return state.allocate.vals.find(v => v.hotkey === state.allocate.hotkey) || null;
+}
+
+function renderAllocate() {
+  const el = $('allocate');
+  if (!el) return;
+  const w = state.wallet;
+  const y = state.you && typeof state.you === 'object' && !state.you.error ? state.you : null;
+  if (!w) {
+    el.innerHTML = `<div class="alloc-box">
+      <h3>Allocate</h3>
+      <p class="why">Connect first. Paste can read any public book; only the wallet you approve can sign an extra.</p>
+    </div>`;
+    return;
+  }
+  if (!y || y.ss58 !== w.address) {
+    el.innerHTML = `<div class="alloc-box">
+      <h3>Allocate</h3>
+      <p class="why">Book is loading for ${esc(shortAddr(w.address))}…</p>
+    </div>`;
+    return;
+  }
+  const a = state.allocate;
+  const val = selectedVal();
+  const dests = featuredDests();
+  const q = a.quote;
+  const free = y.balance || 0;
+  el.innerHTML = `<div class="alloc-box">
+    <h3>Allocate</h3>
+    <p class="why">This builds a wallet extra. On Root, stake stays TAO. On a subnet, it swaps into alpha at the pool — not a yield promise. Slippage cap ${((DESK.slippage||0)*100).toFixed(0)}%.</p>
+    <div class="alloc-fields">
+      <label>Amount · ${fmtTao(free, 2)} free</label>
+      <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}">
+      <label>Into</label>
+      <div class="dests" id="alloc-dests">
+        ${dests.map(id => `<button type="button" data-dest="${id}" class="${Number(a.netuid)===Number(id)?'on':''}">${esc(destName(id))}</button>`).join('')}
+      </div>
+      <label>Through · validator + take</label>
+      <select id="alloc-val">
+        ${a.vals.map(v => `<option value="${esc(v.hotkey)}" ${v.hotkey===a.hotkey?'selected':''}>${v.desk ? DESK.name + ' · ' : ''}${esc(shortAddr(v.hotkey))} · ${esc(fmtTake(v.take))}</option>`).join('') || '<option value="">No validators loaded</option>'}
+      </select>
+      ${q ? `<p class="hint" style="margin:0">${Number(a.netuid)===0 ? 'Root is 1:1 TAO. No pool slip.' : `Quote ≈ ${Number(q.expected_out||0).toFixed(4)} α · impact ${Number(q.price_impact_pct||0).toFixed(3)}%`}</p>` : ''}
+      ${a.err ? `<p class="warn-line">${esc(a.err)}</p>` : ''}
+      ${val ? `<p class="hint" style="margin:0">Prompt will name ${esc(val.desk ? DESK.name : shortAddr(val.hotkey))} · ${esc(fmtTake(val.take))}</p>` : ''}
+      <button type="button" class="btn" id="alloc-review" ${a.busy || !a.amount || !a.hotkey ? 'disabled' : ''}>Review extra</button>
+    </div>
+  </div>`;
+}
+
+function limitRaoFromQuote(q, direction) {
+  if (!q) return null;
+  const spot = num(q.effective_price_tao) ?? num(q.spot_price_tao);
+  if (spot == null) return null;
+  const slip = DESK.slippage || 0.05;
+  const bound = direction === 'unstake' ? spot * (1 - slip) : spot * (1 + slip);
+  try { return window.BriefChain.taoToRao(bound.toFixed(9)); } catch { return null; }
+}
+
+function closeSheet() {
+  const el = $('sheet');
+  el.classList.remove('show');
+  el.hidden = true;
+  el.innerHTML = '';
+}
+
+function openSheet(kind, extra) {
+  const el = $('sheet');
+  const netName = destName(extra.netuid);
+  const take = extra.take;
+  const q = extra.quote;
+  const isRoot = Number(extra.netuid) === 0;
+  const title = kind === 'unstake' ? 'Unstake' : 'Stake';
+  const verb = kind === 'unstake' ? 'Pull' : 'Stake';
+  el.hidden = false;
+  el.classList.add('show');
+  el.innerHTML = `<div class="sheet-card">
+    <h3>${title} ${esc(netName)}</h3>
+    <p>${kind === 'unstake' ? 'This extra sells alpha back toward TAO (Root is 1:1) and leaves this validator.' : (isRoot ? 'Root stake stays TAO-denominated.' : 'This extra swaps TAO into this shop’s alpha at the pool. You can get more alpha and still lose TAO if the price falls.')}</p>
+    <div class="sheet-row"><span>Amount</span><b>${esc(String(extra.amount))} τ</b></div>
+    <div class="sheet-row"><span>Destination</span><b>${esc(netName)}</b></div>
+    <div class="sheet-row"><span>Validator</span><b>${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))}<br>${esc(extra.hotkey)}</b></div>
+    <div class="sheet-row"><span>Take</span><b>${esc(fmtTake(take))}</b></div>
+    <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none (Root)' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
+    ${q && !isRoot ? `<div class="sheet-row"><span>Quote</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' α'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% impact':''}</b></div>` : ''}
+    <p class="warn-line">The wallet prompt is the contract. If it does not name this validator, cancel. We never ask for a seed.</p>
+    <p id="sheet-status" class="hint"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn" id="sheet-sign">${verb} in wallet</button>
+      <button type="button" class="btn btn-ghost" id="sheet-cancel">Cancel</button>
+    </div>
+  </div>`;
+  $('sheet-cancel').onclick = closeSheet;
+  el.onclick = ev => { if (ev.target === el) closeSheet(); };
+  $('sheet-sign').onclick = () => signExtra(kind, extra);
+}
+
+async function signExtra(kind, extra) {
+  const status = $('sheet-status');
+  const go = $('sheet-sign');
+  if (!window.BriefChain) {
+    status.innerHTML = '<span class="warn-line">Chain module failed to load.</span>';
+    return;
+  }
+  go.disabled = true;
+  status.textContent = 'Waiting on the wallet…';
+  try {
+    const limitPriceRao = limitRaoFromQuote(extra.quote, kind === 'unstake' ? 'unstake' : 'stake');
+    const args = {
+      address: state.wallet.address,
+      hotkey: extra.hotkey,
+      netuid: extra.netuid,
+      amountTao: extra.amount,
+      limitPriceRao
+    };
+    const res = kind === 'unstake' ? await BriefChain.removeStake(args) : await BriefChain.addStake(args);
+    status.innerHTML = `<span class="ok-line">In block ${esc((res.hash||'').slice(0,10))}… Refreshing the book.</span>`;
+    await lookupCk(state.wallet.address);
+    setTimeout(closeSheet, 1600);
+  } catch (e) {
+    const msg = String(e && e.message || e);
+    const nice = /reject|cancel|denied/i.test(msg) ? 'Cancelled in the wallet. Nothing was sent.' : msg;
+    status.innerHTML = `<span class="warn-line">${esc(nice)}</span>`;
+    go.disabled = false;
+  }
+}
+
+async function reviewAllocate() {
+  const a = state.allocate;
+  const val = selectedVal();
+  if (!state.wallet) return;
+  if (!a.amount || Number(a.amount) < DESK.minTao) {
+    a.err = 'Minimum is ' + DESK.minTao + ' TAO.';
+    renderAllocate();
+    return;
+  }
+  if (!a.hotkey) {
+    a.err = 'Pick a validator so the extra can name the take.';
+    renderAllocate();
+    return;
+  }
+  await loadQuote();
+  openSheet('stake', {
+    amount: a.amount,
+    netuid: a.netuid,
+    hotkey: a.hotkey,
+    take: val && val.take,
+    desk: !!(val && val.desk),
+    quote: a.quote
+  });
+}
+
+async function reviewUnstake(netuid, hotkey, amt) {
+  if (!state.wallet || !hotkey) return;
+  let quote = null;
+  try {
+    const res = await fetch(API + '/subnets/' + netuid + '/stake-quote?amount=' + encodeURIComponent(amt) + '&direction=unstake');
+    const js = await res.json();
+    quote = js.ok ? js.data : null;
+  } catch {}
+  const val = state.allocate.vals.find(v => v.hotkey === hotkey);
+  openSheet('unstake', {
+    amount: String(amt),
+    netuid: Number(netuid),
+    hotkey,
+    take: val && val.take,
+    desk: !!(val && val.desk),
+    quote
+  });
+}
+
+async function useWalletAccount(acct) {
+  state.wallet = acct;
+  $('ck').value = acct.address;
+  renderConnect();
+  await lookupCk(acct.address);
+  await loadValidators(state.allocate.netuid);
+  await loadQuote();
+  renderAllocate();
+}
+
+async function onConnect() {
+  const hint = $('ck-connect-hint');
+  if (state.wallet && state.accounts.length <= 1) return;
+  if (!window.BriefChain) {
+    state.connectErr = 'Chain module failed to load. Paste a public address instead.';
+    renderConnect();
+    return;
+  }
+  hint.textContent = 'Check the wallet popup…';
+  try {
+    const accts = await BriefChain.connect('Subnet Brief');
+    state.connectErr = '';
+    state.accounts = accts;
+    const pick = accts.find(a => a.address === state.ss58) || accts[0];
+    await useWalletAccount(pick);
+  } catch (e) {
+    state.connectErr = String(e && e.message || e);
+    renderConnect();
+  }
+}
+
+function onDisconnect() {
+  state.wallet = null;
+  state.accounts = [];
+  renderConnect();
+  renderYouBook();
+  renderAllocate();
 }
 
 async function lookupCk(raw) {
@@ -1145,6 +1533,7 @@ async function lookupCk(raw) {
     const bal = balRes.ok ? await balRes.json() : { data: {} };
     state.you = {
       ss58,
+      positions: pos.data?.positions || [],
       agg: aggregatePositions(pos.data?.positions),
       balance: num(bal.data?.balance_tao) || 0
     };
@@ -1204,6 +1593,8 @@ function render() {
   renderMovers();
   renderList();
   renderDesk();
+  renderConnect();
+  renderAllocate();
 }
 
 function openSn(id) {
@@ -1235,6 +1626,23 @@ document.addEventListener('click', e => {
     }
     return;
   }
+  const unstake = e.target.closest('[data-unstake]');
+  if (unstake) {
+    reviewUnstake(unstake.dataset.unstake, unstake.dataset.hotkey, unstake.dataset.amt);
+    return;
+  }
+  const acct = e.target.closest('[data-acct]');
+  if (acct) {
+    const found = state.accounts.find(a => a.address === acct.dataset.acct);
+    if (found) useWalletAccount(found);
+    return;
+  }
+  const dest = e.target.closest('[data-dest]');
+  if (dest) {
+    state.allocate.netuid = Number(dest.dataset.dest);
+    loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => renderAllocate());
+    return;
+  }
   const tab = e.target.closest('.tab');
   if (tab) { setTab(tab.dataset.tab); if (tab.dataset.tab !== 'detail') location.hash = tab.dataset.tab === 'pulse' ? '' : tab.dataset.tab; return; }
   const filt = e.target.closest('[data-filter]');
@@ -1255,6 +1663,33 @@ $('ck-clear').addEventListener('click', () => {
   state.you = null;
   localStorage.removeItem('sb-ck');
   renderYouBook();
+});
+$('ck-connect').addEventListener('click', onConnect);
+$('ck-disconnect').addEventListener('click', onDisconnect);
+document.addEventListener('input', e => {
+  if (e.target && e.target.id === 'alloc-amt') {
+    state.allocate.amount = e.target.value.trim();
+    clearTimeout(document._allocQ);
+    document._allocQ = setTimeout(async () => {
+      await loadQuote();
+      const inpWas = document.activeElement && document.activeElement.id === 'alloc-amt';
+      const pos = inpWas ? document.activeElement.selectionStart : null;
+      renderAllocate();
+      if (inpWas && $('alloc-amt')) {
+        $('alloc-amt').focus();
+        if (pos != null) $('alloc-amt').setSelectionRange(pos, pos);
+      }
+    }, 280);
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target && e.target.id === 'alloc-val') {
+    state.allocate.hotkey = e.target.value;
+    renderAllocate();
+  }
+});
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'alloc-review') reviewAllocate();
 });
 
 const SITE = 'https://ooverstreet.github.io/Owen/brief/';
@@ -1325,6 +1760,11 @@ window.addEventListener('hashchange', applyHash);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 load().then(() => {
   applyHash();
+  loadValidators(state.allocate.netuid);
+  if (window.BriefChain && !BriefChain.hasInjected()) {
+    state.connectErr = 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or paste a public address. On a phone, open this site inside Nova or SubWallet.';
+    renderConnect();
+  }
   if (state.ss58) {
     $('ck').value = state.ss58;
     lookupCk(state.ss58);

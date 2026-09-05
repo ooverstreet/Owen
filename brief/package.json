@@ -1,0 +1,15 @@
+{
+  "name": "subnet-brief-chain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/chain.js --bundle --format=iife --global-name=BriefChain --outfile=chain.js --minify"
+  },
+  "dependencies": {
+    "@polkadot/api": "^16.5.6",
+    "@polkadot/extension-dapp": "^0.62.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12"
+  }
+}

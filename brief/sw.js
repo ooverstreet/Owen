@@ -1,6 +1,6 @@
-const CACHE = 'subnet-brief-v7';
+const CACHE = 'subnet-brief-v8';
 const URLS = [
-  './', './index.html', './manifest.json',
+  './', './index.html', './manifest.json', './chain.js',
   './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
   './snapshot.json'
 ];
@@ -16,5 +16,6 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
   if (url.includes('metagraph.sh') || url.includes('googleapis') || url.includes('gstatic')) return;
+  if (url.startsWith('wss:') || url.includes('opentensor.ai') || url.includes('latent.to')) return;
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
