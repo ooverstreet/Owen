@@ -1479,7 +1479,7 @@ function openSheet(kind, extra) {
         : 'This puts TAO into ' + destShort(extra.netuid) + '. It becomes that shop’s token. You can get more of it and still lose TAO if the price falls.')}</p>
     <div class="sheet-row"><span>Amount</span><b>${esc(String(extra.amount))} τ</b></div>
     <div class="sheet-row"><span>Where</span><b>${esc(isRoot ? 'Park · Root' : destShort(extra.netuid))}</b></div>
-    <div class="sheet-row"><span>Validator fee</span><b>${esc(fmtTake(take))}</b></div>
+    <div class="sheet-row"><span>Validator fee</span><b>${esc(takePctLabel(take))}</b></div>
     <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none on Root' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
     ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
     <p class="hint" style="margin:8px 0 0">${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))} · named in the wallet prompt</p>
