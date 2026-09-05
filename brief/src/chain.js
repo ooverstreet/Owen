@@ -47,6 +47,10 @@ export async function connect(appName) {
   }));
 }
 
+export async function ready() {
+  return getApi();
+}
+
 async function getApi() {
   if (api && api.isConnected) return api;
   let last = null;

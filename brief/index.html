@@ -194,6 +194,10 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .alloc span { width:64px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--mute); }
 
 #desk-grid { display:flex; flex-direction:column; gap:16px; }
+#allocate { order:-1; }
+.stake-steps { margin:0 0 12px; padding-left:18px; color:var(--mute); font-size:13.5px; line-height:1.5; }
+.stake-steps b { color:var(--ink); }
+.amt-presets { display:flex; flex-wrap:wrap; gap:6px; }
 .connect-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0 10px; }
 #ck-connect {
   height:46px; padding:0 16px; border-radius:12px;
@@ -340,6 +344,7 @@ nav.tabs {
   .card { margin-bottom:0; min-width:0; }
   #cards .empty, #cards .spin { grid-column:1 / -1; }
   #desk-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+  #allocate { order:0; }
   .rules { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   #sleeves { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
   .sleeve { margin-bottom:0; }
@@ -431,7 +436,7 @@ nav.tabs {
 
     <section id="desk" class="screen">
       <div class="hero">Root is the savings account. Subnets are the job.</div>
-      <p class="lede">Show your book, then allocate only if you mean to. A wallet signature is the only thing that can move TAO. We never see a seed, and we do not send you to another desk to stake.</p>
+      <p class="lede">Show your book, then stake from the box that says Stake. On a phone that has to be inside Nova’s own browser — Chrome can read, it cannot sign.</p>
 
       <div class="rules">
         <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
@@ -446,7 +451,7 @@ nav.tabs {
             <button type="button" id="ck-connect">Show my book</button>
             <button type="button" id="ck-disconnect" class="btn btn-ghost" hidden>Disconnect</button>
           </div>
-          <p class="hint" id="ck-connect-hint">Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.</p>
+          <p class="hint" id="ck-connect-hint">On Android: Nova app → Browser (inside Nova, not Chrome) → this site → Show my book. Then the Stake box is at the top.</p>
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint">or paste a public address — read only, cannot sign</p>
           <div class="lookup">
@@ -464,7 +469,7 @@ nav.tabs {
         <p>The extra is a Subtensor stake call. TAO leaves your free balance and sits on a named validator. On a subnet it swaps into alpha; on Root it stays TAO. The protocol pays that validator’s take. When Brief runs its own hotkey, this list locks to us.</p>
       </div>
       <div id="sleeves"></div>
-      <p class="foot">Hypothetical 100 TAO sleeves below are still a sketch. Allocate above is the real extra. Names and weights will change.</p>
+      <p class="foot">Hypothetical 100 TAO sleeves below are still a sketch. Stake at the top is the real extra.</p>
     </section>
     <div id="sheet" hidden></div>
 
@@ -1292,6 +1297,13 @@ function selectedVal() {
   return state.allocate.vals.find(v => v.hotkey === state.allocate.hotkey) || null;
 }
 
+function canSignHere() {
+  return !!(window.BriefChain && BriefChain.hasInjected && BriefChain.hasInjected());
+}
+function onPhone() {
+  return /Android|iPhone|iPod/i.test(navigator.userAgent || '');
+}
+
 function renderAllocate() {
   const el = $('allocate');
   if (!el) return;
@@ -1299,15 +1311,17 @@ function renderAllocate() {
   const y = state.you && typeof state.you === 'object' && !state.you.error ? state.you : null;
   if (!w) {
     el.innerHTML = `<div class="alloc-box">
-      <h3>Allocate</h3>
-      <p class="why">Connect first. Paste can read any public book; only the wallet you approve can sign an extra.</p>
+      <h3>Stake</h3>
+      <p class="why">${onPhone() && !canSignHere()
+        ? 'You are not in Nova’s browser. Chrome can only read. Open Nova → Browser → this same link, then tap Show my book. Stake shows at the top.'
+        : 'Tap Show my book first. Paste can only read. Stake needs the wallet that holds the key.'}</p>
     </div>`;
     return;
   }
   if (!y || y.ss58 !== w.address) {
     el.innerHTML = `<div class="alloc-box">
-      <h3>Allocate</h3>
-      <p class="why">Book is loading for ${esc(shortAddr(w.address))}…</p>
+      <h3>Stake</h3>
+      <p class="why">Loading the book for ${esc(shortAddr(w.address))}…</p>
     </div>`;
     return;
   }
@@ -1316,24 +1330,35 @@ function renderAllocate() {
   const dests = featuredDests();
   const q = a.quote;
   const free = y.balance || 0;
+  const signing = canSignHere();
   el.innerHTML = `<div class="alloc-box">
-    <h3>Allocate</h3>
-    <p class="why">This builds a wallet extra. On Root, stake stays TAO. On a subnet, it swaps into alpha at the pool — not a yield promise. Slippage cap ${((DESK.slippage||0)*100).toFixed(0)}%.</p>
+    <h3>Stake</h3>
+    <ol class="stake-steps">
+      <li><b>How much</b> — type TAO or tap a preset.</li>
+      <li><b>Where</b> — Root parks it; a shop swaps into alpha.</li>
+      <li><b>Review stake</b> — Nova asks you to approve. If no popup, you are in Chrome.</li>
+    </ol>
+    ${!signing ? `<p class="warn-line">This browser cannot sign. Cancel and reopen the site inside Nova’s Browser tab.</p>` : ''}
     <div class="alloc-fields">
-      <label>Amount · ${fmtTao(free, 2)} free</label>
+      <label>How much · ${fmtTao(free, 2)} free</label>
       <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}">
-      <label>Into</label>
+      <div class="amt-presets dests">
+        <button type="button" data-amt-preset="0.1">0.1</button>
+        <button type="button" data-amt-preset="1">1</button>
+        <button type="button" data-amt-preset="10">10</button>
+        <button type="button" data-amt-preset="max">All free</button>
+      </div>
+      <label>Where it goes</label>
       <div class="dests" id="alloc-dests">
         ${dests.map(id => `<button type="button" data-dest="${id}" class="${Number(a.netuid)===Number(id)?'on':''}">${esc(destName(id))}</button>`).join('')}
       </div>
-      <label>Through · validator + take</label>
+      <label>Validator · take is in the prompt</label>
       <select id="alloc-val">
         ${a.vals.map(v => `<option value="${esc(v.hotkey)}" ${v.hotkey===a.hotkey?'selected':''}>${v.desk ? DESK.name + ' · ' : ''}${esc(shortAddr(v.hotkey))} · ${esc(fmtTake(v.take))}</option>`).join('') || '<option value="">No validators loaded</option>'}
       </select>
-      ${q ? `<p class="hint" style="margin:0">${Number(a.netuid)===0 ? 'Root is 1:1 TAO. No pool slip.' : `Quote ≈ ${Number(q.expected_out||0).toFixed(4)} α · impact ${Number(q.price_impact_pct||0).toFixed(3)}%`}</p>` : ''}
+      ${q ? `<p class="hint" style="margin:0">${Number(a.netuid)===0 ? 'Root stays TAO. No pool slip.' : `You get about ${Number(q.expected_out||0).toFixed(4)} α · ${Number(q.price_impact_pct||0).toFixed(3)}% impact`}</p>` : ''}
       ${a.err ? `<p class="warn-line">${esc(a.err)}</p>` : ''}
-      ${val ? `<p class="hint" style="margin:0">Prompt will name ${esc(val.desk ? DESK.name : shortAddr(val.hotkey))} · ${esc(fmtTake(val.take))}</p>` : ''}
-      <button type="button" class="btn" id="alloc-review" ${a.busy || !a.amount || !a.hotkey ? 'disabled' : ''}>Review extra</button>
+      <button type="button" class="btn" id="alloc-review" ${a.busy || !a.amount || !a.hotkey || !signing ? 'disabled' : ''}>Review stake</button>
     </div>
   </div>`;
 }
@@ -1373,10 +1398,10 @@ function openSheet(kind, extra) {
     <div class="sheet-row"><span>Take</span><b>${esc(fmtTake(take))}</b></div>
     <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none (Root)' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
     ${q && !isRoot ? `<div class="sheet-row"><span>Quote</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' α'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% impact':''}</b></div>` : ''}
-    <p class="warn-line">The wallet prompt is the contract. If it does not name this validator, cancel. We never ask for a seed.</p>
+    <p class="warn-line">Next, Nova (or Talisman) must pop a sign screen. If nothing pops, you are in Chrome — cancel and open this site inside Nova.</p>
     <p id="sheet-status" class="hint"></p>
     <div class="sheet-actions">
-      <button type="button" class="btn" id="sheet-sign">${verb} in wallet</button>
+      <button type="button" class="btn" id="sheet-sign">${verb}</button>
       <button type="button" class="btn btn-ghost" id="sheet-cancel">Cancel</button>
     </div>
   </div>`;
@@ -1392,9 +1417,17 @@ async function signExtra(kind, extra) {
     status.innerHTML = '<span class="warn-line">Chain module failed to load.</span>';
     return;
   }
+  if (!canSignHere()) {
+    status.innerHTML = `<span class="warn-line">${onPhone()
+      ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → ooverstreet.github.io/Owen/brief/ then Show my book and stake again.'
+      : 'No wallet in this browser. Install Talisman or open Brief inside Nova.'}</span>`;
+    return;
+  }
   go.disabled = true;
-  status.textContent = 'Waiting on the wallet…';
+  status.textContent = 'Reaching the Bittensor chain… (not the wallet yet)';
   try {
+    if (BriefChain.ready) await BriefChain.ready();
+    status.textContent = 'Approve in Nova now. Look for a Nova sign screen — this page will wait.';
     const limitPriceRao = limitRaoFromQuote(extra.quote, kind === 'unstake' ? 'unstake' : 'stake');
     const args = {
       address: state.wallet.address,
@@ -1467,6 +1500,8 @@ async function useWalletAccount(acct) {
   await loadValidators(state.allocate.netuid);
   await loadQuote();
   renderAllocate();
+  const box = $('allocate');
+  if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function onConnect() {
@@ -1641,6 +1676,15 @@ document.addEventListener('click', e => {
   if (dest) {
     state.allocate.netuid = Number(dest.dataset.dest);
     loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => renderAllocate());
+    return;
+  }
+  const preset = e.target.closest('[data-amt-preset]');
+  if (preset) {
+    const y = state.you && typeof state.you === 'object' ? state.you : null;
+    const free = y && y.balance || 0;
+    const p = preset.dataset.amtPreset;
+    state.allocate.amount = p === 'max' ? (free > DESK.minTao ? String(Math.max(0, free - 0.01).toFixed(4)) : '') : p;
+    loadQuote().then(() => renderAllocate());
     return;
   }
   const tab = e.target.closest('.tab');
