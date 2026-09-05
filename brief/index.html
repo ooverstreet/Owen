@@ -762,6 +762,7 @@ const state = {
   ss58: localStorage.getItem('sb-ck') || '',
   wallet: null,
   accounts: [],
+  connectErr: '',
   allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false }
 };
 
@@ -1225,7 +1226,7 @@ function renderConnect() {
     btn.textContent = 'Show my book';
     btn.classList.remove('ghost');
     disc.hidden = true;
-    hint.textContent = 'Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.';
+    hint.textContent = state.connectErr || 'Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.';
   }
   if (state.accounts.length > 1) {
     pick.hidden = false;
@@ -1472,17 +1473,19 @@ async function onConnect() {
   const hint = $('ck-connect-hint');
   if (state.wallet && state.accounts.length <= 1) return;
   if (!window.BriefChain) {
-    hint.textContent = 'Chain module failed to load. Paste a public address instead.';
+    state.connectErr = 'Chain module failed to load. Paste a public address instead.';
+    renderConnect();
     return;
   }
   hint.textContent = 'Check the wallet popup…';
   try {
     const accts = await BriefChain.connect('Subnet Brief');
+    state.connectErr = '';
     state.accounts = accts;
     const pick = accts.find(a => a.address === state.ss58) || accts[0];
     await useWalletAccount(pick);
   } catch (e) {
-    hint.textContent = String(e && e.message || e);
+    state.connectErr = String(e && e.message || e);
     renderConnect();
   }
 }
@@ -1758,6 +1761,10 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 load().then(() => {
   applyHash();
   loadValidators(state.allocate.netuid);
+  if (window.BriefChain && !BriefChain.hasInjected()) {
+    state.connectErr = 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or paste a public address. On a phone, open this site inside Nova or SubWallet.';
+    renderConnect();
+  }
   if (state.ss58) {
     $('ck').value = state.ss58;
     lookupCk(state.ss58);
