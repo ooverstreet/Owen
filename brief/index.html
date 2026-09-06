@@ -555,7 +555,7 @@ nav.tabs {
     <section id="desk" class="screen">
       <div id="wallet-status" class="wallet-status"></div>
       <div class="hero">This is where you stake.</div>
-      <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button. On a phone, do this inside Nova’s browser — Chrome can only look.</p>
+      <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button.</p>
       <div class="steps3">
         <i><b>1. Connect</b>Wallet. No seed.</i>
         <i><b>2. Pick</b>Park, or a shop pill.</i>
@@ -569,7 +569,7 @@ nav.tabs {
             <button type="button" id="ck-connect">Connect wallet</button>
             <button type="button" id="ck-disconnect" class="btn btn-ghost" hidden>Disconnect</button>
           </div>
-          <p class="hint" id="ck-connect-hint">On Android: Nova app → Browser (inside Nova, not Chrome) → this site → Connect wallet. Then Stake is the big gold button.</p>
+          <p class="hint" id="ck-connect-hint">We only receive a public address. Never a seed.</p>
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint">or paste a public address — read only, cannot sign</p>
           <div class="lookup">
@@ -2259,10 +2259,6 @@ load().then(() => {
   featuredDests().forEach(id => loadYield(id).then(() => {
     if (Number(state.allocate.netuid) === Number(id)) renderAllocate();
   }));
-  if (window.BriefChain && !BriefChain.hasInjected()) {
-    state.connectErr = 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or paste a public address. On a phone, open this site inside Nova or SubWallet.';
-    renderConnect();
-  }
   if (state.ss58) {
     $('ck').value = state.ss58;
     lookupCk(state.ss58);
