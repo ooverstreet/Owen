@@ -249,6 +249,15 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .wallet-status.on b { color:var(--ok); }
 .wallet-status span { color:var(--mute); font-size:13px; }
 .wallet-status.flash { box-shadow:0 0 0 2px rgba(94,224,160,.45); }
+.wallet-get { margin:10px 0 0; }
+.wallet-get a {
+  display:inline-flex; align-items:center;
+  height:36px; padding:0 12px; border-radius:10px;
+  border:1px solid var(--line); color:var(--ink); text-decoration:none;
+  font-size:13px; font-weight:600;
+}
+.wallet-get a:hover { border-color:var(--gold); color:var(--gold); }
+.wallet-get small { display:block; margin-top:6px; color:var(--faint); font-size:12px; line-height:1.4; }
 .acct {
   display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;
 }
@@ -546,7 +555,7 @@ nav.tabs {
     <section id="desk" class="screen">
       <div id="wallet-status" class="wallet-status"></div>
       <div class="hero">This is where you stake.</div>
-      <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button. On a phone, do this inside Nova’s browser — Chrome can only look.</p>
+      <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button.</p>
       <div class="steps3">
         <i><b>1. Connect</b>Wallet. No seed.</i>
         <i><b>2. Pick</b>Park, or a shop pill.</i>
@@ -560,7 +569,7 @@ nav.tabs {
             <button type="button" id="ck-connect">Connect wallet</button>
             <button type="button" id="ck-disconnect" class="btn btn-ghost" hidden>Disconnect</button>
           </div>
-          <p class="hint" id="ck-connect-hint">On Android: Nova app → Browser (inside Nova, not Chrome) → this site → Connect wallet. Then Stake is the big gold button.</p>
+          <p class="hint" id="ck-connect-hint">We only receive a public address. Never a seed.</p>
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint">or paste a public address — read only, cannot sign</p>
           <div class="lookup">
@@ -1053,8 +1062,8 @@ function openConnectSheet() {
     <h3>Connect a wallet to stake</h3>
     <p>Your wallet holds the key. We only ask for a public address — never a seed, password, or JSON file.</p>
     ${noInj ? `<p class="warn-line">${onPhone()
-      ? 'This browser cannot sign. Open Nova → Browser → this same link, then tap Connect wallet.'
-      : 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or open Brief inside Nova.'}</p>` : ''}
+      ? 'This browser cannot sign. Get Nova, then open this same link inside Nova → Browser.'
+      : 'No wallet in this browser yet. Get Talisman for this computer, then tap Connect wallet.'}</p>${walletGetHtml()}` : ''}
     <p id="sheet-status" class="hint">${esc(state.connectErr || '')}</p>
     <div class="sheet-actions">
       <button type="button" class="btn" id="sheet-connect">Connect wallet</button>
@@ -1534,7 +1543,7 @@ function renderWalletStatus() {
     if (out) out.onclick = onDisconnect;
   } else {
     el.className = 'wallet-status';
-    el.innerHTML = `<div><b>Not connected</b><span style="display:block;margin-top:3px">Connect a wallet to stake. We never ask for a seed.</span></div><button type="button" class="btn-stake" id="wallet-status-go">Connect wallet</button>`;
+    el.innerHTML = `<div><b>Not connected</b><span style="display:block;margin-top:3px">Connect a wallet to stake. We never ask for a seed.</span>${canSignHere() ? '' : walletGetHtml()}</div><button type="button" class="btn-stake" id="wallet-status-go">Connect wallet</button>`;
     const go = $('wallet-status-go');
     if (go) go.onclick = () => openConnectSheet();
   }
@@ -1559,7 +1568,9 @@ function renderConnect() {
     btn.textContent = 'Connect wallet';
     btn.classList.remove('ghost');
     disc.hidden = true;
-    hint.textContent = state.connectErr || 'Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.';
+    hint.textContent = state.connectErr || (deviceKind() === 'desktop'
+      ? 'We only receive a public address. On this computer, Talisman is the usual wallet.'
+      : 'We only receive a public address. On a phone, open this site inside Nova’s Browser.');
   }
   if (state.accounts.length > 1) {
     pick.hidden = false;
@@ -1629,7 +1640,42 @@ function canSignHere() {
   return !!(window.BriefChain && BriefChain.hasInjected && BriefChain.hasInjected());
 }
 function onPhone() {
-  return /Android|iPhone|iPod/i.test(navigator.userAgent || '');
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+}
+
+function deviceKind() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if (/Android/i.test(ua)) return 'android';
+  return 'desktop';
+}
+
+function walletGet() {
+  const kind = deviceKind();
+  if (kind === 'android') {
+    return {
+      cta: 'Get Nova',
+      href: 'https://play.google.com/store/apps/details?id=io.novafoundation.nova.market',
+      note: 'Play Store. Then open this site inside Nova → Browser — not Chrome.'
+    };
+  }
+  if (kind === 'ios') {
+    return {
+      cta: 'Get Nova',
+      href: 'https://apps.apple.com/app/nova-polkadot-wallet/id1597119355',
+      note: 'App Store. Then open this site inside Nova → Browser.'
+    };
+  }
+  return {
+    cta: 'Get Talisman',
+    href: 'https://talisman.xyz/download',
+    note: 'Browser extension for this computer. Then come back and tap Connect wallet.'
+  };
+}
+
+function walletGetHtml() {
+  const w = walletGet();
+  return `<p class="wallet-get"><a href="${esc(w.href)}" target="_blank" rel="noopener noreferrer">${esc(w.cta)}</a><small>${esc(w.note)}</small></p>`;
 }
 
 function renderAllocate() {
@@ -2213,10 +2259,6 @@ load().then(() => {
   featuredDests().forEach(id => loadYield(id).then(() => {
     if (Number(state.allocate.netuid) === Number(id)) renderAllocate();
   }));
-  if (window.BriefChain && !BriefChain.hasInjected()) {
-    state.connectErr = 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or paste a public address. On a phone, open this site inside Nova or SubWallet.';
-    renderConnect();
-  }
   if (state.ss58) {
     $('ck').value = state.ss58;
     lookupCk(state.ss58);
