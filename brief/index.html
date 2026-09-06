@@ -236,6 +236,19 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   background:var(--gold); color:#1a1408; font-size:14px; font-weight:700;
 }
 #ck-connect.ghost { background:transparent; color:var(--mute); border:1px solid var(--line); }
+.wallet-status {
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  margin:0 0 14px; padding:12px 14px; border-radius:14px;
+  border:1px solid var(--line); background:var(--paper);
+}
+.wallet-status.on {
+  border-color:rgba(94,224,160,.4);
+  background:linear-gradient(160deg, #102018, var(--paper));
+}
+.wallet-status b { font-size:15px; }
+.wallet-status.on b { color:var(--ok); }
+.wallet-status span { color:var(--mute); font-size:13px; }
+.wallet-status.flash { box-shadow:0 0 0 2px rgba(94,224,160,.45); }
 .acct {
   display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;
 }
@@ -531,11 +544,12 @@ nav.tabs {
     </section>
 
     <section id="desk" class="screen">
+      <div id="wallet-status" class="wallet-status"></div>
       <div class="hero">This is where you stake.</div>
       <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button. On a phone, do this inside Nova’s browser — Chrome can only look.</p>
       <div class="steps3">
-        <i><b>1. Pick</b>Park, or a shop pill.</i>
-        <i><b>2. Connect</b>Show my book. No seed.</i>
+        <i><b>1. Connect</b>Wallet. No seed.</i>
+        <i><b>2. Pick</b>Park, or a shop pill.</i>
         <i><b>3. Tap the gold button</b>Approve in your wallet.</i>
       </div>
 
@@ -543,10 +557,10 @@ nav.tabs {
         <div>
           <h2 class="section-h" style="display:block;margin-bottom:6px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700">Your book</span></h2>
           <div class="connect-row">
-            <button type="button" id="ck-connect">Show my book</button>
+            <button type="button" id="ck-connect">Connect wallet</button>
             <button type="button" id="ck-disconnect" class="btn btn-ghost" hidden>Disconnect</button>
           </div>
-          <p class="hint" id="ck-connect-hint">On Android: Nova app → Browser (inside Nova, not Chrome) → this site → Show my book. Then Stake is the big gold button.</p>
+          <p class="hint" id="ck-connect-hint">On Android: Nova app → Browser (inside Nova, not Chrome) → this site → Connect wallet. Then Stake is the big gold button.</p>
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint">or paste a public address — read only, cannot sign</p>
           <div class="lookup">
@@ -1007,11 +1021,49 @@ async function load() {
   render();
 }
 
-function setTab(tab, keepHash) {
+function setTab(tab, keepHash, opts) {
+  const prev = state.tab;
   state.tab = tab;
   if (!keepHash && tab !== 'detail') location.hash = tab === 'pulse' ? '' : tab;
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === tab));
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab || (tab === 'detail' && b.dataset.tab === 'list')));
+  if (tab === 'desk' && (prev !== 'desk' || (opts && opts.askWallet))) offerWallet();
+}
+
+function offerWallet() {
+  renderConnect();
+  if (state.wallet) {
+    const bar = $('wallet-status');
+    if (bar) {
+      bar.classList.add('flash');
+      setTimeout(() => bar.classList.remove('flash'), 1200);
+    }
+    return;
+  }
+  openConnectSheet();
+}
+
+function openConnectSheet() {
+  const el = $('sheet');
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('show');
+  const noInj = !(window.BriefChain && BriefChain.hasInjected && BriefChain.hasInjected());
+  el.innerHTML = `<div class="sheet-card">
+    <h3>Connect a wallet to stake</h3>
+    <p>Your wallet holds the key. We only ask for a public address — never a seed, password, or JSON file.</p>
+    ${noInj ? `<p class="warn-line">${onPhone()
+      ? 'This browser cannot sign. Open Nova → Browser → this same link, then tap Connect wallet.'
+      : 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or open Brief inside Nova.'}</p>` : ''}
+    <p id="sheet-status" class="hint">${esc(state.connectErr || '')}</p>
+    <div class="sheet-actions">
+      <button type="button" class="btn" id="sheet-connect">Connect wallet</button>
+      <button type="button" class="btn btn-ghost" id="sheet-cancel">Not now</button>
+    </div>
+  </div>`;
+  $('sheet-cancel').onclick = closeSheet;
+  el.onclick = ev => { if (ev.target === el) closeSheet(); };
+  $('sheet-connect').onclick = () => onConnect();
 }
 
 function goStake(netuid) {
@@ -1028,6 +1080,7 @@ function goStake(netuid) {
   setTab('desk', true);
   renderDesk();
   renderAllocate();
+  offerWallet();
   Promise.all([
     loadValidators(state.allocate.netuid),
     loadYield(state.allocate.netuid),
@@ -1470,6 +1523,23 @@ function stakeCta(amount, netuid) {
   return isRoot ? `Park ${amount} τ on Root` : `Stake ${amount} τ on ${name}`;
 }
 
+function renderWalletStatus() {
+  const el = $('wallet-status');
+  if (!el) return;
+  const w = state.wallet;
+  if (w) {
+    el.className = 'wallet-status on';
+    el.innerHTML = `<div><b>Connected</b><span style="display:block;margin-top:3px">${esc(w.name || 'Wallet')} · ${esc(shortAddr(w.address))}</span></div><button type="button" class="btn-ghost" id="wallet-status-out" style="height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line)">Disconnect</button>`;
+    const out = $('wallet-status-out');
+    if (out) out.onclick = onDisconnect;
+  } else {
+    el.className = 'wallet-status';
+    el.innerHTML = `<div><b>Not connected</b><span style="display:block;margin-top:3px">Connect a wallet to stake. We never ask for a seed.</span></div><button type="button" class="btn-stake" id="wallet-status-go">Connect wallet</button>`;
+    const go = $('wallet-status-go');
+    if (go) go.onclick = () => openConnectSheet();
+  }
+}
+
 function renderConnect() {
   const btn = $('ck-connect');
   const disc = $('ck-disconnect');
@@ -1479,13 +1549,14 @@ function renderConnect() {
   const w = state.wallet;
   $('desk').classList.toggle('wallet-on', !!w);
   $('desk').classList.toggle('intent-on', !!state.allocate.intent);
+  renderWalletStatus();
   if (w) {
     btn.textContent = 'Connected · ' + shortAddr(w.address);
     btn.classList.add('ghost');
     disc.hidden = false;
     hint.textContent = (w.name ? w.name + ' · ' : '') + (w.source || 'wallet') + '. This address can sign. Stake is the gold button — pick a shop and tap.';
   } else {
-    btn.textContent = 'Show my book';
+    btn.textContent = 'Connect wallet';
     btn.classList.remove('ghost');
     disc.hidden = true;
     hint.textContent = state.connectErr || 'Talisman, Polkadot.js, or SubWallet. We only receive a public address. On a phone, open this site inside that wallet’s browser.';
@@ -1576,10 +1647,10 @@ function renderAllocate() {
   const isRoot = Number(a.netuid) === 0;
   const take = val ? takePctLabel(val.take) : '…';
   const cta = !w
-    ? (isRoot ? 'Show my book to park' : 'Show my book to stake on ' + destShort(a.netuid))
+    ? (isRoot ? 'Connect wallet to park' : 'Connect wallet to stake on ' + destShort(a.netuid))
     : (bookReady ? stakeCta(a.amount, a.netuid) : 'Loading your book…');
   const why = !w
-    ? 'Pick park or a shop now. Then show your book — we never ask for a seed — and tap the gold button again.'
+    ? 'Pick park or a shop now. Then connect your wallet — we never ask for a seed — and tap the gold button again.'
     : 'Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.';
   el.innerHTML = `<div class="alloc-box">
     <h3>${isRoot ? 'Park TAO' : 'Stake on ' + destShort(a.netuid)}</h3>
@@ -1770,22 +1841,35 @@ async function useWalletAccount(acct) {
 
 async function onConnect() {
   const hint = $('ck-connect-hint');
-  if (state.wallet && state.accounts.length <= 1) return;
-  if (!window.BriefChain) {
-    state.connectErr = 'Chain module failed to load. Paste a public address instead.';
+  const status = $('sheet-status');
+  if (state.wallet && state.accounts.length <= 1) {
+    closeSheet();
     renderConnect();
     return;
   }
-  hint.textContent = 'Check the wallet popup…';
+  if (!window.BriefChain) {
+    state.connectErr = 'Chain module failed to load. Paste a public address instead.';
+    renderConnect();
+    if (status) status.innerHTML = `<span class="warn-line">${esc(state.connectErr)}</span>`;
+    return;
+  }
+  if (hint) hint.textContent = 'Check the wallet popup…';
+  if (status) status.textContent = 'Check the wallet popup…';
+  const go = $('sheet-connect');
+  if (go) go.disabled = true;
   try {
     const accts = await BriefChain.connect('Subnet Brief');
     state.connectErr = '';
     state.accounts = accts;
     const pick = accts.find(a => a.address === state.ss58) || accts[0];
     await useWalletAccount(pick);
+    closeSheet();
+    renderConnect();
   } catch (e) {
     state.connectErr = String(e && e.message || e);
     renderConnect();
+    if (status) status.innerHTML = `<span class="warn-line">${esc(state.connectErr)}</span>`;
+    if (go) go.disabled = false;
   }
 }
 
@@ -1984,7 +2068,12 @@ document.addEventListener('click', e => {
     return;
   }
   const tab = e.target.closest('.tab');
-  if (tab) { setTab(tab.dataset.tab); if (tab.dataset.tab !== 'detail') location.hash = tab.dataset.tab === 'pulse' ? '' : tab.dataset.tab; return; }
+  if (tab) {
+    const id = tab.dataset.tab;
+    setTab(id, false, { askWallet: id === 'desk' });
+    if (id !== 'detail') location.hash = id === 'pulse' ? '' : id;
+    return;
+  }
   const filt = e.target.closest('[data-filter]');
   if (filt) { state.filter = filt.dataset.filter; renderList(); return; }
   const sn = e.target.closest('[data-sn]');
@@ -2030,7 +2119,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('click', e => {
   if (e.target.closest && e.target.closest('#alloc-review')) {
-    if (!state.wallet) { onConnect(); return; }
+    if (!state.wallet) { openConnectSheet(); return; }
     reviewAllocate();
   }
   if (e.target.closest && e.target.closest('#alloc-val-hint')) {
