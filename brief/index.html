@@ -40,7 +40,7 @@ body { overflow-x:hidden; }
 button, input { font:inherit; color:inherit; }
 button { cursor:pointer; border:none; background:none; }
 a { color:var(--mint); }
-.app { min-height:100dvh; display:flex; flex-direction:column; padding-bottom:calc(72px + var(--safe-b)); }
+.app { min-height:100dvh; display:flex; flex-direction:column; padding-bottom:calc(118px + var(--safe-b)); }
 
 .topbar {
   position:sticky; top:0; z-index:20;
@@ -349,6 +349,13 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .pay p { color:var(--mute); font-size:13.5px; line-height:1.55; }
 
 .foot { margin-top:22px; font-size:11px; color:var(--faint); line-height:1.5; }
+.legal {
+  max-width:720px; width:100%; margin:0 auto; padding:4px 16px 10px;
+  font-size:11px; color:var(--faint); line-height:1.45;
+}
+.legal b { color:var(--mute); font-weight:600; }
+.apy-line { margin:8px 0 0; font-size:13px; color:var(--ink); line-height:1.4; }
+.apy-line small { display:block; margin-top:3px; color:var(--faint); font-size:11px; font-weight:500; }
 
 nav.tabs {
   position:fixed; left:0; right:0; bottom:0; z-index:30;
@@ -423,6 +430,7 @@ nav.tabs {
     padding:6px 8px;
   }
   .tab { height:40px; font-size:11px; }
+  .legal { max-width:1560px; padding-left:40px; padding-right:40px; }
 }
 @media (min-width: 1280px) {
   #cards { grid-template-columns:repeat(3, minmax(0, 1fr)); }
@@ -597,6 +605,7 @@ nav.tabs {
           <li>We never ask for a seed phrase, private key, or wallet JSON. If a screen ever does, it is not this app.</li>
           <li>Lookup is a GET to a public indexer. Your address is already on the chain; we do not “collect” it as an account.</li>
           <li>Stake is a wallet-signed extra. The confirmation names the fee. We do not hand you to taostats to do it.</li>
+          <li>Past APY is a backward-looking estimate. It is not guaranteed. You can lose TAO. Brief is not liable for your extras or losses.</li>
           <li>Briefs are editorial. Live prices are chain data. We label claimed revenue so it cannot hide as fact.</li>
         </ul>
       </div>
@@ -645,9 +654,12 @@ nav.tabs {
           <button type="button" class="btn btn-ghost" data-go-shops>See shops</button>
         </div>
       </div>
-      <p class="foot">Not financial advice. Emissions, alpha prices, and teams change fast. Briefs are dated August 2026 and should be treated as a starting point, not a score. Live numbers come from the public Metagraphed registry (metagraph.sh), which reads the Bittensor chain.</p>
+      <p class="foot">Not financial advice. Past APY is not a promise. Emissions, alpha prices, and teams change fast. You sign every extra. Brief never holds keys and is not liable for your activity. Briefs are dated August 2026. Live numbers come from the public Metagraphed registry (metagraph.sh).</p>
     </section>
   </main>
+  <footer id="legal" class="legal">
+    <p><b>Not financial advice. Past APY is not a promise.</b> You can lose some or all of your TAO. The percentages on this site are backward-looking estimates from public chain snapshots (emission ÷ stake over the last 30 days, annualized). They ignore price moves and are not guaranteed. You sign every extra in your own wallet. Brief never holds a seed, is not a broker, advisor, or custodian, and is not liable for your activity, losses, taxes, or wallet mistakes.</p>
+  </footer>
   <nav class="tabs">
     <button class="tab on" data-tab="pulse" type="button">Pulse</button>
     <button class="tab" data-tab="list" type="button">Shops</button>
@@ -886,7 +898,8 @@ const state = {
   wallet: null,
   accounts: [],
   connectErr: '',
-  allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false }
+  allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false },
+  yield: {}
 };
 
 const $ = id => document.getElementById(id);
@@ -1015,7 +1028,11 @@ function goStake(netuid) {
   setTab('desk', true);
   renderDesk();
   renderAllocate();
-  loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => {
+  Promise.all([
+    loadValidators(state.allocate.netuid),
+    loadYield(state.allocate.netuid),
+    loadQuote()
+  ]).then(() => {
     renderAllocate();
     const box = $('allocate');
     if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1200,6 +1217,7 @@ async function renderDetail(id) {
       <button type="button" class="btn" data-go-stake="${r.netuid}">Stake on ${esc(r.name || 'this shop')}</button>
       <button type="button" class="btn btn-ghost" data-go-stake="0">Park TAO instead</button>
     </div>
+    <p class="apy-line" id="detail-apy">Past 30 days APY loading…</p>
     <div class="grid3" style="margin-top:14px">
       <div class="kv"><b>${px == null ? '—' : px.toFixed(4)}</b><span>α / TAO</span></div>
       <div class="kv"><b class="${chClass(ch7)}">${fmtPct(ch7, 1)}</b><span>7d</span></div>
@@ -1225,8 +1243,16 @@ async function renderDetail(id) {
       ${r.docs_url ? `<a href="${esc(r.docs_url)}" target="_blank" rel="noopener">Docs</a>` : ''}
       ${r.source_repo ? `<a href="${esc(r.source_repo)}" target="_blank" rel="noopener">Code</a>` : ''}
     </div>` : ''}
-    <p class="foot">${usd != null ? 'Shop token ≈ $' + usd.toFixed(4) + ' · ' : ''}Not financial advice. Stake stays in this app — the gold button, then your wallet. We never ask for a seed.</p>`;
+    <p class="foot">${usd != null ? 'Shop token ≈ $' + usd.toFixed(4) + ' · ' : ''}Not financial advice. Past APY is not a promise. You can lose TAO. Stake stays in this app — the gold button, then your wallet.</p>`;
 
+  loadYield(r.netuid).then(info => {
+    const elApy = $('detail-apy');
+    if (!elApy) return;
+    const line = apyBlurb(info);
+    elApy.innerHTML = line
+      ? esc(line) + '<small>Not a promise. Emissions only — price can erase it. Not financial advice.</small>'
+      : 'Past APY not in yet.';
+  });
   try {
     const ov = await fetch(API + '/subnets/' + r.netuid + '/overview').then(x => x.json());
     const h = ov?.data?.health;
@@ -1374,6 +1400,38 @@ function destShort(id) {
 function destPill(id) {
   if (Number(id) === 0) return { title: 'Park', sub: 'Root · stays TAO' };
   return { title: destShort(id), sub: 'shop · SN' + id };
+}
+
+const EPOCHS_PER_DAY = 20;
+
+function fmtApy(x) {
+  if (x == null || !Number.isFinite(x)) return null;
+  const pct = x * 100;
+  if (pct < 0.05) return pct.toFixed(2) + '%';
+  if (pct < 10) return pct.toFixed(1) + '%';
+  return Math.round(pct) + '%';
+}
+
+function apyBlurb(info) {
+  const label = fmtApy(info && info.apy);
+  if (!label) return '';
+  return `Past 30 days ~${label} annualized`;
+}
+
+async function loadYield(netuid) {
+  const id = Number(netuid);
+  if (state.yield[id] && state.yield[id].apy != null) return state.yield[id];
+  try {
+    const res = await fetch(API + '/subnets/' + id + '/yield/history?window=30d');
+    const js = await res.json();
+    const pts = (js.data && js.data.points) || [];
+    const ys = pts.map(p => num(p.subnet_yield)).filter(n => n != null && n > 0);
+    const avg = ys.length ? ys.reduce((a, b) => a + b, 0) / ys.length : null;
+    state.yield[id] = { apy: avg == null ? null : avg * EPOCHS_PER_DAY * 365, days: ys.length };
+  } catch {
+    state.yield[id] = { apy: null, days: 0 };
+  }
+  return state.yield[id];
 }
 
 function destTip(id) {
@@ -1546,6 +1604,7 @@ function renderAllocate() {
         }).join('')}
       </div>
       <p class="dest-tip" id="alloc-dest-tip">${esc(destTip(a.netuid))}</p>
+      ${apyBlurb(state.yield[a.netuid]) ? `<p class="apy-line tippy" data-tip="Last 30 days of public emission ÷ stake snapshots, annualized at about 20 epochs a day. Emissions only — not price. Not what you will earn.">${esc(apyBlurb(state.yield[a.netuid]))}<small>Not a promise. Price can erase it. Not financial advice.</small></p>` : ''}
       <button type="button" class="hint-btn tippy" id="alloc-val-hint" data-tip="The validator is who your stake sits with. Their fee comes out of emissions — not an extra charge from Brief. We picked the lowest fee we could find on this shop.">
         Validator fee ${esc(take)} · we pick this for you
       </button>
@@ -1592,11 +1651,13 @@ function openSheet(kind, extra) {
         : 'This puts TAO into ' + destShort(extra.netuid) + '. It becomes that shop’s token. You can get more of it and still lose TAO if the price falls.')}</p>
     <div class="sheet-row"><span>Amount</span><b>${esc(String(extra.amount))} τ</b></div>
     <div class="sheet-row"><span>Where</span><b>${esc(isRoot ? 'Park · Root' : destShort(extra.netuid))}</b></div>
+    ${extra.apyLabel ? `<div class="sheet-row"><span>Past 30d APY</span><b>${esc(extra.apyLabel)} · not a promise</b></div>` : ''}
     <div class="sheet-row"><span>Validator fee</span><b>${esc(takePctLabel(take))}</b></div>
     <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none on Root' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
     ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
     <p class="hint" style="margin:8px 0 0">${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))} · named in the wallet prompt</p>
     <p class="warn-line">Next, Nova (or Talisman) pops a sign screen. If nothing pops, you are in Chrome — cancel and open this site inside Nova. We never see your seed.</p>
+    <p class="hint">Not financial advice. You can lose TAO. Past APY is not a forecast. Brief is not liable for this extra.</p>
     <p id="sheet-status" class="hint"></p>
     <div class="sheet-actions">
       <button type="button" class="btn" id="sheet-sign">${esc(verb)}</button>
@@ -1661,13 +1722,15 @@ async function reviewAllocate() {
     return;
   }
   await loadQuote();
+  await loadYield(a.netuid);
   openSheet('stake', {
     amount: a.amount,
     netuid: a.netuid,
     hotkey: a.hotkey,
     take: val && val.take,
     desk: !!(val && val.desk),
-    quote: a.quote
+    quote: a.quote,
+    apyLabel: fmtApy(state.yield[a.netuid] && state.yield[a.netuid].apy)
   });
 }
 
@@ -1695,8 +1758,11 @@ async function useWalletAccount(acct) {
   $('ck').value = acct.address;
   renderConnect();
   await lookupCk(acct.address);
-  await loadValidators(state.allocate.netuid);
-  await loadQuote();
+  await Promise.all([
+    loadValidators(state.allocate.netuid),
+    loadYield(state.allocate.netuid),
+    loadQuote()
+  ]);
   renderAllocate();
   const box = $('allocate');
   if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1850,7 +1916,11 @@ function applyHash() {
     if (Number.isFinite(id)) state.allocate.netuid = id;
     state.allocate.intent = true;
     setTab('desk', true);
-    loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => renderAllocate());
+    Promise.all([
+      loadValidators(state.allocate.netuid),
+      loadYield(state.allocate.netuid),
+      loadQuote()
+    ]).then(() => renderAllocate());
     return;
   }
   if (h === 'stake') { setTab('desk'); return; }
@@ -1897,7 +1967,11 @@ document.addEventListener('click', e => {
   if (dest) {
     state.allocate.netuid = Number(dest.dataset.dest);
     state.allocate.tip = '';
-    loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => renderAllocate());
+    Promise.all([
+      loadValidators(state.allocate.netuid),
+      loadYield(state.allocate.netuid),
+      loadQuote()
+    ]).then(() => renderAllocate());
     return;
   }
   const preset = e.target.closest('[data-amt-preset]');
@@ -2047,6 +2121,9 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 load().then(() => {
   applyHash();
   loadValidators(state.allocate.netuid);
+  featuredDests().forEach(id => loadYield(id).then(() => {
+    if (Number(state.allocate.netuid) === Number(id)) renderAllocate();
+  }));
   if (window.BriefChain && !BriefChain.hasInjected()) {
     state.connectErr = 'No wallet in this browser. Install Talisman, Polkadot.js, or SubWallet — or paste a public address. On a phone, open this site inside Nova or SubWallet.';
     renderConnect();
