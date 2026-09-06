@@ -292,7 +292,8 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
     box-shadow:0 8px 24px rgba(0,0,0,.35);
   }
 }
-#desk.wallet-on .pay, #desk.wallet-on #sleeves, #desk.wallet-on > .foot { display:none; }
+#desk.wallet-on .pay, #desk.wallet-on #sleeves, #desk.wallet-on > .foot,
+#desk.intent-on .pay, #desk.intent-on #sleeves, #desk.intent-on > .foot { display:none; }
 #sheet {
   display:none; position:fixed; inset:0; z-index:50;
   background:rgba(6,8,12,.72); padding:24px 16px;
@@ -525,15 +526,9 @@ nav.tabs {
       <div class="hero">This is where you stake.</div>
       <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button. On a phone, do this inside Nova’s browser — Chrome can only look.</p>
       <div class="steps3">
-        <i><b>1. Connect</b>Show my book. No seed.</i>
-        <i><b>2. Pick</b>Park, or a shop pill.</i>
+        <i><b>1. Pick</b>Park, or a shop pill.</i>
+        <i><b>2. Connect</b>Show my book. No seed.</i>
         <i><b>3. Tap the gold button</b>Approve in your wallet.</i>
-      </div>
-
-      <div class="rules">
-        <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
-        <div class="rule"><b>Trustworthy.</b> Reads are public chain data via Metagraphed. A stake extra names the validator and the take in the wallet prompt. Not financial advice.</div>
-        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: when this desk names its own validator, the protocol already pays the commission. Until then the extra still names whoever you pick, and the take is in the prompt.</div>
       </div>
 
       <div id="desk-grid">
@@ -554,6 +549,12 @@ nav.tabs {
           <div id="you-book"></div>
         </div>
         <div id="allocate"></div>
+      </div>
+
+      <div class="rules">
+        <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
+        <div class="rule"><b>Trustworthy.</b> Reads are public chain data via Metagraphed. A stake extra names the validator and the take in the wallet prompt. Not financial advice.</div>
+        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: when this desk names its own validator, the protocol already pays the commission. Until then the extra still names whoever you pick, and the take is in the prompt.</div>
       </div>
 
       <div class="pay">
@@ -885,7 +886,7 @@ const state = {
   wallet: null,
   accounts: [],
   connectErr: '',
-  allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '' }
+  allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false }
 };
 
 const $ = id => document.getElementById(id);
@@ -1004,9 +1005,16 @@ function goStake(netuid) {
   const id = Number(netuid);
   state.allocate.netuid = Number.isFinite(id) ? id : 0;
   state.allocate.tip = '';
+  state.allocate.intent = true;
+  if (!state.wallet) {
+    state.you = null;
+    if ($('you-book')) $('you-book').innerHTML = '';
+  }
   const hash = state.allocate.netuid ? 'desk/' + state.allocate.netuid : 'desk';
   location.hash = hash;
   setTab('desk', true);
+  renderDesk();
+  renderAllocate();
   loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => {
     renderAllocate();
     const box = $('allocate');
@@ -1412,6 +1420,7 @@ function renderConnect() {
   if (!btn) return;
   const w = state.wallet;
   $('desk').classList.toggle('wallet-on', !!w);
+  $('desk').classList.toggle('intent-on', !!state.allocate.intent);
   if (w) {
     btn.textContent = 'Connected · ' + shortAddr(w.address);
     btn.classList.add('ghost');
@@ -1499,37 +1508,29 @@ function renderAllocate() {
   if (!el) return;
   const w = state.wallet;
   const y = state.you && typeof state.you === 'object' && !state.you.error ? state.you : null;
-  if (!w) {
-    el.innerHTML = `<div class="alloc-box">
-      <h3>Stake</h3>
-      <p class="why">${onPhone() && !canSignHere()
-        ? 'You are not in Nova’s browser. Chrome can only read. Open Nova → Browser → this same link, then tap Show my book. Stake shows at the top.'
-        : 'Tap Show my book first. Paste can only read. Stake needs the wallet that holds the key.'}</p>
-    </div>`;
-    return;
-  }
-  if (!y || y.ss58 !== w.address) {
-    el.innerHTML = `<div class="alloc-box">
-      <h3>Stake</h3>
-      <p class="why">Loading the book for ${esc(shortAddr(w.address))}…</p>
-    </div>`;
-    return;
-  }
+  const bookReady = !!(w && y && y.ss58 === w.address);
   const a = state.allocate;
   const val = selectedVal();
   const dests = featuredDests();
   const q = a.quote;
-  const free = y.balance || 0;
+  const free = bookReady ? (y.balance || 0) : null;
   const signing = canSignHere();
   const isRoot = Number(a.netuid) === 0;
   const take = val ? takePctLabel(val.take) : '…';
-  const cta = stakeCta(a.amount, a.netuid);
+  const cta = !w
+    ? (isRoot ? 'Show my book to park' : 'Show my book to stake on ' + destShort(a.netuid))
+    : (bookReady ? stakeCta(a.amount, a.netuid) : 'Loading your book…');
+  const why = !w
+    ? 'Pick park or a shop now. Then show your book — we never ask for a seed — and tap the gold button again.'
+    : 'Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.';
   el.innerHTML = `<div class="alloc-box">
-    <h3>Stake</h3>
-    <p class="why">Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.</p>
-    ${!signing ? `<p class="warn-line">This browser can show the extra, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
+    <h3>${isRoot ? 'Park TAO' : 'Stake on ' + destShort(a.netuid)}</h3>
+    <p class="why">${esc(why)}</p>
+    ${w && !bookReady ? `<p class="hint">Loading the book for ${esc(shortAddr(w.address))}…</p>` : ''}
+    ${!signing && w ? `<p class="warn-line">This browser can show the extra, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
+    ${onPhone() && !w && !canSignHere() ? `<p class="warn-line">On a phone, open this site inside Nova’s Browser — Chrome can only look.</p>` : ''}
     <div class="alloc-fields">
-      <label>How much · ${fmtTao(free, 2)} free</label>
+      <label>${free != null ? `How much · ${fmtTao(free, 2)} free` : 'How much'}</label>
       <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}" aria-label="Amount in TAO">
       <div class="amt-presets dests">
         <button type="button" class="tippy" data-amt-preset="0.1" data-tip="A small first try. Good when you are just seeing if the extra works.">0.1</button>
@@ -1552,7 +1553,7 @@ function renderAllocate() {
       ${q ? `<p class="hint" style="margin:0">${isRoot ? 'Root stays TAO. No pool slip.' : `You get about ${Number(q.expected_out||0).toFixed(4)} of this shop’s token · ${Number(q.price_impact_pct||0).toFixed(3)}% pool move`}</p>` : ''}
       ${a.err ? `<p class="warn-line">${esc(a.err)}</p>` : ''}
       ${!a.hotkey && a.vals.length === 0 ? `<p class="hint" style="margin:0">Looking for a validator…</p>` : ''}
-      <button type="button" class="btn stake-go" id="alloc-review" ${a.busy ? 'disabled' : ''}>${esc(cta)}</button>
+      <button type="button" class="btn stake-go" id="alloc-review" ${a.busy || (w && !bookReady) ? 'disabled' : ''}>${esc(cta)}</button>
     </div>
   </div>`;
 }
@@ -1777,6 +1778,7 @@ async function lookupCk(raw) {
 
 function renderDesk() {
   $('desk').classList.toggle('wallet-on', !!state.wallet);
+  $('desk').classList.toggle('intent-on', !!state.allocate.intent);
   const s = state.summary || {};
   const root = num(s.total_root_value_tao) || 0;
   const alpha = num(s.total_alpha_value_tao) || 0;
@@ -1846,6 +1848,7 @@ function applyHash() {
   if (h.startsWith('desk/')) {
     const id = Number(h.slice(5));
     if (Number.isFinite(id)) state.allocate.netuid = id;
+    state.allocate.intent = true;
     setTab('desk', true);
     loadValidators(state.allocate.netuid).then(() => loadQuote()).then(() => renderAllocate());
     return;
@@ -1952,7 +1955,10 @@ document.addEventListener('change', e => {
   }
 });
 document.addEventListener('click', e => {
-  if (e.target.closest && e.target.closest('#alloc-review')) reviewAllocate();
+  if (e.target.closest && e.target.closest('#alloc-review')) {
+    if (!state.wallet) { onConnect(); return; }
+    reviewAllocate();
+  }
   if (e.target.closest && e.target.closest('#alloc-val-hint')) {
     state.allocate.tip = state.allocate.tip === 'val' ? '' : 'val';
     renderAllocate();
