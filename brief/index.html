@@ -1174,11 +1174,12 @@ function renderToday() {
   const day = utcDayStamp();
   const when = new Date(day + 'T12:00:00Z').toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
   const apy = apyBlurb(state.yield[r.netuid]);
+  const showApy = apy && (state.yield[r.netuid] || {}).apy > 0;
   el.innerHTML = `<div class="today">
     <p class="kicker">Today’s shop · ${esc(when)}</p>
     <h3>SN${r.netuid} · ${esc(r.name || 'Unknown')}</h3>
     <p>${esc(oneLine(r))}</p>
-    ${apy ? `<p class="today-note">${esc(apy)}. Not a promise. Same shop all day — a new one tomorrow.</p>` : `<p class="today-note">Same shop all day. A new one tomorrow. Not a recommendation.</p>`}
+    ${showApy ? `<p class="today-note">${esc(apy)}. Not a promise. Same shop all day — a new one tomorrow.</p>` : `<p class="today-note">Same shop all day. A new one tomorrow. Not a recommendation.</p>`}
     <div class="card-go">
       <button type="button" class="btn-stake" data-go-stake="${r.netuid}">Stake</button>
       <button type="button" class="btn-read" data-sn="${r.netuid}">Read first</button>
