@@ -315,8 +315,7 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
     box-shadow:0 8px 24px rgba(0,0,0,.35);
   }
 }
-#desk.wallet-on .pay, #desk.wallet-on #sleeves, #desk.wallet-on > .foot,
-#desk.intent-on .pay, #desk.intent-on #sleeves, #desk.intent-on > .foot { display:none; }
+#desk .pay, #desk #sleeves, #desk > .foot { display:none; }
 #sheet {
   display:none; position:fixed; inset:0; z-index:50;
   background:rgba(6,8,12,.72); padding:24px 16px;
@@ -508,11 +507,6 @@ nav.tabs {
     <section id="pulse" class="screen on">
       <div class="hero">Put TAO on a shop — or just park it.</div>
       <p class="lede" id="pulse-lede">TAO is the money. A subnet is a shop doing one AI job. You can park TAO (safer, it stays TAO) or stake it on a shop (a bet — the price can move).</p>
-      <div class="steps3">
-        <i><b>1. Connect</b>Show your book. We never ask for a seed.</i>
-        <i><b>2. Pick</b>Park it, or tap a shop.</i>
-        <i><b>3. Tap Stake</b>Your wallet asks you to approve.</i>
-      </div>
       <div class="howto">
         <button type="button" class="howto-card" data-go-stake="0">
           <b>Park TAO</b>
@@ -526,23 +520,14 @@ nav.tabs {
         </button>
       </div>
       <div class="roles" id="roles"></div>
-      <div class="stats" id="stats"><div class="spin"></div></div>
       <div class="callout" id="take"></div>
       <div class="section-h"><h2>Shops doing a job</h2><button type="button" id="to-list">All shops</button></div>
       <div class="movers" id="movers"></div>
-      <div class="section-h" style="margin-top:18px"><h2>Ready?</h2></div>
-      <button type="button" class="btn stake-go" id="to-desk" style="max-width:320px">Go to Stake</button>
-      <p class="lede" style="margin-top:10px">Same gold button as on a shop card. Connect, pick park or a shop, tap Stake.</p>
     </section>
 
     <section id="list" class="screen">
       <div class="hero">Shops you can put TAO on</div>
       <p class="lede">A shop is a subnet doing one job. Tap Stake to put TAO on it. Tap Read first if you want the brief — candles live there, not on this list.</p>
-      <div class="steps3">
-        <i><b>1. Find a shop</b>Search or scroll.</i>
-        <i><b>2. Tap Stake</b>We take you to the gold button.</i>
-        <i><b>3. Approve</b>Your wallet signs. We never see a seed.</i>
-      </div>
       <input class="search" id="q" type="search" placeholder="Search a shop — Chutes, GPU, science…" autocomplete="off">
       <div class="filters" id="filters"></div>
       <div id="cards"></div>
@@ -557,11 +542,6 @@ nav.tabs {
       <div id="wallet-status" class="wallet-status"></div>
       <div class="hero">This is where you stake.</div>
       <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button.</p>
-      <div class="steps3">
-        <i><b>1. Connect</b>Wallet. No seed.</i>
-        <i><b>2. Pick</b>Park, or a shop pill.</i>
-        <i><b>3. Tap the gold button</b>Approve in your wallet.</i>
-      </div>
 
       <div id="desk-grid">
         <div>
@@ -574,7 +554,7 @@ nav.tabs {
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint">or paste a public address — read only, cannot sign</p>
           <div class="lookup">
-            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
+            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Address starting with 5…">
             <button type="button" id="ck-go">Look up</button>
           </div>
           <p class="hint">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
@@ -584,7 +564,7 @@ nav.tabs {
       </div>
 
       <div class="rules">
-        <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
+        <div class="rule"><b>Secure.</b> Connect wallet asks for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
         <div class="rule"><b>Trustworthy.</b> Reads are public chain data via Metagraphed. A stake extra names the validator and the take in the wallet prompt. Not financial advice.</div>
         <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: when this desk names its own validator, the protocol already pays the commission. Until then the extra still names whoever you pick, and the take is in the prompt.</div>
       </div>
@@ -1109,6 +1089,8 @@ function renderRoles() {
 }
 
 function renderStats() {
+  const el = $('stats');
+  if (!el) return;
   const s = state.summary || {};
   const root = num(s.total_root_value_tao);
   const alpha = num(s.total_alpha_value_tao);
@@ -1129,7 +1111,7 @@ function renderTake() {
   const tot = root + alpha;
   const pctRoot = tot ? (root/tot*100).toFixed(0) : '—';
   const copy = {
-    staker: `About ${pctRoot}% of the value is still parked. Most holders have not picked a shop. Open Stake, tap Show my book, then park it or put it on a shop. The gold button is the extra. The fee is in the prompt.`,
+    staker: `About ${pctRoot}% of the value is still parked. Most holders have not picked a shop. Open Stake, connect your wallet, then park it or put it on a shop. The gold button is the extra. The fee is in the prompt.`,
     miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
     builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
     curious: `TAO is the money. Each shop has its own token. Park TAO if you want safer; stake on a shop if you want a bet. The Stake tab is the gold button. Guide is the map.`
@@ -2150,7 +2132,8 @@ document.addEventListener('click', e => {
   if (sn) { openSn(sn.dataset.sn); return; }
 });
 $('to-list').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
-$('to-desk').addEventListener('click', () => goStake(state.allocate.netuid || 0));
+const toDesk = $('to-desk');
+if (toDesk) toDesk.addEventListener('click', () => goStake(state.allocate.netuid || 0));
 $('back').addEventListener('click', () => { location.hash = 'list'; setTab('list'); });
 $('q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
 $('ck-go').addEventListener('click', () => lookupCk($('ck').value));
