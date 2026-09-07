@@ -675,6 +675,14 @@ function saveSettings(ev) {
   return false;
 }
 
+function eraseAll() {
+  if (!confirm('Erase every job, client, and house on this phone?')) return;
+  db = emptyDb();
+  save();
+  sessionStorage.removeItem('overstreet-ok');
+  go('today');
+}
+
 function copyBookLink() {
   const url = new URL('book.html', location.href);
   if (db.settings.phone) url.searchParams.set('to', db.settings.phone);
