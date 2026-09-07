@@ -7,7 +7,7 @@ This document is for designing a scheduling app for house-cleaning appointments 
 - Skip anything you are unsure about. Partial answers are still useful.
 - Handwritten, typed, voice-to-text, or photos of a notebook page are all fine.
 - If a question does not fit how you work, write that down — that is useful too.
-- When you are done, send this back (or use the on-screen form, which can copy/download your answers).
+- When you are done, send this back (or use the on-screen form: tap Share answers, then Messages).
 
 Takes about 20–30 minutes. Do it in chunks if you want.
 
