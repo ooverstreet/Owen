@@ -528,7 +528,7 @@ nav.tabs {
       <div class="roles" id="roles"></div>
       <div class="stats" id="stats"><div class="spin"></div></div>
       <div class="callout" id="take"></div>
-      <div class="section-h"><h2>Worth a look</h2><button type="button" id="to-list">All shops</button></div>
+      <div class="section-h"><h2>Shops doing a job</h2><button type="button" id="to-list">All shops</button></div>
       <div class="movers" id="movers"></div>
       <div class="section-h" style="margin-top:18px"><h2>Ready?</h2></div>
       <button type="button" class="btn stake-go" id="to-desk" style="max-width:320px">Go to Stake</button>
@@ -537,7 +537,7 @@ nav.tabs {
 
     <section id="list" class="screen">
       <div class="hero">Shops you can put TAO on</div>
-      <p class="lede">A shop is a subnet. Tap Stake to put TAO on it. Tap Read first if you want the brief.</p>
+      <p class="lede">A shop is a subnet doing one job. Tap Stake to put TAO on it. Tap Read first if you want the brief — candles live there, not on this list.</p>
       <div class="steps3">
         <i><b>1. Find a shop</b>Search or scroll.</i>
         <i><b>2. Tap Stake</b>We take you to the gold button.</i>
@@ -1137,13 +1137,21 @@ function renderTake() {
   $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role]}</p>`;
 }
 
+function jobRank(r) {
+  const rev = r.brief?.revenue;
+  if (rev === 'verified') return 0;
+  if (rev === 'claimed') return 1;
+  if (r.brief) return 2;
+  if (r.website_url && num(r.tao_in_pool_tao) > 5000) return 3;
+  return 9;
+}
+
 function interesting() {
-  const rows = state.rows.filter(r => r.netuid !== 0 && num(r.tao_in_pool_tao) > 5000);
-  const byEm = [...rows].sort((a,b) => (num(b.emission_share)||0) - (num(a.emission_share)||0));
-  const byCh = [...rows].sort((a,b) => Math.abs(num(b.alpha_price_change_7d)||0) - Math.abs(num(a.alpha_price_change_7d)||0));
+  const rows = state.rows.filter(r => r.netuid !== 0 && jobRank(r) < 9);
+  rows.sort((a, b) => jobRank(a) - jobRank(b) || (num(b.tao_in_pool_tao) || 0) - (num(a.tao_in_pool_tao) || 0));
   const featured = [];
   const seen = new Set();
-  for (const r of [...byEm.slice(0,4), ...byCh.slice(0,4), ...rows.filter(r => r.brief?.revenue === 'verified')]) {
+  for (const r of rows) {
     if (seen.has(r.netuid)) continue;
     seen.add(r.netuid);
     featured.push(r);
@@ -1206,7 +1214,6 @@ function renderMovers() {
       <button class="move-main" data-sn="${r.netuid}" type="button">
         <div class="sn">SN${r.netuid}</div>
         <div class="nm"><b>${esc(r.name || 'Unknown')}</b><i>${esc(oneLine(r))}</i></div>
-        <div class="ch ${chClass(num(r.alpha_price_change_7d))}">${fmtPct(num(r.alpha_price_change_7d), 1)}</div>
       </button>
       <button type="button" class="btn-stake" data-go-stake="${r.netuid}">Stake</button>
     </div>`).join('') || '<div class="empty">Loading network…</div>';
@@ -1236,20 +1243,12 @@ function renderList() {
   const rows = filtered();
   $('cards').innerHTML = rows.map(r => {
     const g = gradeOf(r);
-    const px = num(r.alpha_price_tao);
-    const ch = num(r.alpha_price_change_7d);
-    const em = num(r.emission_share);
     return `<div class="card">
       <div class="card-top">
         <b>SN${r.netuid} · ${esc(r.name || 'Unknown')}</b>
         <span class="badge ${g}">${gradeLabel(g)}</span>
       </div>
       <div class="tagline">${esc(oneLine(r))}</div>
-      <div class="meta">
-        <span><b>${px == null ? '—' : px.toFixed(4) + ' τ'}</b> price</span>
-        <span class="${chClass(ch)}"><b>${fmtPct(ch, 1)}</b> 7d</span>
-        <span><b>${em == null ? '—' : (em*100).toFixed(2)+'%'}</b> emissions</span>
-      </div>
       <div class="roleline">${esc(roleLine(r))}</div>
       <div class="card-go">
         <button type="button" class="btn-stake" data-go-stake="${r.netuid}">Stake</button>
