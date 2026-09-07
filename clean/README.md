@@ -39,4 +39,4 @@ Her answers are the main ingredient. These extras make the first version much be
 - Payment-processor accounts unless she wants clients to pay in the app
 - A full employee roster unless she already has helpers
 
-When the filled form comes back, the next step is a first version around her must-haves (usually: calendar, house notes, recurring jobs).
+When the filled form comes back, the first version lives in `overstreet/`.
