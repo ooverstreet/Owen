@@ -318,8 +318,10 @@ function renderJob() {
         ${!j.clockIn ? `<button class="btn gold" onclick="clockIn('${j.id}')">Clock in</button>` : ''}
         ${clocked ? `<button class="btn primary" onclick="clockOut('${j.id}')">Clock out</button>` : ''}
       </div>
-      <label>Miles this job</label>
-      <input type="number" step="0.1" value="${esc(j.miles || '')}" onchange="setMiles('${j.id}', this.value)">
+      <div class="field" style="margin-top:10px">
+        <label>Miles this job</label>
+        <input type="number" step="0.1" inputmode="decimal" value="${esc(j.miles || '')}" onchange="setMiles('${j.id}', this.value)" placeholder="0">
+      </div>
     </div>
     <div class="card">
       <strong>Payment</strong>
@@ -360,13 +362,19 @@ function renderJobForm() {
     <p class="lede">Type is color-coded on the calendar. Extras show on the day so you do not forget blinds or appliances.</p>
     <form onsubmit="return saveJob(event, '${editing ? editing.id : ''}')">
       <div class="field"><label>Client</label>
-        <select name="clientId">${clientOpts}<option value="">— New client below —</option></select>
+        <select name="clientId">
+          <option value="">— Choose or add below —</option>
+          ${clientOpts}
+        </select>
       </div>
-      <div class="field"><label>New client name</label><input name="newClient" placeholder="If they are not in the list"></div>
+      <div class="field"><label>New client name</label><input name="newClient" placeholder="If they are not in the list yet"></div>
       <div class="field"><label>Phone</label><input name="phone" type="tel" placeholder="For reminders" value="${esc(clientPrefill.phone || '')}"></div>
       <div class="field"><label>Email</label><input name="email" type="email" value="${esc(clientPrefill.email || '')}"></div>
       <div class="field"><label>House</label>
-        <select name="houseId">${houseOpts}<option value="">— New house below —</option></select>
+        <select name="houseId">
+          <option value="">— Choose or add below —</option>
+          ${houseOpts}
+        </select>
       </div>
       <div class="field"><label>Address</label><input name="address" placeholder="Full address" value="${esc(housePrefill.address || '')}"></div>
       <div class="field"><label>Square footage</label><input name="sqft" inputmode="numeric" value="${esc(housePrefill.sqft || '')}"></div>
@@ -420,32 +428,40 @@ function saveJob(ev, editId) {
   const f = ev.target;
   const g = n => (f[n] && f[n].value || '').trim();
   let clientId = g('clientId');
-  if (!clientId) {
-    if (!g('newClient')) { alert('Add a client name.'); return false; }
-    clientId = uid();
-    db.clients.push({ id: clientId, name: g('newClient'), phone: g('phone'), email: g('email') });
-  } else {
+  if (g('newClient')) {
+    const existing = db.clients.find(c => c.name.toLowerCase() === g('newClient').toLowerCase());
+    if (existing) clientId = existing.id;
+    else {
+      clientId = uid();
+      db.clients.push({ id: clientId, name: g('newClient'), phone: g('phone'), email: g('email') });
+    }
+  } else if (clientId) {
     const c = clientById(clientId);
     if (c) {
       if (g('phone')) c.phone = g('phone');
       if (g('email')) c.email = g('email');
     }
+  } else {
+    alert('Add a client name.');
+    return false;
   }
   let houseId = g('houseId');
   const houseFields = {
     address: g('address'), sqft: g('sqft'), beds: g('beds'), baths: g('baths'), stories: g('stories'),
     pets: g('pets'), access: g('access'), codes: g('codes'), surfaces: g('surfaces'), dontTouch: g('dontTouch'), whoHome: g('whoHome'),
   };
-  if (!houseId) {
+  const selectedHouse = houseById(houseId);
+  const addressChanged = houseFields.address && selectedHouse && houseFields.address !== selectedHouse.address;
+  if (editId && selectedHouse && !addressChanged) {
+    Object.entries(houseFields).forEach(([k, v]) => { if (v) selectedHouse[k] = v; });
+    selectedHouse.clientId = clientId;
+    houseId = selectedHouse.id;
+  } else if (selectedHouse && !houseFields.address) {
+    houseId = selectedHouse.id;
+  } else {
     if (!houseFields.address) { alert('Add the house address.'); return false; }
     houseId = uid();
     db.houses.push(Object.assign({ id: houseId, clientId }, houseFields));
-  } else {
-    const h = houseById(houseId);
-    if (h) {
-      Object.entries(houseFields).forEach(([k, v]) => { if (v) h[k] = v; });
-      h.clientId = clientId;
-    }
   }
   const extras = [...f.querySelectorAll('[name=extras]:checked')].map(i => i.value);
   const amount = Math.max(200, Number(g('amount') || 200));
@@ -456,7 +472,13 @@ function saveJob(ev, editId) {
   };
   if (editId) {
     const j = jobById(editId);
-    if (j) Object.assign(j, base);
+    if (j) {
+      Object.assign(j, {
+        clientId, houseId, date: base.date, start: base.start, hours: base.hours,
+        type: base.type, extras: base.extras, amount: base.amount, who: base.who,
+        notes: base.notes, whoHome: base.whoHome, recur: base.recur,
+      });
+    }
     save();
     go('job/' + editId);
     return false;
@@ -632,6 +654,11 @@ function renderSettings() {
       <div class="actions"><button class="btn" onclick="copyBookLink()">Copy booking link</button>
       <a class="btn" href="book.html" target="_blank" rel="noopener">Open page</a></div>
       <p class="hint" id="book-status"></p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <strong>This phone only</strong>
+      <p class="meta">Jobs are saved on this device, not in the cloud.</p>
+      <button class="btn danger full" type="button" onclick="eraseAll()">Erase all jobs on this phone</button>
     </div>
   `, 'more');
 }

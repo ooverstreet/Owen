@@ -1,4 +1,4 @@
-const CACHE = 'overstreet-v1';
+const CACHE = 'overstreet-v2';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg', './book.html'];
 
 self.addEventListener('install', (e) => {
