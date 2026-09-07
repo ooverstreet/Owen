@@ -176,9 +176,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--sage); box-shado
 #screen-welcome .footer-nav { display: none; }
 
 .review {
+  display: block; width: 100%;
   background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
   padding: 16px; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5;
-  max-height: 50vh; overflow: auto;
+  min-height: 240px; max-height: 50vh; overflow: auto;
+  -webkit-user-select: text; user-select: text;
 }
 
 @media print {
@@ -208,7 +210,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--sage); box-shado
         <p>This is a planner for a house-cleaning appointment app — times, square footage, rooms, add-ons, and how you actually run your week.</p>
         <p>Skip anything you are unsure about. Partial answers are still useful. You can leave and come back; this page remembers what you typed on this device.</p>
         <div class="note">
-          <strong>Takes about 20–30 minutes.</strong> Do it in chunks if you want. When you finish, tap <em>Copy answers</em> or <em>Download</em> and send the file to your husband so we can start building.
+          <strong>Takes about 20–30 minutes.</strong> Do it in chunks if you want. When you finish, tap <em>Share answers</em> and send them in a text — you do not need another app to open a file.
         </div>
         <div class="actions">
           <button class="btn primary" onclick="goSection(0)">Start</button>
@@ -478,7 +480,7 @@ const SECTIONS = [
   {
     id: 'send',
     title: 'Send your answers',
-    blurb: 'Copy or download these answers and send them to your husband. You can still go back and edit.',
+    blurb: 'On iPhone, tap Share answers, then Messages. You do not need an app to open a file.',
     fields: []
   }
 ];
@@ -589,15 +591,15 @@ function renderSections() {
 
 function sendPanel() {
   return `
-    <div class="note"><strong>Nothing is uploaded.</strong> Copy or download, then send the file in a text or email.</div>
+    <div class="note"><strong>On iPhone:</strong> tap <em>Share answers</em>, then Messages. If that screen says it cannot open a file, use Share (not Download). You can also tap the box below, Select All, and Copy.</div>
     <div class="actions">
-      <button class="btn primary" onclick="copyAnswers()">Copy answers</button>
-      <button class="btn" onclick="downloadAnswers('md')">Download as text</button>
-      <button class="btn" onclick="downloadAnswers('json')">Download as JSON</button>
+      <button class="btn primary" onclick="shareAnswers()">Share answers</button>
+      <button class="btn" onclick="copyAnswers()">Copy</button>
+      <button class="btn" onclick="downloadAnswers('txt')">Save as text</button>
       <button class="btn" onclick="printForm()">Print</button>
     </div>
     <p class="hint" id="copy-status" style="margin:12px 0"></p>
-    <div class="review" id="review">${escapeHtml(toMarkdown())}</div>
+    <textarea class="review" id="review" readonly>${escapeHtml(toMarkdown())}</textarea>
   `;
 }
 
@@ -634,7 +636,7 @@ function showScreen() {
   document.getElementById('btn-next').textContent = current === SECTIONS.length - 1 ? 'Home' : 'Next';
   if (s.id === 'send') {
     const review = document.getElementById('review');
-    if (review) review.textContent = toMarkdown();
+    if (review) review.value = toMarkdown();
   }
   window.scrollTo(0, 0);
 }
@@ -710,19 +712,66 @@ async function copyAnswers() {
   try {
     await navigator.clipboard.writeText(text);
     if (status) status.textContent = 'Copied. Paste into a text or email.';
-  } catch {
-    if (status) status.textContent = 'Copy failed — use Download instead.';
+    return;
+  } catch { /* fall through */ }
+  if (copyFallback(text)) {
+    if (status) status.textContent = 'Copied. Paste into a text or email.';
+    return;
+  }
+  if (status) status.textContent = 'Copy did not work. Tap the answers box, Select All, then Copy.';
+}
+
+function copyFallback(text) {
+  const el = document.getElementById('review');
+  if (el && typeof el.select === 'function') {
+    el.focus();
+    el.select();
+    try { return document.execCommand('copy'); } catch { /* ignore */ }
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  ta.remove();
+  return ok;
+}
+
+async function shareAnswers() {
+  const text = toMarkdown();
+  const status = document.getElementById('copy-status');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Cleaning app answers', text });
+      if (status) status.textContent = 'Share sheet opened. Choose Messages or Mail.';
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+  await copyAnswers();
+  if (status && !status.textContent) {
+    status.textContent = 'Share is not available here. Answers were copied — paste them into a text.';
   }
 }
 
 function downloadAnswers(kind) {
   const asJson = kind === 'json';
-  const blob = new Blob([asJson ? toJSON() : toMarkdown()], { type: asJson ? 'application/json' : 'text/markdown' });
+  const body = asJson ? toJSON() : toMarkdown();
+  const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = asJson ? 'cleaning-app-answers.json' : 'cleaning-app-answers.md';
+  a.download = asJson ? 'cleaning-app-answers.json' : 'cleaning-app-answers.txt';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  const status = document.getElementById('copy-status');
+  if (status) status.textContent = 'If the phone says it cannot open the file, go Back and tap Share answers instead.';
 }
 
 function printForm() {

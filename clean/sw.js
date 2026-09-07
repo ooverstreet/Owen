@@ -1,4 +1,4 @@
-const CACHE = 'clean-intake-v1';
+const CACHE = 'clean-intake-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {

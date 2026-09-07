@@ -6,7 +6,7 @@ A planner for a house-cleaning scheduling app. Fill it out, send the answers bac
 
 Two ways to fill this out:
 
-1. **On a phone or computer** — open `index.html` (the form). It saves as you type on that device. At the end, tap **Copy answers** or **Download** and send the file.
+1. **On a phone or computer** — open `index.html` (the form). It saves as you type on that device. At the end, tap **Share answers** and send them in a text. On iPhone, do not use Download — the phone will try to open the file and say there is no app for it.
 2. **On paper** — print `INTAKE.md` or use **Print a paper copy** in the form. Handwritten answers are fine.
 
 Skip anything. Partial answers are still useful. Stories about real jobs help more than perfect checklists.
