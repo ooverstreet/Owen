@@ -31,11 +31,24 @@ jobs:
         with:
           enablement: true
 
-      - name: Upload app files
+      - name: Keep old /brief/ GitHub links
+        run: |
+          mkdir -p brief/brief
+          cat > brief/brief/index.html <<'EOF'
+          <!doctype html>
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0;url=../">
+          <link rel="canonical" href="https://subnetbriefs.com/">
+          <title>Subnet Brief</title>
+          <script>location.replace('../')</script>
+          <p><a href="../">Subnet Brief</a></p>
+          EOF
+
+      - name: Upload Brief
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload only the app files (not node_modules, Cursor folder, etc.)
-          path: '.'
+          # Public site is Brief at the domain root. Other apps stay in git.
+          path: 'brief'
 
       - name: Deploy to GitHub Pages
         id: deploy
