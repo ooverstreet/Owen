@@ -12,12 +12,12 @@
 <meta name="description" content="Park TAO or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Bittensor in plain English</title>
-<link rel="canonical" href="https://ooverstreet.github.io/Owen/brief/">
+<link rel="canonical" href="https://subnetbriefs.com/">
 <meta property="og:title" content="Subnet Brief">
 <meta property="og:description" content="Bittensor in plain English. Read a public book. Allocate only with a wallet signature. No seed.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ooverstreet.github.io/Owen/brief/">
-<meta property="og:image" content="https://ooverstreet.github.io/Owen/brief/icon-512.png">
+<meta property="og:url" content="https://subnetbriefs.com/">
+<meta property="og:image" content="https://subnetbriefs.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1861,7 +1861,7 @@ async function signExtra(kind, extra) {
   }
   if (!canSignHere()) {
     status.innerHTML = `<span class="warn-line">${onPhone()
-      ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → ooverstreet.github.io/Owen/brief/ then Show my book and stake again.'
+      ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → subnetbriefs.com then Show my book and stake again.'
       : 'No wallet in this browser. Install Talisman or open Brief inside Nova.'}</span>`;
     return;
   }
@@ -2263,7 +2263,7 @@ document.addEventListener('mouseout', e => {
   tip.textContent = destTip(state.allocate.netuid);
 });
 
-const SITE = 'https://ooverstreet.github.io/Owen/brief/';
+const SITE = 'https://subnetbriefs.com/';
 const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 let deferredPrompt = null;
 function isPhone() {
