@@ -95,6 +95,18 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 }
 .callout h3 { font-family:Fraunces, serif; font-size:17px; font-weight:650; margin-bottom:6px; }
 .callout p { color:var(--mute); font-size:13.5px; line-height:1.55; }
+.today {
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:16px 16px 14px; margin:0 0 18px;
+}
+.today .kicker {
+  font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:8px;
+}
+.today h3 { font-family:Fraunces, serif; font-size:20px; font-weight:650; margin-bottom:6px; }
+.today p { color:var(--mute); font-size:13.5px; line-height:1.5; }
+.today .today-note { margin-top:8px; font-size:12px; color:var(--faint); }
+.today .card-go { margin-top:12px; }
 
 .section-h {
   display:flex; align-items:baseline; justify-content:space-between; gap:8px;
@@ -525,6 +537,7 @@ nav.tabs {
           <em>See shops →</em>
         </button>
       </div>
+      <div id="today-shop"></div>
       <div class="roles" id="roles"></div>
       <div class="stats" id="stats"><div class="spin"></div></div>
       <div class="callout" id="take"></div>
@@ -908,6 +921,8 @@ const BRIEFS = {
   }
 };
 
+const HIGHLIGHT_IDS = [64, 51, 4, 120, 56, 62, 34, 44, 68, 3, 9, 8, 19, 107, 93, 75, 1];
+
 const state = {
   role: localStorage.getItem('sb-role') || 'staker',
   tab: 'pulse',
@@ -1135,6 +1150,41 @@ function renderTake() {
     curious: `TAO is the money. Each shop has its own token. Park TAO if you want safer; stake on a shop if you want a bet. The Stake tab is the gold button. Guide is the map.`
   };
   $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role]}</p>`;
+}
+
+function utcDayStamp() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function todayShop() {
+  const rows = state.rows || [];
+  const pool = HIGHLIGHT_IDS.map(id => rows.find(r => r.netuid === id)).filter(r => r && r.emission_enabled !== false);
+  if (!pool.length) return null;
+  const [y, m, d] = utcDayStamp().split('-').map(Number);
+  const n = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(2026, 0, 1)) / 86400000);
+  const i = ((n % pool.length) + pool.length) % pool.length;
+  return pool[i];
+}
+
+function renderToday() {
+  const el = $('today-shop');
+  if (!el) return;
+  const r = todayShop();
+  if (!r) { el.innerHTML = ''; return; }
+  const day = utcDayStamp();
+  const when = new Date(day + 'T12:00:00Z').toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+  const apy = apyBlurb(state.yield[r.netuid]);
+  const showApy = apy && (state.yield[r.netuid] || {}).apy > 0;
+  el.innerHTML = `<div class="today">
+    <p class="kicker">Today’s shop · ${esc(when)}</p>
+    <h3>SN${r.netuid} · ${esc(r.name || 'Unknown')}</h3>
+    <p>${esc(oneLine(r))}</p>
+    ${showApy ? `<p class="today-note">${esc(apy)}. Not a promise. Same shop all day — a new one tomorrow.</p>` : `<p class="today-note">Same shop all day. A new one tomorrow. Not a recommendation.</p>`}
+    <div class="card-go">
+      <button type="button" class="btn-stake" data-go-stake="${r.netuid}">Stake</button>
+      <button type="button" class="btn-read" data-sn="${r.netuid}">Read first</button>
+    </div>
+  </div>`;
 }
 
 function interesting() {
@@ -2036,6 +2086,7 @@ function render() {
   renderRoles();
   renderStats();
   renderTake();
+  renderToday();
   renderTape();
   renderMovers();
   renderList();
@@ -2284,6 +2335,8 @@ load().then(() => {
   featuredDests().forEach(id => loadYield(id).then(() => {
     if (Number(state.allocate.netuid) === Number(id)) renderAllocate();
   }));
+  const highlight = todayShop();
+  if (highlight) loadYield(highlight.netuid).then(() => renderToday());
   if (state.ss58) {
     $('ck').value = state.ss58;
     lookupCk(state.ss58);
