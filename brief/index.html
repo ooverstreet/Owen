@@ -393,6 +393,7 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 }
 .pos b { flex:1; font-size:13px; }
 .pos i { font-style:normal; color:var(--mute); font-size:12px; font-variant-numeric:tabular-nums; }
+#desk.wallet-on .paste-book { display:none; }
 .pay {
   background:linear-gradient(160deg, var(--mint-wash), var(--paper));
   border:1px solid var(--mint-line); border-radius:16px; padding:16px; margin:8px 0 16px;
@@ -605,12 +606,12 @@ nav.tabs {
           </div>
           <p class="hint" id="ck-connect-hint">We only receive a public address. Never a seed.</p>
           <div class="acct" id="acct-pick" hidden></div>
-          <p class="hint">or paste a public address — read only, cannot sign</p>
-          <div class="lookup">
+          <p class="hint paste-book">or paste a public address — read only, cannot sign</p>
+          <div class="lookup paste-book">
             <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
             <button type="button" id="ck-go">Look up</button>
           </div>
-          <p class="hint">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
+          <p class="hint paste-book">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
           <div id="you-book"></div>
         </div>
         <div id="allocate"></div>
@@ -1466,6 +1467,30 @@ function renderYouBook() {
   const free = y.balance || 0;
   const workTao = rows.filter(r => WORK_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
   const researchTao = rows.filter(r => RESEARCH_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
+  const mine = !!(state.wallet && state.wallet.address === y.ss58);
+  const top = rows.slice(0, mine ? 20 : 10);
+  if (mine) {
+    el.innerHTML = `
+    <div class="sleeve">
+      <h3>Your book</h3>
+      <div class="meta" style="margin:8px 0 4px">
+        <span><b>${fmtTao(free, 2)}</b> free</span>
+        <span><b>${fmtTao(total, 2)}</b> staked</span>
+      </div>
+      ${!rows.length ? `<p class="why">Nothing staked yet. Pick park or a shop, then tap the gold button. Nova will ask you to approve.</p>` : ''}
+      ${top.map(p => {
+        const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
+        const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
+        return `<div class="pos">
+          <b>${esc(name)}</b>
+          <i>${fmtTao(p.tao, 2)} τ</i>
+          ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+    renderAllocate();
+    return;
+  }
   const briefed = rows.filter(r => BRIEFS[r.netuid]);
   const workPct = total ? workTao / total : 0;
   let verdict;
@@ -1480,7 +1505,7 @@ function renderYouBook() {
   } else {
     verdict = `This book is in ${rows.length} shop${rows.length===1?'':'s'}. Read the grades below — claimed is not verified, and identity-risk names do not belong in a default sleeve.`;
   }
-  const top = rows.slice(0, 10);
+  const publicTop = rows.slice(0, 10);
   el.innerHTML = `
     <div class="sleeve">
       <h3>Public book · ${esc(shortAddr(y.ss58))}</h3>
@@ -1491,7 +1516,7 @@ function renderYouBook() {
         <span><b>${rows.length}</b> subnets</span>
         <span><b>${(workPct*100).toFixed(0)}%</b> work sleeve</span>
       </div>
-      ${top.map(p => {
+      ${publicTop.map(p => {
         const row = rowBy(p.netuid) || { netuid: p.netuid, name: 'SN'+p.netuid };
         const g = gradeOf(row);
         const pct = total ? (p.tao / total * 100) : 0;
