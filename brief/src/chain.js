@@ -3,8 +3,14 @@ import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-d
 
 const RPCS = [
   'wss://entrypoint-finney.opentensor.ai:443',
-  'wss://lite.sub.latent.to:443'
+  'wss://lite.chain.opentensor.ai:443',
+  'wss://lite.sub.latent.to:443',
+  'wss://bittensor-finney.api.onfinality.io/public-ws'
 ];
+const CONNECT_MS = 10000;
+const SEND_MS = 90000;
+const DEAD = 'The public chain nodes timed out. Your TAO did not move. Wait a few seconds and tap Stake again.';
+const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
 
 let api = null;
 
@@ -47,30 +53,60 @@ export async function connect(appName) {
   }));
 }
 
+function sleepReject(ms, msg) {
+  return new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), ms));
+}
+
+async function withTimeout(promise, ms, msg) {
+  let t;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg)), ms); })
+    ]);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function connectOne(url) {
+  const provider = new WsProvider(url, false, undefined, CONNECT_MS);
+  let next = null;
+  try {
+    await Promise.race([
+      provider.connect(),
+      sleepReject(CONNECT_MS, 'RPC timeout')
+    ]);
+    next = await Promise.race([
+      ApiPromise.create({ provider, noInitWarn: true }),
+      sleepReject(CONNECT_MS, 'RPC timeout')
+    ]);
+    if (!next.isConnected) throw new Error('RPC dropped');
+    return next;
+  } catch (e) {
+    try { if (next) await next.disconnect(); } catch {}
+    try { await provider.disconnect(); } catch {}
+    throw e;
+  }
+}
+
 export async function ready() {
   return getApi();
 }
 
 async function getApi() {
   if (api && api.isConnected) return api;
-  let last = null;
-  for (const url of RPCS) {
-    try {
-      const provider = new WsProvider(url, 8000);
-      const next = await Promise.race([
-        ApiPromise.create({ provider }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('RPC timeout')), 12000))
-      ]);
-      await next.isReady;
-      api = next;
-      return api;
-    } catch (e) {
-      last = e;
-      try { api && api.disconnect(); } catch {}
-      api = null;
-    }
+  api = null;
+  const pending = RPCS.map(url => connectOne(url));
+  try {
+    api = await Promise.any(pending);
+  } catch {
+    throw new Error(DEAD);
   }
-  throw last || new Error('Could not reach a public Subtensor node.');
+  pending.forEach(p => {
+    p.then(inst => { if (inst !== api) inst.disconnect().catch(() => {}); }).catch(() => {});
+  });
+  return api;
 }
 
 function moduleTx(apiInst) {
@@ -133,7 +169,7 @@ export async function addStake({ address, hotkey, netuid, amountTao, limitPriceR
   if (BigInt(amountRao) < 2000000n) throw new Error('Minimum stake is 0.002 TAO.');
   const apiInst = await getApi();
   const tx = stakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao, limitPriceRao });
-  return signSend(address, tx);
+  return withTimeout(signSend(address, tx), SEND_MS, SLOW);
 }
 
 export async function removeStake({ address, hotkey, netuid, amountTao, limitPriceRao }) {
@@ -141,7 +177,7 @@ export async function removeStake({ address, hotkey, netuid, amountTao, limitPri
   if (BigInt(amountRao) < 2000000n) throw new Error('Minimum unstake is 0.002 TAO.');
   const apiInst = await getApi();
   const tx = unstakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao, limitPriceRao });
-  return signSend(address, tx);
+  return withTimeout(signSend(address, tx), SEND_MS, SLOW);
 }
 
 export async function priceRao(tao) {
