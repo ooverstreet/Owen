@@ -1,16 +1,21 @@
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 
-const RPCS = [
+const WSS = [
   'wss://entrypoint-finney.opentensor.ai:443',
   'wss://lite.chain.opentensor.ai:443',
   'wss://lite.sub.latent.to:443',
   'wss://bittensor-finney.api.onfinality.io/public-ws'
 ];
+const HTTPS = [
+  'https://bittensor-finney.api.onfinality.io/public',
+  'https://lite.chain.opentensor.ai',
+  'https://entrypoint-finney.opentensor.ai:443'
+];
 const CONNECT_MS = 20000;
 const REQUEST_MS = 30000;
 const SEND_MS = 90000;
-const DEAD = 'The public chain nodes timed out. Your TAO did not move. Wait a few seconds and tap Stake again.';
+const DEAD = 'Could not reach a public chain node. Your TAO did not move. Turn Wi‑Fi off and try on cell data, inside Nova → Browser.';
 const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
 
 let api = null;
@@ -71,7 +76,12 @@ async function withTimeout(promise, ms, msg) {
   }
 }
 
-async function connectOne(url) {
+function markHttp(inst) {
+  inst._briefHttp = true;
+  return inst;
+}
+
+async function connectWs(url) {
   const provider = new WsProvider(url, false, undefined, REQUEST_MS);
   let next = null;
   try {
@@ -90,6 +100,15 @@ async function connectOne(url) {
     try { await provider.disconnect(); } catch {}
     throw e;
   }
+}
+
+async function connectHttp(url) {
+  const provider = new HttpProvider(url);
+  const next = await Promise.race([
+    ApiPromise.create({ provider, noInitWarn: true }),
+    sleepReject(CONNECT_MS, 'RPC timeout')
+  ]);
+  return markHttp(next);
 }
 
 function firstSuccess(promises) {
@@ -118,7 +137,10 @@ async function getApi() {
   if (api && api.isConnected) return api;
   if (connecting) return connecting;
   connecting = (async () => {
-    const pending = RPCS.map(url => connectOne(url));
+    const pending = [
+      ...HTTPS.map(url => connectHttp(url)),
+      ...WSS.map(url => connectWs(url))
+    ];
     try {
       api = await firstSuccess(pending);
       pending.forEach(p => {
@@ -159,8 +181,14 @@ function unstakeCall(apiInst, { hotkey, netuid, amountRao, limitPriceRao }) {
   return m.removeStake(hotkey, netuid, amountRao);
 }
 
-async function signSend(address, tx) {
+async function signSend(address, tx, apiInst) {
   const injector = await web3FromAddress(address);
+  if (apiInst && apiInst._briefHttp) {
+    const signed = await tx.signAsync(address, { signer: injector.signer });
+    const hash = await apiInst.rpc.author.submitExtrinsic(signed);
+    const hex = typeof hash === 'string' ? hash : (hash && hash.toHex ? hash.toHex() : String(hash));
+    return { hash: hex, inBlock: true };
+  }
   return new Promise((resolve, reject) => {
     let unsub = null;
     tx.signAndSend(address, { signer: injector.signer }, result => {
@@ -195,7 +223,7 @@ export async function addStake({ address, hotkey, netuid, amountTao, limitPriceR
   if (BigInt(amountRao) < 2000000n) throw new Error('Minimum stake is 0.002 TAO.');
   const apiInst = await getApi();
   const tx = stakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao, limitPriceRao });
-  return withTimeout(signSend(address, tx), SEND_MS, SLOW);
+  return withTimeout(signSend(address, tx, apiInst), SEND_MS, SLOW);
 }
 
 export async function removeStake({ address, hotkey, netuid, amountTao, limitPriceRao }) {
@@ -203,7 +231,7 @@ export async function removeStake({ address, hotkey, netuid, amountTao, limitPri
   if (BigInt(amountRao) < 2000000n) throw new Error('Minimum unstake is 0.002 TAO.');
   const apiInst = await getApi();
   const tx = unstakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao, limitPriceRao });
-  return withTimeout(signSend(address, tx), SEND_MS, SLOW);
+  return withTimeout(signSend(address, tx, apiInst), SEND_MS, SLOW);
 }
 
 export async function priceRao(tao) {
