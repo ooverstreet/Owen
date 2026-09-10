@@ -12,10 +12,10 @@ const HTTPS = [
   'https://lite.chain.opentensor.ai',
   'https://entrypoint-finney.opentensor.ai:443'
 ];
-const CONNECT_MS = 20000;
-const REQUEST_MS = 30000;
+const CONNECT_MS = 45000;
+const REQUEST_MS = 45000;
 const SEND_MS = 90000;
-const DEAD = 'Could not reach a public chain node. Your TAO did not move. Turn Wi‑Fi off and try on cell data, inside Nova → Browser.';
+const DEAD = 'Could not reach a public chain node. Your TAO did not move. Wait, then tap Stake once more. If it fails again, open Nova → Browser → subnetbriefs.com.';
 const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
 
 let api = null;
@@ -102,31 +102,32 @@ async function connectWs(url) {
   }
 }
 
+async function pingHttp(url) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = setTimeout(() => { try { ctrl && ctrl.abort(); } catch {} }, 8000);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'system_chain', params: [] }),
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    if (!res.ok) throw new Error('ping ' + res.status);
+    const js = await res.json();
+    if (!js || !js.result) throw new Error('ping empty');
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function connectHttp(url) {
+  await pingHttp(url);
   const provider = new HttpProvider(url);
   const next = await Promise.race([
     ApiPromise.create({ provider, noInitWarn: true }),
     sleepReject(CONNECT_MS, 'RPC timeout')
   ]);
   return markHttp(next);
-}
-
-function firstSuccess(promises) {
-  return new Promise((resolve, reject) => {
-    let left = promises.length;
-    let last = new Error(DEAD);
-    if (!left) {
-      reject(last);
-      return;
-    }
-    promises.forEach(p => {
-      p.then(resolve, err => {
-        last = err;
-        left -= 1;
-        if (!left) reject(last);
-      });
-    });
-  });
 }
 
 export async function ready() {
@@ -137,23 +138,24 @@ async function getApi() {
   if (api && api.isConnected) return api;
   if (connecting) return connecting;
   connecting = (async () => {
-    const pending = [
-      ...HTTPS.map(url => connectHttp(url)),
-      ...WSS.map(url => connectWs(url))
-    ];
-    try {
-      api = await firstSuccess(pending);
-      pending.forEach(p => {
-        p.then(inst => { if (inst !== api) inst.disconnect().catch(() => {}); }).catch(() => {});
-      });
-      return api;
-    } catch {
-      api = null;
-      throw new Error(DEAD);
-    } finally {
-      connecting = null;
+    for (const url of HTTPS) {
+      try {
+        api = await connectHttp(url);
+        return api;
+      } catch {
+        api = null;
+      }
     }
-  })();
+    for (const url of WSS) {
+      try {
+        api = await connectWs(url);
+        return api;
+      } catch {
+        api = null;
+      }
+    }
+    throw new Error(DEAD);
+  })().finally(() => { connecting = null; });
   return connecting;
 }
 
