@@ -1473,32 +1473,61 @@ function argMap(args) {
   return out;
 }
 
+function parseNetuid(v) {
+  if (v == null || v === '') return null;
+  const id = Number(v);
+  return Number.isInteger(id) && id >= 0 ? id : null;
+}
+
+function isRecentIso(iso, days) {
+  if (!iso) return true;
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return true;
+  return Date.now() - t < days * 864e5;
+}
+
 function positionsFromActivity(events, extrinsics) {
   const by = new Map();
   const bump = (netuid, hotkey, tao) => {
-    const id = Number(netuid);
+    const id = parseNetuid(netuid);
     const amt = Number(tao) || 0;
-    if (!Number.isFinite(id) || !hotkey || !amt) return;
+    if (id == null || !hotkey || !amt) return;
     const cur = by.get(id) || { hotkey, netuid: id, stake_tao: 0, pending: true };
     cur.stake_tao += amt;
     cur.hotkey = hotkey;
     by.set(id, cur);
   };
-  let sawStake = false;
-  for (const e of events || []) {
-    const kind = String(e.event_kind || '');
-    if (kind === 'StakeAdded') { sawStake = true; bump(e.netuid, e.hotkey, e.amount_tao); }
-    if (kind === 'StakeRemoved') { sawStake = true; bump(e.netuid, e.hotkey, -(num(e.amount_tao) || 0)); }
+
+  const DAYS = 7;
+  let usedX = false;
+  for (const x of extrinsics || []) {
+    if (!x || x.success === false || !isRecentIso(x.observed_at, DAYS)) continue;
+    const fn = String(x.call_function || '');
+    const a = argMap(x.call_args);
+    const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
+    if (fn === 'add_stake_limit' || fn === 'add_stake') { usedX = true; bump(a.netuid, a.hotkey, tao); }
+    if (fn === 'remove_stake_limit' || fn === 'remove_stake') { usedX = true; bump(a.netuid, a.hotkey, -tao); }
   }
-  if (!sawStake) {
-    for (const x of extrinsics || []) {
-      if (!x || x.success === false) continue;
-      const fn = String(x.call_function || '');
-      const a = argMap(x.call_args);
-      const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
-      if (fn === 'add_stake_limit' || fn === 'add_stake') bump(a.netuid, a.hotkey, tao);
-      if (fn === 'remove_stake_limit' || fn === 'remove_stake') bump(a.netuid, a.hotkey, -tao);
-    }
+  if (usedX) return [...by.values()].filter(p => p.stake_tao > 0.0005);
+
+  const groups = new Map();
+  for (const e of events || []) {
+    if (!isRecentIso(e.observed_at, DAYS)) continue;
+    const kind = String(e.event_kind || '');
+    if (kind !== 'StakeAdded' && kind !== 'StakeRemoved') continue;
+    if (parseNetuid(e.netuid) == null) continue;
+    const key = String(e.block_number) + '.' + String(e.extrinsic_index);
+    const g = groups.get(key) || [];
+    g.push(e);
+    groups.set(key, g);
+  }
+  for (const g of groups.values()) {
+    const adds = g.filter(e => e.event_kind === 'StakeAdded');
+    const rms = g.filter(e => e.event_kind === 'StakeRemoved');
+    const shopAdds = adds.filter(e => parseNetuid(e.netuid) !== 0);
+    const useAdds = shopAdds.length ? shopAdds : adds;
+    for (const e of useAdds) bump(e.netuid, e.hotkey, e.amount_tao);
+    for (const e of rms) bump(e.netuid, e.hotkey, -(num(e.amount_tao) || 0));
   }
   return [...by.values()].filter(p => p.stake_tao > 0.0005);
 }
@@ -1572,7 +1601,7 @@ function renderYouBook() {
         <span><b>${fmtTao(total, 2)}</b> staked</span>
       </div>
       ${!rows.length ? `<p class="why">Nothing in this book yet. If Nova already shows a transfer, tap Refresh — the public snapshot is slower than your wallet. TAO sits with the validator, not in Brief.</p>` : ''}
-      ${pendingRows ? `<p class="hint">On chain from extras Nova already sent. The public snapshot has not listed this shop yet.</p>` : ''}
+      ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent extras from Nova. One extra should be one shop — tap Refresh if this still looks split.' : 'This extra is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
         const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
