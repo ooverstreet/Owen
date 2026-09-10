@@ -1,3 +1,5 @@
+import './crypto-asm.js';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 
@@ -12,14 +14,25 @@ const HTTPS = [
   'https://lite.chain.opentensor.ai',
   'https://entrypoint-finney.opentensor.ai:443'
 ];
-const CONNECT_MS = 45000;
-const REQUEST_MS = 45000;
+const CONNECT_MS = 30000;
+const REQUEST_MS = 30000;
 const SEND_MS = 90000;
-const DEAD = 'Could not reach a public chain node. Your TAO did not move. Wait, then tap Stake once more. If it fails again, open Nova → Browser → subnetbriefs.com.';
+const DEAD = 'Could not reach a public chain node. Your TAO did not move. Tap Stake once and wait for Nova — do not mash the button.';
 const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
 
 let api = null;
 let connecting = null;
+let cryptoOk = false;
+
+function isPhone() {
+  return typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+}
+
+async function ensureCrypto() {
+  if (cryptoOk) return;
+  await withTimeout(cryptoWaitReady(), 20000, 'This browser could not start wallet crypto. Open Nova → Browser → subnetbriefs.com.');
+  cryptoOk = true;
+}
 
 export function hasInjected() {
   const inj = typeof window !== 'undefined' ? window.injectedWeb3 : null;
@@ -122,12 +135,17 @@ async function pingHttp(url) {
 
 async function connectHttp(url) {
   await pingHttp(url);
+  await ensureCrypto();
   const provider = new HttpProvider(url);
   const next = await Promise.race([
     ApiPromise.create({ provider, noInitWarn: true }),
     sleepReject(CONNECT_MS, 'RPC timeout')
   ]);
   return markHttp(next);
+}
+
+export async function ping() {
+  await pingHttp(HTTPS[0]);
 }
 
 export async function ready() {
@@ -138,6 +156,7 @@ async function getApi() {
   if (api && api.isConnected) return api;
   if (connecting) return connecting;
   connecting = (async () => {
+    await ensureCrypto();
     for (const url of HTTPS) {
       try {
         api = await connectHttp(url);
@@ -146,12 +165,14 @@ async function getApi() {
         api = null;
       }
     }
-    for (const url of WSS) {
-      try {
-        api = await connectWs(url);
-        return api;
-      } catch {
-        api = null;
+    if (!isPhone()) {
+      for (const url of WSS) {
+        try {
+          api = await connectWs(url);
+          return api;
+        } catch {
+          api = null;
+        }
       }
     }
     throw new Error(DEAD);

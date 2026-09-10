@@ -724,7 +724,7 @@ nav.tabs {
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
-<script src="chain.js?v=22"></script>
+<script src="chain.js?v=23"></script>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
 const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
@@ -1712,7 +1712,7 @@ function canSignHere() {
 }
 
 function warmChain() {
-  try { if (window.BriefChain && BriefChain.ready) BriefChain.ready().catch(() => {}); } catch (e) {}
+  try { if (window.BriefChain && BriefChain.ping) BriefChain.ping().catch(() => {}); } catch (e) {}
 }
 function onPhone() {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
@@ -1891,8 +1891,10 @@ async function signExtra(kind, extra) {
     return;
   }
   go.disabled = true;
-  status.textContent = 'Reaching a public chain node… this can take a minute on a phone. Your TAO has not moved.';
+  status.textContent = 'Checking a public node… your TAO has not moved.';
   try {
+    if (BriefChain.ping) await BriefChain.ping();
+    status.textContent = 'Loading the chain on this phone… can take a minute. Do not tap again. TAO has not moved.';
     if (BriefChain.ready) await BriefChain.ready();
     status.textContent = 'Approve in Nova now. Look for a Nova sign screen — this page will wait.';
     const limitPriceRao = limitRaoFromQuote(extra.quote, kind === 'unstake' ? 'unstake' : 'stake');
