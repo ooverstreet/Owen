@@ -724,7 +724,7 @@ nav.tabs {
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
-<script src="chain.js"></script>
+<script src="chain.js?v=20"></script>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
 const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
@@ -1909,7 +1909,11 @@ async function signExtra(kind, extra) {
     setTimeout(closeSheet, 1600);
   } catch (e) {
     const msg = String(e && e.message || e);
-    const nice = /reject|cancel|denied/i.test(msg) ? 'Cancelled in the wallet. Nothing was sent.' : msg;
+    const nice = /reject|cancel|denied/i.test(msg)
+      ? 'Cancelled in the wallet. Nothing was sent.'
+      : /RPC timeout|timed out|taking too long|public chain nodes/i.test(msg)
+        ? 'Could not reach a public chain node. Your TAO did not move. Open Nova → Browser → subnetbriefs.com, then tap Stake again.'
+        : msg;
     status.innerHTML = `<span class="warn-line">${esc(nice)}</span>`;
     go.disabled = false;
   }
