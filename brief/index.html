@@ -1578,7 +1578,7 @@ function renderYouBook() {
         const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
         return `<div class="pos">
           <b>${esc(name)}${pos && pos.pending ? '<small>on chain</small>' : ''}</b>
-          <i>${fmtTao(p.tao, 2)} τ</i>
+          <i>${fmtTao(p.tao, 2)}</i>
           ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
