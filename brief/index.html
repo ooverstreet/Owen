@@ -724,7 +724,7 @@ nav.tabs {
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
-<script src="chain.js?v=21"></script>
+<script src="chain.js?v=22"></script>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
 const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
@@ -1891,7 +1891,7 @@ async function signExtra(kind, extra) {
     return;
   }
   go.disabled = true;
-  status.textContent = 'Reaching a public chain node… your TAO has not moved.';
+  status.textContent = 'Reaching a public chain node… this can take a minute on a phone. Your TAO has not moved.';
   try {
     if (BriefChain.ready) await BriefChain.ready();
     status.textContent = 'Approve in Nova now. Look for a Nova sign screen — this page will wait.';
@@ -1912,7 +1912,7 @@ async function signExtra(kind, extra) {
     const nice = /reject|cancel|denied/i.test(msg)
       ? 'Cancelled in the wallet. Nothing was sent.'
       : /RPC timeout|timed out|taking too long|public chain nodes/i.test(msg)
-        ? 'Could not reach a public chain node. Your TAO did not move. Turn Wi‑Fi off, open Nova → Browser → subnetbriefs.com, then tap Stake once.'
+        ? 'Could not reach a public chain node. Your TAO did not move. Wait a minute, then tap Stake once more. Stay in Nova → Browser.'
         : msg;
     status.innerHTML = `<span class="warn-line">${esc(nice)}</span>`;
     go.disabled = false;
