@@ -735,6 +735,19 @@ const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
 const WORK_IDS = [64, 51, 4];
 const RESEARCH_IDS = [120, 62, 34];
 const SS58_RE = /^5[1-9A-HJ-NP-Za-km-z]{46,48}$/;
+const EVM_RE = /^0x[0-9a-fA-F]{40}$/;
+
+function walletAccounts(list) {
+  const out = [];
+  const seen = new Set();
+  for (const a of list || []) {
+    const address = String(a.address || '').trim();
+    if (!SS58_RE.test(address) || seen.has(address)) continue;
+    seen.add(address);
+    out.push({ ...a, address });
+  }
+  return out;
+}
 const DESK = {
   name: 'Brief desk',
   hotkey: '',
@@ -2127,10 +2140,16 @@ async function reviewUnstake(netuid, hotkey, amt) {
 }
 
 async function useWalletAccount(acct) {
-  state.wallet = acct;
-  $('ck').value = acct.address;
+  const pick = acct && SS58_RE.test(acct.address) ? acct : walletAccounts(state.accounts)[0];
+  if (!pick) {
+    state.you = { error: 'Nova also listed an Ethereum account (0x…). Brief needs the Bittensor key that starts with 5. Tap that chip.' };
+    renderYouBook();
+    return;
+  }
+  state.wallet = pick;
+  $('ck').value = pick.address;
   renderConnect();
-  await lookupCk(acct.address);
+  await lookupCk(pick.address);
   await Promise.all([
     loadValidators(state.allocate.netuid),
     loadYield(state.allocate.netuid),
@@ -2160,7 +2179,8 @@ async function onConnect() {
   const go = $('sheet-connect');
   if (go) go.disabled = true;
   try {
-    const accts = await BriefChain.connect('Subnet Brief');
+    const accts = walletAccounts(await BriefChain.connect('Subnet Brief'));
+    if (!accts.length) throw new Error('The wallet only offered an Ethereum address. Pick the Bittensor account that starts with 5, then connect again.');
     state.connectErr = '';
     state.accounts = accts;
     const pick = accts.find(a => a.address === state.ss58) || accts[0];
@@ -2197,11 +2217,30 @@ function pollBook(ss58) {
   });
 }
 
+async function fetchJson(url, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function lookupCk(raw, opts) {
   const ss58 = String(raw || '').trim();
   const gen = ++lookupGen;
   if (ss58.split(/\s+/).length >= 8) {
     state.you = { error: 'Stop. That looks like a seed phrase. This app only accepts a public address starting with 5. Nothing was sent.' };
+    renderYouBook();
+    return;
+  }
+  if (EVM_RE.test(ss58)) {
+    state.you = { error: 'That is an Ethereum account. Brief needs the Bittensor key that starts with 5 — tap that chip. Nothing was sent.' };
     renderYouBook();
     return;
   }
@@ -2222,43 +2261,34 @@ async function lookupCk(raw, opts) {
     state.you = 'loading';
     renderYouBook();
   }
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 15000);
-    const [posRes, balRes, evRes, exRes] = await Promise.all([
-      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/positions', { signal: ctrl.signal }),
-      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/balance', { signal: ctrl.signal }),
-      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/events?limit=40', { signal: ctrl.signal }),
-      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/extrinsics?limit=15', { signal: ctrl.signal })
-    ]);
-    clearTimeout(t);
-    if (gen !== lookupGen) return;
-    if (!posRes.ok) throw new Error('lookup failed');
-    const pos = await posRes.json();
-    const bal = balRes.ok ? await balRes.json() : { data: {} };
-    const ev = evRes.ok ? await evRes.json() : { data: {} };
-    const ex = exRes.ok ? await exRes.json() : { data: {} };
-    const indexed = pos.data?.positions || [];
-    const extras = positionsFromActivity(ev.data?.events, ex.data?.extrinsics);
-    const pending = readPending(ss58);
-    const positions = mergeBookPositions(indexed, extras, pending);
-    clearPendingIfListed(ss58, indexed.concat(extras));
-    state.you = {
-      ss58,
-      positions,
-      agg: aggregatePositions(positions),
-      balance: num(bal.data?.balance_tao) || 0
-    };
-  } catch {
-    if (gen !== lookupGen) return;
-    const pending = readPending(ss58);
-    if (pending) {
-      const positions = mergeBookPositions([], [], pending);
-      state.you = { ss58, positions, agg: aggregatePositions(positions), balance: (state.you && state.you.balance) || 0 };
-    } else {
-      state.you = { error: 'Could not read this address from the public indexer. Try again in a moment, or check the address.' };
+  const enc = encodeURIComponent(ss58);
+  const [pos, bal, ev, ex] = await Promise.all([
+    fetchJson(API + '/accounts/' + enc + '/positions', 12000),
+    fetchJson(API + '/accounts/' + enc + '/balance', 8000),
+    fetchJson(API + '/accounts/' + enc + '/events?limit=40', 12000),
+    fetchJson(API + '/accounts/' + enc + '/extrinsics?limit=15', 12000)
+  ]);
+  if (gen !== lookupGen) return;
+  const indexed = (pos && pos.data && pos.data.positions) || [];
+  const extras = positionsFromActivity(ev && ev.data && ev.data.events, ex && ex.data && ex.data.extrinsics);
+  const pending = readPending(ss58);
+  const positions = mergeBookPositions(indexed, extras, pending);
+  clearPendingIfListed(ss58, indexed.concat(extras));
+  if (!pos && !extras.length && !pending) {
+    if (quiet && state.you && state.you.ss58 === ss58 && !state.you.error) {
+      renderYouBook();
+      return;
     }
+    state.you = { error: 'Could not read this address from the public indexer. Try again in a moment, or check the address.' };
+    renderYouBook();
+    return;
   }
+  state.you = {
+    ss58,
+    positions,
+    agg: aggregatePositions(positions),
+    balance: num(bal && bal.data && bal.data.balance_tao) || (state.you && state.you.balance) || 0
+  };
   renderYouBook();
 }
 
