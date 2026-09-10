@@ -393,6 +393,9 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 }
 .pos b { flex:1; font-size:13px; }
 .pos i { font-style:normal; color:var(--mute); font-size:12px; font-variant-numeric:tabular-nums; }
+.pos small { display:block; font-size:11px; color:var(--faint); font-weight:500; margin-top:2px; }
+.book-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.book-head button { color:var(--gold); font-size:12px; font-weight:560; }
 #desk.wallet-on .paste-book { display:none; }
 .pay {
   background:linear-gradient(160deg, var(--mint-wash), var(--paper));
@@ -1430,6 +1433,99 @@ function shortAddr(s) {
   return s.length < 12 ? s : s.slice(0, 6) + '…' + s.slice(-4);
 }
 
+function acctChipLabel(a) {
+  const short = shortAddr(a.address || '');
+  const n = String(a.name || '').trim();
+  if (!n || /^own$/i.test(n)) return short;
+  return n + ' · ' + short;
+}
+
+const PENDING_KEY = 'sb-pending-stake';
+
+function readPending(ss58) {
+  try {
+    const p = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
+    if (!p || p.address !== ss58) return null;
+    if (Date.now() - Number(p.t || 0) > 12 * 36e5) return null;
+    return p;
+  } catch {
+    return null;
+  }
+}
+
+function writePending(p) {
+  try { localStorage.setItem(PENDING_KEY, JSON.stringify({ ...p, t: Date.now() })); } catch {}
+}
+
+function clearPendingIfListed(ss58, positions) {
+  const p = readPending(ss58);
+  if (!p) return;
+  const hit = (positions || []).some(x => Number(x.netuid) === Number(p.netuid) && (num(x.stake_tao) || 0) > 0.0005);
+  if (hit) try { localStorage.removeItem(PENDING_KEY); } catch {}
+}
+
+function raoToTao(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n === 0) return 0;
+  return Math.abs(n) >= 1e6 ? n / 1e9 : n;
+}
+
+function argMap(args) {
+  const out = {};
+  for (const a of args || []) out[a.name] = a.value;
+  return out;
+}
+
+function positionsFromActivity(events, extrinsics) {
+  const by = new Map();
+  const bump = (netuid, hotkey, tao) => {
+    const id = Number(netuid);
+    const amt = Number(tao) || 0;
+    if (!Number.isFinite(id) || !hotkey || !amt) return;
+    const cur = by.get(id) || { hotkey, netuid: id, stake_tao: 0, pending: true };
+    cur.stake_tao += amt;
+    cur.hotkey = hotkey;
+    by.set(id, cur);
+  };
+  let sawStake = false;
+  for (const e of events || []) {
+    const kind = String(e.event_kind || '');
+    if (kind === 'StakeAdded') { sawStake = true; bump(e.netuid, e.hotkey, e.amount_tao); }
+    if (kind === 'StakeRemoved') { sawStake = true; bump(e.netuid, e.hotkey, -(num(e.amount_tao) || 0)); }
+  }
+  if (!sawStake) {
+    for (const x of extrinsics || []) {
+      if (!x || x.success === false) continue;
+      const fn = String(x.call_function || '');
+      const a = argMap(x.call_args);
+      const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
+      if (fn === 'add_stake_limit' || fn === 'add_stake') bump(a.netuid, a.hotkey, tao);
+      if (fn === 'remove_stake_limit' || fn === 'remove_stake') bump(a.netuid, a.hotkey, -tao);
+    }
+  }
+  return [...by.values()].filter(p => p.stake_tao > 0.0005);
+}
+
+function mergeBookPositions(indexed, extras, pending) {
+  const have = new Set((indexed || []).map(p => Number(p.netuid)));
+  const out = [...(indexed || [])];
+  for (const p of extras || []) {
+    const id = Number(p.netuid);
+    if (have.has(id)) continue;
+    out.push(p);
+    have.add(id);
+  }
+  if (pending && !have.has(Number(pending.netuid))) {
+    out.push({
+      hotkey: pending.hotkey,
+      netuid: Number(pending.netuid),
+      stake_tao: Number(pending.amount) || 0,
+      pending: true
+    });
+  }
+  return out;
+}
+
 function aggregatePositions(positions) {
   const by = new Map();
   for (const p of positions || []) {
@@ -1470,19 +1566,21 @@ function renderYouBook() {
   const mine = !!(state.wallet && state.wallet.address === y.ss58);
   const top = rows.slice(0, mine ? 20 : 10);
   if (mine) {
+    const pendingRows = (y.positions || []).some(p => p.pending);
     el.innerHTML = `
     <div class="sleeve">
-      <h3>Your book</h3>
+      <div class="book-head"><h3>Your book</h3><button type="button" data-refresh-book>Refresh</button></div>
       <div class="meta" style="margin:8px 0 4px">
         <span><b>${fmtTao(free, 2)}</b> free</span>
         <span><b>${fmtTao(total, 2)}</b> staked</span>
       </div>
-      ${!rows.length ? `<p class="why">Nothing staked yet. Pick park or a shop, then tap the gold button. Nova will ask you to approve.</p>` : ''}
+      ${!rows.length ? `<p class="why">Nothing in this book yet. If Nova already shows a transfer, tap Refresh — the public snapshot is slower than your wallet. TAO sits with the validator, not in Brief.</p>` : ''}
+      ${pendingRows ? `<p class="hint">On chain from extras Nova already sent. The public snapshot has not listed this shop yet.</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
         const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
         return `<div class="pos">
-          <b>${esc(name)}</b>
+          <b>${esc(name)}${pos && pos.pending ? '<small>on chain</small>' : ''}</b>
           <i>${fmtTao(p.tao, 2)} τ</i>
           ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
@@ -1671,7 +1769,7 @@ function renderConnect() {
   if (state.accounts.length > 1) {
     pick.hidden = false;
     pick.innerHTML = state.accounts.map(a =>
-      `<button type="button" data-acct="${esc(a.address)}" class="${w && w.address === a.address ? 'on' : ''}">${esc(a.name || shortAddr(a.address))}</button>`
+      `<button type="button" data-acct="${esc(a.address)}" class="${w && w.address === a.address ? 'on' : ''}">${esc(acctChipLabel(a))}</button>`
     ).join('');
   } else {
     pick.hidden = true;
@@ -1932,8 +2030,18 @@ async function signExtra(kind, extra) {
     };
     const res = kind === 'unstake' ? await BriefChain.removeStake(args) : await BriefChain.addStake(args);
     status.innerHTML = `<span class="ok-line">In block ${esc((res.hash||'').slice(0,10))}… Refreshing the book.</span>`;
+    if (kind !== 'unstake') {
+      writePending({
+        address: state.wallet.address,
+        netuid: extra.netuid,
+        hotkey: extra.hotkey,
+        amount: extra.amount,
+        hash: res.hash || ''
+      });
+    }
     await lookupCk(state.wallet.address);
-    setTimeout(closeSheet, 1600);
+    pollBook(state.wallet.address);
+    setTimeout(closeSheet, 2200);
   } catch (e) {
     const msg = String(e && e.message || e);
     const nice = /reject|cancel|denied/i.test(msg)
@@ -2050,14 +2158,27 @@ function onDisconnect() {
   renderAllocate();
 }
 
-async function lookupCk(raw) {
+let lookupGen = 0;
+let bookPollGen = 0;
+
+function pollBook(ss58) {
+  const id = ++bookPollGen;
+  [4000, 9000, 18000].forEach(ms => {
+    setTimeout(() => {
+      if (id !== bookPollGen || state.ss58 !== ss58) return;
+      lookupCk(ss58, { quiet: true });
+    }, ms);
+  });
+}
+
+async function lookupCk(raw, opts) {
   const ss58 = String(raw || '').trim();
+  const gen = ++lookupGen;
   if (ss58.split(/\s+/).length >= 8) {
     state.you = { error: 'Stop. That looks like a seed phrase. This app only accepts a public address starting with 5. Nothing was sent.' };
     renderYouBook();
     return;
   }
-  const el = $('you-book');
   if (!SS58_RE.test(ss58)) {
     state.you = { error: 'That does not look like a Bittensor address (public key starting with 5, 47–49 characters). Never paste a seed phrase here.' };
     renderYouBook();
@@ -2070,27 +2191,47 @@ async function lookupCk(raw) {
   }
   state.ss58 = ss58;
   localStorage.setItem('sb-ck', ss58);
-  state.you = 'loading';
-  renderYouBook();
+  const quiet = !!(opts && opts.quiet && state.you && state.you.ss58 === ss58 && !state.you.error);
+  if (!quiet) {
+    state.you = 'loading';
+    renderYouBook();
+  }
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 15000);
-    const [posRes, balRes] = await Promise.all([
+    const [posRes, balRes, evRes, exRes] = await Promise.all([
       fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/positions', { signal: ctrl.signal }),
-      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/balance', { signal: ctrl.signal })
+      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/balance', { signal: ctrl.signal }),
+      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/events?limit=40', { signal: ctrl.signal }),
+      fetch(API + '/accounts/' + encodeURIComponent(ss58) + '/extrinsics?limit=15', { signal: ctrl.signal })
     ]);
     clearTimeout(t);
+    if (gen !== lookupGen) return;
     if (!posRes.ok) throw new Error('lookup failed');
     const pos = await posRes.json();
     const bal = balRes.ok ? await balRes.json() : { data: {} };
+    const ev = evRes.ok ? await evRes.json() : { data: {} };
+    const ex = exRes.ok ? await exRes.json() : { data: {} };
+    const indexed = pos.data?.positions || [];
+    const extras = positionsFromActivity(ev.data?.events, ex.data?.extrinsics);
+    const pending = readPending(ss58);
+    const positions = mergeBookPositions(indexed, extras, pending);
+    clearPendingIfListed(ss58, indexed.concat(extras));
     state.you = {
       ss58,
-      positions: pos.data?.positions || [],
-      agg: aggregatePositions(pos.data?.positions),
+      positions,
+      agg: aggregatePositions(positions),
       balance: num(bal.data?.balance_tao) || 0
     };
   } catch {
-    state.you = { error: 'Could not read this address from the public indexer. Try again in a moment, or check the address.' };
+    if (gen !== lookupGen) return;
+    const pending = readPending(ss58);
+    if (pending) {
+      const positions = mergeBookPositions([], [], pending);
+      state.you = { ss58, positions, agg: aggregatePositions(positions), balance: (state.you && state.you.balance) || 0 };
+    } else {
+      state.you = { error: 'Could not read this address from the public indexer. Try again in a moment, or check the address.' };
+    }
   }
   renderYouBook();
 }
@@ -2201,6 +2342,11 @@ document.addEventListener('click', e => {
       const m = (location.hash || '').match(/sn\/(\d+)/);
       if (m) renderDetail(m[1]);
     }
+    return;
+  }
+  const refreshBook = e.target.closest('[data-refresh-book]');
+  if (refreshBook) {
+    if (state.ss58) lookupCk(state.ss58);
     return;
   }
   const unstake = e.target.closest('[data-unstake]');
