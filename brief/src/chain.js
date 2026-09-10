@@ -7,12 +7,14 @@ const RPCS = [
   'wss://lite.sub.latent.to:443',
   'wss://bittensor-finney.api.onfinality.io/public-ws'
 ];
-const CONNECT_MS = 10000;
+const CONNECT_MS = 20000;
+const REQUEST_MS = 30000;
 const SEND_MS = 90000;
 const DEAD = 'The public chain nodes timed out. Your TAO did not move. Wait a few seconds and tap Stake again.';
 const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
 
 let api = null;
+let connecting = null;
 
 export function hasInjected() {
   const inj = typeof window !== 'undefined' ? window.injectedWeb3 : null;
@@ -70,7 +72,7 @@ async function withTimeout(promise, ms, msg) {
 }
 
 async function connectOne(url) {
-  const provider = new WsProvider(url, false, undefined, CONNECT_MS);
+  const provider = new WsProvider(url, false, undefined, REQUEST_MS);
   let next = null;
   try {
     await Promise.race([
@@ -90,23 +92,47 @@ async function connectOne(url) {
   }
 }
 
+function firstSuccess(promises) {
+  return new Promise((resolve, reject) => {
+    let left = promises.length;
+    let last = new Error(DEAD);
+    if (!left) {
+      reject(last);
+      return;
+    }
+    promises.forEach(p => {
+      p.then(resolve, err => {
+        last = err;
+        left -= 1;
+        if (!left) reject(last);
+      });
+    });
+  });
+}
+
 export async function ready() {
   return getApi();
 }
 
 async function getApi() {
   if (api && api.isConnected) return api;
-  api = null;
-  const pending = RPCS.map(url => connectOne(url));
-  try {
-    api = await Promise.any(pending);
-  } catch {
-    throw new Error(DEAD);
-  }
-  pending.forEach(p => {
-    p.then(inst => { if (inst !== api) inst.disconnect().catch(() => {}); }).catch(() => {});
-  });
-  return api;
+  if (connecting) return connecting;
+  connecting = (async () => {
+    const pending = RPCS.map(url => connectOne(url));
+    try {
+      api = await firstSuccess(pending);
+      pending.forEach(p => {
+        p.then(inst => { if (inst !== api) inst.disconnect().catch(() => {}); }).catch(() => {});
+      });
+      return api;
+    } catch {
+      api = null;
+      throw new Error(DEAD);
+    } finally {
+      connecting = null;
+    }
+  })();
+  return connecting;
 }
 
 function moduleTx(apiInst) {
