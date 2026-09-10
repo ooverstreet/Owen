@@ -1434,10 +1434,7 @@ function shortAddr(s) {
 }
 
 function acctChipLabel(a) {
-  const short = shortAddr(a.address || '');
-  const n = String(a.name || '').trim();
-  if (!n || /^own$/i.test(n)) return short;
-  return n + ' · ' + short;
+  return shortAddr(a.address || '');
 }
 
 const PENDING_KEY = 'sb-pending-stake';
