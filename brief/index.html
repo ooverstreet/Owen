@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
 <meta name="description" content="Park TAO or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Bittensor in plain English</title>
@@ -1710,6 +1710,10 @@ function selectedVal() {
 function canSignHere() {
   return !!(window.BriefChain && BriefChain.hasInjected && BriefChain.hasInjected());
 }
+
+function warmChain() {
+  try { if (window.BriefChain && BriefChain.ready) BriefChain.ready().catch(() => {}); } catch (e) {}
+}
 function onPhone() {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
 }
@@ -1870,6 +1874,7 @@ function openSheet(kind, extra) {
   $('sheet-cancel').onclick = closeSheet;
   el.onclick = ev => { if (ev.target === el) closeSheet(); };
   $('sheet-sign').onclick = () => signExtra(kind, extra);
+  warmChain();
 }
 
 async function signExtra(kind, extra) {
@@ -1886,7 +1891,7 @@ async function signExtra(kind, extra) {
     return;
   }
   go.disabled = true;
-  status.textContent = 'Reaching the Bittensor chain… (not the wallet yet)';
+  status.textContent = 'Reaching a public chain node… your TAO has not moved.';
   try {
     if (BriefChain.ready) await BriefChain.ready();
     status.textContent = 'Approve in Nova now. Look for a Nova sign screen — this page will wait.';
@@ -1995,6 +2000,7 @@ async function onConnect() {
     state.accounts = accts;
     const pick = accts.find(a => a.address === state.ss58) || accts[0];
     await useWalletAccount(pick);
+    warmChain();
     closeSheet();
     renderConnect();
   } catch (e) {
@@ -2368,6 +2374,7 @@ window.addEventListener('hashchange', applyHash);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 load().then(() => {
   applyHash();
+  warmChain();
   loadValidators(state.allocate.netuid);
   featuredDests().forEach(id => loadYield(id).then(() => {
     if (Number(state.allocate.netuid) === Number(id)) renderAllocate();
