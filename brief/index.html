@@ -11,12 +11,12 @@
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
-<meta name="description" content="Park TAO or put it on an AI shop. Your wallet signs. We never ask for a seed.">
+<meta name="description" content="Learn to stake TAO in plain English. Park it, or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
-<title>Subnet Brief — Bittensor in plain English</title>
+<title>Subnet Brief — Stake TAO in plain English</title>
 <link rel="canonical" href="https://subnetbriefs.com/">
 <meta property="og:title" content="Subnet Brief">
-<meta property="og:description" content="Bittensor in plain English. Read a public book. Allocate only with a wallet signature. No seed.">
+<meta property="og:description" content="Park TAO or stake it on a shop. Your wallet signs. We never ask for a seed.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://subnetbriefs.com/">
 <meta property="og:image" content="https://subnetbriefs.com/icon-512.png">
@@ -92,6 +92,19 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   letter-spacing:-.02em; margin:8px 0 10px;
 }
 .lede { color:var(--mute); font-size:14.5px; line-height:1.55; margin-bottom:18px; }
+.trust {
+  display:grid; grid-template-columns:1fr; gap:8px; margin:0 0 18px;
+}
+.trust i {
+  font-style:normal; background:var(--paper); border:1px solid var(--line);
+  border-radius:14px; padding:12px 14px;
+}
+.trust b { display:block; color:var(--mint); font-size:13px; margin-bottom:3px; }
+.trust span { display:block; color:var(--mute); font-size:13px; line-height:1.45; }
+.home-more { margin-top:4px; }
+@media (min-width: 560px) {
+  .trust { grid-template-columns:1fr 1fr 1fr; }
+}
 
 .roles { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; }
 .role {
@@ -344,8 +357,7 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
     box-shadow:0 8px 24px var(--shadow);
   }
 }
-#desk.wallet-on .pay, #desk.wallet-on #sleeves, #desk.wallet-on > .foot,
-#desk.intent-on .pay, #desk.intent-on #sleeves, #desk.intent-on > .foot { display:none; }
+#desk .pay, #desk #sleeves, #desk > .foot { display:none; }
 #sheet {
   display:none; position:fixed; inset:0; z-index:50;
   background:var(--overlay); padding:24px 16px;
@@ -446,6 +458,7 @@ nav.tabs {
 #theme { padding:0 9px; font-size:11px; font-weight:700; }
 @media (max-width: 560px) {
   .hero { font-size:24px; }
+  .howto { grid-template-columns:1fr; }
   .lookup { flex-direction:column; }
   .lookup button { width:100%; height:46px; }
   .grid3 { grid-template-columns:1fr 1fr; }
@@ -464,20 +477,27 @@ nav.tabs {
   header { max-width:1560px; margin:0 auto; width:100%; padding-left:40px; padding-right:40px; }
   .hero { font-size:36px; }
   .lede { font-size:16px; max-width:62ch; }
-  .stats { grid-template-columns:repeat(4, 1fr); gap:10px; }
+  #pulse.screen.on {
+    display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    gap:8px 36px; align-items:start;
+  }
+  #pulse .home-lead { padding-top:4px; }
+  #pulse .home-side { padding-top:12px; }
+  #pulse .home-more { grid-column:1 / -1; }
+  .stats { grid-template-columns:repeat(2, 1fr); gap:10px; }
   .movers, #movers { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
   #movers .move { min-width:0; width:auto; }
   #movers .nm { min-width:0; }
   #cards { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
   .card { margin-bottom:0; min-width:0; }
   #cards .empty, #cards .spin { grid-column:1 / -1; }
-  #desk-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+  #desk-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:22px; align-items:start; }
   #allocate { order:0; }
-  .rules { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .rules { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   #sleeves { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
   .sleeve { margin-bottom:0; }
   #guide.screen.on { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:start; }
-  #guide .hero, #guide .lede, #guide .foot, #guide .steps3, #guide .howto { grid-column:1 / -1; }
+  #guide .hero, #guide .lede, #guide .foot, #guide .steps3, #guide .howto, #guide .trust { grid-column:1 / -1; }
   .guide-card { margin-bottom:0; }
   .grid3 { grid-template-columns:repeat(3, 1fr); gap:10px; }
   nav.tabs {
@@ -527,7 +547,7 @@ nav.tabs {
     <div class="mark">τ</div>
     <div class="brand">
       <h1>SUBNET BRIEF</h1>
-      <p id="subhead">Park TAO or put it on a shop</p>
+      <p id="subhead">Stake TAO in plain English</p>
     </div>
     <div id="live-pill">loading</div>
     <button type="button" id="theme" title="Light mode" aria-label="Switch to light mode">Light</button>
@@ -542,44 +562,50 @@ nav.tabs {
   </div>
   <main>
     <section id="pulse" class="screen on">
-      <div class="hero">Put TAO on a shop — or just park it.</div>
-      <p class="lede" id="pulse-lede">TAO is the money. A subnet is a shop doing one AI job. You can park TAO (safer, it stays TAO) or stake it on a shop (a bet — the price can move).</p>
-      <div class="steps3">
-        <i><b>1. Connect</b>Show your book. We never ask for a seed.</i>
-        <i><b>2. Pick</b>Park it, or tap a shop.</i>
-        <i><b>3. Tap Stake</b>Your wallet asks you to approve.</i>
+      <div class="home-lead">
+        <div class="hero">Stake TAO without the jargon.</div>
+        <p class="lede" id="pulse-lede">TAO is the money. A subnet is a shop doing one AI job. You can park TAO so it stays TAO, or stake it on a shop — a bet, because the shop’s token can go up or down.</p>
+        <div class="trust">
+          <i><b>Your wallet holds it</b><span>Nova or Talisman keeps the keys. Brief never holds TAO.</span></i>
+          <i><b>We never ask for a seed</b><span>If a screen ever does, it is not this site. Close it.</span></i>
+          <i><b>You can unstake</b><span>Shop tokens can lose value. Gains stay in the stake until you unstake.</span></i>
+        </div>
+        <div class="howto">
+          <button type="button" class="howto-card" data-go-stake="0">
+            <b>Park TAO</b>
+            <span>Safer. It stays TAO. Most of the network does this.</span>
+            <em>Park it →</em>
+          </button>
+          <button type="button" class="howto-card gold" data-go-shops>
+            <b>Stake on a shop</b>
+            <span>Pick a name like Chutes. Price can move. Read first if you want.</span>
+            <em>See shops →</em>
+          </button>
+        </div>
+        <div class="steps3">
+          <i><b>1. Connect</b>Your wallet. No seed.</i>
+          <i><b>2. Pick</b>Park, or a shop.</i>
+          <i><b>3. Approve</b>Nova asks. You tap yes.</i>
+        </div>
       </div>
-      <div class="howto">
-        <button type="button" class="howto-card" data-go-stake="0">
-          <b>Park TAO</b>
-          <span>Keep it as TAO. Safer. Less of a bet.</span>
-          <em>Park it →</em>
-        </button>
-        <button type="button" class="howto-card gold" data-go-shops>
-          <b>Stake on a shop</b>
-          <span>Pick a shop like Chutes. Price can go up or down.</span>
-          <em>See shops →</em>
-        </button>
+      <div class="home-side">
+        <div id="today-shop"></div>
+        <div class="stats" id="stats"><div class="spin"></div></div>
       </div>
-      <div id="today-shop"></div>
-      <div class="roles" id="roles"></div>
-      <div class="stats" id="stats"><div class="spin"></div></div>
-      <div class="callout" id="take"></div>
-      <div class="section-h"><h2>Worth a look</h2><button type="button" id="to-list">All shops</button></div>
-      <div class="movers" id="movers"></div>
-      <div class="section-h" style="margin-top:18px"><h2>Ready?</h2></div>
-      <button type="button" class="btn stake-go" id="to-desk" style="max-width:320px">Go to Stake</button>
-      <p class="lede" style="margin-top:10px">Same gold button as on a shop card. Connect, pick park or a shop, tap Stake.</p>
+      <div class="home-more">
+        <div class="roles" id="roles"></div>
+        <div class="callout" id="take"></div>
+        <div class="section-h"><h2>Shops to start with</h2><button type="button" id="to-list">All shops</button></div>
+        <div class="movers" id="movers"></div>
+        <div class="section-h" style="margin-top:18px"><h2>Ready?</h2></div>
+        <button type="button" class="btn stake-go" id="to-desk" style="max-width:320px">Go to Stake</button>
+        <p class="lede" style="margin-top:10px">Open in Nova’s Browser on a phone. Connect, pick park or a shop, tap the gold button.</p>
+      </div>
     </section>
 
     <section id="list" class="screen">
       <div class="hero">Shops you can put TAO on</div>
-      <p class="lede">A shop is a subnet. Tap Stake to put TAO on it. Tap Read first if you want the brief.</p>
-      <div class="steps3">
-        <i><b>1. Find a shop</b>Search or scroll.</i>
-        <i><b>2. Tap Stake</b>We take you to the gold button.</i>
-        <i><b>3. Approve</b>Your wallet signs. We never see a seed.</i>
-      </div>
+      <p class="lede">Each shop is a subnet — one AI job. Tap Read first if you want the brief. Tap Stake when you are ready. If you are not ready to pick, park TAO on the Stake tab instead. It stays TAO.</p>
       <input class="search" id="q" type="search" placeholder="Search a shop — Chutes, GPU, science…" autocomplete="off">
       <div class="filters" id="filters"></div>
       <div id="cards"></div>
@@ -592,12 +618,12 @@ nav.tabs {
 
     <section id="desk" class="screen">
       <div id="wallet-status" class="wallet-status"></div>
-      <div class="hero">This is where you stake.</div>
-      <p class="lede">Park TAO (safer) or pick a shop, then tap the gold button.</p>
+      <div class="hero">Connect, then stake</div>
+      <p class="lede">Use the wallet you already have. We never ask for a seed. You tap confirm in the wallet. After that, this page shows where your TAO sits.</p>
       <div class="steps3">
         <i><b>1. Connect</b>Wallet. No seed.</i>
-        <i><b>2. Pick</b>Park, or a shop pill.</i>
-        <i><b>3. Tap the gold button</b>Approve in your wallet.</i>
+        <i><b>2. Pick</b>Park, or a shop.</i>
+        <i><b>3. Approve</b>Your wallet asks. You tap yes.</i>
       </div>
 
       <div id="desk-grid">
@@ -611,7 +637,7 @@ nav.tabs {
           <div class="acct" id="acct-pick" hidden></div>
           <p class="hint paste-book">or paste a public address — read only, cannot sign</p>
           <div class="lookup paste-book">
-            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Coldkey starting with 5…">
+            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Public address starting with 5…">
             <button type="button" id="ck-go">Look up</button>
           </div>
           <p class="hint paste-book">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
@@ -621,91 +647,85 @@ nav.tabs {
       </div>
 
       <div class="rules">
-        <div class="rule"><b>Secure.</b> Show my book asks the wallet for a public address. Paste still works. We never ask for a seed, JSON wallet, or password.</div>
-        <div class="rule"><b>Trustworthy.</b> Reads are public chain data via Metagraphed. A stake extra names the validator and the take in the wallet prompt. Not financial advice.</div>
-        <div class="rule"><b>Profitable for us, later.</b> Like a Bitcoin mining pool: when this desk names its own validator, the protocol already pays the commission. Until then the extra still names whoever you pick, and the take is in the prompt.</div>
+        <div class="rule"><b>We never see your seed</b> — if an app asks you to type 12 words, close it. That is not us.</div>
+        <div class="rule"><b>You confirm every move</b> — your wallet pops up. If you cancel, nothing happens.</div>
+        <div class="rule"><b>Getting TAO back</b> — tap Unstake, then wait a few days. Gains do not land as free TAO by themselves.</div>
+        <div class="rule"><b>Risk</b> — parking on the main chain is usually calmer than a shop. A shop can go to zero. Not financial advice.</div>
       </div>
-
-      <div class="pay">
-        <h3>How this becomes a business</h3>
-        <p>You tap Stake. Nova or Talisman asks you to approve. TAO leaves your free balance and sits with a validator. On a shop it becomes that shop’s token; on Root it stays TAO. The validator’s fee is named before you sign. When Brief runs its own hotkey, this list locks to us.</p>
-      </div>
-      <div id="sleeves"></div>
-      <p class="foot">The 100 τ bars below are a walkthrough, not your money. Your real book is above, after you connect. Stake is the gold button.</p>
     </section>
     <div id="sheet" hidden></div>
 
     <section id="guide" class="screen">
-      <div class="hero">How this actually works</div>
-      <p class="lede">TAO is the money. A subnet is a shop. Staking is putting your TAO on a shop — or parking it so it stays TAO.</p>
+      <div class="hero">Learn staking in a few minutes</div>
+      <p class="lede">TAO is the money. A subnet is a shop doing one AI job. Staking is putting your TAO to work — parked on the main chain, or on a shop you choose.</p>
+      <div class="trust">
+        <i><b>Your wallet holds it</b><span>Nova or Talisman keeps the keys. Brief never holds TAO.</span></i>
+        <i><b>We never ask for a seed</b><span>If a screen ever does, it is not this site. Close it.</span></i>
+        <i><b>You tap yes</b><span>Every move waits for your wallet. Cancel and nothing happens.</span></i>
+      </div>
       <div class="steps3">
-        <i><b>1. Connect</b>Show your book. We never ask for a seed.</i>
-        <i><b>2. Pick</b>Park it, or tap a shop.</i>
-        <i><b>3. Tap Stake</b>Your wallet asks you to approve.</i>
+        <i><b>1. Connect</b>Your wallet. No seed.</i>
+        <i><b>2. Pick</b>Park, or a shop.</i>
+        <i><b>3. Approve</b>Nova asks. You tap yes.</i>
       </div>
       <div class="howto">
         <button type="button" class="howto-card" data-go-stake="0">
           <b>Park TAO</b>
-          <span>Keep it as TAO. Safer. Less of a bet.</span>
+          <span>Keep it as TAO. Safer. Most of the network does this.</span>
           <em>Park it →</em>
         </button>
         <button type="button" class="howto-card gold" data-go-shops>
           <b>Stake on a shop</b>
-          <span>Pick a shop, then tap Stake.</span>
+          <span>A bet on one team. Price can move. Read first if you want.</span>
           <em>See shops →</em>
         </button>
       </div>
 
       <div class="guide-card">
-        <h3>Phone and site</h3>
-        <p>This <b style="color:var(--ink)">is</b> the site: a link you can open in any browser. On a phone it is also an app — Add to Home Screen (iPhone: Share → Add to Home Screen; Android: Install). No App Store, no seed. The Stake tab is where TAO actually moves.</p>
-      </div>
-      <div class="guide-card">
-        <h3>Trust, before a single τ moves</h3>
+        <h3>The words that matter</h3>
         <ul>
-          <li>We never ask for a seed phrase, private key, or wallet JSON. If a screen ever does, it is not this app.</li>
-          <li>Lookup is a GET to a public indexer. Your address is already on the chain; we do not “collect” it as an account.</li>
-          <li>Stake is a wallet-signed extra. The confirmation names the fee. We do not hand you to taostats to do it.</li>
-          <li>Past APY is a backward-looking estimate. It is not guaranteed. You can lose TAO. Brief is not liable for your extras or losses.</li>
-          <li>Briefs are editorial. Live prices are chain data. We label claimed revenue so it cannot hide as fact.</li>
+          <li><b style="color:var(--ink)">TAO</b> is the coin. You buy it, send it, or stake it.</li>
+          <li><b style="color:var(--ink)">A shop</b> is a subnet — one AI job, with its own token.</li>
+          <li><b style="color:var(--ink)">Park</b> leaves TAO as TAO on the main chain. Usually the calmer choice.</li>
+          <li><b style="color:var(--ink)">Stake on a shop</b> swaps TAO into that shop’s token. You can earn more of it and still lose TAO if the price falls.</li>
         </ul>
       </div>
       <div class="guide-card">
-        <h3>The three jobs</h3>
+        <h3>Phone and computer</h3>
+        <p>On a phone, open this same link inside <b style="color:var(--ink)">Nova → Browser</b>. Chrome can only look. On a computer, Talisman is the usual wallet. Add to Home Screen if you want it to open like an app — no App Store, no seed. The Stake tab is where TAO actually moves.</p>
+      </div>
+      <div class="guide-card">
+        <h3>Why you can trust this page</h3>
         <ul>
-          <li><b style="color:var(--ink)">Miners</b> do the work: inference, GPUs, forecasts, agents, science.</li>
-          <li><b style="color:var(--ink)">Validators</b> test that work and submit scores. Those scores become rewards.</li>
-          <li><b style="color:var(--ink)">Owners</b> write the rules of the shop. They take about 18% of subnet emissions; miners and validators split the rest.</li>
+          <li>We never ask for a seed phrase, private key, or wallet file. If a screen ever does, it is not this app.</li>
+          <li>Connect only shares a public address. That address is already on the chain.</li>
+          <li>You sign every stake in your own wallet. The prompt names the fee. We do not send you somewhere else to finish it.</li>
+          <li>Numbers on this site are public chain data. Briefs are editorial. Past APY is a look-back, not a promise.</li>
         </ul>
       </div>
       <div class="guide-card">
-        <h3>Why staking feels like venture, not yield</h3>
-        <p>When you stake TAO into a subnet you swap into that subnet’s <b style="color:var(--ink)">alpha</b> token. You can earn more alpha and still lose TAO if the shop’s price falls. Root staking is the conservative park. Direct subnet staking is an active bet on one team’s market.</p>
+        <h3>What happens to your TAO</h3>
+        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, then wait a few days.</p>
       </div>
       <div class="guide-card">
-        <h3>The six questions that matter</h3>
+        <h3>How to pick a shop</h3>
         <ol>
           <li>Is there a live product a stranger can use today?</li>
-          <li>Do customers pay in dollars, or only in emissions?</li>
-          <li>Can anyone outside the team verify usage (OpenRouter, Polymarket, a public dashboard)?</li>
-          <li>Is the team public, shipping, and still around?</li>
-          <li>Is liquidity thick enough that you can exit without wrecking the pool?</li>
-          <li>Is the owner selling alpha faster than the product is earning?</li>
+          <li>Do customers pay in dollars, or only in network rewards?</li>
+          <li>Can anyone outside the team check usage?</li>
+          <li>Is the team public and still shipping?</li>
+          <li>Is there enough liquidity to leave without wrecking the price?</li>
+          <li>Is the owner selling the shop’s token faster than the product is earning?</li>
         </ol>
-        <p style="margin-top:10px">Most of the 128 shops fail several of those. A handful pass. That gap is the whole market.</p>
+        <p style="margin-top:10px">Most shops fail several of those. A handful pass. Read the brief before you stake.</p>
       </div>
       <div class="guide-card">
-        <h3>Do not build another explorer</h3>
-        <p>taostats, TaoMarketCap, SubnetAIQ, SubnetRadar, SubnetStats, and TAOFlute already cover prices, explorers, health scores, and whale tape. A prettier table is not a business — it is a Bitcoin block explorer in 2012: useful, crowded, and hard to charge for.</p>
-        <p style="margin-top:8px">Bittensor is early in the same way Bitcoin was early: TAO is the bet on the network, and most of the money in the next phase goes to picks-and-shovels that sit on <b style="color:var(--ink)">flow</b> (stake, inference, attention), not on screenshots of the chain.</p>
+        <h3>Risk, in one place</h3>
+        <p>Parking is usually calmer than a shop. A shop can go to zero. Percentages here ignore price moves and are not guaranteed. You can lose some or all of your TAO. This is not financial advice. Brief is not a broker, advisor, or custodian.</p>
       </div>
       <div class="guide-card">
-        <h3>Where we actually get paid</h3>
-        <ol>
-          <li><b style="color:var(--ink)">Validator desk (primary, Bitcoin-pool analog).</b> Most TAO is still parked because picking among 128 shops feels like becoming a VC. The needed service is a conservative sleeve plus a research sleeve, executed through a validator we run or partner with. Revenue is the protocol commission on dividends — already native, already how the chain pays judges. The UI is customer acquisition, not the SKU. See the Stake tab.</li>
-          <li><b style="color:var(--ink)">Front door to using a subnet (merchant analog).</b> Charge people who do not care about TAO: inference, authenticity checks, coding agents. Chutes, Ridgeline, and Dippy are the pattern. Analytics is the wedge; usage is the company.</li>
-          <li><b style="color:var(--ink)">Do not sell the map.</b> Paid pro dashboards exist and will keep existing. Competing with free taostats on columns is how you work for free. Do not send people there to stake, either — that trains the habit of allocating TAO in someone else's product.</li>
-        </ol>
+        <h3>Why Brief</h3>
+        <p>We explain the choice in plain English, then let you stake from the same page. We never hold keys. We do not send you to another site to finish. When you are ready, the gold button is Stake.</p>
       </div>
       <div class="guide-card">
         <h3>Ready to try?</h3>
@@ -715,14 +735,14 @@ nav.tabs {
           <button type="button" class="btn btn-ghost" data-go-shops>See shops</button>
         </div>
       </div>
-      <p class="foot">Not financial advice. Past APY is not a promise. Emissions, alpha prices, and teams change fast. You sign every extra. Brief never holds keys and is not liable for your activity. Briefs are dated August 2026. Live numbers come from the public Metagraphed registry (metagraph.sh).</p>
+      <p class="foot">Not financial advice. Past APY is not a promise. Prices and teams change fast. You sign every stake. Brief never holds keys and is not liable for your activity. Live numbers come from the public Metagraphed registry.</p>
     </section>
   </main>
   <footer id="legal" class="legal">
-    <p><b>Not financial advice. Past APY is not a promise.</b> You can lose some or all of your TAO. The percentages on this site are backward-looking estimates from public chain snapshots (emission ÷ stake over the last 30 days, annualized). They ignore price moves and are not guaranteed. You sign every extra in your own wallet. Brief never holds a seed, is not a broker, advisor, or custodian, and is not liable for your activity, losses, taxes, or wallet mistakes.</p>
+    <p><b>Not financial advice. Past APY is not a promise.</b> You can lose some or all of your TAO. The percentages on this site are backward-looking estimates from public chain snapshots (emission ÷ stake over the last 30 days, annualized). They ignore price moves and are not guaranteed. You sign every stake in your own wallet. Brief never holds a seed, is not a broker, advisor, or custodian, and is not liable for your activity, losses, taxes, or wallet mistakes.</p>
   </footer>
   <nav class="tabs">
-    <button class="tab on" data-tab="pulse" type="button">Pulse</button>
+    <button class="tab on" data-tab="pulse" type="button">Home</button>
     <button class="tab" data-tab="list" type="button">Shops</button>
     <button class="tab" data-tab="desk" type="button">Stake</button>
     <button class="tab" data-tab="guide" type="button">Guide</button>
@@ -755,10 +775,10 @@ const DESK = {
   minTao: 0.002
 };
 const ROLES = [
-  ['staker', 'Staker'],
+  ['curious', 'Just learning'],
+  ['staker', 'I already stake'],
   ['miner', 'Miner'],
-  ['builder', 'Builder'],
-  ['curious', 'Just looking']
+  ['builder', 'Builder']
 ];
 const FILTERS = [
   ['all', 'All'],
@@ -961,7 +981,7 @@ const BRIEFS = {
 const HIGHLIGHT_IDS = [64, 51, 4, 120, 56, 62, 34, 44, 68, 3, 9, 8, 19, 107, 93, 75, 1];
 
 const state = {
-  role: localStorage.getItem('sb-role') || 'staker',
+  role: localStorage.getItem('sb-role') || 'curious',
   tab: 'pulse',
   filter: 'all',
   q: '',
@@ -1170,8 +1190,8 @@ function renderStats() {
   $('stats').innerHTML = `
     <div class="stat"><b>${n}</b><span>Shops</span></div>
     <div class="stat"><b>${px ? '$'+px.toFixed(0) : '—'}</b><span>TAO price</span></div>
-    <div class="stat"><b>${tot ? ((alpha||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>TAO in shops</span></div>
-    <div class="stat"><b>${fmtUsd((alpha||0) * (px||0))}</b><span>Shop tokens</span></div>`;
+    <div class="stat"><b>${tot ? ((root||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>Parked</span></div>
+    <div class="stat"><b>${tot ? ((alpha||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>On shops</span></div>`;
 }
 
 function renderTake() {
@@ -1181,12 +1201,12 @@ function renderTake() {
   const tot = root + alpha;
   const pctRoot = tot ? (root/tot*100).toFixed(0) : '—';
   const copy = {
-    staker: `About ${pctRoot}% of the value is still parked. Most holders have not picked a shop. Open Stake, tap Show my book, then park it or put it on a shop. The gold button is the extra. The fee is in the prompt.`,
+    staker: `About ${pctRoot}% of TAO is still parked. Most holders have not picked a shop. Open Stake, connect, then park it or put it on a shop. You confirm in the wallet. The fee is named in the prompt.`,
     miner: `There are ~${Number(s.total_miners||0).toLocaleString()} miners across the network and most top shops are already full (256 UIDs). Your edge is picking a contest you can actually win, not the highest emission share. Open this list in Miner mode and read slots, registration cost, and the task.`,
     builder: `The money in Bittensor UIs is rarely another dashboard. It is being the front door: Chutes for inference, Ridgeline for agents, Dippy for consumer chat. Use Builder mode to see which shops even have a site, docs, and a callable API.`,
-    curious: `TAO is the money. Each shop has its own token. Park TAO if you want safer; stake on a shop if you want a bet. The Stake tab is the gold button. Guide is the map.`
+    curious: `About ${pctRoot}% of TAO is still parked — the calmer choice. Park if you are new. Pick a shop only after you read it. Stake is the gold button. Guide has the map.`
   };
-  $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role]}</p>`;
+  $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role] || copy.curious}</p>`;
 }
 
 function utcDayStamp() {
@@ -1383,7 +1403,7 @@ async function renderDetail(id) {
     <div class="prose">
       ${b ? `<h3>What it actually does</h3><p>${esc(b.does)}</p>
         <h3>Revenue honesty</h3><p>${esc(b.revenueNote)}</p>
-        <h3>If you are a ${esc(ROLES.find(x=>x[0]===state.role)[1].toLowerCase())}</h3><p>${esc(roleLine(r))}</p>
+        <h3>${state.role === 'curious' ? 'If you are just learning' : state.role === 'staker' ? 'If you already stake' : 'If you are a ' + esc((ROLES.find(x=>x[0]===state.role)||ROLES[0])[1].toLowerCase())}</h3><p>${esc(roleLine(r))}</p>
         ${b.flags?.length ? `<h3>What can go wrong</h3><div class="flags">${b.flags.map(f=>`<div class="flag"><b>Watch.</b> ${esc(f)}</div>`).join('')}</div>` : ''}`
         : `<h3>No editorial brief yet</h3><p>${esc(r.description || 'The registry has almost no human description for this netuid. That itself is a signal: if the team cannot explain the shop, you probably should not fund it.')}</p>
            <p>${esc(roleLine(r))}</p>`}
@@ -1413,33 +1433,6 @@ async function renderDetail(id) {
   } catch {
     $('health').textContent = r.github_stars != null ? r.github_stars + ' GitHub stars' : '';
   }
-}
-
-function sleeveRows(ids, fallback) {
-  const found = ids.map(id => rowBy(id)).filter(Boolean);
-  if (found.length >= 2) return found;
-  return fallback();
-}
-
-function weightsByPool(rows) {
-  const liqs = rows.map(r => Math.max(num(r.tao_in_pool_tao) || 0, 1));
-  const sum = liqs.reduce((a, b) => a + b, 0);
-  return rows.map((r, i) => ({ row: r, w: liqs[i] / sum }));
-}
-
-function renderSleeve(title, why, parts) {
-  return `<div class="sleeve">
-    <h3>${esc(title)}</h3>
-    <p class="why">${esc(why)}</p>
-    ${parts.map(({ row: r, w }) => {
-      const tao = 100 * w;
-      return `<button class="alloc" data-go-stake="${r.netuid}" type="button">
-        <b>SN${r.netuid} ${esc(r.name || '')}</b>
-        <div class="bar"><i style="width:${(w*100).toFixed(1)}%"></i></div>
-        <span>${tao.toFixed(1)} τ</span>
-      </button>`;
-    }).join('')}
-  </div>`;
 }
 
 function shortAddr(s) {
@@ -1601,7 +1594,6 @@ function renderYouBook() {
   const total = rows.reduce((a, r) => a + r.tao, 0);
   const free = y.balance || 0;
   const workTao = rows.filter(r => WORK_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
-  const researchTao = rows.filter(r => RESEARCH_IDS.includes(r.netuid)).reduce((a, r) => a + r.tao, 0);
   const mine = !!(state.wallet && state.wallet.address === y.ss58);
   const top = rows.slice(0, mine ? 20 : 10);
   if (mine) {
@@ -1614,7 +1606,7 @@ function renderYouBook() {
         <span><b>${fmtTao(total, 2)}</b> staked</span>
       </div>
       ${!rows.length ? `<p class="why">Nothing in this book yet. If Nova already shows a transfer, tap Refresh — the public snapshot is slower than your wallet. TAO sits with the validator, not in Brief.</p>` : ''}
-      ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent extras from Nova. One extra should be one shop — tap Refresh if this still looks split.' : 'This extra is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
+      ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent stakes from Nova. One stake should be one shop — tap Refresh if this still looks split.' : 'This stake is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
         const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
@@ -1632,15 +1624,15 @@ function renderYouBook() {
   const workPct = total ? workTao / total : 0;
   let verdict;
   if (!rows.length && free < 0.01) {
-    verdict = 'No delegated alpha and almost no free TAO on this key. Empty book, or it is a hotkey rather than a coldkey.';
+    verdict = 'Nothing staked on this address, and almost no free TAO.';
   } else if (!rows.length) {
-    verdict = `This key has ${fmtTao(free, 2)} free and nothing in subnet shops. That is a cash balance, not a desk. Root vs alpha still has to be chosen.`;
+    verdict = `This address has ${fmtTao(free, 2)} free and nothing on shops yet. Park it, or pick a shop.`;
   } else if (workPct >= 0.45) {
-    verdict = `A large slice of this book (${(workPct*100).toFixed(0)}%) already sits in the Work sleeve (Chutes / Lium / Targon). The next question is concentration and whether those shops still have paying users.`;
+    verdict = `A large slice of this book (${(workPct*100).toFixed(0)}%) is already on live shops like Chutes, Lium, or Targon.`;
   } else if (rows.length >= 8) {
-    verdict = `${rows.length} shops. That is the amateur-VC problem: a dashboard can list them, a desk should make you pick a few you can explain.`;
+    verdict = `${rows.length} shops. That is a lot to keep track of — a few you can explain is usually enough.`;
   } else {
-    verdict = `This book is in ${rows.length} shop${rows.length===1?'':'s'}. Read the grades below — claimed is not verified, and identity-risk names do not belong in a default sleeve.`;
+    verdict = `This book is in ${rows.length} shop${rows.length===1?'':'s'}. Read the grades — claimed is not the same as verified.`;
   }
   const publicTop = rows.slice(0, 10);
   el.innerHTML = `
@@ -1650,8 +1642,8 @@ function renderYouBook() {
       <div class="meta" style="margin:8px 0 4px">
         <span><b>${fmtTao(total, 1)}</b> in shops</span>
         <span><b>${fmtTao(free, 2)}</b> free TAO</span>
-        <span><b>${rows.length}</b> subnets</span>
-        <span><b>${(workPct*100).toFixed(0)}%</b> work sleeve</span>
+        <span><b>${rows.length}</b> shops</span>
+        <span><b>${(workPct*100).toFixed(0)}%</b> on live shops</span>
       </div>
       ${publicTop.map(p => {
         const row = rowBy(p.netuid) || { netuid: p.netuid, name: 'SN'+p.netuid };
@@ -1668,8 +1660,8 @@ function renderYouBook() {
           ${canSign && pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
-      ${rows.length > 10 ? `<p class="hint" style="margin-top:8px">${rows.length - 10} more shops not shown. A desk is supposed to shrink this list.</p>` : ''}
-      <p class="hint" style="margin-top:8px">${state.wallet && state.wallet.address === y.ss58 ? 'Connected book — Stake is next to this on a wide screen, above it on a phone. ' : 'Read-only chain data. '}${briefed.length} of ${rows.length} names have an editorial brief here. Research sleeve overlap: ${fmtTao(researchTao, 1)}.</p>
+      ${rows.length > 10 ? `<p class="hint" style="margin-top:8px">${rows.length - 10} more shops not shown.</p>` : ''}
+      <p class="hint" style="margin-top:8px">${state.wallet && state.wallet.address === y.ss58 ? 'Connected book — Stake is next to this on a wide screen, above it on a phone. ' : 'Read-only chain data. '}${briefed.length} of ${rows.length} names have a brief here.</p>
     </div>`;
   renderAllocate();
 }
@@ -1954,13 +1946,13 @@ function renderAllocate() {
     <h3>${isRoot ? 'Park TAO' : 'Stake on ' + destShort(a.netuid)}</h3>
     <p class="why">${esc(why)}</p>
     ${w && !bookReady ? `<p class="hint">Loading the book for ${esc(shortAddr(w.address))}…</p>` : ''}
-    ${!signing && w ? `<p class="warn-line">This browser can show the extra, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
+    ${!signing && w ? `<p class="warn-line">This browser can show the stake, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
     ${onPhone() && !w && !canSignHere() ? `<p class="warn-line">On a phone, open this site inside Nova’s Browser — Chrome can only look.</p>` : ''}
     <div class="alloc-fields">
       <label>${free != null ? `How much · ${fmtTao(free, 2)} free` : 'How much'}</label>
       <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}" aria-label="Amount in TAO">
       <div class="amt-presets dests">
-        <button type="button" class="tippy" data-amt-preset="0.1" data-tip="A small first try. Good when you are just seeing if the extra works.">0.1</button>
+        <button type="button" class="tippy" data-amt-preset="0.1" data-tip="A small first try. Good when you are just seeing if staking works.">0.1</button>
         <button type="button" class="tippy" data-amt-preset="1" data-tip="One TAO. Still a taste, not a position.">1</button>
         <button type="button" class="tippy" data-amt-preset="10" data-tip="Ten TAO. Only if you already know this shop.">10</button>
         <button type="button" class="tippy" data-amt-preset="max" data-tip="Everything you can stake, minus a pinch so the wallet can pay the fee.">All free</button>
@@ -2014,7 +2006,7 @@ function openSheet(kind, extra) {
   el.innerHTML = `<div class="sheet-card">
     <h3>${esc(title)}?</h3>
     <p>${kind === 'unstake'
-      ? 'This sells the shop token back toward TAO and leaves this validator. Root is 1:1.'
+      ? 'This starts getting your TAO back. It takes a few days. Gains do not land as free TAO by themselves. Root is 1:1.'
       : (isRoot
         ? 'This parks TAO on Root. It stays TAO — no shop token.'
         : 'This puts TAO into ' + destShort(extra.netuid) + '. It becomes that shop’s token. You can get more of it and still lose TAO if the price falls.')}</p>
@@ -2026,7 +2018,7 @@ function openSheet(kind, extra) {
     ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
     <p class="hint" style="margin:8px 0 0">${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))} · named in the wallet prompt</p>
     <p class="warn-line">Next, Nova (or Talisman) pops a sign screen. If nothing pops, you are in Chrome — cancel and open this site inside Nova. We never see your seed.</p>
-    <p class="hint">Not financial advice. You can lose TAO. Past APY is not a forecast. Brief is not liable for this extra.</p>
+    <p class="hint">Not financial advice. You can lose TAO. Past APY is not a forecast. Brief is not liable for this stake.</p>
     <p id="sheet-status" class="hint"></p>
     <div class="sheet-actions">
       <button type="button" class="btn" id="sheet-sign">${esc(verb)}</button>
@@ -2048,7 +2040,7 @@ async function signExtra(kind, extra) {
   }
   if (!canSignHere()) {
     status.innerHTML = `<span class="warn-line">${onPhone()
-      ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → subnetbriefs.com then Show my book and stake again.'
+      ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → subnetbriefs.com then connect and stake again.'
       : 'No wallet in this browser. Install Talisman or open Brief inside Nova.'}</span>`;
     return;
   }
@@ -2098,7 +2090,7 @@ async function reviewAllocate() {
   const val = selectedVal();
   if (!state.wallet) return;
   if (!a.amount || Number(a.amount) < DESK.minTao) {
-    a.err = 'Smallest extra is ' + DESK.minTao + ' TAO — type a bit more.';
+    a.err = 'Smallest amount is ' + DESK.minTao + ' TAO — type a bit more.';
     renderAllocate();
     return;
   }
@@ -2295,38 +2287,6 @@ async function lookupCk(raw, opts) {
 function renderDesk() {
   $('desk').classList.toggle('wallet-on', !!state.wallet);
   $('desk').classList.toggle('intent-on', !!state.allocate.intent);
-  const s = state.summary || {};
-  const root = num(s.total_root_value_tao) || 0;
-  const alpha = num(s.total_alpha_value_tao) || 0;
-  const tot = root + alpha;
-  const pctRoot = tot ? (root / tot * 100).toFixed(0) : '—';
-  const work = sleeveRows([64, 51, 4], () =>
-    state.rows.filter(r => r.netuid && (r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed')).slice(0, 3)
-  );
-  const research = sleeveRows([120, 62, 34], () =>
-    state.rows.filter(r => r.brief && !work.includes(r) && r.netuid !== 0).slice(0, 3)
-  );
-  const parkTao = tot ? (root / tot) * 100 : 63;
-  $('sleeves').innerHTML =
-    `<div class="sleeve">
-      <h3>Park · Root</h3>
-      <p class="why">Keep the savings account. ${pctRoot}% of the network is already doing this. You earn a simpler TAO-denominated product and skip alpha drawdowns. This is the honest default until a shop earns a seat.</p>
-      <div class="alloc" style="pointer-events:none">
-        <b>SN0 Root</b>
-        <div class="bar"><i style="width:${Math.min(parkTao, 100).toFixed(0)}%"></i></div>
-        <span>idle</span>
-      </div>
-    </div>` +
-    renderSleeve(
-      'Work · 100 τ sleeve',
-      'Names with a live product and a deep enough pool that you can exit. Weighted by TAO in the pool so you are not crowding the thinnest book. This is the validator-desk default.',
-      weightsByPool(work)
-    ) +
-    renderSleeve(
-      'Research · 100 τ sleeve',
-      'Smaller, noisier bets: founder-led training, coding agents, authenticity. Size this as optionality, not as yield. One identity-risk name (Teutonic / old Templar) is deliberately left out.',
-      weightsByPool(research)
-    );
 }
 
 function render() {
@@ -2335,8 +2295,10 @@ function render() {
   pill.className = state.live ? 'on' : 'snap';
   if (state.generatedAt) {
     const t = new Date(state.generatedAt);
-    $('subhead').textContent = 'as of ' + t.toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    const when = t.toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    pill.title = (state.live ? 'Live' : 'Snapshot') + ' as of ' + when;
   }
+  $('subhead').textContent = 'Stake TAO in plain English';
   renderRoles();
   renderStats();
   renderTake();
