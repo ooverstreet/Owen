@@ -408,6 +408,39 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .pos small { display:block; font-size:11px; color:var(--faint); font-weight:500; margin-top:2px; }
 .book-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
 .book-head button { color:var(--gold); font-size:12px; font-weight:560; }
+.notch {
+  display:flex; align-items:center; gap:10px;
+  margin:10px 0 8px; padding:10px 12px; width:100%;
+  border-radius:14px; border:1px solid var(--mint-line);
+  background:linear-gradient(160deg, var(--mint-wash), var(--paper));
+  text-align:left;
+}
+.notch .tau {
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  background:var(--mint); color:var(--on-mint);
+  display:grid; place-items:center;
+  font-family:Fraunces, serif; font-weight:700; font-size:22px; line-height:1;
+  animation:notch-nod .9s ease;
+}
+.notch b { display:block; font-size:14px; color:var(--ink); }
+.notch span { display:block; margin-top:2px; font-size:12px; color:var(--mute); line-height:1.4; }
+.notch-pill {
+  display:inline-block; margin-left:6px; padding:1px 6px; border-radius:999px;
+  background:var(--mint); color:var(--on-mint);
+  font-size:10px; font-weight:700; letter-spacing:.04em; vertical-align:1px;
+  animation:notch-pop .5s ease;
+}
+.pos.grew i { color:var(--mint); font-weight:700; }
+@keyframes notch-nod {
+  0% { transform:rotate(-10deg) translateY(3px); }
+  45% { transform:rotate(12deg) translateY(-2px); }
+  100% { transform:none; }
+}
+@keyframes notch-pop {
+  0% { transform:scale(.55); opacity:0; }
+  70% { transform:scale(1.1); }
+  100% { transform:none; opacity:1; }
+}
 #desk.wallet-on .paste-book { display:none; }
 .pay {
   background:linear-gradient(160deg, var(--mint-wash), var(--paper));
@@ -705,7 +738,7 @@ nav.tabs {
       </div>
       <div class="guide-card">
         <h3>What happens to your TAO</h3>
-        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, then wait a few days.</p>
+        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, then wait a few days. When parked TAO crosses the next whole number — 19 to 20 — Your book marks it with a small +1. That is still staked, not free in Nova.</p>
       </div>
       <div class="guide-card">
         <h3>How to pick a shop</h3>
@@ -995,7 +1028,8 @@ const state = {
   accounts: [],
   connectErr: '',
   allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false },
-  yield: {}
+  yield: {},
+  notch: null
 };
 
 const $ = id => document.getElementById(id);
@@ -1444,6 +1478,61 @@ function acctChipLabel(a) {
 }
 
 const PENDING_KEY = 'sb-pending-stake';
+const NOTCH_KEY = 'sb-notch';
+
+function wholeTao(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x) || x < 0) return 0;
+  return Math.floor(x + 1e-6);
+}
+
+function loadNotchMap() {
+  try { return JSON.parse(localStorage.getItem(NOTCH_KEY) || '{}') || {}; }
+  catch { return {}; }
+}
+
+function saveNotchMap(all) {
+  try { localStorage.setItem(NOTCH_KEY, JSON.stringify(all)); } catch {}
+}
+
+function looksLikeDeposit(delta) {
+  if (!(delta >= 0.95)) return false;
+  if ([0.1, 1, 10].some(p => Math.abs(delta - p) < 0.03)) return true;
+  const rounded = Math.round(delta);
+  return rounded >= 1 && Math.abs(delta - rounded) < 0.03;
+}
+
+function parkNotch(ss58, parkTao, pending) {
+  if (state.notch && state.notch.ss58 === ss58) return state.notch;
+  if (!ss58 || !Number.isFinite(parkTao)) return null;
+  const floor = wholeTao(parkTao);
+  const all = loadNotchMap();
+  const prev = all[ss58] && all[ss58][0];
+  const celebrated = prev && Array.isArray(prev.celebrated) ? prev.celebrated.slice() : [];
+  const entry = { tao: parkTao, floor, celebrated };
+
+  if (!prev || prev.tao == null) {
+    if (!celebrated.includes(floor)) celebrated.push(floor);
+    all[ss58] = Object.assign({}, all[ss58] || {}, { 0: entry });
+    saveNotchMap(all);
+    return null;
+  }
+
+  const delta = parkTao - Number(prev.tao);
+  const skip = pending || !(delta > 0) || looksLikeDeposit(delta);
+  let note = null;
+  if (!skip && floor > (prev.floor || 0) && !celebrated.includes(floor)) {
+    note = { ss58, floor, steps: Math.max(1, floor - (prev.floor || 0)) };
+    celebrated.push(floor);
+    if (celebrated.length > 8) entry.celebrated = celebrated.slice(-8);
+    state.notch = note;
+  } else if (skip && !celebrated.includes(floor)) {
+    celebrated.push(floor);
+  }
+  all[ss58] = Object.assign({}, all[ss58] || {}, { 0: entry });
+  saveNotchMap(all);
+  return note;
+}
 
 function readPending(ss58) {
   try {
@@ -1598,6 +1687,9 @@ function renderYouBook() {
   const top = rows.slice(0, mine ? 20 : 10);
   if (mine) {
     const pendingRows = (y.positions || []).some(p => p.pending);
+    const parkRow = rows.find(r => Number(r.netuid) === 0);
+    const parkPending = (y.positions || []).some(p => Number(p.netuid) === 0 && p.pending);
+    const notch = parkRow ? parkNotch(y.ss58, parkRow.tao, parkPending) : null;
     el.innerHTML = `
     <div class="sleeve">
       <div class="book-head"><h3>Your book</h3><button type="button" data-refresh-book>Refresh</button></div>
@@ -1605,14 +1697,22 @@ function renderYouBook() {
         <span><b>${fmtTao(free, 2)}</b> free</span>
         <span><b>${fmtTao(total, 2)}</b> staked</span>
       </div>
+      ${notch ? `<button type="button" class="notch" data-dismiss-notch>
+        <i class="tau">τ</i>
+        <div>
+          <b>The pile crossed ${notch.floor} τ</b>
+          <span>Still parked. Not free in Nova yet.</span>
+        </div>
+      </button>` : ''}
       ${!rows.length ? `<p class="why">Nothing in this book yet. If Nova already shows a transfer, tap Refresh — the public snapshot is slower than your wallet. TAO sits with the validator, not in Brief.</p>` : ''}
       ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent stakes from Nova. One stake should be one shop — tap Refresh if this still looks split.' : 'This stake is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
         const name = Number(p.netuid) === 0 ? 'Parked · Root' : destShort(p.netuid);
-        return `<div class="pos">
+        const grew = notch && Number(p.netuid) === 0;
+        return `<div class="pos${grew ? ' grew' : ''}">
           <b>${esc(name)}${pos && pos.pending ? '<small>on chain</small>' : ''}</b>
-          <i>${fmtTao(p.tao, 2)}</i>
+          <i>${fmtTao(p.tao, 2)}${grew ? `<em class="notch-pill">+${notch.steps}</em>` : ''}</i>
           ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
@@ -2360,6 +2460,12 @@ document.addEventListener('click', e => {
       const m = (location.hash || '').match(/sn\/(\d+)/);
       if (m) renderDetail(m[1]);
     }
+    return;
+  }
+  const dismissNotch = e.target.closest('[data-dismiss-notch]');
+  if (dismissNotch) {
+    state.notch = null;
+    renderYouBook();
     return;
   }
   const refreshBook = e.target.closest('[data-refresh-book]');
