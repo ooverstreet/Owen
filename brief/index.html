@@ -115,9 +115,20 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .role.on { background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
 
 .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px; }
-.stat { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+.stat {
+  background:var(--paper); border:1px solid var(--line); border-radius:14px;
+  padding:12px 14px; text-align:left; width:100%;
+}
+.stat.on { border-color:var(--gold); }
 .stat b { display:block; font-family:Fraunces, serif; font-size:20px; font-weight:650; }
 .stat span { display:block; margin-top:3px; font-size:11px; color:var(--mute); letter-spacing:.04em; text-transform:uppercase; }
+.stat-tip {
+  grid-column:1 / -1;
+  margin:0; padding:12px 14px;
+  background:var(--paper); border:1px solid var(--line); border-radius:14px;
+  color:var(--mute); font-size:13.5px; line-height:1.5; text-align:left;
+}
+.stat-tip b { color:var(--ink); font-weight:560; }
 
 .callout {
   background:linear-gradient(160deg, var(--wash), var(--paper));
@@ -1029,7 +1040,8 @@ const state = {
   connectErr: '',
   allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false },
   yield: {},
-  notch: null
+  notch: null,
+  statTip: ''
 };
 
 const $ = id => document.getElementById(id);
@@ -1221,11 +1233,21 @@ function renderStats() {
   const tot = (root || 0) + (alpha || 0);
   const px = num(state.taoUsd?.usd_per_tao);
   const n = (state.rows || []).filter(r => r.netuid !== 0).length;
+  const pctPark = tot ? ((root||0)/tot*100).toFixed(0) : '—';
+  const pctShop = tot ? ((alpha||0)/tot*100).toFixed(0) : '—';
+  const tips = {
+    shops: 'How many AI shops (subnets) are on the network right now.',
+    price: 'What one TAO is worth in dollars, from the public feed. It moves.',
+    parked: pctPark + '% of all staked TAO is still parked on the main chain. It stays TAO. This is the whole network — not your book.',
+    alpha: pctShop + '% of all staked TAO has been put on a shop and is now that shop’s token. Price can move. This is the whole network — not your book.'
+  };
+  const open = state.statTip;
   $('stats').innerHTML = `
-    <div class="stat"><b>${n}</b><span>Shops</span></div>
-    <div class="stat"><b>${px ? '$'+px.toFixed(0) : '—'}</b><span>TAO price</span></div>
-    <div class="stat"><b>${tot ? ((root||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>Parked</span></div>
-    <div class="stat"><b>${tot ? ((alpha||0)/tot*100).toFixed(0)+'%' : '—'}</b><span>On shops</span></div>`;
+    <button type="button" class="stat tippy${open==='shops'?' on':''}" data-stat="shops" data-tip="${esc(tips.shops)}"><b>${n}</b><span>Shops</span></button>
+    <button type="button" class="stat tippy${open==='price'?' on':''}" data-stat="price" data-tip="${esc(tips.price)}"><b>${px ? '$'+px.toFixed(0) : '—'}</b><span>TAO price</span></button>
+    <button type="button" class="stat tippy${open==='parked'?' on':''}" data-stat="parked" data-tip="${esc(tips.parked)}"><b>${pctPark}%</b><span>Parked</span></button>
+    <button type="button" class="stat tippy${open==='alpha'?' on':''}" data-stat="alpha" data-tip="${esc(tips.alpha)}"><b>${pctShop}%</b><span>On shops</span></button>
+    ${open && tips[open] ? `<p class="stat-tip"><b>What this is.</b> ${esc(tips[open])}</p>` : ''}`;
 }
 
 function renderTake() {
@@ -2494,6 +2516,13 @@ document.addEventListener('click', e => {
   const go = e.target.closest('[data-go-stake]');
   if (go) {
     goStake(go.dataset.goStake);
+    return;
+  }
+  const stat = e.target.closest('[data-stat]');
+  if (stat) {
+    const id = stat.dataset.stat;
+    state.statTip = state.statTip === id ? '' : id;
+    renderStats();
     return;
   }
   const dest = e.target.closest('[data-dest]');
