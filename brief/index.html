@@ -127,8 +127,13 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   margin:0; padding:12px 14px;
   background:var(--paper); border:1px solid var(--line); border-radius:14px;
   color:var(--mute); font-size:13.5px; line-height:1.5; text-align:left;
+  animation:stat-in .2s ease;
 }
 .stat-tip b { color:var(--ink); font-weight:560; }
+@keyframes stat-in {
+  from { opacity:0; transform:translateY(-4px); }
+  to { opacity:1; transform:none; }
+}
 
 .callout {
   background:linear-gradient(160deg, var(--wash), var(--paper));
@@ -1224,6 +1229,22 @@ function renderRoles() {
   $('roles').innerHTML = ROLES.map(([id, label]) =>
     `<button class="role${state.role===id?' on':''}" data-role="${id}" type="button">${label}</button>`
   ).join('');
+}
+
+let statTipTimer = 0;
+
+function hideStatTip() {
+  if (statTipTimer) { clearTimeout(statTipTimer); statTipTimer = 0; }
+  if (!state.statTip) return;
+  state.statTip = '';
+  renderStats();
+}
+
+function showStatTip(id) {
+  if (statTipTimer) clearTimeout(statTipTimer);
+  state.statTip = id;
+  renderStats();
+  statTipTimer = setTimeout(hideStatTip, 5000);
 }
 
 function renderStats() {
@@ -2521,10 +2542,11 @@ document.addEventListener('click', e => {
   const stat = e.target.closest('[data-stat]');
   if (stat) {
     const id = stat.dataset.stat;
-    state.statTip = state.statTip === id ? '' : id;
-    renderStats();
+    if (state.statTip === id) hideStatTip();
+    else showStatTip(id);
     return;
   }
+  if (state.statTip && !e.target.closest('#stats')) hideStatTip();
   const dest = e.target.closest('[data-dest]');
   if (dest) {
     state.allocate.netuid = Number(dest.dataset.dest);
