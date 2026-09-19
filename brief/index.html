@@ -1191,7 +1191,6 @@ function openConnectSheet() {
       ? 'X, Chrome, and Samsung cannot sign. Tap Open in Nova — we copy the link and try to jump into the app. If nothing happens, open Nova → Browser and paste. We never ask for a seed.'
       : 'Your wallet holds the key. We only ask for a public address — never a seed, password, or JSON file.'}</p>
     ${noInj && !phoneStuck ? `<p class="warn-line">No wallet in this browser yet. Get Talisman for this computer, then tap Connect wallet.</p>${walletGetHtml()}` : ''}
-    ${phoneStuck ? `<p class="hint">Already have Nova? You do not need the Play Store.</p>` : ''}
     <p id="sheet-status" class="hint">${esc(state.connectErr || '')}</p>
     <div class="sheet-actions${phoneStuck ? ' sheet-actions-stack' : ''}">
       ${phoneStuck
@@ -1200,7 +1199,7 @@ function openConnectSheet() {
         : `<button type="button" class="btn" id="sheet-connect">Connect wallet</button>`}
       <button type="button" class="btn btn-ghost" id="sheet-cancel">Not now</button>
     </div>
-    ${phoneStuck ? walletGetHtml() : ''}
+    ${phoneStuck ? `<p class="hint">No Nova yet? <a data-wallet-get href="${esc(walletGet().href)}" target="_blank" rel="noopener noreferrer">${esc(walletGet().cta)}</a>, then tap Open in Nova.</p>` : ''}
   </div>`;
   $('sheet-cancel').onclick = closeSheet;
   el.onclick = ev => { if (ev.target === el) closeSheet(); };
@@ -2109,11 +2108,21 @@ function copyBriefUrlNow() {
 
 function copyBriefForNova() {
   const status = $('sheet-status');
-  const ok = copyBriefUrlNow();
-  if (!status) return;
-  status.innerHTML = ok
-    ? '<span class="ok-line">Link copied. Open Nova → Browser and paste.</span>'
-    : '<span class="warn-line">Copy failed. In Nova → Browser type subnetbriefs.com</span>';
+  const okMsg = '<span class="ok-line">Link copied. Open Nova → Browser and paste.</span>';
+  const failMsg = '<span class="warn-line">Copy failed. In Nova → Browser type subnetbriefs.com</span>';
+  if (copyBriefUrlNow()) {
+    if (status) status.innerHTML = okMsg;
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(BRIEF_URL).then(() => {
+      if (status) status.innerHTML = okMsg;
+    }).catch(() => {
+      if (status) status.innerHTML = failMsg;
+    });
+    return;
+  }
+  if (status) status.innerHTML = failMsg;
 }
 
 function openBriefInNova() {
