@@ -1598,7 +1598,7 @@ function readPending(ss58) {
   try {
     const p = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
     if (!p || p.address !== ss58) return null;
-    if (Date.now() - Number(p.t || 0) > 12 * 36e5) return null;
+    if (Date.now() - Number(p.t || 0) > 7 * 864e5) return null;
     return p;
   } catch {
     return null;
@@ -1641,7 +1641,7 @@ function isRecentIso(iso, days) {
   return Date.now() - t < days * 864e5;
 }
 
-function positionsFromActivity(events, extrinsics) {
+function positionsFromActivity(events, extrinsics, days) {
   const by = new Map();
   const bump = (netuid, hotkey, tao) => {
     const id = parseNetuid(netuid);
@@ -1653,17 +1653,15 @@ function positionsFromActivity(events, extrinsics) {
     by.set(id, cur);
   };
 
-  const DAYS = 7;
-  let usedX = false;
+  const DAYS = Number(days) > 0 ? Number(days) : 60;
   for (const x of extrinsics || []) {
     if (!x || x.success === false || !isRecentIso(x.observed_at, DAYS)) continue;
     const fn = String(x.call_function || '');
     const a = argMap(x.call_args);
     const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
-    if (fn === 'add_stake_limit' || fn === 'add_stake') { usedX = true; bump(a.netuid, a.hotkey, tao); }
-    if (fn === 'remove_stake_limit' || fn === 'remove_stake') { usedX = true; bump(a.netuid, a.hotkey, -tao); }
+    if (fn === 'add_stake_limit' || fn === 'add_stake') bump(a.netuid, a.hotkey, tao);
+    if (fn === 'remove_stake_limit' || fn === 'remove_stake') bump(a.netuid, a.hotkey, -tao);
   }
-  if (usedX) return [...by.values()].filter(p => p.stake_tao > 0.0005);
 
   const groups = new Map();
   for (const e of events || []) {
@@ -1764,7 +1762,7 @@ function renderYouBook() {
           <span>Still parked. Not free in Nova yet.</span>
         </div>
       </button>` : ''}
-      ${!rows.length ? `<p class="why">Nothing in this book yet. If Nova already shows a transfer, tap Refresh — the public snapshot is slower than your wallet. TAO sits with the validator, not in Brief.</p>` : ''}
+      ${!rows.length ? `<p class="why">Nothing listed on this key yet. Open Nova → Staking — that is the source of truth. If a stake is there, tap Refresh. Brief’s public list can lag. TAO sits with the validator, not in Brief.</p>` : ''}
       ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent stakes from Nova. One stake should be one shop — tap Refresh if this still looks split.' : 'This stake is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
@@ -2487,15 +2485,20 @@ async function lookupCk(raw, opts) {
   const [pos, bal, ev, ex] = await Promise.all([
     fetchJson(API + '/accounts/' + enc + '/positions', 12000),
     fetchJson(API + '/accounts/' + enc + '/balance', 8000),
-    fetchJson(API + '/accounts/' + enc + '/events?limit=40', 12000),
-    fetchJson(API + '/accounts/' + enc + '/extrinsics?limit=15', 12000)
+    fetchJson(API + '/accounts/' + enc + '/events?limit=80', 12000),
+    fetchJson(API + '/accounts/' + enc + '/extrinsics?limit=40', 12000)
   ]);
   if (gen !== lookupGen) return;
   const indexed = (pos && pos.data && pos.data.positions) || [];
-  const extras = positionsFromActivity(ev && ev.data && ev.data.events, ex && ex.data && ex.data.extrinsics);
+  const degraded = !!(pos && pos.data && pos.data.degraded);
+  const extras = positionsFromActivity(
+    ev && ev.data && ev.data.events,
+    ex && ex.data && ex.data.extrinsics,
+    indexed.length && !degraded ? 14 : 60
+  );
   const pending = readPending(ss58);
   const positions = mergeBookPositions(indexed, extras, pending);
-  clearPendingIfListed(ss58, indexed.concat(extras));
+  if (!degraded) clearPendingIfListed(ss58, indexed.concat(extras));
   if (!pos && !extras.length && !pending) {
     if (quiet && state.you && state.you.ss58 === ss58 && !state.you.error) {
       renderYouBook();
