@@ -392,6 +392,8 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .sheet-row b { color:var(--ink); font-weight:560; text-align:right; }
 .sheet-actions { display:flex; gap:8px; margin-top:14px; }
 .sheet-actions .btn { flex:1; }
+.sheet-actions-stack { flex-wrap:wrap; }
+.sheet-actions-stack .btn:first-child { flex:1 1 100%; }
 .warn-line { color:var(--warn); font-size:13px; line-height:1.45; }
 .ok-line { color:var(--ok); font-size:13px; }
 .lookup { display:flex; gap:8px; margin:10px 0 8px; }
@@ -741,7 +743,7 @@ nav.tabs {
       </div>
       <div class="guide-card">
         <h3>Phone and computer</h3>
-        <p>On a phone, open this same link inside <b style="color:var(--ink)">Nova → Browser</b>. Chrome can only look. On a computer, Talisman is the usual wallet. Add to Home Screen if you want it to open like an app — no App Store, no seed. The Stake tab is where TAO actually moves.</p>
+        <p>On a phone, tap <b style="color:var(--ink)">Open in Nova</b> if you landed in X or Chrome. If the app does not jump, paste into Nova → Browser. Chrome can only look. On a computer, Talisman is the usual wallet. Add to Home Screen if you want it to open like an app — no App Store, no seed. The Stake tab is where TAO actually moves.</p>
       </div>
       <div class="guide-card">
         <h3>Why you can trust this page</h3>
@@ -1186,14 +1188,15 @@ function openConnectSheet() {
   el.innerHTML = `<div class="sheet-card">
     <h3>${phoneStuck ? 'Open this in Nova' : 'Connect a wallet to stake'}</h3>
     <p>${phoneStuck
-      ? 'X, Chrome, and Samsung cannot sign. We copy the link. Open Nova → Browser and paste. We never ask for a seed.'
+      ? 'X, Chrome, and Samsung cannot sign. Tap Open in Nova — we copy the link and try to jump into the app. If nothing happens, open Nova → Browser and paste. We never ask for a seed.'
       : 'Your wallet holds the key. We only ask for a public address — never a seed, password, or JSON file.'}</p>
     ${noInj && !phoneStuck ? `<p class="warn-line">No wallet in this browser yet. Get Talisman for this computer, then tap Connect wallet.</p>${walletGetHtml()}` : ''}
-    ${phoneStuck ? `<p class="hint">Already have Nova? You do not need the Play Store. Just paste into Nova → Browser.</p>` : ''}
+    ${phoneStuck ? `<p class="hint">Already have Nova? You do not need the Play Store.</p>` : ''}
     <p id="sheet-status" class="hint">${esc(state.connectErr || '')}</p>
-    <div class="sheet-actions">
+    <div class="sheet-actions${phoneStuck ? ' sheet-actions-stack' : ''}">
       ${phoneStuck
-        ? `<button type="button" class="btn" id="sheet-copy-nova">Copy link for Nova</button>`
+        ? `<button type="button" class="btn" id="sheet-open-nova">Open in Nova</button>
+           <button type="button" class="btn btn-ghost" id="sheet-copy-nova">Copy link</button>`
         : `<button type="button" class="btn" id="sheet-connect">Connect wallet</button>`}
       <button type="button" class="btn btn-ghost" id="sheet-cancel">Not now</button>
     </div>
@@ -1203,6 +1206,8 @@ function openConnectSheet() {
   el.onclick = ev => { if (ev.target === el) closeSheet(); };
   const go = $('sheet-connect');
   if (go) go.onclick = () => onConnect();
+  const openNova = $('sheet-open-nova');
+  if (openNova) openNova.onclick = () => openBriefInNova();
   const copy = $('sheet-copy-nova');
   if (copy) copy.onclick = () => copyBriefForNova();
 }
@@ -1919,7 +1924,8 @@ function renderWalletStatus() {
     if (out) out.onclick = onDisconnect;
   } else {
     el.className = 'wallet-status';
-    el.innerHTML = `<div><b>Not connected</b><span style="display:block;margin-top:3px">Connect a wallet to stake. We never ask for a seed.</span>${canSignHere() ? '' : walletGetHtml()}</div><button type="button" class="btn-stake" id="wallet-status-go">Connect wallet</button>`;
+    const phoneStuck = onPhone() && !canSignHere();
+    el.innerHTML = `<div><b>Not connected</b><span style="display:block;margin-top:3px">${phoneStuck ? 'X and Chrome cannot sign. Open this in Nova.' : 'Connect a wallet to stake. We never ask for a seed.'}</span>${canSignHere() || onPhone() ? '' : walletGetHtml()}</div><button type="button" class="btn-stake" id="wallet-status-go">${phoneStuck ? 'Open in Nova' : 'Connect wallet'}</button>`;
     const go = $('wallet-status-go');
     if (go) go.onclick = () => openConnectSheet();
   }
@@ -2036,14 +2042,14 @@ function walletGet() {
     return {
       cta: 'Get Nova',
       href: 'https://play.google.com/store/apps/details?id=io.novafoundation.nova.market',
-      note: 'Only if you do not have Nova yet. If you do: Copy link, then Nova → Browser → paste.'
+      note: 'Only if you do not have Nova yet.'
     };
   }
   if (kind === 'ios') {
     return {
       cta: 'Get Nova',
       href: 'https://apps.apple.com/app/nova-polkadot-wallet/id1597119355',
-      note: 'App Store. Then open this site inside Nova → Browser.'
+      note: 'Only if you do not have Nova yet.'
     };
   }
   return {
@@ -2069,21 +2075,54 @@ function openWalletStore(href) {
 }
 
 const BRIEF_URL = 'https://subnetbriefs.com/';
+const NOVA_PKG = 'io.novafoundation.nova.market';
+const NOVA_DAPP = 'https://app.novawallet.io/open/dapp?url=' + encodeURIComponent(BRIEF_URL);
+
+function novaLaunchHref() {
+  if (deviceKind() === 'android') {
+    return 'intent://open/dapp?url=' + encodeURIComponent(BRIEF_URL)
+      + '#Intent;scheme=https;host=app.novawallet.io;package=' + NOVA_PKG
+      + ';S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=' + NOVA_PKG)
+      + ';end';
+  }
+  return NOVA_DAPP;
+}
+
+function copyBriefUrlNow() {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = BRIEF_URL;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, BRIEF_URL.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return true;
+  } catch (e) {}
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(BRIEF_URL).catch(() => {});
+  }
+  return false;
+}
 
 function copyBriefForNova() {
-  const done = ok => {
-    const status = $('sheet-status');
-    if (status) {
-      status.innerHTML = ok
-        ? '<span class="ok-line">Link copied. Open Nova → Browser and paste.</span>'
-        : '<span class="warn-line">Copy failed. In Nova → Browser type subnetbriefs.com</span>';
-    }
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(BRIEF_URL).then(() => done(true)).catch(() => done(false));
-  } else {
-    done(false);
+  const status = $('sheet-status');
+  const ok = copyBriefUrlNow();
+  if (!status) return;
+  status.innerHTML = ok
+    ? '<span class="ok-line">Link copied. Open Nova → Browser and paste.</span>'
+    : '<span class="warn-line">Copy failed. In Nova → Browser type subnetbriefs.com</span>';
+}
+
+function openBriefInNova() {
+  const status = $('sheet-status');
+  copyBriefUrlNow();
+  if (status) {
+    status.innerHTML = '<span class="ok-line">Opening Nova. If nothing happens, paste into Nova → Browser.</span>';
   }
+  location.href = novaLaunchHref();
 }
 
 function walletGetHtml() {
