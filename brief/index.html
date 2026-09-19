@@ -1204,7 +1204,7 @@ function openConnectSheet() {
         : `<button type="button" class="btn" id="sheet-connect">Connect wallet</button>`}
       <button type="button" class="btn btn-ghost" id="sheet-cancel">Not now</button>
     </div>
-    ${phoneStuck ? `<p class="hint">No Nova yet? <a data-wallet-get href="${esc(walletGet().href)}" target="_blank" rel="noopener noreferrer">${esc(walletGet().cta)}</a>, then paste into Nova → Browser.</p>` : ''}
+    ${!trapped && phoneStuck ? `<p class="hint">No Nova yet? <a data-wallet-get href="${esc(walletGet().href)}" target="_blank" rel="noopener noreferrer">${esc(walletGet().cta)}</a>, then paste into Nova → Browser.</p>` : ''}
   </div>`;
   $('sheet-cancel').onclick = closeSheet;
   el.onclick = ev => { if (ev.target === el) closeSheet(); };
@@ -2076,6 +2076,13 @@ function isStandalone() {
 
 function openWalletStore(href) {
   if (!href) return;
+  if (inAppBrowser()) {
+    const status = $('sheet-status');
+    if (status) {
+      status.innerHTML = '<span class="warn-line">X cannot open the store. Leave X, open Nova, paste.</span>';
+    }
+    return;
+  }
   if (isStandalone() || onPhone()) {
     location.href = href;
     return;
