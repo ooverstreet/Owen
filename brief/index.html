@@ -1647,22 +1647,13 @@ function positionsFromActivity(events, extrinsics, days) {
     const id = parseNetuid(netuid);
     const amt = Number(tao) || 0;
     if (id == null || !hotkey || !amt) return;
-    const cur = by.get(id) || { hotkey, netuid: id, stake_tao: 0, pending: true };
+    const cur = by.get(id) || { hotkey, netuid: id, stake_tao: 0, pending: false };
     cur.stake_tao += amt;
     cur.hotkey = hotkey;
     by.set(id, cur);
   };
 
-  const DAYS = Number(days) > 0 ? Number(days) : 60;
-  for (const x of extrinsics || []) {
-    if (!x || x.success === false || !isRecentIso(x.observed_at, DAYS)) continue;
-    const fn = String(x.call_function || '');
-    const a = argMap(x.call_args);
-    const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
-    if (fn === 'add_stake_limit' || fn === 'add_stake') bump(a.netuid, a.hotkey, tao);
-    if (fn === 'remove_stake_limit' || fn === 'remove_stake') bump(a.netuid, a.hotkey, -tao);
-  }
-
+  const DAYS = Number(days) > 0 ? Number(days) : 14;
   const groups = new Map();
   for (const e of events || []) {
     if (!isRecentIso(e.observed_at, DAYS)) continue;
@@ -1674,7 +1665,9 @@ function positionsFromActivity(events, extrinsics, days) {
     g.push(e);
     groups.set(key, g);
   }
+  let usedEvents = false;
   for (const g of groups.values()) {
+    usedEvents = true;
     const adds = g.filter(e => e.event_kind === 'StakeAdded');
     const rms = g.filter(e => e.event_kind === 'StakeRemoved');
     const shopAdds = adds.filter(e => parseNetuid(e.netuid) !== 0);
@@ -1682,7 +1675,25 @@ function positionsFromActivity(events, extrinsics, days) {
     for (const e of useAdds) bump(e.netuid, e.hotkey, e.amount_tao);
     for (const e of rms) bump(e.netuid, e.hotkey, -(num(e.amount_tao) || 0));
   }
-  return [...by.values()].filter(p => p.stake_tao > 0.0005);
+  if (!usedEvents) {
+    for (const x of extrinsics || []) {
+      if (!x || x.success === false || !isRecentIso(x.observed_at, DAYS)) continue;
+      const fn = String(x.call_function || '');
+      const a = argMap(x.call_args);
+      const tao = raoToTao(a.amount_staked ?? a.amount_unstaked ?? a.amount);
+      if (fn === 'add_stake_limit' || fn === 'add_stake') bump(a.netuid, a.hotkey, tao);
+      if (fn === 'remove_stake_limit' || fn === 'remove_stake') bump(a.netuid, a.hotkey, -tao);
+    }
+  }
+  const rows = [...by.values()].filter(p => p.stake_tao > 0.0005);
+  const shops = rows.filter(p => Number(p.netuid) !== 0);
+  const root = rows.find(p => Number(p.netuid) === 0);
+  if (root && shops.length === 1) {
+    const a = root.stake_tao;
+    const b = shops[0].stake_tao;
+    if (Math.abs(a - b) / Math.max(a, b) < 0.25) return shops;
+  }
+  return rows;
 }
 
 function mergeBookPositions(indexed, extras, pending) {
@@ -2494,7 +2505,7 @@ async function lookupCk(raw, opts) {
   const extras = positionsFromActivity(
     ev && ev.data && ev.data.events,
     ex && ex.data && ex.data.extrinsics,
-    indexed.length && !degraded ? 14 : 60
+    14
   );
   const pending = readPending(ss58);
   const positions = mergeBookPositions(indexed, extras, pending);
