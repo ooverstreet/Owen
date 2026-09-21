@@ -1,4 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Subnet Brief">
   <rect width="512" height="512" rx="108" fill="#e4b36a"/>
-  <path fill="#0a0c10" d="M156 154c0-18 16-30 34-26l42 12h48l42-12c18-4 34 8 34 26 0 16-12 26-28 24l-32-8v176c0 44-24 72-68 80-30 6-54-8-52-32 2-18 20-20 30-8 16 14 28 4 28-24V170l-48 8c-16 2-30-8-30-24z"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#0a0c10" stroke-width="22"/>
+  <g transform="translate(256 262) scale(.72) translate(-256 -262)">
+    <path fill="#0a0c10" d="M156 154c0-18 16-30 34-26l42 12h48l42-12c18-4 34 8 34 26 0 16-12 26-28 24l-32-8v176c0 44-24 72-68 80-30 6-54-8-52-32 2-18 20-20 30-8 16 14 28 4 28-24V170l-48 8c-16 2-30-8-30-24z"/>
+  </g>
 </svg>
