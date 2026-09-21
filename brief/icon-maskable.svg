@@ -1,10 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0a0c10"/>
-  <rect x="128" y="108" width="256" height="296" rx="24" fill="#151922" stroke="#e4b36a" stroke-width="12"/>
-  <rect x="160" y="152" width="128" height="14" rx="7" fill="#e4b36a"/>
-  <rect x="160" y="186" width="192" height="10" rx="5" fill="#5ee0c5" opacity=".85"/>
-  <rect x="160" y="212" width="168" height="10" rx="5" fill="#8b93a7" opacity=".55"/>
-  <circle cx="336" cy="348" r="42" fill="#e4b36a"/>
-  <rect x="314" y="330" width="44" height="9" rx="4.5" fill="#0a0c10"/>
-  <rect x="331" y="330" width="10" height="40" rx="5" fill="#0a0c10"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Subnet Brief">
+  <rect width="512" height="512" fill="#e4b36a"/>
+  <path fill="#0a0c10" d="M156 154c0-18 16-30 34-26l42 12h48l42-12c18-4 34 8 34 26 0 16-12 26-28 24l-32-8v176c0 44-24 72-68 80-30 6-54-8-52-32 2-18 20-20 30-8 16 14 28 4 28-24V170l-48 8c-16 2-30-8-30-24z"/>
 </svg>
