@@ -76,11 +76,8 @@ header {
   display:flex; align-items:center; gap:10px;
 }
 .mark {
-  width:34px; height:34px; border-radius:50%; flex-shrink:0;
-  background:var(--gold); color:var(--mark-ink);
-  display:grid; place-items:center;
-  font-family:Fraunces, serif; font-weight:700; font-size:18px; line-height:1;
-  box-shadow: inset 0 0 0 2px var(--mark-ink);
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  object-fit:cover; background:var(--gold);
 }
 .brand { flex:1; min-width:0; }
 .brand h1 { font-size:15px; font-weight:700; letter-spacing:.04em; }
@@ -604,7 +601,7 @@ nav.tabs {
 <div class="app">
   <div class="topbar">
   <header>
-    <div class="mark">τ</div>
+    <img class="mark" src="icon-192.png" width="36" height="36" alt="">
     <div class="brand">
       <h1>SUBNET BRIEF</h1>
       <p id="subhead">Stake TAO in plain English</p>
