@@ -849,6 +849,7 @@ const BRIEFS = {
   64: {
     tagline: 'Serverless GPU inference. The closest thing Bittensor has to a real SaaS.',
     does: 'Chutes lets developers deploy and call models without running their own cluster. It is listed as a provider on OpenRouter, which is the one usage number in this whole network that a team cannot write itself.',
+    learner: 'This is the shop with a real outside meter: OpenRouter lists it, so usage is not only a screenshot. You are sitting next to an inference API strangers can pay. The token can still fall if that paid usage stays small next to TAO rewards.',
     revenue: 'verified',
     revenueNote: 'Independent OpenRouter throughput exists. Self-reported token counts have been higher than the public feed. Customer revenue is real and still small next to TAO emissions — the cheap-vs-AWS story is partly a subsidy.',
     flags: ['Rayon Labs also runs Gradients and Nineteen; one operator still takes a large slice of network emissions.', 'If emissions fall faster than paid usage grows, list prices would have to rise.'],
@@ -860,6 +861,7 @@ const BRIEFS = {
   51: {
     tagline: 'Peer-to-peer GPU rental. Currently the fattest pool of TAO among product subnets.',
     does: 'Lium is a GPU marketplace: supply cards or rent them. The bull case is that rental revenue already outruns emissions. That claim is still mostly internal reporting — there is no public revenue dashboard a stranger can audit.',
+    learner: 'Picture a noticeboard for GPUs: people list cards, others rent them. There is no chat app to try. The bull line is “rent already pays more than emissions” — that is the team talking, not a public till you can audit.',
     revenue: 'claimed',
     revenueNote: 'If a live third-party dashboard ever lands, this becomes the self-sufficiency story of the network. Until then, treat “revenue > emissions” as interesting if true.',
     flags: ['Identity on-chain is lium.io; older writeups also say Celium/Datura. Confirm you are looking at the same shop.', 'Liquidity leadership can reverse quickly; this is a flow market, not a bond.'],
@@ -871,6 +873,7 @@ const BRIEFS = {
   4: {
     tagline: 'Confidential GPU compute. The enterprise pitch: the host cannot read the job.',
     does: 'Targon runs inference and compute inside trusted-execution style enclaves (Intel TDX / NVIDIA CC). Manifold Labs published a confidential-compute writeup with Intel. Dippy is the best-known consumer app sitting on top.',
+    learner: 'The extra claim is privacy: the host is not supposed to read the job. That is for careful buyers (health, finance), not cheaper chat. If you only wanted an API that answers, Chutes is the simpler shop.',
     revenue: 'claimed',
     revenueNote: 'Headline ARR figures have been self-reported and have not stayed on a public dashboard. Confidential compute is a real buyer need in health and finance; contracts are the proof, not the blog post.',
     flags: ['Unaudited revenue. Do not underwrite $10M ARR as if it were GAAP.', 'Hardware-attested supply is harder to scale than vanilla GPUs.'],
@@ -882,6 +885,7 @@ const BRIEFS = {
   120: {
     tagline: 'Reason mining. The protocol co-founder left the foundation to build this.',
     does: 'Affine is a competitive training / reasoning market: miners improve models on program synthesis and related tasks. Winner-takes-quality by design. No consumer product and no revenue yet — the signal is who is building it (Const / Jacob Steeves).',
+    learner: 'There is no storefront. Miners compete to make models better at reasoning, like a lab contest. You would be funding the experiment. Park is the usual first move if you are still learning the map.',
     revenue: 'none',
     revenueNote: 'Research subnet. You are funding an experiment, not buying cash flow.',
     flags: ['Founder-attention is not a moat if the incentive mechanism is gameable.', 'Expect high miner churn and opaque “who is actually ahead” periods.'],
@@ -893,6 +897,7 @@ const BRIEFS = {
   56: {
     tagline: 'One-click fine-tuning. Rayon Labs’ training shop.',
     does: 'Gradients is AutoML: upload data, pick a base model, train. The pitch is 10–100× cheaper than Vertex/AWS. Same caveat as Chutes: a lot of that gap is TAO paying the miners.',
+    learner: 'Upload data, get a trained model — the “fine-tune as a button” shop, same studio as Chutes. The cheap-vs-Google pitch is partly TAO paying the miners. You are in the Rayon cluster, not a separate world.',
     revenue: 'claimed',
     revenueNote: 'Product is live at gradients.io. Independent dollar revenue is thinner than the marketing comparisons.',
     flags: ['Subnet code has been less public than Chutes, which makes verification harder.', 'Same-operator concentration with SN64 / SN19.'],
@@ -904,6 +909,7 @@ const BRIEFS = {
   62: {
     tagline: 'Software-engineering agents that compete on benchmarks.',
     does: 'Ridges is a marketplace of coding agents. Ridgeline is the front-door product (GitHub-shaped workflow). Inference often rides Targon and Chutes — a reminder that the winning UIs compose subnets instead of being one.',
+    learner: 'Coding agents that try to win tests, with a GitHub-shaped front door. Easy to picture if you have used Copilot. Paid customers are not the story yet; the token has moved harder than the receipts.',
     revenue: 'none',
     revenueNote: 'Product exists; verified customer revenue does not. This is the category where Bittensor’s bake-off structure is most plausible versus a single Copilot.',
     flags: ['Agent quality is only as good as the hidden test suite. If miners overfit the bench, users feel it immediately.', 'Token price has been violent relative to shipped revenue.'],
@@ -915,6 +921,7 @@ const BRIEFS = {
   34: {
     tagline: 'Is this image/video/audio fake? Incentivized detectors.',
     does: 'BitMind pays miners to detect synthetic media. This is one of the few subnets with a civilian use case that does not require you to care about TAO.',
+    learner: 'The job is “is this photo or video fake?” You can say that to someone who has never heard of TAO. Whether newsrooms or apps will pay for it is still open. Reading it is useful; staking it is a separate choice.',
     revenue: 'none',
     revenueNote: 'Clear product story, unclear paid demand. Deepfake tooling is crowded; the edge has to be calibration plus price.',
     flags: ['Accuracy claims need a public, dated eval set. Without it you are buying a vibe.'],
@@ -926,6 +933,7 @@ const BRIEFS = {
   44: {
     tagline: 'Make every camera intelligent — sports vision in production.',
     does: 'Score annotates sports video with decentralised computer vision. Older writeups tied it to DKING/SIRE sports-betting models and a large AUM claim. The current public face is wearescore.com.',
+    learner: 'This shop watches sports film and draws the smart overlay. Old writeups mixed in betting-fund rumors — skip those until the live site is clearly doing the vision job. You would be backing sports cameras, not a hedge fund.',
     revenue: 'claimed',
     revenueNote: 'Partnership headlines are easier to verify than ongoing P&L. Expired certs and quiet sites have shown up in this cluster before — check the live site before you size in.',
     flags: ['Sports-betting revenue is opaque by nature.', 'Alpha has been jumpy; liquidity is mid-pack.'],
@@ -937,6 +945,7 @@ const BRIEFS = {
   68: {
     tagline: 'Drug-discovery bake-off. Miners propose molecules; validators score binding.',
     does: 'NOVA / Metanova screens huge chemical libraries with a learned oracle. Wet-lab confirmation is the only thing that turns this from a pretty leaderboard into a company.',
+    learner: 'Miners suggest molecules; the shop scores how they might stick to a target. That is homework for drug discovery, not a medicine you can buy. Wet lab is the missing step. Fine to read; a first stake is usually kinder on park.',
     revenue: 'none',
     revenueNote: 'Intellectually one of the best-specified science subnets. Revenue is still a future tense.',
     flags: ['Virtual hits are cheap. Chemistry is not.', 'Smaller miner set than the inference shops — check whether that is quality or emptiness.'],
@@ -948,6 +957,7 @@ const BRIEFS = {
   3: {
     tagline: 'Coordinated learning — the shop that used to be Templar.',
     does: 'Templar / Covenant trained Covenant-72B across the open internet, then the original team publicly left Bittensor in April 2026 after a governance fight. The netuid is still live as Teutonic / tplr.ai. That is a different risk than a boring compute subnet.',
+    learner: 'This netuid trained a well-known public model, then the original team left after a fight. The number is still live under a new face. If you are learning, this is the shop that teaches “the name on the door can change.”',
     revenue: 'caution',
     revenueNote: 'Technical achievement is real and published. Continuity of the team that made it is not. Treat identity changes as a first-class risk.',
     flags: ['Team-exit history. Read current owners before you assume you own “the 72B subnet.”', 'Validator count has been thin versus miner count — scoring power is concentrated.'],
@@ -959,6 +969,7 @@ const BRIEFS = {
   9: {
     tagline: 'Liquid / distributed training from Macrocosmos.',
     does: 'iota is Macrocosmos’ training subnet — consumer and clustered GPUs contributing to shared pretraining. Related family: Apex (SN1) and other Macrocosmos shops.',
+    learner: 'Home GPUs and racks helping train a shared model, from the Macrocosmos studio. You will not open a consumer app here. Look for public training notes, not a “buy now” page.',
     revenue: 'none',
     revenueNote: 'Infrastructure for training, not a consumer SKU. Value shows up as models and papers, then maybe as APIs.',
     flags: ['Training subnets are hard to evaluate from alpha price alone. Look at published runs.'],
@@ -970,6 +981,7 @@ const BRIEFS = {
   8: {
     tagline: 'Trustless execution / liquidity for prop desks and traders.',
     does: 'Vanta pitches a decentralised execution engine for proprietary trading firms. Older maps called SN8 “prop trading.” Verify the live product; trading subnets have a habit of being more whitepaper than fill.',
+    learner: 'The pitch is software for trading firms, not a toy you chat with. Shops like this have a habit of sounding busier than the tape. If you cannot see fills, you are reading a brochure.',
     revenue: 'caution',
     revenueNote: 'If fills, latency, and audited P&L are not public, you are buying a story about traders, not a tape.',
     flags: ['Easy to confuse “we have miners submitting signals” with “a desk will pay for this.”'],
@@ -981,6 +993,7 @@ const BRIEFS = {
   19: {
     tagline: 'Low-latency inference (Nineteen / blockmachine lineage).',
     does: 'SN19 has been Rayon Labs’ speed-focused inference shop, live at nineteen.ai for text and image. On-chain name may read as blockmachine — always match netuid, not the vibe.',
+    learner: 'Same family as Chutes, aimed at speed — text and pictures. Explorers may show another name; match SN19. If you wanted the main inference shop, that is Chutes (SN64).',
     revenue: 'claimed',
     revenueNote: 'Same family as Chutes, different optimisation (latency vs scale). Smaller emission share.',
     flags: ['Name drift on explorers. Confirm website + repo before you allocate.'],
@@ -992,6 +1005,7 @@ const BRIEFS = {
   107: {
     tagline: 'Genomics as a foundational layer.',
     does: 'Minos is pitching genomics infrastructure. High emission share with a science story needs a corresponding public artifact (paper, API, hospital design partner).',
+    learner: 'The story is genomics: DNA-scale compute. A high emission share with a science label is not a hospital bill. Until a stranger can hit an API or a paper, this is a thesis, not a product you can poke.',
     revenue: 'none',
     revenueNote: 'Emission leadership in a science vertical is not the same as demand. Ask what a non-token customer would buy tomorrow.',
     flags: ['When a new name is taking a top emission slot, read the mechanism and the team before the candle.'],
@@ -1003,6 +1017,7 @@ const BRIEFS = {
   93: {
     tagline: 'Decentralised creator / influencer marketplace.',
     does: 'Bitcast is a creator-economy subnet: attention, campaigns, and payouts rather than GPUs. That is a distribution business wearing a TAO jersey.',
+    learner: 'Influencers and campaigns, not GPUs. Your TAO would back a media marketplace. Brands actually paying is the score; miner count is not.',
     revenue: 'claimed',
     revenueNote: 'Creator marketplaces live or die on brands actually paying. Look for campaign receipts, not only miner counts.',
     flags: ['Off-chain attention metrics are easy to fake. Prefer payable invoices.'],
@@ -1014,6 +1029,7 @@ const BRIEFS = {
   75: {
     tagline: 'Storage, VMs, and apps with a chain-backed cloud story.',
     does: 'Hippius is trying to be a decentralised cloud: disks and machines, not just tokens. Overlaps the Akash/Render/Filecoin conversation.',
+    learner: 'Disks and virtual machines — renting a computer that is not AWS. Cloud lives on “did it stay up.” Compare a real price and uptime to a normal host before you call it cheaper.',
     revenue: 'claimed',
     revenueNote: 'Cloud is brutal on reliability SLAs. A pretty dashboard is not multi-AZ.',
     flags: ['Compare real VM prices and uptime to Hetzner/AWS before calling it cheaper.'],
@@ -1025,6 +1041,7 @@ const BRIEFS = {
   1: {
     tagline: 'Apex — Macrocosmos’ general intelligence / agent platform.',
     does: 'Apex is the Macrocosmos flagship product surface sitting beside their training subnets. Strong docs and integration readiness relative to most of the network.',
+    learner: 'Macrocosmos’ front door for agents, next to their training shops. The docs are better than most. You would be backing a studio’s platform, not one app with a receipt.',
     revenue: 'none',
     revenueNote: 'Platform, not a proven cash-flow loop. Quality of agents and public evals matter more than alpha beta.',
     flags: ['Macrocosmos concentration across several netuids.'],
@@ -1099,9 +1116,10 @@ function roleLine(row) {
   if (b) {
     if (state.role === 'miner') return b.miner;
     if (state.role === 'builder') return b.builder;
-    if (state.role === 'curious') return b.does;
+    if (state.role === 'curious') return b.learner || b.does;
     return b.staker;
   }
+  const name = row.name || ('SN' + row.netuid);
   if (state.role === 'miner') {
     const slots = num(row.open_slots);
     const cost = num(row.registration_cost_tao);
@@ -1110,6 +1128,14 @@ function roleLine(row) {
   }
   if (state.role === 'builder') {
     return row.website_url ? `Public site: ${row.website_url.replace(/^https?:\/\//,'')}` : 'No official website in the registry. Integration risk is high.';
+  }
+  if (state.role === 'curious') {
+    const d = String(row.description || '').replace(/\s+/g, ' ').trim();
+    if (d && d.length > 24) {
+      const clip = d.length > 160 ? d.slice(0, 157) + '…' : d;
+      return `${name} has no Brief writeup yet. The registry says: “${clip}”. If that still sounds like jargon, park is the calmer first step.`;
+    }
+    return `${name} has no Brief writeup and almost no public description. That is a signal. Park until someone can say what the shop does in a sentence.`;
   }
   const liq = num(row.tao_in_pool_tao);
   const em = num(row.emission_share);
@@ -1424,7 +1450,7 @@ function filtered() {
   return state.rows.filter(r => {
     if (r.netuid === 0) return false;
     if (q) {
-      const blob = [r.name, 'sn'+r.netuid, r.netuid, r.description, r.brief?.tagline, r.brief?.does].join(' ').toLowerCase();
+      const blob = [r.name, 'sn'+r.netuid, r.netuid, r.description, r.brief?.tagline, r.brief?.does, r.brief?.learner].join(' ').toLowerCase();
       return blob.includes(q);
     }
     if (state.filter === 'product' && !(r.brief?.revenue === 'verified' || r.brief?.revenue === 'claimed' || r.brief?.tags?.includes('product'))) return false;
