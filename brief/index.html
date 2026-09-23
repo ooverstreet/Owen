@@ -189,7 +189,12 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   to { transform:translateY(-50%); }
 }
 @media (max-width: 559px) {
-  .news-port { height:5.6em; }
+  .news-track { animation:none; }
+  .news-port {
+    height:auto; max-height:12.5em; overflow:auto;
+    -webkit-mask-image:none; mask-image:none;
+  }
+  .news-clone { display:none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .news-track { animation:none; }
