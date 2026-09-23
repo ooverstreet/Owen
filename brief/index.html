@@ -1367,25 +1367,37 @@ function showStatTip(id) {
   statTipTimer = setTimeout(hideStatTip, 5000);
 }
 
+function taoPrice() {
+  const t = state.taoUsd;
+  const px = num(t && t.usd_per_tao);
+  if (px == null) return null;
+  const when = Date.parse(t.observed_at || state.generatedAt || '');
+  const age = Number.isFinite(when) ? Date.now() - when : (state.live ? 0 : Infinity);
+  if (age > 12 * 3600e3) return null;
+  return px;
+}
+
 function renderStats() {
   const s = state.summary || {};
   const root = num(s.total_root_value_tao);
   const alpha = num(s.total_alpha_value_tao);
   const tot = (root || 0) + (alpha || 0);
-  const px = num(state.taoUsd?.usd_per_tao);
+  const px = taoPrice();
   const n = (state.rows || []).filter(r => r.netuid !== 0).length;
   const pctPark = tot ? ((root||0)/tot*100).toFixed(0) : '—';
   const pctShop = tot ? ((alpha||0)/tot*100).toFixed(0) : '—';
   const tips = {
     shops: 'How many AI shops (subnets) are on the network right now.',
-    price: 'What one TAO is worth in dollars, from the public feed. It moves.',
+    price: px == null
+      ? 'Dollar price is not in yet. We use a public chain feed, not Coinbase. Open when the live pill is on.'
+      : 'About $' + px.toFixed(2) + ' from a public chain average, not Coinbase. Their number can be a few dollars different. It moves. Not a quote you can trade.',
     parked: pctPark + '% of all staked TAO is still parked on the main chain. It stays TAO. This is the whole network — not your book.',
     alpha: pctShop + '% of all staked TAO has been put on a shop and is now that shop’s token. Price can move. This is the whole network — not your book.'
   };
   const open = state.statTip;
   $('stats').innerHTML = `
     <button type="button" class="stat tippy${open==='shops'?' on':''}" data-stat="shops" data-tip="${esc(tips.shops)}"><b>${n}</b><span>Shops</span></button>
-    <button type="button" class="stat tippy${open==='price'?' on':''}" data-stat="price" data-tip="${esc(tips.price)}"><b>${px ? '$'+px.toFixed(0) : '—'}</b><span>TAO price</span></button>
+    <button type="button" class="stat tippy${open==='price'?' on':''}" data-stat="price" data-tip="${esc(tips.price)}"><b>${px == null ? '—' : '~$' + Math.round(px)}</b><span>TAO · about</span></button>
     <button type="button" class="stat tippy${open==='parked'?' on':''}" data-stat="parked" data-tip="${esc(tips.parked)}"><b>${pctPark}%</b><span>Parked</span></button>
     <button type="button" class="stat tippy${open==='alpha'?' on':''}" data-stat="alpha" data-tip="${esc(tips.alpha)}"><b>${pctShop}%</b><span>On shops</span></button>
     ${open && tips[open] ? `<p class="stat-tip"><b>What this is.</b> ${esc(tips[open])}</p>` : ''}`;
