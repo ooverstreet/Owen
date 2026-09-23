@@ -1142,7 +1142,8 @@ const state = {
   allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false },
   yield: {},
   notch: null,
-  statTip: ''
+  statTip: '',
+  priceLive: false
 };
 
 const $ = id => document.getElementById(id);
@@ -1231,31 +1232,31 @@ function merge(catalog, economics) {
   return rows.sort((a, b) => (num(b.tao_in_pool_tao) || 0) - (num(a.tao_in_pool_tao) || 0));
 }
 
-async function load() {
+async function fetchJson(url, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 12000);
-    const [ecoRes, catRes] = await Promise.all([
-      fetch(API + '/economics', { signal: ctrl.signal }),
-      fetch(API + '/subnets?limit=130', { signal: ctrl.signal })
-    ]);
+    const r = await fetch(url, { signal: ctrl.signal });
+    if (!r.ok) throw new Error('bad status');
+    return await r.json();
+  } finally {
     clearTimeout(t);
-    if (!ecoRes.ok || !catRes.ok) throw new Error('bad status');
-    const eco = await ecoRes.json();
-    const cat = await catRes.json();
-    state.rows = merge(cat.data.subnets, eco.data.subnets);
-    state.summary = eco.data.summary;
-    state.taoUsd = eco.data.tao_usd;
-    state.generatedAt = eco.data.generated_at || eco.meta?.published_at;
-    state.live = true;
-  } catch (err) {
-    const snap = await fetch('./snapshot.json').then(r => r.json());
-    state.rows = merge(snap.catalog, snap.economics);
-    state.summary = snap.summary;
-    state.taoUsd = snap.tao_usd;
-    state.generatedAt = snap.generated_at;
-    state.live = false;
   }
+}
+
+async function load() {
+  const snapP = fetch('./snapshot.json').then(r => r.json()).catch(() => null);
+  const ecoP = fetchJson(API + '/economics', 15000).catch(() => null);
+  const catP = fetchJson(API + '/subnets?limit=130', 15000).catch(() => null);
+  const [eco, cat, snap] = await Promise.all([ecoP, catP, snapP]);
+  const catalog = (cat && cat.data && cat.data.subnets) || (snap && snap.catalog) || [];
+  const economics = (eco && eco.data && eco.data.subnets) || (snap && snap.economics) || [];
+  state.rows = merge(catalog, economics);
+  state.summary = (eco && eco.data && eco.data.summary) || (snap && snap.summary) || null;
+  state.taoUsd = (eco && eco.data && eco.data.tao_usd) || null;
+  state.priceLive = !!(state.taoUsd && state.taoUsd.usd_per_tao != null);
+  state.generatedAt = (eco && (eco.data.generated_at || eco.meta && eco.meta.published_at)) || (snap && snap.generated_at) || null;
+  state.live = !!eco;
   render();
 }
 
@@ -1371,8 +1372,9 @@ function taoPrice() {
   const t = state.taoUsd;
   const px = num(t && t.usd_per_tao);
   if (px == null) return null;
-  const when = Date.parse(t.observed_at || state.generatedAt || '');
-  const age = Number.isFinite(when) ? Date.now() - when : (state.live ? 0 : Infinity);
+  if (state.priceLive || state.live) return px;
+  const when = Date.parse(t.observed_at || '');
+  const age = Number.isFinite(when) ? Date.now() - when : Infinity;
   if (age > 12 * 3600e3) return null;
   return px;
 }
