@@ -2480,7 +2480,8 @@ function renderAllocate() {
   if (!el) return;
   const w = state.wallet;
   const y = state.you && typeof state.you === 'object' && !state.you.error ? state.you : null;
-  const bookReady = !!(w && y && y.ss58 === w.address);
+  const yOk = !!(y && y.ss58);
+  const bookReady = !!(w && yOk && y.ss58 === w.address);
   const a = state.allocate;
   const val = selectedVal();
   const dests = featuredDests();
@@ -2488,13 +2489,15 @@ function renderAllocate() {
   const free = bookReady ? (y.balance || 0) : null;
   const signing = canSignHere();
   const isRoot = Number(a.netuid) === 0;
-  const have = bookReady ? bookHave(y, a.netuid) : null;
+  const have = yOk ? bookHave(y, a.netuid) : null;
   const take = val ? takePctLabel(val.take) : '…';
   const cta = !w
     ? (isRoot ? 'Connect wallet to park' : 'Connect wallet to stake on ' + destShort(a.netuid))
     : (bookReady ? stakeCta(a.amount, a.netuid) : 'Loading your book…');
   const why = !w
-    ? 'Pick park or a shop now. Then connect your wallet — we never ask for a seed — and tap the gold button again.'
+    ? (have
+      ? 'This key already has a stake here. Connect the same wallet to add more — we never ask for a seed.'
+      : 'Pick park or a shop now. Then connect your wallet — we never ask for a seed — and tap the gold button again.')
     : have
     ? 'You already have a stake here. The box below is free TAO — extra you can add. We pick a low-fee validator.'
     : 'Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.';
@@ -2518,7 +2521,7 @@ function renderAllocate() {
       <div class="dests pills" id="alloc-dests">
         ${dests.map(id => {
           const pill = destPill(id);
-          const row = bookReady ? bookHave(y, id) : null;
+          const row = yOk ? bookHave(y, id) : null;
           const sub = row ? fmtTao(row.tao, 2) + ' here' : pill.sub;
           return `<button type="button" class="tippy ${Number(a.netuid)===Number(id)?'on':''}" data-dest="${id}" data-tip="${esc(destTip(id))}"><span>${esc(pill.title)}</span><small>${esc(sub)}</small></button>`;
         }).join('')}
