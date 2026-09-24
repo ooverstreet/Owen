@@ -547,6 +547,15 @@ nav.tabs {
 
 .empty { color:var(--mute); padding:28px 8px; text-align:center; }
 .spin { width:22px; height:22px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:sp .8s linear infinite; margin:24px auto; }
+.quiet-lookup {
+  margin:8px 0 12px; padding:8px 12px;
+  border:1px solid var(--line); border-radius:12px; background:var(--paper);
+}
+.quiet-lookup summary {
+  cursor:pointer; color:var(--mute); font-size:13px; font-weight:560; line-height:1.4;
+}
+.quiet-lookup[open] summary { margin-bottom:8px; color:var(--ink); }
+.sent-here { color:var(--mute); font-size:14px; line-height:1.5; margin:0 0 16px; }
 .lookup input { font-size:16px; }
 .search { font-size:16px; }
 #install {
@@ -659,7 +668,7 @@ nav.tabs {
     </div>
     <div id="live-pill">loading</div>
     <button type="button" id="theme" title="Light mode" aria-label="Switch to light mode">Light</button>
-    <button type="button" id="share" title="Share" aria-label="Share">↗</button>
+    <button type="button" id="share" title="Send to a friend" aria-label="Send to a friend">↗</button>
   </header>
   <div id="tape" aria-label="Live top subnets"></div>
   </div>
@@ -695,6 +704,7 @@ nav.tabs {
           <i><b>2. Pick</b>Park, or a shop.</i>
           <i><b>3. Approve</b>Nova asks. You tap yes.</i>
         </div>
+        <p class="sent-here">If someone sent you here: open this in Nova’s Browser — not Chrome, not Nova’s Staking tab. We never ask for a seed.</p>
       </div>
       <div class="home-side">
         <div id="today-shop"></div>
@@ -751,12 +761,14 @@ nav.tabs {
           </div>
           <p class="hint" id="ck-connect-hint">We only receive a public address. Never a seed.</p>
           <div class="acct" id="acct-pick" hidden></div>
-          <p class="hint paste-book">or paste a public address — read only, cannot sign</p>
-          <div class="lookup paste-book">
-            <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Public address starting with 5…">
-            <button type="button" id="ck-go">Look up</button>
-          </div>
-          <p class="hint paste-book">Try a large on-chain book: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
+          <details class="paste-book quiet-lookup">
+            <summary>Look up a public address — read only, cannot sign</summary>
+            <div class="lookup">
+              <input id="ck" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" enterkeyhint="search" inputmode="text" placeholder="Public address starting with 5…">
+              <button type="button" id="ck-go">Look up</button>
+            </div>
+            <p class="hint">See what a book looks like: <button type="button" id="ck-demo">use a public example</button> · <button type="button" id="ck-clear">clear</button></p>
+          </details>
           <div id="you-book"></div>
         </div>
         <div id="allocate"></div>
@@ -3130,14 +3142,16 @@ applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'li
 $('theme').addEventListener('click', () => {
   applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
 });
+const SHARE_TEXT = 'Stake TAO in plain English. Open this in Nova’s Browser — we never ask for a seed.';
 $('share').addEventListener('click', async () => {
-  const data = { title: 'Subnet Brief', text: 'Bittensor in plain English.', url: SITE };
+  const data = { title: 'Subnet Brief', text: SHARE_TEXT, url: SITE };
+  const invite = SHARE_TEXT + '\n' + SITE;
   if (navigator.share) {
     try { await navigator.share(data); } catch (e) {}
     return;
   }
   try {
-    await navigator.clipboard.writeText(SITE);
+    await navigator.clipboard.writeText(invite);
     $('share').textContent = '✓';
     setTimeout(() => { $('share').textContent = '↗'; }, 1400);
   } catch (e) {}
