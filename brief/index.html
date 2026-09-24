@@ -405,6 +405,12 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   margin:8px 0 0; padding:10px 12px; border-radius:10px;
   background:var(--paper2); color:var(--ink); font-size:13px; line-height:1.45;
 }
+.have-line {
+  margin:0 0 10px; padding:10px 12px; border-radius:10px;
+  background:var(--mint-wash); border:1px solid var(--mint-line);
+  color:var(--ink); font-size:13.5px; line-height:1.45;
+}
+.have-line b { font-variant-numeric:tabular-nums; }
 .hint-btn {
   display:inline-flex; align-items:center; gap:6px; margin:2px 0 0; padding:0;
   border:0; background:none; cursor:pointer; text-align:left;
@@ -1836,17 +1842,170 @@ function positionsFromActivity(events, extrinsics, days) {
   return rows;
 }
 
-function mergeBookPositions(indexed, extras, pending) {
-  const have = new Set((indexed || []).map(p => Number(p.netuid)));
-  const out = [...(indexed || [])];
-  for (const p of extras || []) {
-    const id = Number(p.netuid);
-    if (have.has(id)) continue;
-    out.push(p);
-    have.add(id);
+const RPC_HTTPS = [
+  'https://lite.chain.opentensor.ai',
+  'https://entrypoint-finney.opentensor.ai:443',
+  'https://bittensor-finney.api.onfinality.io/public'
+];
+const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function hex0x(bytes) {
+  let s = '0x';
+  for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, '0');
+  return s;
+}
+
+function hexToBytes(hex) {
+  const h = String(hex || '').replace(/^0x/i, '');
+  if (!h || h.length % 2) return new Uint8Array();
+  const u8 = new Uint8Array(h.length / 2);
+  for (let i = 0; i < u8.length; i++) u8[i] = parseInt(h.slice(i * 2, i * 2 + 2), 16);
+  return u8;
+}
+
+function ss58Pub(addr) {
+  try {
+    let n = 0n;
+    let pad = 0;
+    for (const ch of String(addr || '')) {
+      const i = B58.indexOf(ch);
+      if (i < 0) return null;
+      if (n === 0n && ch === '1') pad += 1;
+      n = n * 58n + BigInt(i);
+    }
+    let raw = [];
+    while (n > 0n) {
+      raw.push(Number(n & 255n));
+      n >>= 8n;
+    }
+    raw.reverse();
+    const bytes = new Uint8Array(pad + raw.length);
+    bytes.set(raw, pad);
+    if (bytes.length < 33) return null;
+    const start = bytes[0] < 64 ? 1 : 2;
+    if (bytes.length < start + 32) return null;
+    return bytes.slice(start, start + 32);
+  } catch {
+    return null;
   }
-  if (pending && !have.has(Number(pending.netuid))) {
-    out.push({
+}
+
+function readCompact(u8, i) {
+  const first = u8[i];
+  const mode = first & 3;
+  if (mode === 0) return [first >> 2, i + 1];
+  if (mode === 1) return [(first | (u8[i + 1] << 8)) >> 2, i + 2];
+  if (mode === 2) {
+    const v = (u8[i] | (u8[i + 1] << 8) | (u8[i + 2] << 16) | (u8[i + 3] << 24)) >>> 2;
+    return [v, i + 4];
+  }
+  const n = (first >> 2) + 4;
+  let v = 0n;
+  for (let k = 0; k < n; k++) v |= BigInt(u8[i + 1 + k]) << (8n * BigInt(k));
+  return [Number(v), i + 1 + n];
+}
+
+function decodeStakeInfos(hex) {
+  const u8 = hexToBytes(hex);
+  if (!u8.length) return [];
+  const [n, start] = readCompact(u8, 0);
+  let i = start;
+  const out = [];
+  for (let k = 0; k < n && i + 65 <= u8.length; k++) {
+    const hotkey = hex0x(u8.slice(i, i + 32)); i += 32;
+    i += 32;
+    let netuid; [netuid, i] = readCompact(u8, i);
+    let stake; [stake, i] = readCompact(u8, i);
+    [, i] = readCompact(u8, i);
+    [, i] = readCompact(u8, i);
+    [, i] = readCompact(u8, i);
+    [, i] = readCompact(u8, i);
+    i += 1;
+    if (netuid >= 0 && stake > 500000) out.push({ hotkey, netuid, stake_rao: stake });
+  }
+  return out;
+}
+
+async function rpcCall(method, params, ms) {
+  const body = JSON.stringify({ id: 1, jsonrpc: '2.0', method, params });
+  for (const url of RPC_HTTPS) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms || 8000);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body,
+        signal: ctrl.signal
+      });
+      if (!res.ok) continue;
+      const js = await res.json();
+      if (js && js.result) return js.result;
+    } catch {
+    } finally {
+      clearTimeout(t);
+    }
+  }
+  return null;
+}
+
+function catalogAlphaPx(netuid) {
+  if (Number(netuid) === 0) return 1;
+  const r = rowBy(netuid);
+  return num(r && r.alpha_price_tao);
+}
+
+async function chainAlphaPrice(netuid) {
+  const arg = new Uint8Array(2);
+  arg[0] = Number(netuid) & 255;
+  arg[1] = (Number(netuid) >> 8) & 255;
+  const raw = await rpcCall('state_call', ['SwapRuntimeApi_current_alpha_price', hex0x(arg)], 8000);
+  if (!raw) return null;
+  const u8 = hexToBytes(raw);
+  if (u8.length < 8) return null;
+  let v = 0n;
+  for (let k = 0; k < 8; k++) v |= BigInt(u8[k]) << (8n * BigInt(k));
+  return Number(v) / 1e9;
+}
+
+async function chainPositions(ss58) {
+  const pub = ss58Pub(ss58);
+  if (!pub) return null;
+  const raw = await rpcCall('state_call', ['StakeInfoRuntimeApi_get_stake_info_for_coldkey', hex0x(pub)], 10000);
+  if (!raw) return null;
+  const decoded = decodeStakeInfos(raw);
+  const need = [...new Set(decoded.filter(p => p.netuid !== 0 && catalogAlphaPx(p.netuid) == null).map(p => p.netuid))];
+  const fetched = {};
+  await Promise.all(need.map(async id => { fetched[id] = await chainAlphaPrice(id); }));
+  return decoded.map(p => {
+    const px = p.netuid === 0 ? 1 : (catalogAlphaPx(p.netuid) ?? fetched[p.netuid]);
+    const alpha = p.stake_rao / 1e9;
+    return {
+      hotkey: p.hotkey,
+      netuid: p.netuid,
+      stake_tao: px == null ? alpha : alpha * px,
+      onchain: true
+    };
+  }).filter(p => p.stake_tao > 0.0005);
+}
+
+function mergeBookPositions(indexed, extras, pending, onchain) {
+  const have = new Set();
+  const out = [];
+  const add = p => {
+    if (!p) return;
+    const id = Number(p.netuid);
+    if (!Number.isFinite(id) || have.has(id)) return;
+    const tao = num(p.stake_tao) || 0;
+    if (tao <= 0.0005 && !p.pending) return;
+    have.add(id);
+    out.push(p);
+  };
+  for (const p of indexed || []) add(p);
+  for (const p of onchain || []) add(p);
+  for (const p of extras || []) add(p);
+  if (pending) {
+    add({
       hotkey: pending.hotkey,
       netuid: Number(pending.netuid),
       stake_tao: Number(pending.amount) || 0,
@@ -1854,6 +2013,21 @@ function mergeBookPositions(indexed, extras, pending) {
     });
   }
   return out;
+}
+
+function bookHave(y, netuid) {
+  if (!y || !y.agg) return null;
+  return y.agg.find(r => Number(r.netuid) === Number(netuid)) || null;
+}
+
+function emptyBookWhy(y) {
+  const free = (y && y.balance) || 0;
+  if (y && y.chain) {
+    return free >= 0.002
+      ? 'No shop stake on this key. The number above is free TAO — that is what you can put on a shop. Nova’s Staking tab is other networks, not Chutes.'
+      : 'No shop stake on this key. If you just signed in Nova’s Browser, tap Refresh. Nova’s Staking tab is other networks — it will not list Chutes.';
+  }
+  return 'Brief has not listed a shop stake yet. Tap Refresh. Do not open Nova → Staking — that list is Polkadot and friends, not your Bittensor shops. TAO sits with the validator, not in Brief.';
 }
 
 function aggregatePositions(positions) {
@@ -1913,7 +2087,7 @@ function renderYouBook() {
           <span>Still parked. Not free in Nova yet.</span>
         </div>
       </button>` : ''}
-      ${!rows.length ? `<p class="why">Nothing listed on this key yet. Open Nova → Staking — that is the source of truth. If a stake is there, tap Refresh. Brief’s public list can lag. TAO sits with the validator, not in Brief.</p>` : ''}
+      ${!rows.length ? `<p class="why">${esc(emptyBookWhy(y))}</p>` : ''}
       ${pendingRows ? `<p class="hint">${(y.positions || []).filter(p => p.pending).length > 1 ? 'Recent stakes from Nova. One stake should be one shop — tap Refresh if this still looks split.' : 'This stake is on chain. The public snapshot has not listed the shop yet.'}</p>` : ''}
       ${top.map(p => {
         const pos = (y.positions || []).find(x => Number(x.netuid) === p.netuid);
@@ -2314,16 +2488,20 @@ function renderAllocate() {
   const free = bookReady ? (y.balance || 0) : null;
   const signing = canSignHere();
   const isRoot = Number(a.netuid) === 0;
+  const have = bookReady ? bookHave(y, a.netuid) : null;
   const take = val ? takePctLabel(val.take) : '…';
   const cta = !w
     ? (isRoot ? 'Connect wallet to park' : 'Connect wallet to stake on ' + destShort(a.netuid))
     : (bookReady ? stakeCta(a.amount, a.netuid) : 'Loading your book…');
   const why = !w
     ? 'Pick park or a shop now. Then connect your wallet — we never ask for a seed — and tap the gold button again.'
+    : have
+    ? 'You already have a stake here. The box below is free TAO — extra you can add. We pick a low-fee validator.'
     : 'Pick how much and where. Hover a pill (or tap it) for what it means. We pick a low-fee validator — you just tap the gold button.';
   el.innerHTML = `<div class="alloc-box">
     <h3>${isRoot ? 'Park TAO' : 'Stake on ' + destShort(a.netuid)}</h3>
     <p class="why">${esc(why)}</p>
+    ${have ? `<p class="have-line">You already have <b>${fmtTao(have.tao, 2)}</b> on ${esc(isRoot ? 'Root' : destShort(a.netuid))}. That sits with the validator — not in Brief, and not in Nova’s Staking list.</p>` : ''}
     ${w && !bookReady ? `<p class="hint">Loading the book for ${esc(shortAddr(w.address))}…</p>` : ''}
     ${!signing && w ? `<p class="warn-line">This browser can show the stake, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
     ${onPhone() && !w && !canSignHere() ? `<p class="warn-line">On a phone, open this site inside Nova’s Browser — Chrome can only look.</p>` : ''}
@@ -2340,7 +2518,9 @@ function renderAllocate() {
       <div class="dests pills" id="alloc-dests">
         ${dests.map(id => {
           const pill = destPill(id);
-          return `<button type="button" class="tippy ${Number(a.netuid)===Number(id)?'on':''}" data-dest="${id}" data-tip="${esc(destTip(id))}"><span>${esc(pill.title)}</span><small>${esc(pill.sub)}</small></button>`;
+          const row = bookReady ? bookHave(y, id) : null;
+          const sub = row ? fmtTao(row.tao, 2) + ' here' : pill.sub;
+          return `<button type="button" class="tippy ${Number(a.netuid)===Number(id)?'on':''}" data-dest="${id}" data-tip="${esc(destTip(id))}"><span>${esc(pill.title)}</span><small>${esc(sub)}</small></button>`;
         }).join('')}
       </div>
       <p class="dest-tip" id="alloc-dest-tip">${esc(destTip(a.netuid))}</p>
@@ -2633,11 +2813,12 @@ async function lookupCk(raw, opts) {
     renderYouBook();
   }
   const enc = encodeURIComponent(ss58);
-  const [pos, bal, ev, ex] = await Promise.all([
+  const [pos, bal, ev, ex, onchain] = await Promise.all([
     fetchJson(API + '/accounts/' + enc + '/positions', 12000),
     fetchJson(API + '/accounts/' + enc + '/balance', 8000),
     fetchJson(API + '/accounts/' + enc + '/events?limit=80', 12000),
-    fetchJson(API + '/accounts/' + enc + '/extrinsics?limit=40', 12000)
+    fetchJson(API + '/accounts/' + enc + '/extrinsics?limit=40', 12000),
+    chainPositions(ss58)
   ]);
   if (gen !== lookupGen) return;
   const indexed = (pos && pos.data && pos.data.positions) || [];
@@ -2645,12 +2826,12 @@ async function lookupCk(raw, opts) {
   const extras = positionsFromActivity(
     ev && ev.data && ev.data.events,
     ex && ex.data && ex.data.extrinsics,
-    14
+    indexed.length ? 14 : 90
   );
   const pending = readPending(ss58);
-  const positions = mergeBookPositions(indexed, extras, pending);
-  if (!degraded) clearPendingIfListed(ss58, indexed.concat(extras));
-  if (!pos && !extras.length && !pending) {
+  const positions = mergeBookPositions(indexed, extras, pending, onchain);
+  if (!degraded) clearPendingIfListed(ss58, indexed.concat(extras, onchain || []));
+  if (!pos && onchain == null && !extras.length && !pending) {
     if (quiet && state.you && state.you.ss58 === ss58 && !state.you.error) {
       renderYouBook();
       return;
@@ -2663,7 +2844,8 @@ async function lookupCk(raw, opts) {
     ss58,
     positions,
     agg: aggregatePositions(positions),
-    balance: num(bal && bal.data && bal.data.balance_tao) || (state.you && state.you.balance) || 0
+    balance: num(bal && bal.data && bal.data.balance_tao) || (state.you && state.you.balance) || 0,
+    chain: onchain != null
   };
   renderYouBook();
 }
