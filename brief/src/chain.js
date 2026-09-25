@@ -207,8 +207,22 @@ function unstakeCall(apiInst, { hotkey, netuid, amountRao, limitPriceRao }) {
 async function signSend(address, tx, apiInst) {
   const injector = await web3FromAddress(address);
   if (apiInst && apiInst._briefHttp) {
-    const signed = await tx.signAsync(address, { signer: injector.signer });
-    const hash = await apiInst.rpc.author.submitExtrinsic(signed);
+    // Fresh nonce + immortal era. A stale HTTP nonce makes Nova sign one
+    // payload and us submit another — the node then says "bad signature".
+    let nonce;
+    try {
+      nonce = await apiInst.rpc.system.accountNextIndex(address);
+    } catch {
+      nonce = undefined;
+    }
+    const signed = await tx.signAsync(address, {
+      signer: injector.signer,
+      nonce,
+      era: 0,
+      withSignedTransaction: true
+    });
+    const raw = typeof signed === 'string' ? signed : (signed.toHex ? signed.toHex() : String(signed));
+    const hash = await apiInst.rpc.author.submitExtrinsic(raw);
     const hex = typeof hash === 'string' ? hash : (hash && hash.toHex ? hash.toHex() : String(hash));
     return { hash: hex, inBlock: true };
   }
