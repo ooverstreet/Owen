@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="House cleaning intake">
+  <rect width="128" height="128" rx="28" fill="#E8F0E4"/>
+  <path d="M22 62 L64 26 L106 62 V104 H80 V76 H48 V104 H22 Z" fill="#3F6B4E"/>
+  <rect x="56" y="80" width="16" height="24" rx="2" fill="#F7F3EA"/>
+  <circle cx="98" cy="30" r="5" fill="#C9A227"/>
+  <path d="M98 18 V24 M98 36 V42 M86 30 H92 M104 30 H110" stroke="#C9A227" stroke-width="3" stroke-linecap="round"/>
+  <path d="M28 34 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 z" fill="#7BAF88"/>
+</svg>

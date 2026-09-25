@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clean Intake">
+<meta name="theme-color" content="#3F6B4E">
+<meta name="description" content="Fill this out so we can build a house-cleaning scheduling app around how you actually work.">
+<title>House Cleaning App — Planner</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sage: #3F6B4E;
+  --sage-deep: #2C4A36;
+  --leaf: #7BAF88;
+  --cream: #F7F3EA;
+  --linen: #EFE8D8;
+  --paper: #FFFcf6;
+  --ink: #2C3329;
+  --mute: #5E6A5C;
+  --line: rgba(44, 51, 41, 0.12);
+  --gold: #C9A227;
+  --terra: #C4784A;
+  --ok: #2F7D4A;
+  --shadow: 0 16px 40px rgba(44, 74, 54, 0.10);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { min-height: 100%; background: var(--cream); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; }
+body { overflow-x: hidden; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+a { color: var(--sage); }
+
+.app { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(247, 243, 234, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 16px 10px;
+  padding-top: max(10px, var(--safe-t));
+  display: flex; align-items: center; gap: 10px;
+}
+.mark {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: var(--sage); display: grid; place-items: center;
+}
+.mark img { width: 36px; height: 36px; border-radius: 10px; }
+.brand { flex: 1; min-width: 0; }
+.brand h1 { font-family: Fraunces, serif; font-size: 16px; font-weight: 700; line-height: 1.2; }
+.brand p { font-size: 12px; color: var(--mute); }
+#save-pill {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--mute);
+  white-space: nowrap;
+}
+#save-pill.ok { color: var(--ok); border-color: rgba(47,125,74,.35); }
+
+.progress-wrap { height: 4px; background: var(--linen); }
+#progress { height: 100%; width: 0; background: var(--sage); transition: width .25s ease; }
+
+main { flex: 1; width: 100%; max-width: 760px; margin: 0 auto; padding: 18px 16px 140px; }
+
+.welcome { padding: 12px 0 8px; }
+.welcome h2 {
+  font-family: Fraunces, serif; font-size: 32px; font-weight: 700; line-height: 1.15;
+  letter-spacing: -.02em; margin-bottom: 12px;
+}
+.welcome p { color: var(--mute); font-size: 16px; line-height: 1.55; margin-bottom: 10px; }
+.note {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 14px 16px; margin: 16px 0 8px; box-shadow: var(--shadow);
+}
+.note strong { color: var(--sage-deep); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 16px; border-radius: 12px; font-weight: 700;
+  border: 1px solid var(--line); background: var(--paper);
+}
+.btn.primary { background: var(--sage); color: #fff; border-color: var(--sage); }
+.btn.ghost { background: transparent; }
+.btn:active { transform: scale(.98); }
+
+.toc { display: grid; gap: 8px; margin-top: 22px; }
+.toc-item {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; width: 100%;
+}
+.toc-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  background: var(--linen); color: var(--sage-deep);
+}
+.toc-item.done .toc-num { background: var(--sage); color: #fff; }
+.toc-item span { flex: 1; font-weight: 600; }
+.toc-item small { color: var(--mute); font-size: 12px; }
+
+.section { display: none; }
+.section.on { display: block; animation: in .22s ease; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.sec-kicker { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--sage); margin-bottom: 4px; }
+.sec-title { font-family: Fraunces, serif; font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.sec-blurb { color: var(--mute); margin-bottom: 20px; line-height: 1.5; }
+
+.field { margin-bottom: 20px; }
+.field label.q, .field .q { display: block; font-weight: 700; font-size: 15.5px; margin-bottom: 6px; }
+.hint { display: block; color: var(--mute); font-size: 13.5px; margin-bottom: 8px; line-height: 1.4; }
+input[type=text], input[type=tel], input[type=email], input[type=number], input[type=time], textarea, select {
+  width: 100%; background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; min-height: 46px; outline: none;
+}
+textarea { min-height: 110px; resize: vertical; line-height: 1.45; }
+input:focus, textarea:focus, select:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(63,107,78,.15); }
+
+.choices { display: flex; flex-direction: column; gap: 8px; }
+.choice {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+  padding: 11px 12px; cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--sage); background: #f3f8f3; }
+.choice input { margin-top: 3px; accent-color: var(--sage); width: 18px; height: 18px; flex-shrink: 0; }
+.choice span { line-height: 1.35; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1px solid var(--line); background: var(--paper); border-radius: 999px;
+  padding: 8px 12px; font-weight: 600; font-size: 14px;
+}
+.chip.on { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+.matrix { display: grid; gap: 8px; }
+.matrix-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px 8px 14px;
+}
+.matrix-row span { font-weight: 600; font-size: 14px; }
+.matrix-row select { min-height: 38px; width: auto; min-width: 128px; padding: 6px 10px; }
+
+.rank { display: grid; gap: 8px; }
+.rank-row {
+  display: grid; grid-template-columns: 1fr; gap: 6px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+}
+.rank-row strong { font-size: 14.5px; }
+.rank-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+.rank-opts label {
+  flex: 1; min-width: 72px; text-align: center; border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.rank-opts input { display: none; }
+.rank-opts label:has(input:checked) { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+.footer-nav {
+  position: sticky; bottom: 0; z-index: 20;
+  background: rgba(247, 243, 234, 0.96);
+  border-top: 1px solid var(--line);
+  padding: 10px 16px;
+  padding-bottom: max(12px, var(--safe-b));
+  display: flex; gap: 8px; justify-content: space-between; align-items: center;
+}
+.footer-nav .btn { flex: 1; }
+#screen-welcome .footer-nav { display: none; }
+
+.review {
+  display: block; width: 100%;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5;
+  min-height: 240px; max-height: 50vh; overflow: auto;
+  -webkit-user-select: text; user-select: text;
+}
+
+@media print {
+  .topbar, .footer-nav, .progress-wrap, .actions, #save-pill { display: none !important; }
+  .section { display: block !important; page-break-inside: avoid; }
+  main { padding: 0; max-width: none; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="mark"><img src="icon.svg" alt=""></div>
+    <div class="brand">
+      <h1>Cleaning app planner</h1>
+      <p>Answers stay on this phone until you export them</p>
+    </div>
+    <div id="save-pill">Saved</div>
+  </div>
+  <div class="progress-wrap"><div id="progress"></div></div>
+
+  <main>
+    <section class="section on" id="screen-welcome">
+      <div class="welcome">
+        <h2>Help us build your scheduling app.</h2>
+        <p>This is a planner for a house-cleaning appointment app — times, square footage, rooms, add-ons, and how you actually run your week.</p>
+        <p>Skip anything you are unsure about. Partial answers are still useful. You can leave and come back; this page remembers what you typed on this device.</p>
+        <div class="note">
+          <strong>Takes about 20–30 minutes.</strong> Do it in chunks if you want. When you finish, tap <em>Share answers</em> and send them in a text — you do not need another app to open a file.
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="goSection(0)">Start</button>
+          <button class="btn" onclick="printForm()">Print a paper copy</button>
+        </div>
+        <div class="toc" id="toc"></div>
+      </div>
+    </section>
+    <div id="sections"></div>
+  </main>
+
+  <div class="footer-nav" id="footer-nav">
+    <button class="btn ghost" id="btn-back" onclick="prevSection()">Back</button>
+    <button class="btn primary" id="btn-next" onclick="nextSection()">Next</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const STORE = 'clean-intake-v1';
+const ROOM_OPTIONS = [
+  ['always', 'Always included'],
+  ['addon', 'Add-on / extra'],
+  ['never', 'I do not offer this'],
+  ['sometimes', 'Depends on the job'],
+];
+
+const SECTIONS = [
+  {
+    id: 'you',
+    title: 'About you',
+    blurb: 'Just enough to name the app and know who it is for.',
+    fields: [
+      { id: 'her_name', type: 'text', label: 'Your name' },
+      { id: 'business_name', type: 'text', label: 'Business name', hint: 'If you do not have one yet, write “not yet” or a name you like.' },
+      { id: 'app_name', type: 'text', label: 'What should we call the app?', hint: 'Or write “surprise me.”' },
+      { id: 'years_cleaning', type: 'text', label: 'How long have you been cleaning houses?' },
+      { id: 'solo_or_help', type: 'radio', label: 'Do you work alone?', options: ['Always solo', 'Usually solo, sometimes a helper', 'I have a regular helper / small team', 'I want to grow a team later'] },
+      { id: 'one_sentence', type: 'textarea', label: 'In one or two sentences, what should this app do for you?', hint: 'Example: “Show my week, keep house notes, and stop me from double-booking.”' },
+    ]
+  },
+  {
+    id: 'today',
+    title: 'How you work today',
+    blurb: 'The messy current process is more useful than a perfect wish list.',
+    fields: [
+      { id: 'book_how', type: 'check', label: 'How do clients book you today?', options: ['Phone call', 'Text message', 'Facebook / Instagram message', 'Email', 'In person / word of mouth', 'Paper calendar or notebook', 'Google / Apple Calendar', 'Another app (name it below)'] },
+      { id: 'book_how_other', type: 'text', label: 'If you use another app or method, what is it?' },
+      { id: 'calendar_now', type: 'textarea', label: 'Where does your real schedule live right now?', hint: 'Phone calendar, paper, your head, a group text…' },
+      { id: 'biggest_annoyance', type: 'textarea', label: 'What is the most annoying part of scheduling right now?' },
+      { id: 'tried_apps', type: 'textarea', label: 'Have you tried Jobber, Housecall Pro, HoneyBook, Google Calendar, or anything else?', hint: 'What did you like or hate?' },
+      { id: 'close_call', type: 'textarea', label: 'Tell one mix-up or close call', hint: 'Double-booked, wrong address, forgot an add-on, client not home, etc.' },
+    ]
+  },
+  {
+    id: 'who',
+    title: 'Who uses the app',
+    blurb: 'This decides logins, privacy, and whether clients book themselves.',
+    fields: [
+      { id: 'who_uses', type: 'check', label: 'Who should be able to open this app?', options: ['Just me', 'My husband / family can see and edit', 'A helper can see their jobs', 'Clients can log in and book themselves'] },
+      { id: 'who_books', type: 'radio', label: 'Who should actually put jobs on the calendar?', options: ['Only me. Clients request, I accept.', 'Clients pick an open time themselves.', 'Either is fine; I want both.', 'I am not sure yet.'] },
+      { id: 'public_or_private', type: 'radio', label: 'Should this stay private?', options: ['Private — only people I invite', 'I also want a public booking page I can share', 'Not sure'] },
+    ]
+  },
+  {
+    id: 'week',
+    title: 'Your work week',
+    blurb: 'Hours, buffers, and how packed a day can get.',
+    fields: [
+      { id: 'work_days', type: 'check', label: 'Days you usually work', options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+      { id: 'earliest_start', type: 'time', label: 'Earliest you like to start a job' },
+      { id: 'latest_end', type: 'time', label: 'Latest you like to finish' },
+      { id: 'jobs_per_day', type: 'text', label: 'Typical number of jobs in a day?', hint: 'A range is fine, e.g. 1–3.' },
+      { id: 'buffer_minutes', type: 'text', label: 'How many minutes do you want between jobs?', hint: 'Drive time, reset, lunch. “It depends” is a valid answer.' },
+      { id: 'travel_in_slot', type: 'radio', label: 'Is drive time part of the appointment, or extra padding?', options: ['I pad extra time between jobs for driving', 'The appointment block includes drive time', 'I do not track drive time', 'Not sure'] },
+      { id: 'lunch', type: 'textarea', label: 'Do you want a blocked lunch / break every day?', hint: 'When, and is it flexible?' },
+      { id: 'same_day', type: 'radio', label: 'Do you take same-day jobs?', options: ['Yes, if I have a gap', 'Rarely', 'Never', 'Only for regulars'] },
+      { id: 'book_ahead', type: 'text', label: 'How far ahead can someone book?', hint: 'Same week, 2 weeks, a month, as far as they want…' },
+      { id: 'time_off', type: 'textarea', label: 'How do you block vacations, sick days, or personal appointments today?' },
+    ]
+  },
+  {
+    id: 'area',
+    title: 'Service area',
+    blurb: 'Where you will and will not drive.',
+    fields: [
+      { id: 'home_base', type: 'text', label: 'Home base (city / area)' },
+      { id: 'serve_where', type: 'textarea', label: 'Cities, neighborhoods, or towns you serve' },
+      { id: 'max_drive', type: 'text', label: 'Max drive time or miles you are willing to go' },
+      { id: 'outside_area', type: 'radio', label: 'Jobs outside your usual area?', options: ['No', 'Case by case', 'Yes, with an extra travel fee', 'Not sure'] },
+      { id: 'travel_fee', type: 'textarea', label: 'If you charge extra for distance, how do you decide the fee?' },
+    ]
+  },
+  {
+    id: 'house',
+    title: 'What you need about a house',
+    blurb: 'Square footage, access, pets, and anything else you ask before you say yes.',
+    fields: [
+      { id: 'house_fields', type: 'check', label: 'What do you want on file for each house?', options: [
+        'Full address', 'Gate / building / lockbox codes', 'Parking notes', 'Square footage',
+        'Bedrooms', 'Bathrooms', 'Number of stories', 'Occupied or vacant',
+        'Pets (type and where they go during the clean)', 'Kids or people at home',
+        'Last cleaned / how dirty it usually is', 'Photos of rooms',
+        'How I get in (client home, lockbox, hide-a-key, garage, smart lock)',
+        'Alarm instructions', 'Who provides supplies', 'Things I should not touch',
+        'Allergies / unscented / pet-safe products', 'Special surfaces (marble, hardwood, plants)'
+      ]},
+      { id: 'required_before_yes', type: 'textarea', label: 'Which of those are required before you accept a job?', hint: 'Example: “Address, beds/baths, and how I get in. Sq ft is nice but I can live without it.”' },
+      { id: 'sqft_how', type: 'radio', label: 'How do you usually get square footage?', options: ['Client tells me', 'I look it up (Zillow, etc.)', 'I estimate from beds/baths', 'I do not really use square footage', 'Other (explain below)'] },
+      { id: 'sqft_notes', type: 'textarea', label: 'Anything else about size or layout that changes the job?', hint: 'Open floor plan, lots of clutter, stairs, huge kitchen, etc.' },
+      { id: 'access_notes', type: 'textarea', label: 'Typical ways you get into a house, and what goes wrong' },
+    ]
+  },
+  {
+    id: 'rooms',
+    title: 'Rooms and extras',
+    blurb: 'Mark what is in a standard clean, what costs extra, and what you do not offer.',
+    fields: [
+      { id: 'packages', type: 'check', label: 'Job types you offer', options: ['Regular / maintenance clean', 'Deep clean', 'Move-in / move-out', 'Airbnb / short-term rental turnover', 'One-time / spring clean', 'Post-construction', 'Organization help', 'Other (describe below)'] },
+      { id: 'packages_other', type: 'text', label: 'Other job types' },
+      { id: 'standard_vs_deep', type: 'textarea', label: 'What is included in a standard clean vs a deep clean?', hint: 'Bullet list is perfect. If you already have a checklist, paste it or say you will text a photo of it.' },
+      { id: 'room_kitchen', type: 'matrix', label: 'Kitchen' },
+      { id: 'room_baths', type: 'matrix', label: 'Bathrooms' },
+      { id: 'room_beds', type: 'matrix', label: 'Bedrooms' },
+      { id: 'room_living', type: 'matrix', label: 'Living / family room' },
+      { id: 'room_dining', type: 'matrix', label: 'Dining room' },
+      { id: 'room_halls', type: 'matrix', label: 'Hallways, stairs, entry' },
+      { id: 'room_laundry', type: 'matrix', label: 'Laundry room' },
+      { id: 'room_office', type: 'matrix', label: 'Office' },
+      { id: 'room_basement', type: 'matrix', label: 'Basement' },
+      { id: 'room_garage', type: 'matrix', label: 'Garage' },
+      { id: 'room_patio', type: 'matrix', label: 'Patio / deck / porch' },
+      { id: 'room_windows_in', type: 'matrix', label: 'Interior windows' },
+      { id: 'room_windows_out', type: 'matrix', label: 'Exterior windows' },
+      { id: 'room_blinds', type: 'matrix', label: 'Blinds / shutters' },
+      { id: 'room_baseboards', type: 'matrix', label: 'Baseboards' },
+      { id: 'room_fans', type: 'matrix', label: 'Ceiling fans' },
+      { id: 'room_fridge', type: 'matrix', label: 'Inside the fridge' },
+      { id: 'room_oven', type: 'matrix', label: 'Inside the oven' },
+      { id: 'room_microwave', type: 'matrix', label: 'Inside the microwave' },
+      { id: 'room_cabinets', type: 'matrix', label: 'Inside cabinets / drawers' },
+      { id: 'room_dishes', type: 'matrix', label: 'Doing dishes' },
+      { id: 'room_laundry_wash', type: 'matrix', label: 'Wash / fold laundry' },
+      { id: 'room_beds_linens', type: 'matrix', label: 'Change linens / make beds' },
+      { id: 'room_trash', type: 'matrix', label: 'Take out trash' },
+      { id: 'room_walls', type: 'matrix', label: 'Walls / spot cleaning' },
+      { id: 'extras_notes', type: 'textarea', label: 'Any other rooms, add-ons, or “I never do this” items?' },
+    ]
+  },
+  {
+    id: 'time_price',
+    title: 'Time and pricing',
+    blurb: 'How you guess duration and what you charge. Approximate numbers are fine.',
+    fields: [
+      { id: 'estimate_how', type: 'check', label: 'How do you estimate how long a job will take?', options: ['Square footage', 'Bedrooms / bathrooms', 'Photos or a walkthrough', 'Fixed time slots (2 hr, 3 hr, 4 hr)', 'Gut feel after talking to the client', 'I always quote a range'] },
+      { id: 'typical_times', type: 'textarea', label: 'Typical times for common jobs', hint: 'Example: small apartment 2 hrs; 3 bed / 2 bath regular 3–4 hrs; move-out 6–8 hrs.' },
+      { id: 'price_how', type: 'radio', label: 'How do you price today?', options: ['Hourly', 'Flat rate per visit', 'By square footage', 'By beds / baths', 'Custom quote every time', 'Mix of the above'] },
+      { id: 'price_range', type: 'textarea', label: 'Typical prices or ranges', hint: 'You can keep this private — it stays on this device until you export. Skip if you prefer to tell us later.' },
+      { id: 'minimum', type: 'text', label: 'Minimum charge?' },
+      { id: 'recurring_discount', type: 'textarea', label: 'Do regulars get a different rate (weekly / biweekly / monthly)?' },
+      { id: 'deposit', type: 'textarea', label: 'Deposits: do you take one, how much, and when?' },
+      { id: 'when_pay', type: 'radio', label: 'When do clients usually pay?', options: ['Before the job', 'At the job', 'After the job', 'It varies'] },
+      { id: 'pay_how', type: 'check', label: 'How they pay', options: ['Cash', 'Venmo', 'Zelle', 'Cash App', 'Check', 'Card / Square / PayPal', 'Invoice', 'Other'] },
+      { id: 'app_payments', type: 'radio', label: 'Should the app take payments, or only track what they owe?', options: ['Track only — I collect money myself', 'I want clients to pay in the app', 'Invoices I can send, payment still outside the app', 'Not sure'] },
+      { id: 'extra_fees', type: 'textarea', label: 'Extra fees you sometimes charge', hint: 'Pets, heavy soil, last-minute, far drive, supplies, holidays…' },
+      { id: 'quotes', type: 'radio', label: 'Do you send a written quote before the first job?', options: ['Always', 'Sometimes', 'Rarely / I just tell them a number', 'I want the app to generate quotes'] },
+    ]
+  },
+  {
+    id: 'recurring',
+    title: 'Regulars, cancels, and changes',
+    blurb: 'Repeating clients are usually the heart of a cleaning calendar.',
+    fields: [
+      { id: 'frequencies', type: 'check', label: 'Repeat schedules you offer', options: ['Weekly', 'Every 2 weeks', 'Every 3 weeks', 'Monthly', 'Every 4 weeks', 'One-time only', 'Seasonal / as needed'] },
+      { id: 'skip_week', type: 'textarea', label: 'How do regulars skip a week or move a date (holidays, travel)?' },
+      { id: 'cancel_notice', type: 'text', label: 'How much notice do you want for a cancel?' },
+      { id: 'late_cancel', type: 'textarea', label: 'Late cancel or no-show: what happens?', hint: 'Fee, they lose the slot, you still charge a portion…' },
+      { id: 'reschedule', type: 'textarea', label: 'How do you reschedule today, and what would you rather the app do?' },
+      { id: 'waitlist', type: 'radio', label: 'If a slot opens, do you want a waitlist or “offer this time to someone”?', options: ['Yes, that would help', 'No, I fill gaps myself', 'Not sure'] },
+    ]
+  },
+  {
+    id: 'talk',
+    title: 'Talking with clients',
+    blurb: 'Calls, texts, reminders — and what the app should send vs what you send.',
+    fields: [
+      { id: 'how_found', type: 'check', label: 'How do new clients usually find you?', options: ['Friends / family', 'Facebook / Instagram', 'Nextdoor', 'Google', 'Flyers / cards', 'Repeat clients referring', 'Other'] },
+      { id: 'prefer_contact', type: 'radio', label: 'How do you prefer clients contact you?', options: ['Text', 'Call', 'Facebook / Instagram', 'Email', 'Any of those is fine'] },
+      { id: 'reminders', type: 'check', label: 'Reminders you want', options: ['Confirm when a job is booked', 'Text me the night before with tomorrow’s list', 'Text the client the day before', 'Text the client the morning of', 'Thank-you after the job', 'None — I will handle messages myself'] },
+      { id: 'client_login', type: 'radio', label: 'Should clients have their own login?', options: ['No. This app is for me.', 'A simple booking link is enough, no account', 'Yes, clients should have accounts', 'Not sure'] },
+      { id: 'client_fields', type: 'check', label: 'Client info to store', options: ['Name', 'Mobile number', 'Email', 'Preferred contact', 'Billing name if different', 'Notes / personality / “loves extra bathroom time”'] },
+    ]
+  },
+  {
+    id: 'dayof',
+    title: 'Day of the job',
+    blurb: 'What you want on screen when you are standing in the driveway.',
+    fields: [
+      { id: 'on_screen', type: 'check', label: 'What should be easy to see at the house?', options: ['Address and map / directions', 'Gate and door codes', 'Who will be home', 'Pets', 'Checklist', 'Add-ons for this visit', 'Notes from last time', 'Timer / clock in', 'Client phone number', 'Photos'] },
+      { id: 'checklist_want', type: 'radio', label: 'Do you want a tap-through checklist during the clean?', options: ['Yes, I would use it', 'A simple list I can glance at', 'No, I do not want to tap a phone while I work'] },
+      { id: 'photos', type: 'radio', label: 'Before / after photos?', options: ['For my records only', 'To send the client', 'Both', 'I do not take photos'] },
+      { id: 'next_time_notes', type: 'textarea', label: 'What kinds of “next visit” notes do you already keep?', hint: 'Example: “Hall bath — no bleach. Dog in crate. Client likes extra kitchen.”' },
+      { id: 'supplies', type: 'textarea', label: 'Do you want the app to track supplies, or is that overkill?' },
+      { id: 'clock', type: 'radio', label: 'Clock in / clock out for your own time tracking?', options: ['Yes', 'Nice but not needed', 'No'] },
+    ]
+  },
+  {
+    id: 'look',
+    title: 'Look, calendar, and phone',
+    blurb: 'How it should feel, and which screens you will live on.',
+    fields: [
+      { id: 'vibe', type: 'radio', label: 'The feel of the app', options: ['Calm and cozy', 'Clean and simple / no fuss', 'Bright and cheerful', 'Professional / businesslike', 'Surprise me'] },
+      { id: 'colors', type: 'text', label: 'Colors you like (or hate)', hint: 'Sage, cream, your logo colors, “no pink,” etc.' },
+      { id: 'calendar_view', type: 'check', label: 'Calendar views you want', options: ['Day', 'Week', 'Month', 'A simple list of upcoming jobs'] },
+      { id: 'color_code', type: 'radio', label: 'Color-code jobs by…', options: ['Client', 'Job type (regular vs deep)', 'Paid vs unpaid', 'I do not care'] },
+      { id: 'cal_sync', type: 'radio', label: 'Sync with Google or Apple Calendar?', options: ['Yes, please', 'No, keep it only in this app', 'Not sure'] },
+      { id: 'device', type: 'check', label: 'Where will you use it?', options: ['iPhone', 'Android phone', 'iPad / tablet', 'Computer at home'] },
+      { id: 'logo', type: 'textarea', label: 'Do you have a logo, van wrap, shirts, or a color scheme already?', hint: 'If yes, text photos of them separately. Describe here so we know to expect them.' },
+    ]
+  },
+  {
+    id: 'features',
+    title: 'Must-have vs later',
+    blurb: 'Be honest. A small app that fits your week is better than a giant one you will not open.',
+    fields: [
+      { id: 'rank_calendar', type: 'rank', label: 'A calendar of my jobs' },
+      { id: 'rank_house_notes', type: 'rank', label: 'House details (sq ft, codes, pets, rooms)' },
+      { id: 'rank_client_book', type: 'rank', label: 'Clients book themselves online' },
+      { id: 'rank_recurring', type: 'rank', label: 'Repeating weekly / biweekly jobs' },
+      { id: 'rank_quotes', type: 'rank', label: 'Quotes' },
+      { id: 'rank_invoices', type: 'rank', label: 'Invoices / payment tracking' },
+      { id: 'rank_sms', type: 'rank', label: 'Automatic text reminders' },
+      { id: 'rank_checklist', type: 'rank', label: 'Cleaning checklists' },
+      { id: 'rank_photos', type: 'rank', label: 'Photo storage for a house' },
+      { id: 'rank_maps', type: 'rank', label: 'Maps / directions' },
+      { id: 'rank_mileage', type: 'rank', label: 'Mileage / travel tracking' },
+      { id: 'rank_income', type: 'rank', label: 'Income / what I made this month' },
+      { id: 'rank_team', type: 'rank', label: 'Helper / employee schedules' },
+      { id: 'rank_supplies', type: 'rank', label: 'Supplies inventory' },
+      { id: 'first_version', type: 'textarea', label: 'If the first version could only do three things, what would they be?' },
+    ]
+  },
+  {
+    id: 'stories',
+    title: 'Walk through real jobs',
+    blurb: 'Stories beat checkboxes. A few real examples will shape the app more than anything else.',
+    fields: [
+      { id: 'story_last', type: 'textarea', label: 'The last job you did', hint: 'How it got booked, the house (size, rooms, extras), how long it took, what you charged, anything special.' },
+      { id: 'story_regular', type: 'textarea', label: 'One regular client', hint: 'How often, how you remember their quirks, how they pay, how they cancel.' },
+      { id: 'story_hard', type: 'textarea', label: 'A hard or unusual job', hint: 'Huge house, first-time deep clean, pet accident, client home the whole time…' },
+      { id: 'dream_morning', type: 'textarea', label: 'Your dream morning with this app', hint: 'What do you open first? What should it tell you before you leave the house?' },
+    ]
+  },
+  {
+    id: 'privacy',
+    title: 'Privacy and anything else',
+    blurb: 'Addresses, door codes, and photos of people’s homes are sensitive. Tell us how careful to be.',
+    fields: [
+      { id: 'lock_app', type: 'radio', label: 'Should the app ask for a PIN or login before showing addresses and codes?', options: ['Yes, definitely', 'Nice to have', 'Not needed if it is only on my phone'] },
+      { id: 'who_sees_codes', type: 'textarea', label: 'Who is allowed to see gate codes and notes?' },
+      { id: 'photos_keep', type: 'radio', label: 'Where should house photos live?', options: ['Only on my phone', 'Backed up privately in the app', 'I do not want photos in the app'] },
+      { id: 'anything_else', type: 'textarea', label: 'Anything else we should know?', hint: 'Nicknames for the app, a feature you saw somewhere, something you never want, a photo you will send…' },
+      { id: 'will_send', type: 'check', label: 'I will separately send (text/email)…', options: ['A photo of my current calendar', 'My current checklist or price list', 'Logo / brand photos', 'A screenshot of how I book now', 'Nothing extra'] },
+    ]
+  },
+  {
+    id: 'send',
+    title: 'Send your answers',
+    blurb: 'Send these to your husband. You can still go back and edit.',
+    fields: []
+  }
+];
+
+const RANK_OPTS = [
+  ['must', 'Must have'],
+  ['nice', 'Nice later'],
+  ['skip', 'Skip'],
+];
+
+let answers = {};
+let current = -1; // -1 = welcome
+
+function load() {
+  try { answers = JSON.parse(localStorage.getItem(STORE) || '{}'); } catch { answers = {}; }
+}
+
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(answers));
+  const pill = document.getElementById('save-pill');
+  pill.textContent = 'Saved';
+  pill.classList.add('ok');
+  updateProgress();
+}
+
+function fieldValue(id) {
+  const v = answers[id];
+  if (v == null || v === '') return '';
+  if (Array.isArray(v)) return v.join(', ');
+  return String(v);
+}
+
+function isFilled(id) {
+  const v = answers[id];
+  if (v == null || v === '') return false;
+  if (Array.isArray(v)) return v.length > 0;
+  return true;
+}
+
+function updateProgress() {
+  const ids = SECTIONS.flatMap(s => s.fields.map(f => f.id));
+  const filled = ids.filter(isFilled).length;
+  const pct = ids.length ? Math.round((filled / ids.length) * 100) : 0;
+  document.getElementById('progress').style.width = pct + '%';
+  renderToc();
+}
+
+function renderToc() {
+  const toc = document.getElementById('toc');
+  toc.innerHTML = SECTIONS.map((s, i) => {
+    const total = s.fields.length;
+    const done = s.fields.filter(f => isFilled(f.id)).length;
+    const complete = total === 0 ? false : done > 0;
+    return `<button class="toc-item ${complete ? 'done' : ''}" onclick="goSection(${i})">
+      <div class="toc-num">${i + 1}</div>
+      <span>${s.title}</span>
+      <small>${total ? done + '/' + total : 'Export'}</small>
+    </button>`;
+  }).join('');
+}
+
+function renderChoice(f, type) {
+  const selected = type === 'check' ? (answers[f.id] || []) : (answers[f.id] || '');
+  return `<div class="choices">${f.options.map(opt => {
+    const on = type === 'check' ? selected.includes(opt) : selected === opt;
+    return `<label class="choice"><input type="${type === 'check' ? 'checkbox' : 'radio'}" name="${f.id}" value="${escapeAttr(opt)}" ${on ? 'checked' : ''} onchange="onChoice('${f.id}','${type}',this)"><span>${escapeHtml(opt)}</span></label>`;
+  }).join('')}</div>`;
+}
+
+function renderField(f) {
+  const v = answers[f.id] ?? '';
+  const hint = f.hint ? `<span class="hint">${escapeHtml(f.hint)}</span>` : '';
+  let body = '';
+  if (f.type === 'text' || f.type === 'tel' || f.type === 'email' || f.type === 'number' || f.type === 'time') {
+    body = `<input type="${f.type}" id="${f.id}" value="${escapeAttr(v)}" oninput="onText('${f.id}', this.value)">`;
+  } else if (f.type === 'textarea') {
+    body = `<textarea id="${f.id}" oninput="onText('${f.id}', this.value)">${escapeHtml(v)}</textarea>`;
+  } else if (f.type === 'check' || f.type === 'radio') {
+    body = renderChoice(f, f.type);
+  } else if (f.type === 'matrix') {
+    const cur = v || '';
+    body = `<div class="matrix"><div class="matrix-row"><span>${escapeHtml(f.label)}</span>
+      <select onchange="onText('${f.id}', this.value)">
+        <option value="">Choose…</option>
+        ${ROOM_OPTIONS.map(([k, lab]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${lab}</option>`).join('')}
+      </select></div></div>`;
+    return `<div class="field">${hint}${body}</div>`;
+  } else if (f.type === 'rank') {
+    body = `<div class="rank"><div class="rank-row"><strong>${escapeHtml(f.label)}</strong>
+      <div class="rank-opts">${RANK_OPTS.map(([k, lab]) => `<label><input type="radio" name="${f.id}" value="${k}" ${v === k ? 'checked' : ''} onchange="onText('${f.id}', this.value)"><span>${lab}</span></label>`).join('')}</div></div></div>`;
+    return `<div class="field">${body}</div>`;
+  }
+  return `<div class="field"><label class="q" for="${f.id}">${escapeHtml(f.label)}</label>${hint}${body}</div>`;
+}
+
+function renderSections() {
+  const root = document.getElementById('sections');
+  root.innerHTML = SECTIONS.map((s, i) => {
+    const extra = s.id === 'send' ? sendPanel() : s.fields.map(renderField).join('');
+    return `<section class="section" id="sec-${s.id}">
+      <div class="sec-kicker">Section ${i + 1} of ${SECTIONS.length}</div>
+      <h2 class="sec-title">${escapeHtml(s.title)}</h2>
+      <p class="sec-blurb">${escapeHtml(s.blurb)}</p>
+      ${extra}
+    </section>`;
+  }).join('');
+}
+
+function sendPanel() {
+  return `
+    <div class="note"><strong>On iPhone:</strong> tap <em>Share answers</em>, then Messages. If that screen says it cannot open a file, use Share (not Download). You can also tap the box below, Select All, and Copy.</div>
+    <div class="actions">
+      <button class="btn primary" onclick="shareAnswers()">Share answers</button>
+      <button class="btn" onclick="copyAnswers()">Copy</button>
+      <button class="btn" onclick="downloadAnswers('txt')">Save as text</button>
+      <button class="btn" onclick="printForm()">Print</button>
+    </div>
+    <p class="hint" id="copy-status" style="margin:12px 0"></p>
+    <textarea class="review" id="review" readonly>${escapeHtml(toMarkdown())}</textarea>
+  `;
+}
+
+function onText(id, value) {
+  answers[id] = value;
+  save();
+}
+
+function onChoice(id, type, el) {
+  if (type === 'check') {
+    const set = new Set(answers[id] || []);
+    if (el.checked) set.add(el.value); else set.delete(el.value);
+    answers[id] = [...set];
+  } else {
+    answers[id] = el.value;
+  }
+  save();
+}
+
+function showScreen() {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('on'));
+  const welcome = document.getElementById('screen-welcome');
+  const footer = document.getElementById('footer-nav');
+  if (current < 0) {
+    welcome.classList.add('on');
+    footer.style.display = 'none';
+    return;
+  }
+  welcome.classList.remove('on');
+  footer.style.display = 'flex';
+  const s = SECTIONS[current];
+  document.getElementById('sec-' + s.id).classList.add('on');
+  document.getElementById('btn-back').textContent = current === 0 ? 'Home' : 'Back';
+  document.getElementById('btn-next').textContent = current === SECTIONS.length - 1 ? 'Home' : 'Next';
+  if (s.id === 'send') {
+    const review = document.getElementById('review');
+    if (review) review.value = toMarkdown();
+  }
+  window.scrollTo(0, 0);
+}
+
+function goSection(i) {
+  current = i;
+  showScreen();
+}
+function nextSection() {
+  if (current >= SECTIONS.length - 1) { current = -1; showScreen(); return; }
+  current += 1;
+  showScreen();
+}
+function prevSection() {
+  current -= 1;
+  showScreen();
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s).replace(/\n/g, ' '); }
+
+function labelFor(id) {
+  for (const s of SECTIONS) {
+    const f = s.fields.find(x => x.id === id);
+    if (f) return f.label;
+  }
+  return id;
+}
+
+function pretty(id, value) {
+  if (value == null || value === '') return '';
+  if (Array.isArray(value)) return value.join(', ');
+  const map = Object.fromEntries(ROOM_OPTIONS);
+  const rank = Object.fromEntries(RANK_OPTS);
+  if (map[value]) return map[value];
+  if (rank[value]) return rank[value];
+  return String(value);
+}
+
+function toMarkdown() {
+  const lines = [
+    '# House cleaning app — intake answers',
+    '',
+    `_Exported ${new Date().toLocaleString()}_`,
+    '',
+  ];
+  for (const s of SECTIONS) {
+    if (!s.fields.length) continue;
+    lines.push(`## ${s.title}`, '');
+    let any = false;
+    for (const f of s.fields) {
+      const val = pretty(f.id, answers[f.id]);
+      if (!val) continue;
+      any = true;
+      lines.push(`**${f.label}**`);
+      lines.push(val);
+      lines.push('');
+    }
+    if (!any) lines.push('_No answers in this section yet._', '');
+  }
+  return lines.join('\n');
+}
+
+function toJSON() {
+  return JSON.stringify({ exportedAt: new Date().toISOString(), answers }, null, 2);
+}
+
+async function copyAnswers() {
+  const text = toMarkdown();
+  const status = document.getElementById('copy-status');
+  try {
+    await navigator.clipboard.writeText(text);
+    if (status) status.textContent = 'Copied. Paste into a text or email.';
+    return;
+  } catch { /* fall through */ }
+  if (copyFallback(text)) {
+    if (status) status.textContent = 'Copied. Paste into a text or email.';
+    return;
+  }
+  if (status) status.textContent = 'Copy did not work. Tap the answers box, Select All, then Copy.';
+}
+
+function copyFallback(text) {
+  const el = document.getElementById('review');
+  if (el && typeof el.select === 'function') {
+    el.focus();
+    el.select();
+    try { return document.execCommand('copy'); } catch { /* ignore */ }
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  ta.remove();
+  return ok;
+}
+
+async function shareAnswers() {
+  const text = toMarkdown();
+  const status = document.getElementById('copy-status');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Cleaning app answers', text });
+      if (status) status.textContent = 'Share sheet opened. Choose Messages or Mail.';
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+  await copyAnswers();
+  if (status && !status.textContent) {
+    status.textContent = 'Share is not available here. Answers were copied — paste them into a text.';
+  }
+}
+
+function downloadAnswers(kind) {
+  const asJson = kind === 'json';
+  const body = asJson ? toJSON() : toMarkdown();
+  const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = asJson ? 'cleaning-app-answers.json' : 'cleaning-app-answers.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  const status = document.getElementById('copy-status');
+  if (status) status.textContent = 'If the phone says it cannot open the file, go Back and tap Share answers instead.';
+}
+
+function printForm() {
+  document.querySelectorAll('.section').forEach(el => el.classList.add('on'));
+  window.print();
+  showScreen();
+}
+
+load();
+renderSections();
+renderToc();
+updateProgress();
+showScreen();
+
+if ('serviceWorker' in navigator) {
+  const base = location.pathname.replace(/\/[^/]*$/, '/');
+  navigator.serviceWorker.register(base + 'sw.js', { scope: base }).catch(() => {});
+}
+</script>
+</body>
+</html>
