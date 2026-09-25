@@ -1,0 +1,21 @@
+{
+  "id": "/campus-safety/",
+  "name": "Beacon — Campus Safety Alerts",
+  "short_name": "Beacon",
+  "description": "Official campus tip reporting and parent safety alerts for schools, staff, and authorities.",
+  "start_url": "/campus-safety/",
+  "scope": "/campus-safety/",
+  "display": "standalone",
+  "background_color": "#0B3D3A",
+  "theme_color": "#0B3D3A",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/campus-safety/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
