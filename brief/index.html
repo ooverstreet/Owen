@@ -1305,6 +1305,7 @@ function setTab(tab, keepHash, opts) {
 function offerWallet() {
   renderConnect();
   if (state.wallet) {
+    closeSheet();
     const bar = $('wallet-status');
     if (bar) {
       bar.classList.add('flash');
@@ -1316,6 +1317,10 @@ function offerWallet() {
 }
 
 function openConnectSheet() {
+  if (state.wallet) {
+    closeSheet();
+    return;
+  }
   const el = $('sheet');
   if (!el) return;
   el.hidden = false;
@@ -2770,6 +2775,8 @@ async function useWalletAccount(acct) {
   }
   state.wallet = pick;
   $('ck').value = pick.address;
+  stopConnectWait();
+  closeSheet();
   renderConnect();
   await lookupCk(pick.address);
   await Promise.all([
@@ -2831,7 +2838,8 @@ function stopConnectWait() {
 async function onConnect() {
   const hint = $('ck-connect-hint');
   const status = $('sheet-status');
-  if (state.wallet && state.accounts.length <= 1) {
+  if (state.wallet) {
+    stopConnectWait();
     closeSheet();
     renderConnect();
     return;
