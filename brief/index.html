@@ -2682,7 +2682,7 @@ async function signExtra(kind, extra) {
     const nice = /reject|cancel|denied/i.test(msg)
       ? 'Cancelled in the wallet. Nothing was sent.'
       : /bad signature|1010|Invalid Transaction/i.test(msg)
-        ? 'Nova signed, but this phone sent the extra with a stale ticket. Wait a minute, tap Refresh · live. If the row is gone, it already worked. If it is still there, tap Unstake once more — do not double-tap.'
+        ? 'Nova already approved. This phone then re-sent the extra and the node said no. Tap Not now, then Refresh · live. If the shop shows the new amount, it worked. If not, wait a minute and tap the gold button once — do not double-tap. Shop unstakes take a few days to become free TAO.'
         : /RPC timeout|timed out|taking too long|public chain nodes/i.test(msg)
         ? 'Could not reach a public chain node. Your TAO did not move. Wait a minute, then tap Stake once more. Stay in Nova → Browser.'
         : msg;

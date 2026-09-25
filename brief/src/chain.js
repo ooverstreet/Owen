@@ -11,8 +11,9 @@ const WSS = [
 ];
 const HTTPS = [
   'https://bittensor-finney.api.onfinality.io/public',
-  'https://lite.chain.opentensor.ai',
-  'https://entrypoint-finney.opentensor.ai:443'
+  'https://lite.sub.latent.to',
+  'https://entrypoint-finney.opentensor.ai:443',
+  'https://lite.chain.opentensor.ai'
 ];
 const CONNECT_MS = 30000;
 const REQUEST_MS = 30000;
@@ -204,11 +205,41 @@ function unstakeCall(apiInst, { hotkey, netuid, amountRao, limitPriceRao }) {
   return m.removeStake(hotkey, netuid, amountRao);
 }
 
+function alreadyIn(err) {
+  return /1010|bad signature|already imported|duplicate|Usurped|TemporarilyBanned/i.test(String(err && err.message || err || ''));
+}
+
+async function submitRaw(apiInst, raw) {
+  const hash = await apiInst.rpc.author.submitExtrinsic(raw);
+  return typeof hash === 'string' ? hash : (hash && hash.toHex ? hash.toHex() : String(hash));
+}
+
+async function submitRawHttp(raw) {
+  const body = JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'author_submitExtrinsic', params: [raw] });
+  for (const url of HTTPS) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body,
+        cache: 'no-store'
+      });
+      const js = await res.json();
+      if (js && js.result) return js.result;
+      if (js && js.error && alreadyIn(js.error.message || '')) return 'in';
+    } catch {
+    }
+  }
+  return null;
+}
+
 async function signSend(address, tx, apiInst) {
   const injector = await web3FromAddress(address);
   if (apiInst && apiInst._briefHttp) {
     // Fresh nonce + immortal era. A stale HTTP nonce makes Nova sign one
     // payload and us submit another — the node then says "bad signature".
+    // Nova often broadcasts on approve; if our resubmit 1010s, the extra
+    // may already be in.
     let nonce;
     try {
       nonce = await apiInst.rpc.system.accountNextIndex(address);
@@ -222,9 +253,16 @@ async function signSend(address, tx, apiInst) {
       withSignedTransaction: true
     });
     const raw = typeof signed === 'string' ? signed : (signed.toHex ? signed.toHex() : String(signed));
-    const hash = await apiInst.rpc.author.submitExtrinsic(raw);
-    const hex = typeof hash === 'string' ? hash : (hash && hash.toHex ? hash.toHex() : String(hash));
-    return { hash: hex, inBlock: true };
+    const signedHash = signed && signed.hash && signed.hash.toHex ? signed.hash.toHex() : '';
+    try {
+      const hex = await submitRaw(apiInst, raw);
+      return { hash: hex, inBlock: true };
+    } catch (e) {
+      if (alreadyIn(e)) return { hash: signedHash || 'signed', inBlock: true };
+      const extra = await submitRawHttp(raw);
+      if (extra) return { hash: extra === 'in' ? (signedHash || 'signed') : extra, inBlock: true };
+      throw e;
+    }
   }
   return new Promise((resolve, reject) => {
     let unsub = null;
