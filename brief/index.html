@@ -30,9 +30,9 @@
 <meta name="twitter:image" content="https://subnetbriefs.com/og.png">
 <meta name="twitter:image:alt" content="Subnet Brief — Stake TAO in plain English">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=51">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=51">
-<link rel="icon" href="icon.svg?v=51">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=52">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=52">
+<link rel="icon" href="icon.svg?v=52">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@380;460;560;700&display=swap" rel="stylesheet">
@@ -661,7 +661,7 @@ nav.tabs {
 <div class="app">
   <div class="topbar">
   <header>
-    <img class="mark" src="icon-192.png?v=51" width="40" height="40" alt="Brief">
+    <img class="mark" src="icon-192.png?v=52" width="40" height="40" alt="Brief">
     <div class="brand">
       <h1>SUBNET BRIEF</h1>
       <p id="subhead">Stake TAO in plain English</p>
@@ -1856,6 +1856,7 @@ function positionsFromActivity(events, extrinsics, days) {
 
 const RPC_HTTPS = [
   'https://lite.chain.opentensor.ai',
+  'https://lite.sub.latent.to',
   'https://entrypoint-finney.opentensor.ai:443',
   'https://bittensor-finney.api.onfinality.io/public'
 ];
@@ -1940,25 +1941,33 @@ function decodeStakeInfos(hex) {
 
 async function rpcCall(method, params, ms) {
   const body = JSON.stringify({ id: 1, jsonrpc: '2.0', method, params });
-  for (const url of RPC_HTTPS) {
+  const tryUrl = async url => {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), ms || 8000);
+    const t = setTimeout(() => ctrl.abort(), ms || 10000);
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body,
-        signal: ctrl.signal
+        signal: ctrl.signal,
+        cache: 'no-store'
       });
-      if (!res.ok) continue;
+      if (!res.ok) return null;
       const js = await res.json();
-      if (js && js.result) return js.result;
+      return js && js.result ? js.result : null;
     } catch {
+      return null;
     } finally {
       clearTimeout(t);
     }
+  };
+  try {
+    return await Promise.any(RPC_HTTPS.map(url =>
+      tryUrl(url).then(r => { if (!r) throw new Error('empty'); return r; })
+    ));
+  } catch {
+    return null;
   }
-  return null;
 }
 
 function catalogAlphaPx(netuid) {
@@ -1986,11 +1995,11 @@ async function chainPositions(ss58) {
   const raw = await rpcCall('state_call', ['StakeInfoRuntimeApi_get_stake_info_for_coldkey', hex0x(pub)], 10000);
   if (!raw) return null;
   const decoded = decodeStakeInfos(raw);
-  const need = [...new Set(decoded.filter(p => p.netuid !== 0 && catalogAlphaPx(p.netuid) == null).map(p => p.netuid))];
+  const need = [...new Set(decoded.filter(p => p.netuid !== 0).map(p => p.netuid))];
   const fetched = {};
   await Promise.all(need.map(async id => { fetched[id] = await chainAlphaPrice(id); }));
   return decoded.map(p => {
-    const px = p.netuid === 0 ? 1 : (catalogAlphaPx(p.netuid) ?? fetched[p.netuid]);
+    const px = p.netuid === 0 ? 1 : (fetched[p.netuid] ?? catalogAlphaPx(p.netuid));
     const alpha = p.stake_rao / 1e9;
     return {
       hotkey: p.hotkey,
@@ -1999,6 +2008,19 @@ async function chainPositions(ss58) {
       onchain: true
     };
   }).filter(p => p.stake_tao > 0.0005);
+}
+
+function dropGhostRoot(rows) {
+  const list = rows || [];
+  const shops = list.filter(p => Number(p.netuid) !== 0);
+  const root = list.find(p => Number(p.netuid) === 0);
+  if (!root || !shops.length) return list;
+  const a = num(root.stake_tao) || 0;
+  const twin = shops.some(s => {
+    const b = num(s.stake_tao) || 0;
+    return a && b && Math.abs(a - b) / Math.max(a, b) < 0.25;
+  });
+  return twin ? shops : list;
 }
 
 function mergeBookPositions(indexed, extras, pending, onchain) {
@@ -2013,14 +2035,16 @@ function mergeBookPositions(indexed, extras, pending, onchain) {
     have.add(id);
     out.push(p);
   };
-  // Live chain wins. The public positions snapshot can sit for hours, so using
-  // it first made Refresh look cached after a stake or unstake.
-  if (onchain && onchain.length) {
+  const reachedChain = onchain != null;
+  // A successful chain read — even an empty one — is the book. The public
+  // snapshot can sit for hours, and a shop extra often lists a twin Root row.
+  if (reachedChain) {
     for (const p of onchain) add(p);
   } else {
     for (const p of indexed || []) add(p);
-    for (const p of onchain || []) add(p);
-    for (const p of extras || []) add(p);
+    if (!(indexed && indexed.length)) {
+      for (const p of extras || []) add(p);
+    }
   }
   if (pending) {
     add({
@@ -2030,7 +2054,7 @@ function mergeBookPositions(indexed, extras, pending, onchain) {
       pending: true
     });
   }
-  return out;
+  return reachedChain ? out : dropGhostRoot(out);
 }
 
 function bookHave(y, netuid) {
@@ -2093,7 +2117,7 @@ function renderYouBook() {
     const notch = parkRow ? parkNotch(y.ss58, parkRow.tao, parkPending) : null;
     el.innerHTML = `
     <div class="sleeve">
-      <div class="book-head"><h3>Your book</h3><button type="button" data-refresh-book>Refresh</button></div>
+      <div class="book-head"><h3>Your book</h3><button type="button" data-refresh-book>${y.chain ? 'Refresh · live' : 'Refresh · snapshot'}</button></div>
       <div class="meta" style="margin:8px 0 4px">
         <span><b>${fmtTao(free, 2)}</b> free</span>
         <span><b>${fmtTao(total, 2)}</b> staked</span>
