@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-09-29T14:45:21Z",
+  "source": "https://taodaily.io/feed/",
+  "items": [
+    {
+      "when": "Sep 29",
+      "title": "TPN’s Private Benchmark Tests Models Without Prior Access to Questions",
+      "body": "TPN’s fluid_knowledge is a private AI benchmark that tests models on unseen questions, helping measure genuine knowledge without giving models access to the…",
+      "href": "https://taodaily.io/tpns-private-benchmark-tests-models-without-prior-access-to-questions/",
+      "sn": null
+    },
+    {
+      "when": "Sep 29",
+      "title": "Const’s Keynote at Exploit Summit: Harness the Exploit, Build a Mind Outside the State",
+      "body": "Const’s Exploit Summit keynote reveals Bittensor’s vision for incentive computing, decentralized frontier AI, and an open intelligence network designed to…",
+      "href": "https://taodaily.io/consts-keynote-at-exploit-summit-harness-the-exploit-build-a-mind-outside-the-state/",
+      "sn": null
+    },
+    {
+      "when": "Sep 29",
+      "title": "Cathedral Explained: The Execution Layer for Reinforcement Learning on Bittensor",
+      "body": "Cathedral is building CPU sandbox infrastructure for reinforcement learning, AI agents, and evaluation on Bittensor SN94. Here’s how it works and why it…",
+      "href": "https://taodaily.io/cathedral-explained-the-execution-layer-for-reinforcement-learning-on-bittensor/",
+      "sn": 94
+    },
+    {
+      "when": "Sep 28",
+      "title": "Gamma Tokens Could Turn Subnets Into Customers of Each Other",
+      "body": "Const introduced Gamma tokens as a new usage-credit layer that could let subnets buy compute, inference and other services from one another.",
+      "href": "https://taodaily.io/gamma-tokens-could-turn-subnets-into-customers-of-each-other/",
+      "sn": null
+    },
+    {
+      "when": "Sep 28",
+      "title": "Max Sebti: From a Near-Death Experience to Building Score on Bittensor",
+      "body": "A near-death experience changed how Max Sebti sees time, people, and the kind of work worth building. That perspective now runs through his approach to…",
+      "href": "https://taodaily.io/max-sebti-from-a-near-death-experience-to-building-score-on-bittensor/",
+      "sn": null
+    },
+    {
+      "when": "Sep 28",
+      "title": "How CookingTAO (SN122) Is Simplifying Subnet Mining Across Bittensor",
+      "body": "CookingTAO (SN122) opens Bittensor mining with a 30% incentive burn, set to fall to 0% as more developers submit miner code to the platform.",
+      "href": "https://taodaily.io/how-cookingtao-sn122-is-simplifying-subnet-mining-across-bittensor/",
+      "sn": 122
+    }
+  ]
+}
