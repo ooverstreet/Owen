@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh https://api.rss2json.com wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
 <meta name="description" content="Learn to stake TAO in plain English. Park it, or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Stake TAO in plain English</title>
@@ -182,8 +182,14 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 }
 .news-item + .news-item { border-top:1px solid var(--line); }
 .news-item time { display:block; font-size:11px; color:var(--faint); margin-bottom:2px; }
-.news-item b { display:block; font-size:13.5px; font-weight:560; color:var(--ink); line-height:1.35; }
-.news-item span { display:block; margin-top:3px; font-size:12.5px; color:var(--mute); line-height:1.45; }
+.news-item b {
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; font-size:13.5px; font-weight:560; color:var(--ink); line-height:1.35;
+}
+.news-item span {
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; margin-top:3px; font-size:12.5px; color:var(--mute); line-height:1.45;
+}
 .news-note { margin:8px 0 0; font-size:11px; color:var(--faint); line-height:1.4; }
 @keyframes news-up {
   from { transform:translateY(0); }
