@@ -30,9 +30,9 @@
 <meta name="twitter:image" content="https://subnetbriefs.com/og.png">
 <meta name="twitter:image:alt" content="Subnet Brief — Stake TAO in plain English">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=53">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=53">
-<link rel="icon" href="icon.svg?v=53">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=54">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=54">
+<link rel="icon" href="icon.svg?v=54">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@380;460;560;700&display=swap" rel="stylesheet">
@@ -436,6 +436,18 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
   background:var(--overlay); padding:24px 16px;
 }
 #sheet.show { display:grid; place-items:center; }
+#sheet.signing {
+  z-index:20;
+  background:transparent;
+  place-items:start center;
+  padding:12px 12px 0;
+  pointer-events:none;
+}
+#sheet.signing .sheet-card {
+  pointer-events:auto;
+  max-height:none;
+  box-shadow:0 8px 24px var(--shadow);
+}
 .sheet-card {
   width:min(480px, 100%); background:var(--paper); border:1px solid var(--line);
   border-radius:18px; padding:18px 16px 14px; max-height:min(88dvh, 720px); overflow:auto;
@@ -546,7 +558,20 @@ nav.tabs {
 .tab.on { color:var(--gold); background:var(--paper); }
 
 .empty { color:var(--mute); padding:28px 8px; text-align:center; }
+@keyframes sp { to { transform: rotate(360deg); } }
+@keyframes wait-pulse { 50% { opacity:.42; } }
 .spin { width:22px; height:22px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:sp .8s linear infinite; margin:24px auto; }
+.wait-line {
+  display:flex; align-items:flex-start; gap:8px;
+  margin:0 0 12px; color:var(--ink); font-size:13px; line-height:1.45;
+}
+.wait-line i {
+  width:14px; height:14px; margin-top:2px; border-radius:50%; flex-shrink:0;
+  border:2px solid var(--line); border-top-color:var(--gold);
+  animation:sp .7s linear infinite;
+}
+.wait-line b { font-weight:560; animation:wait-pulse 1.6s ease-in-out infinite; }
+.wallet-status.wait { border-color:var(--gold-line); }
 .quiet-lookup {
   margin:8px 0 12px; padding:8px 12px;
   border:1px solid var(--line); border-radius:12px; background:var(--paper);
@@ -661,7 +686,7 @@ nav.tabs {
 <div class="app">
   <div class="topbar">
   <header>
-    <img class="mark" src="icon-192.png?v=53" width="40" height="40" alt="Brief">
+    <img class="mark" src="icon-192.png?v=54" width="40" height="40" alt="Brief">
     <div class="brand">
       <h1>SUBNET BRIEF</h1>
       <p id="subhead">Stake TAO in plain English</p>
@@ -1157,6 +1182,8 @@ const state = {
   wallet: null,
   accounts: [],
   connectErr: '',
+  connecting: false,
+  connectWait: '',
   allocate: { netuid: 0, amount: '', hotkey: '', vals: [], quote: null, err: '', busy: false, tip: '', intent: false },
   yield: {},
   notch: null,
@@ -1290,6 +1317,7 @@ function setTab(tab, keepHash, opts) {
 function offerWallet() {
   renderConnect();
   if (state.wallet) {
+    closeSheet();
     const bar = $('wallet-status');
     if (bar) {
       bar.classList.add('flash');
@@ -1301,6 +1329,10 @@ function offerWallet() {
 }
 
 function openConnectSheet() {
+  if (state.wallet) {
+    closeSheet();
+    return;
+  }
   const el = $('sheet');
   if (!el) return;
   el.hidden = false;
@@ -2291,6 +2323,9 @@ function renderWalletStatus() {
     el.innerHTML = `<div><b>Connected</b><span style="display:block;margin-top:3px">${esc(w.name || 'Wallet')} · ${esc(shortAddr(w.address))}</span></div><button type="button" class="btn-ghost" id="wallet-status-out" style="height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line)">Disconnect</button>`;
     const out = $('wallet-status-out');
     if (out) out.onclick = onDisconnect;
+  } else if (state.connecting) {
+    el.className = 'wallet-status wait';
+    el.innerHTML = `<div><b>Connecting</b><span class="wait-line" style="display:flex;margin:6px 0 0"><i aria-hidden="true"></i><b>${esc(state.connectWait || 'Asking the wallet… this is not frozen.')}</b></span></div>`;
   } else {
     el.className = 'wallet-status';
     const phoneStuck = onPhone() && !canSignHere();
@@ -2313,16 +2348,22 @@ function renderConnect() {
   renderWalletStatus();
   if (w) {
     btn.textContent = 'Connected · ' + shortAddr(w.address);
+    btn.disabled = false;
     btn.classList.add('ghost');
     disc.hidden = false;
     hint.textContent = (w.name ? w.name + ' · ' : '') + (w.source || 'wallet') + '. This address can sign. Stake is the gold button — pick a shop and tap.';
   } else {
-    btn.textContent = 'Connect wallet';
-    btn.classList.remove('ghost');
+    btn.textContent = state.connecting ? 'Connecting…' : 'Connect wallet';
+    btn.disabled = !!state.connecting;
+    btn.classList.toggle('ghost', !!state.connecting);
     disc.hidden = true;
-    hint.textContent = state.connectErr || (deviceKind() === 'desktop'
-      ? 'We only receive a public address. On this computer, Talisman is the usual wallet.'
-      : 'We only receive a public address. On a phone, open this site inside Nova’s Browser.');
+    if (state.connecting) {
+      hint.innerHTML = `<span class="wait-line"><i aria-hidden="true"></i><b>${esc(state.connectWait || 'Asking the wallet… this is not frozen.')}</b></span>`;
+    } else {
+      hint.textContent = state.connectErr || (deviceKind() === 'desktop'
+        ? 'We only receive a public address. On this computer, Talisman is the usual wallet.'
+        : 'We only receive a public address. On a phone, open this site inside Nova’s Browser.');
+    }
   }
   if (state.accounts.length > 1) {
     pick.hidden = false;
@@ -2592,8 +2633,9 @@ function limitRaoFromQuote(q, direction) {
 }
 
 function closeSheet() {
+  stopSignWait();
   const el = $('sheet');
-  el.classList.remove('show');
+  el.classList.remove('show', 'signing');
   el.hidden = true;
   el.innerHTML = '';
 }
@@ -2606,6 +2648,7 @@ function openSheet(kind, extra) {
   const title = kind === 'unstake' ? 'Unstake ' + destShort(extra.netuid) : stakeCta(extra.amount, extra.netuid);
   const verb = kind === 'unstake' ? 'Unstake' : stakeCta(extra.amount, extra.netuid);
   el.hidden = false;
+  el.classList.remove('signing');
   el.classList.add('show');
   el.innerHTML = `<div class="sheet-card">
     <h3>${esc(title)}?</h3>
@@ -2621,7 +2664,7 @@ function openSheet(kind, extra) {
     <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none on Root' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
     ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
     <p class="hint" style="margin:8px 0 0">${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))} · named in the wallet prompt</p>
-    <p class="warn-line">Next, Nova (or Talisman) pops a sign screen. If nothing pops, you are in Chrome — cancel and open this site inside Nova. We never see your seed.</p>
+    <p class="warn-line">${esc(sheetWalletCopy())}</p>
     <p class="hint">Not financial advice. You can lose TAO. Past APY is not a forecast. Brief is not liable for this stake.</p>
     <p id="sheet-status" class="hint"></p>
     <div class="sheet-actions">
@@ -2630,31 +2673,56 @@ function openSheet(kind, extra) {
     </div>
   </div>`;
   $('sheet-cancel').onclick = closeSheet;
-  el.onclick = ev => { if (ev.target === el) closeSheet(); };
+  el.onclick = ev => { if (ev.target === el && !el.classList.contains('signing')) closeSheet(); };
   $('sheet-sign').onclick = () => signExtra(kind, extra);
   warmChain();
+}
+
+function sheetWalletCopy() {
+  if (canSignHere() && onPhone()) {
+    return 'You are already in Nova. After you tap, Approve slides over this page — not a new window. We never see your seed.';
+  }
+  if (onPhone()) {
+    return 'Next, Nova pops a sign screen. If nothing pops, you are in Chrome — cancel and open this site inside Nova. We never see your seed.';
+  }
+  return 'Next, Talisman (or Nova) pops a sign screen. Check behind this tab if nothing appears. We never see your seed.';
+}
+
+function paintSignWaitCard(msg) {
+  const el = $('sheet');
+  if (!el || !el.classList.contains('show')) return;
+  el.classList.add('signing');
+  el.innerHTML = `<div class="sheet-card">
+    ${waitLineHtml(msg)}
+    <p class="hint" style="margin:0 0 12px">${onPhone()
+      ? 'You are already in Nova. Approve is not a new window. If nothing slides up, tap the wallet icon at the top of this Nova browser.'
+      : 'A sign sheet may sit behind this tab. The gold ring means this page is waiting.'}</p>
+    <div class="sheet-actions">
+      <button type="button" class="btn btn-ghost" id="sheet-cancel">Not now</button>
+    </div>
+  </div>`;
+  const cancel = $('sheet-cancel');
+  if (cancel) cancel.onclick = closeSheet;
 }
 
 async function signExtra(kind, extra) {
   const status = $('sheet-status');
   const go = $('sheet-sign');
   if (!window.BriefChain) {
-    status.innerHTML = '<span class="warn-line">Chain module failed to load.</span>';
+    if (status) status.innerHTML = '<span class="warn-line">Chain module failed to load.</span>';
     return;
   }
   if (!canSignHere()) {
-    status.innerHTML = `<span class="warn-line">${onPhone()
+    if (status) status.innerHTML = `<span class="warn-line">${onPhone()
       ? 'No wallet prompt here. This is a normal browser. Open Nova → Browser → subnetbriefs.com then connect and stake again.'
       : 'No wallet in this browser. Install Talisman or open Brief inside Nova.'}</span>`;
     return;
   }
-  go.disabled = true;
-  status.textContent = 'Checking a public node… your TAO has not moved.';
+  if (go) go.disabled = true;
+  startSignWait();
   try {
     if (BriefChain.ping) await BriefChain.ping();
-    status.textContent = 'Loading the chain on this phone… can take a minute. Do not tap again. TAO has not moved.';
     if (BriefChain.ready) await BriefChain.ready();
-    status.textContent = 'Approve in Nova now. Look for a Nova sign screen — this page will wait.';
     const limitPriceRao = limitRaoFromQuote(extra.quote, kind === 'unstake' ? 'unstake' : 'stake');
     const args = {
       address: state.wallet.address,
@@ -2664,7 +2732,14 @@ async function signExtra(kind, extra) {
       limitPriceRao
     };
     const res = kind === 'unstake' ? await BriefChain.removeStake(args) : await BriefChain.addStake(args);
-    status.innerHTML = `<span class="ok-line">In block ${esc((res.hash||'').slice(0,10))}… Refreshing the book.</span>`;
+    stopSignWait();
+    const el = $('sheet');
+    if (el) {
+      el.classList.remove('signing');
+      el.innerHTML = `<div class="sheet-card">
+        <p class="ok-line">In block ${esc((res.hash||'').slice(0,10))}… Refreshing the book.</p>
+      </div>`;
+    }
     if (kind !== 'unstake') {
       writePending({
         address: state.wallet.address,
@@ -2678,6 +2753,7 @@ async function signExtra(kind, extra) {
     pollBook(state.wallet.address);
     setTimeout(closeSheet, 2200);
   } catch (e) {
+    stopSignWait();
     const msg = String(e && e.message || e);
     const nice = /reject|cancel|denied/i.test(msg)
       ? 'Cancelled in the wallet. Nothing was sent.'
@@ -2686,8 +2762,11 @@ async function signExtra(kind, extra) {
         : /RPC timeout|timed out|taking too long|public chain nodes/i.test(msg)
         ? 'Could not reach a public chain node. Your TAO did not move. Wait a minute, then tap Stake once more. Stay in Nova → Browser.'
         : msg;
-    status.innerHTML = `<span class="warn-line">${esc(nice)}</span>`;
-    go.disabled = false;
+    openSheet(kind, extra);
+    const err = $('sheet-status');
+    const again = $('sheet-sign');
+    if (err) err.innerHTML = `<span class="warn-line">${esc(nice)}</span>`;
+    if (again) again.disabled = false;
   }
 }
 
@@ -2746,6 +2825,8 @@ async function useWalletAccount(acct) {
   }
   state.wallet = pick;
   $('ck').value = pick.address;
+  stopConnectWait();
+  closeSheet();
   renderConnect();
   await lookupCk(pick.address);
   await Promise.all([
@@ -2758,10 +2839,90 @@ async function useWalletAccount(acct) {
   if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function connectWaitLines() {
+  return onPhone()
+    ? [
+      'Asking Nova… no extra window on this phone.',
+      'Still connecting. The gold ring is moving — this is not frozen.',
+      'Waiting on Nova. If it asks, tap Allow once.'
+    ]
+    : [
+      'Waiting on the wallet. A sheet may sit behind this tab.',
+      'Still connecting. The gold ring is moving — this is not frozen.',
+      'Waiting for Allow. Check the wallet icon in the toolbar.'
+    ];
+}
+
+function waitLineHtml(msg) {
+  return `<span class="wait-line"><i aria-hidden="true"></i><b>${esc(msg)}</b></span>`;
+}
+
+function signWaitLines() {
+  return onPhone()
+    ? [
+      'Asking Nova to Approve on this screen — not a new window.',
+      'The gold ring is moving. Look for Approve sliding over this page.',
+      'Still waiting. If nothing slides up, tap the Nova icon at the top of this browser.'
+    ]
+    : [
+      'Waiting on the wallet. A sign sheet may sit behind this tab.',
+      'The gold ring is moving — this is not frozen.',
+      'Check the wallet icon in the toolbar.'
+    ];
+}
+
+let signWaitTick = 0;
+function startSignWait() {
+  stopSignWait();
+  const lines = signWaitLines();
+  signWaitTick = 0;
+  paintSignWaitCard(lines[0]);
+  signWaitTick = 1;
+  startSignWait.timer = setInterval(() => {
+    const line = $('sheet') && $('sheet').querySelector('.wait-line b');
+    if (line) line.textContent = lines[signWaitTick % lines.length];
+    signWaitTick += 1;
+  }, 2200);
+}
+
+function stopSignWait() {
+  if (startSignWait.timer) clearInterval(startSignWait.timer);
+  startSignWait.timer = 0;
+}
+
+let connectWaitTick = 0;
+function startConnectWait() {
+  stopConnectWait();
+  connectWaitTick = 0;
+  state.connecting = true;
+  state.connectErr = '';
+  const lines = connectWaitLines();
+  const paint = () => {
+    state.connectWait = lines[connectWaitTick % lines.length];
+    connectWaitTick += 1;
+    const hint = $('ck-connect-hint');
+    const status = $('sheet-status');
+    if (hint) hint.innerHTML = waitLineHtml(state.connectWait);
+    if (status) status.innerHTML = waitLineHtml(state.connectWait);
+    renderWalletStatus();
+  };
+  paint();
+  connectWaitTick = 1;
+  startConnectWait.timer = setInterval(paint, 2200);
+}
+
+function stopConnectWait() {
+  if (startConnectWait.timer) clearInterval(startConnectWait.timer);
+  startConnectWait.timer = 0;
+  state.connecting = false;
+  state.connectWait = '';
+}
+
 async function onConnect() {
   const hint = $('ck-connect-hint');
   const status = $('sheet-status');
-  if (state.wallet && state.accounts.length <= 1) {
+  if (state.wallet) {
+    stopConnectWait();
     closeSheet();
     renderConnect();
     return;
@@ -2772,13 +2933,22 @@ async function onConnect() {
     if (status) status.innerHTML = `<span class="warn-line">${esc(state.connectErr)}</span>`;
     return;
   }
-  if (hint) hint.textContent = 'Check the wallet popup…';
-  if (status) status.textContent = 'Check the wallet popup…';
   const go = $('sheet-connect');
   if (go) go.disabled = true;
+  const btn = $('ck-connect');
+  if (btn) btn.disabled = true;
+  startConnectWait();
   try {
-    const accts = walletAccounts(await BriefChain.connect('Subnet Brief'));
+    const accts = walletAccounts(await Promise.race([
+      BriefChain.connect('Subnet Brief'),
+      new Promise((_, rej) => setTimeout(() => rej(new Error(
+        onPhone()
+          ? 'Nova did not answer. Look in Nova for Allow — it is not a popup. Then tap Connect again.'
+          : 'The wallet did not answer. Check behind this tab or the toolbar, then tap Connect again.'
+      )), 28000))
+    ]));
     if (!accts.length) throw new Error('The wallet only offered an Ethereum address. Pick the Bittensor account that starts with 5, then connect again.');
+    stopConnectWait();
     state.connectErr = '';
     state.accounts = accts;
     const pick = accts.find(a => a.address === state.ss58) || accts[0];
@@ -2787,16 +2957,21 @@ async function onConnect() {
     closeSheet();
     renderConnect();
   } catch (e) {
+    stopConnectWait();
     state.connectErr = String(e && e.message || e);
     renderConnect();
     if (status) status.innerHTML = `<span class="warn-line">${esc(state.connectErr)}</span>`;
     if (go) go.disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
 
 function onDisconnect() {
+  stopConnectWait();
   state.wallet = null;
   state.accounts = [];
+  const btn = $('ck-connect');
+  if (btn) btn.disabled = false;
   renderConnect();
   renderYouBook();
   renderAllocate();
