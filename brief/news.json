@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-09-29T14:45:21Z",
+  "generated_at": "2026-09-29T19:05:49Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Sep 29",
+      "title": "Not in Montreal for Exploit Summit? Here’s What You Missed on Day One",
+      "body": "Missed Exploit Summit Day 1? Catch the key Bittensor updates from Montreal, including Gamma tokens, AI training, drug discovery, robotics, drones, and new…",
+      "href": "https://taodaily.io/not-in-montreal-for-exploit-summit-heres-what-you-missed-on-day-one/",
+      "sn": null
+    },
     {
       "when": "Sep 29",
       "title": "TPN’s Private Benchmark Tests Models Without Prior Access to Questions",
@@ -36,13 +43,6 @@
       "body": "A near-death experience changed how Max Sebti sees time, people, and the kind of work worth building. That perspective now runs through his approach to…",
       "href": "https://taodaily.io/max-sebti-from-a-near-death-experience-to-building-score-on-bittensor/",
       "sn": null
-    },
-    {
-      "when": "Sep 28",
-      "title": "How CookingTAO (SN122) Is Simplifying Subnet Mining Across Bittensor",
-      "body": "CookingTAO (SN122) opens Bittensor mining with a 30% incentive burn, set to fall to 0% as more developers submit miner code to the platform.",
-      "href": "https://taodaily.io/how-cookingtao-sn122-is-simplifying-subnet-mining-across-bittensor/",
-      "sn": 122
     }
   ]
 }

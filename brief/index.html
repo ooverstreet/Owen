@@ -3466,7 +3466,7 @@ $('share').addEventListener('click', async () => {
 
 window.addEventListener('hashchange', applyHash);
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=57');
 load().then(() => {
   applyHash();
   warmChain();
