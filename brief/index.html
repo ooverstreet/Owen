@@ -178,6 +178,7 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 .news-item {
   display:block; width:100%; text-align:left;
   padding:8px 0 10px; border:0; background:none; color:inherit;
+  text-decoration:none; cursor:pointer;
 }
 .news-item + .news-item { border-top:1px solid var(--line); }
 .news-item time { display:block; font-size:11px; color:var(--faint); margin-bottom:2px; }
@@ -191,7 +192,7 @@ main { flex:1; padding:0 16px 24px; max-width:720px; width:100%; margin:0 auto; 
 @media (max-width: 559px) {
   .news-track { animation:none; }
   .news-port {
-    height:auto; max-height:12.5em; overflow:auto;
+    height:auto; max-height:22em; overflow:auto;
     -webkit-mask-image:none; mask-image:none;
   }
   .news-clone { display:none; }
@@ -1142,24 +1143,27 @@ const BRIEFS = {
 };
 
 const HIGHLIGHT_IDS = [64, 51, 4, 120, 56, 62, 34, 44, 68, 3, 9, 8, 19, 107, 93, 75, 1];
+const NEWS_FEED = 'https://taodaily.io/feed/';
+const NEWS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(NEWS_FEED);
 const NEWS = [
   {
-    when: 'Apr 2026',
-    title: 'The Templar team left',
-    body: 'SN3 trained a well-known public model, then the original team walked after a fight. The shop is still on, under a new name. The door can change.',
-    sn: 3
+    when: 'Sep 29',
+    title: 'Const spoke at Exploit Summit',
+    body: 'The Montréal keynote is about incentive computing and an open network outside the usual labs. This week — not last season.',
+    href: 'https://taodaily.io/consts-keynote-at-exploit-summit-harness-the-exploit-build-a-mind-outside-the-state/'
   },
   {
-    when: '2026',
-    title: 'Chutes showed up on OpenRouter',
-    body: 'That is the rare outside meter — usage a team cannot type into its own dashboard. SN64 is the inference shop people mean by a real SaaS.',
-    sn: 64
+    when: 'Sep 29',
+    title: 'Cathedral is an RL shop on SN94',
+    body: 'CPU sandboxes for agents and evaluation on Bittensor. A new shop note, not a recap of 2025.',
+    href: 'https://taodaily.io/cathedral-explained-the-execution-layer-for-reinforcement-learning-on-bittensor/',
+    sn: 94
   },
   {
-    when: '2026',
-    title: 'Const left to build Affine',
-    body: 'The protocol co-founder is on SN120. It is a reasoning contest with no storefront. You would be funding a lab, not a product.',
-    sn: 120
+    when: 'Sep 28',
+    title: 'Gamma tokens: shops paying shops',
+    body: 'Const floated usage credits so one subnet could buy compute or inference from another. Still a plan, not a product.',
+    href: 'https://taodaily.io/gamma-tokens-could-turn-subnets-into-customers-of-each-other/'
   },
   {
     when: 'Still true',
@@ -1188,7 +1192,9 @@ const state = {
   yield: {},
   notch: null,
   statTip: '',
-  priceLive: false
+  priceLive: false,
+  news: null,
+  newsMode: 'wait'
 };
 
 const $ = id => document.getElementById(id);
@@ -1485,26 +1491,105 @@ function todayShop() {
 }
 
 function newsCard(n) {
-  const open = n.sn != null ? ` data-sn="${n.sn}"` : '';
-  return `<button class="news-item" type="button"${open}>
-    <time>${esc(n.when)}</time>
+  const inner = `<time>${esc(n.when)}</time>
     <b>${esc(n.title)}</b>
-    <span>${esc(n.body)}</span>
-  </button>`;
+    <span>${esc(n.body)}</span>`;
+  if (n.href) {
+    return `<a class="news-item" href="${esc(n.href)}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+  }
+  const open = n.sn != null ? ` data-sn="${n.sn}"` : '';
+  return `<button class="news-item" type="button"${open}>${inner}</button>`;
 }
 
-function renderNews() {
+function newsNote(mode) {
+  if (mode === 'live') return 'Today’s Bittensor notes, from TAO Daily. Tap a line to read it. Not financial advice.';
+  if (mode === 'wait') return 'Looking for today’s notes. Not financial advice.';
+  return 'Live notes did not load. These stay until the next visit. Not financial advice.';
+}
+
+function renderNews(items, mode) {
   const el = $('home-news');
   if (!el) return;
-  if (!NEWS.length) { el.innerHTML = ''; return; }
-  const cards = NEWS.map(newsCard).join('');
+  if (items) state.news = items;
+  if (mode) state.newsMode = mode;
+  const list = (state.news && state.news.length) ? state.news : NEWS;
+  if (!list.length) { el.innerHTML = ''; return; }
+  const cards = list.map(newsCard).join('');
   el.innerHTML = `<div class="news">
     <p class="kicker">Latest news</p>
     <div class="news-port">
       <div class="news-track">${cards}<div class="news-clone" aria-hidden="true">${cards}</div></div>
     </div>
-    <p class="news-note">Notes we keep here. Not a live wire. Not financial advice.</p>
+    <p class="news-note">${newsNote(state.newsMode)}</p>
   </div>`;
+}
+
+function stripNewsHtml(s) {
+  const d = document.createElement('div');
+  d.innerHTML = String(s || '');
+  return (d.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
+function newsWhen(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function cleanNewsBody(s) {
+  let t = stripNewsHtml(s);
+  t = t.replace(/\[\.\.\.\]\s*/g, '');
+  t = t.replace(/The post\b.*$/i, '').trim();
+  if (t.length > 160) t = t.slice(0, 157).replace(/\s+\S*$/, '') + '…';
+  return t;
+}
+
+function itemsFromRss(js) {
+  if (!js || js.status !== 'ok' || !Array.isArray(js.items)) return [];
+  return js.items.slice(0, 6).map(it => ({
+    when: newsWhen(it.pubDate),
+    title: stripNewsHtml(it.title || ''),
+    body: cleanNewsBody(it.description || it.content || ''),
+    href: it.link || '',
+    sn: null
+  })).filter(n => n.title && n.href);
+}
+
+function itemsFromFile(js) {
+  if (!js || !Array.isArray(js.items)) return [];
+  return js.items.filter(n => n && n.title).slice(0, 6);
+}
+
+async function fetchJson(url, ms) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = setTimeout(() => { try { ctrl && ctrl.abort(); } catch {} }, ms);
+  try {
+    const res = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+    if (!res.ok) throw new Error('news ' + res.status);
+    return await res.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+let newsLoading = false;
+async function loadNews() {
+  if (state.newsMode === 'live' && state.news && state.news.length) {
+    renderNews();
+    return;
+  }
+  if (newsLoading) { renderNews(); return; }
+  newsLoading = true;
+  renderNews(NEWS, 'wait');
+  try {
+    const live = itemsFromRss(await fetchJson(NEWS_PROXY, 8000));
+    if (live.length) { renderNews(live, 'live'); return; }
+  } catch {}
+  try {
+    const file = itemsFromFile(await fetchJson('./news.json', 8000));
+    if (file.length) { renderNews(file, 'live'); return; }
+  } catch {}
+  renderNews(NEWS, 'fallback');
 }
 
 function renderToday() {
@@ -3095,7 +3180,7 @@ function render() {
   renderStats();
   renderTake();
   renderToday();
-  renderNews();
+  loadNews();
   renderTape();
   renderMovers();
   renderList();
