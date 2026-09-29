@@ -19,7 +19,7 @@ const CONNECT_MS = 30000;
 const REQUEST_MS = 30000;
 const SEND_MS = 90000;
 const DEAD = 'Could not reach a public chain node. Your TAO did not move. Tap Stake once and wait for Nova — do not mash the button.';
-const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If you never saw a sign screen, nothing moved.';
+const SLOW = 'The chain is taking too long. If you already approved in the wallet, check your book before tapping Stake again. If Approve never slid over this page, nothing moved.';
 
 let api = null;
 let connecting = null;
