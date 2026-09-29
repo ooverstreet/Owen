@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-09-29T19:05:49Z",
+  "generated_at": "2026-09-29T22:59:10Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Sep 29",
+      "title": "Tao Templar’s Laundry Experiment Exposes the Hardest Problem in Bittensor",
+      "body": "Bittensor subnet incentives take time to refine as participants find loopholes. Learn how incentive design, validation, and iteration shape effective subnet…",
+      "href": "https://taodaily.io/tao-templars-laundry-experiment-exposes-the-hardest-problem-in-bittensor/",
+      "sn": null
+    },
     {
       "when": "Sep 29",
       "title": "Not in Montreal for Exploit Summit? Here’s What You Missed on Day One",
@@ -35,13 +42,6 @@
       "title": "Gamma Tokens Could Turn Subnets Into Customers of Each Other",
       "body": "Const introduced Gamma tokens as a new usage-credit layer that could let subnets buy compute, inference and other services from one another.",
       "href": "https://taodaily.io/gamma-tokens-could-turn-subnets-into-customers-of-each-other/",
-      "sn": null
-    },
-    {
-      "when": "Sep 28",
-      "title": "Max Sebti: From a Near-Death Experience to Building Score on Bittensor",
-      "body": "A near-death experience changed how Max Sebti sees time, people, and the kind of work worth building. That perspective now runs through his approach to…",
-      "href": "https://taodaily.io/max-sebti-from-a-near-death-experience-to-building-score-on-bittensor/",
       "sn": null
     }
   ]
