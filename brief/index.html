@@ -780,7 +780,7 @@ nav.tabs {
       <div class="rules">
         <div class="rule"><b>We never see your seed</b> — if an app asks you to type 12 words, close it. That is not us.</div>
         <div class="rule"><b>You confirm every move</b> — your wallet pops up. If you cancel, nothing happens.</div>
-        <div class="rule"><b>Getting TAO back</b> — tap Unstake, then wait a few days. Gains do not land as free TAO by themselves.</div>
+        <div class="rule"><b>Getting TAO back</b> — tap Unstake, approve in Nova, then Refresh · live. Shop tokens become TAO at the current price. Gains do not land as free TAO by themselves.</div>
         <div class="rule"><b>Risk</b> — parking on the main chain is usually calmer than a shop. A shop can go to zero. Not financial advice.</div>
       </div>
 
@@ -858,7 +858,7 @@ nav.tabs {
       </div>
       <div class="guide-card">
         <h3>What happens to your TAO</h3>
-        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, then wait a few days. When parked TAO crosses the next whole number — 19 to 20 — Your book marks it with a small +1. That is still staked, not free in Nova.</p>
+        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, approve in Nova, then Refresh · live. When parked TAO crosses the next whole number — 19 to 20 — Your book marks it with a small +1. That is still staked, not free in Nova.</p>
       </div>
       <div class="guide-card">
         <h3>How to pick a shop</h3>
@@ -901,7 +901,7 @@ nav.tabs {
     <button class="tab" data-tab="guide" type="button">Guide</button>
   </nav>
 </div>
-<script src="chain.js?v=24"></script>
+<script src="chain.js?v=25"></script>
 <script>
 const API = 'https://api.metagraph.sh/api/v1';
 const DEMO_SS58 = '5GsbTgfvgCH4xdqSkiPb7EaBBFLHjWH5vfEALhJaewSFpZX9';
@@ -2128,6 +2128,7 @@ async function chainPositions(ss58) {
       hotkey: p.hotkey,
       netuid: p.netuid,
       stake_tao: px == null ? alpha : alpha * px,
+      stake_rao: p.stake_rao,
       onchain: true
     };
   }).filter(p => p.stake_tao > 0.0005);
@@ -2261,7 +2262,7 @@ function renderYouBook() {
         return `<div class="pos${grew ? ' grew' : ''}">
           <b>${esc(name)}${pos && pos.pending ? '<small>on chain</small>' : ''}</b>
           <i>${fmtTao(p.tao, 2)}${grew ? `<em class="notch-pill">+${notch.steps}</em>` : ''}</i>
-          ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
+          ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" data-rao="${pos.stake_rao != null ? pos.stake_rao : ''}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
     </div>`;
@@ -2305,7 +2306,7 @@ function renderYouBook() {
             <b>SN${p.netuid} ${esc(row.name || '')}</b>
             <i>${fmtTao(p.tao, 1)} · ${pct.toFixed(1)}%</i>
           </button>
-          ${canSign && pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
+          ${canSign && pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" data-rao="${pos.stake_rao != null ? pos.stake_rao : ''}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
       ${rows.length > 10 ? `<p class="hint" style="margin-top:8px">${rows.length - 10} more shops not shown.</p>` : ''}
@@ -2723,6 +2724,14 @@ function limitRaoFromQuote(q, direction) {
   try { return window.BriefChain.taoToRao(bound.toFixed(9)); } catch { return null; }
 }
 
+function unstakeAlphaRao(extra) {
+  if (extra.stakeRao && Number(extra.stakeRao) > 0) return String(extra.stakeRao);
+  if (Number(extra.netuid) === 0) return BriefChain.taoToRao(String(extra.amount));
+  const px = num(extra.quote && extra.quote.spot_price_tao) || catalogAlphaPx(extra.netuid);
+  if (!(px > 0)) return BriefChain.taoToRao(String(extra.amount));
+  return BriefChain.taoToRao((Number(extra.amount) / px).toFixed(9));
+}
+
 function closeSheet() {
   stopSignWait();
   const el = $('sheet');
@@ -2744,7 +2753,9 @@ function openSheet(kind, extra) {
   el.innerHTML = `<div class="sheet-card">
     <h3>${esc(title)}?</h3>
     <p>${kind === 'unstake'
-      ? 'This starts getting your TAO back. It takes a few days. Gains do not land as free TAO by themselves. Root is 1:1.'
+      ? (isRoot
+        ? 'This takes parked TAO back to free. Root is 1:1. After Nova approves, tap Refresh · live — it should leave Your book.'
+        : 'This sells this shop’s token back to TAO at the current price. After Nova approves, tap Refresh · live. It should leave Your book. Gains still inside other shops stay there.')
       : (isRoot
         ? 'This parks TAO on Root. It stays TAO — no shop token.'
         : 'This puts TAO into ' + destShort(extra.netuid) + '. It becomes that shop’s token. You can get more of it and still lose TAO if the price falls.')}</p>
@@ -2753,7 +2764,7 @@ function openSheet(kind, extra) {
     ${extra.apyLabel ? `<div class="sheet-row"><span>Past 30d APY</span><b>${esc(extra.apyLabel)} · not a promise</b></div>` : ''}
     <div class="sheet-row"><span>Validator fee</span><b>${esc(takePctLabel(take))}</b></div>
     <div class="sheet-row"><span>Slippage cap</span><b>${isRoot ? 'none on Root' : ((DESK.slippage*100).toFixed(0)+'%')}</b></div>
-    ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake'?'':'≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
+    ${q && !isRoot ? `<div class="sheet-row"><span>About</span><b>${kind==='unstake' ? '≈ '+Number(q.expected_out||0).toFixed(4)+' τ back' : '≈ '+Number(q.expected_out||0).toFixed(4)+' of this token'}${q.price_impact_pct!=null?' · '+Number(q.price_impact_pct).toFixed(3)+'% pool move':''}</b></div>` : ''}
     <p class="hint" style="margin:8px 0 0">${esc(extra.desk ? DESK.name : shortAddr(extra.hotkey))} · named in the wallet prompt</p>
     <p class="warn-line">${esc(sheetWalletCopy())}</p>
     <p class="hint">Not financial advice. You can lose TAO. Past APY is not a forecast. Brief is not liable for this stake.</p>
@@ -2820,6 +2831,7 @@ async function signExtra(kind, extra) {
       hotkey: extra.hotkey,
       netuid: extra.netuid,
       amountTao: extra.amount,
+      amountRao: kind === 'unstake' ? unstakeAlphaRao(extra) : undefined,
       limitPriceRao
     };
     const res = kind === 'unstake' ? await BriefChain.removeStake(args) : await BriefChain.addStake(args);
@@ -2849,7 +2861,7 @@ async function signExtra(kind, extra) {
     const nice = /reject|cancel|denied/i.test(msg)
       ? 'Cancelled in the wallet. Nothing was sent.'
       : /bad signature|1010|Invalid Transaction/i.test(msg)
-        ? 'Nova already approved. This phone then re-sent the extra and the node said no. Tap Not now, then Refresh · live. If the shop shows the new amount, it worked. If not, wait a minute and tap the gold button once — do not double-tap. Shop unstakes take a few days to become free TAO.'
+        ? 'Nova already approved. This phone then re-sent the extra and the node said no. Tap Not now, then Refresh · live. If the shop left Your book, it worked. If it is still there, wait a minute and tap Unstake once — do not double-tap.'
         : /RPC timeout|timed out|taking too long|public chain nodes/i.test(msg)
         ? 'Could not reach a public chain node. Your TAO did not move. Wait a minute, then tap Stake once more. Stay in Nova → Browser.'
         : msg;
@@ -2888,22 +2900,31 @@ async function reviewAllocate() {
   });
 }
 
-async function reviewUnstake(netuid, hotkey, amt) {
+async function reviewUnstake(netuid, hotkey, amt, rao) {
   if (!state.wallet || !hotkey) return;
+  const id = Number(netuid);
+  const stakeRao = rao !== '' && rao != null && Number(rao) > 0 ? String(Math.floor(Number(rao))) : '';
+  let alphaAmt = Number(amt);
+  if (stakeRao) alphaAmt = Number(stakeRao) / 1e9;
+  else if (id !== 0) {
+    const px = (await chainAlphaPrice(id)) || catalogAlphaPx(id);
+    if (px > 0) alphaAmt = Number(amt) / px;
+  }
   let quote = null;
   try {
-    const res = await fetch(API + '/subnets/' + netuid + '/stake-quote?amount=' + encodeURIComponent(amt) + '&direction=unstake');
+    const res = await fetch(API + '/subnets/' + id + '/stake-quote?amount=' + encodeURIComponent(alphaAmt) + '&direction=unstake');
     const js = await res.json();
     quote = js.ok ? js.data : null;
   } catch {}
   const val = state.allocate.vals.find(v => v.hotkey === hotkey);
   openSheet('unstake', {
     amount: String(amt),
-    netuid: Number(netuid),
+    netuid: id,
     hotkey,
     take: val && val.take,
     desk: !!(val && val.desk),
-    quote
+    quote,
+    stakeRao
   });
 }
 
@@ -3259,7 +3280,7 @@ document.addEventListener('click', e => {
   }
   const unstake = e.target.closest('[data-unstake]');
   if (unstake) {
-    reviewUnstake(unstake.dataset.unstake, unstake.dataset.hotkey, unstake.dataset.amt);
+    reviewUnstake(unstake.dataset.unstake, unstake.dataset.hotkey, unstake.dataset.amt, unstake.dataset.rao);
     return;
   }
   const acct = e.target.closest('[data-acct]');
@@ -3466,7 +3487,7 @@ $('share').addEventListener('click', async () => {
 
 window.addEventListener('hashchange', applyHash);
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=57');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v=58');
 load().then(() => {
   applyHash();
   warmChain();

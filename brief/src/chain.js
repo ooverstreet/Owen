@@ -301,11 +301,15 @@ export async function addStake({ address, hotkey, netuid, amountTao, limitPriceR
   return withTimeout(signSend(address, tx, apiInst), SEND_MS, SLOW);
 }
 
-export async function removeStake({ address, hotkey, netuid, amountTao, limitPriceRao }) {
-  const amountRao = taoToRao(amountTao);
-  if (BigInt(amountRao) < 2000000n) throw new Error('Minimum unstake is 0.002 TAO.');
+export async function removeStake({ address, hotkey, netuid, amountTao, amountRao, limitPriceRao }) {
+  // remove_stake takes alpha (shop token), not TAO. Passing the book’s TAO
+  // value here only peels a sliver when the shop price is below 1.
+  const rao = amountRao != null && String(amountRao) !== ''
+    ? String(amountRao)
+    : taoToRao(amountTao);
+  if (BigInt(rao) < 2000000n) throw new Error('Minimum unstake is 0.002 of this shop’s token.');
   const apiInst = await getApi();
-  const tx = unstakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao, limitPriceRao });
+  const tx = unstakeCall(apiInst, { hotkey, netuid: Number(netuid), amountRao: rao, limitPriceRao });
   return withTimeout(signSend(address, tx, apiInst), SEND_MS, SLOW);
 }
 
