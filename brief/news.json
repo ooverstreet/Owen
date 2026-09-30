@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-09-29T22:59:10Z",
+  "generated_at": "2026-09-30T18:00:51Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Sep 30",
+      "title": "A User Used Cascade (SN91) to Predict Their Spotify Wrapped for 2027",
+      "body": "This article shows how time-series forecasting can go far beyond finance and weather, making everyday data useful for predicting what could come next.",
+      "href": "https://taodaily.io/a-user-used-cascade-sn91-to-predict-their-spotify-wrapped-for-2027/",
+      "sn": 91
+    },
+    {
+      "when": "Sep 30",
+      "title": "Verathos and Nodexo Consolidate Under Subnet 96",
+      "body": "Nodexo and Verathos are consolidating under one network on Bittensor Subnet 96. Here’s what the move means for operators, builders, holders, and the future…",
+      "href": "https://taodaily.io/verathos-and-nodexo-consolidate-under-subnet-96/",
+      "sn": null
+    },
     {
       "when": "Sep 29",
       "title": "Tao Templar’s Laundry Experiment Exposes the Hardest Problem in Bittensor",
@@ -28,20 +42,6 @@
       "title": "Const’s Keynote at Exploit Summit: Harness the Exploit, Build a Mind Outside the State",
       "body": "Const’s Exploit Summit keynote reveals Bittensor’s vision for incentive computing, decentralized frontier AI, and an open intelligence network designed to…",
       "href": "https://taodaily.io/consts-keynote-at-exploit-summit-harness-the-exploit-build-a-mind-outside-the-state/",
-      "sn": null
-    },
-    {
-      "when": "Sep 29",
-      "title": "Cathedral Explained: The Execution Layer for Reinforcement Learning on Bittensor",
-      "body": "Cathedral is building CPU sandbox infrastructure for reinforcement learning, AI agents, and evaluation on Bittensor SN94. Here’s how it works and why it…",
-      "href": "https://taodaily.io/cathedral-explained-the-execution-layer-for-reinforcement-learning-on-bittensor/",
-      "sn": 94
-    },
-    {
-      "when": "Sep 28",
-      "title": "Gamma Tokens Could Turn Subnets Into Customers of Each Other",
-      "body": "Const introduced Gamma tokens as a new usage-credit layer that could let subnets buy compute, inference and other services from one another.",
-      "href": "https://taodaily.io/gamma-tokens-could-turn-subnets-into-customers-of-each-other/",
       "sn": null
     }
   ]
