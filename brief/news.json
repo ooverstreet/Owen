@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-01T18:26:41Z",
+  "generated_at": "2026-10-01T23:14:00Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 1",
+      "title": "Two Days in Montreal Show Where Bittensor Is Heading Next",
+      "body": "Exploit Summit ’26 wrapped in Montreal with product demos, Pitchtensor, Gamma discussions, new subnet updates, and a stronger focus on Bittensor’s working…",
+      "href": "https://taodaily.io/two-days-in-montreal-show-where-bittensor-is-heading-next/",
+      "sn": null
+    },
+    {
+      "when": "Oct 1",
+      "title": "Synth (SN50) Adds Volatility to Its Crypto Forecasting Score",
+      "body": "Synth (SN50) has launched Volatility CRPS in its Crypto 1h competition, adding a new way to measure whether 1,000 simulated price paths capture not only…",
+      "href": "https://taodaily.io/synth-sn50-adds-volatility-to-its-crypto-forecasting-score/",
+      "sn": 50
+    },
+    {
+      "when": "Oct 1",
+      "title": "IOTA SDK To Let AI Developers Tap Distributed GPUs Without Rebuilding Their Workflows",
+      "body": "IOTA SDK to let developers tap distributed GPUs without rebuilding workflows, making IOTA’s decentralized training infrastructure easier to use across…",
+      "href": "https://taodaily.io/iota-sdk-to-let-ai-developers-tap-distributed-gpus-without-rebuilding-their-workflows/",
+      "sn": null
+    },
     {
       "when": "Oct 1",
       "title": "Subnet Summer Is Paying Creators to Teach Bittensor / TAO",
@@ -22,27 +43,6 @@
       "body": "Targon (SN4) expands beyond confidential VMs with Bare Metal and Sandboxes, giving AI teams dedicated hardware, isolated environments, and flexible cloud…",
       "href": "https://taodaily.io/targon-is-expanding-from-confidential-compute-into-a-full-cloud-stack-with-bare-metal-and-sandboxes/",
       "sn": 4
-    },
-    {
-      "when": "Sep 30",
-      "title": "Carbon Wins Pitchtensor 2026 With 500 TAO Raised in Under 20 Minutes",
-      "body": "Carbon won Pitchtensor 2026 at Exploit Summit in Montreal, raising 500 TAO in 19 minutes and 58 seconds as it prepares to launch a Bittensor subnet for…",
-      "href": "https://taodaily.io/carbon-wins-pitchtensor-2026-with-500-tao-raised-in-under-20-minutes/",
-      "sn": null
-    },
-    {
-      "when": "Sep 30",
-      "title": "Yanez Pulse and Gate Give AI Agents Autonomy Without Giving Up Human Control",
-      "body": "Yanez Pulse and Gate let AI agents act autonomously while keeping sensitive payments and actions under verified human control through biometric approval and…",
-      "href": "https://taodaily.io/yanez-pulse-and-gate-give-ai-agents-autonomy-without-giving-up-human-control/",
-      "sn": null
-    },
-    {
-      "when": "Sep 30",
-      "title": "A User Used Cascade (SN91) to Predict Their Spotify Wrapped for 2027",
-      "body": "This article shows how time-series forecasting can go far beyond finance and weather, making everyday data useful for predicting what could come next.",
-      "href": "https://taodaily.io/a-user-used-cascade-sn91-to-predict-their-spotify-wrapped-for-2027/",
-      "sn": 91
     }
   ]
 }
