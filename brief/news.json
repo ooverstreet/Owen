@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-02T17:53:39Z",
+  "generated_at": "2026-10-02T23:00:00Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 2",
+      "title": "How OpenRoboto (SN80) Is Connecting Real-World Data, Model Training and Physical Robots",
+      "body": "OpenRoboto (SN80) is connecting real-world robot data, Bittensor model training, harder benchmarks and physical testing to build a full robotics learning loop.",
+      "href": "https://taodaily.io/how-openroboto-sn80-is-connecting-real-world-data-model-training-and-physical-robots/",
+      "sn": 80
+    },
+    {
+      "when": "Oct 2",
+      "title": "OMG, Connito Is Building Specialist AI Skills Without Messing With the Base Model",
+      "body": "Connito is testing a new way to give AI models specialist skills in areas like math, code, medicine, law and finance without changing the base model itself.",
+      "href": "https://taodaily.io/omg-connito-is-building-specialist-ai-skills-without-messing-with-the-base-model/",
+      "sn": null
+    },
+    {
+      "when": "Oct 2",
+      "title": "Jon Durbin Shows an 8B Model Trained for $6,500 Running at 60 Tokens Per Second on a Phone",
+      "body": "Jon Durbin showed how Chutes is approaching decentralized AI training, including an 8B model trained for roughly $6,500 that can run at nearly 60 tokens per…",
+      "href": "https://taodaily.io/jon-durbin-shows-an-8b-model-trained-for-6500-running-at-60-tokens-per-second-on-a-phone/",
+      "sn": null
+    },
     {
       "when": "Oct 2",
       "title": "Gamma Gives Bittensor an x402-Style Way to Pay for Subnet Services",
@@ -22,27 +43,6 @@
       "body": "Synth (SN50) has launched Volatility CRPS in its Crypto 1h competition, adding a new way to measure whether 1,000 simulated price paths capture not only…",
       "href": "https://taodaily.io/synth-sn50-adds-volatility-to-its-crypto-forecasting-score/",
       "sn": 50
-    },
-    {
-      "when": "Oct 1",
-      "title": "IOTA SDK To Let AI Developers Tap Distributed GPUs Without Rebuilding Their Workflows",
-      "body": "IOTA SDK to let developers tap distributed GPUs without rebuilding workflows, making IOTA’s decentralized training infrastructure easier to use across…",
-      "href": "https://taodaily.io/iota-sdk-to-let-ai-developers-tap-distributed-gpus-without-rebuilding-their-workflows/",
-      "sn": null
-    },
-    {
-      "when": "Oct 1",
-      "title": "Subnet Summer Is Paying Creators to Teach Bittensor / TAO",
-      "body": "Subnet Summer’s Summer School lets eligible creators earn rewards for teaching Bittensor through Bitcast, with access currently limited to the top 350 accounts.",
-      "href": "https://taodaily.io/subnet-summer-is-paying-creators-to-teach-bittensor-tao/",
-      "sn": null
-    },
-    {
-      "when": "Oct 1",
-      "title": "From Moving Files to Running Data Pipelines, Beam Studio Changes What SN105 Can Do",
-      "body": "Beam Studio gives SN105 a visual interface for building programmable data pipelines, combining transfers, transformations, schedules, retries, and branching…",
-      "href": "https://taodaily.io/from-moving-files-to-running-data-pipelines-beam-studio-changes-what-sn105-can-do/",
-      "sn": 105
     }
   ]
 }
