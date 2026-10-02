@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-01T23:14:00Z",
+  "generated_at": "2026-10-02T17:53:39Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 2",
+      "title": "Gamma Gives Bittensor an x402-Style Way to Pay for Subnet Services",
+      "body": "Gamma could become Bittensor’s x402-style payment layer, letting users burn alpha for stable subnet credits used to pay for compute, inference, data, and…",
+      "href": "https://taodaily.io/gamma-gives-bittensor-an-x402-style-way-to-pay-for-subnet-services/",
+      "sn": null
+    },
     {
       "when": "Oct 1",
       "title": "Two Days in Montreal Show Where Bittensor Is Heading Next",
@@ -36,13 +43,6 @@
       "body": "Beam Studio gives SN105 a visual interface for building programmable data pipelines, combining transfers, transformations, schedules, retries, and branching…",
       "href": "https://taodaily.io/from-moving-files-to-running-data-pipelines-beam-studio-changes-what-sn105-can-do/",
       "sn": 105
-    },
-    {
-      "when": "Sep 30",
-      "title": "Targon Is Expanding From Confidential Compute Into a Full Cloud Stack With Bare Metal and Sandboxes",
-      "body": "Targon (SN4) expands beyond confidential VMs with Bare Metal and Sandboxes, giving AI teams dedicated hardware, isolated environments, and flexible cloud…",
-      "href": "https://taodaily.io/targon-is-expanding-from-confidential-compute-into-a-full-cloud-stack-with-bare-metal-and-sandboxes/",
-      "sn": 4
     }
   ]
 }
