@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-02T23:00:00Z",
+  "generated_at": "2026-10-03T16:20:27Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 3",
+      "title": "Bittensor Gains 37% as Grayscale Highlights Growing AI Crypto Momentum",
+      "body": "Bittensor gained 37% in September 2026 as Grayscale’s AI Crypto Sector rose 54%, highlighting growing interest in blockchain infrastructure for the emerging…",
+      "href": "https://taodaily.io/bittensor-gains-37-as-grayscale-highlights-growing-ai-crypto-momentum/",
+      "sn": null
+    },
+    {
+      "when": "Oct 3",
+      "title": "Pareton (SN10) Tunes Engy’s Qwen3.8 for Faster Production Inference on Bittensor",
+      "body": "Pareton (SN10) and Engy (SN53) have launched a partnership that puts optimised Qwen3.8 into live traffic on Engy’s verified inference network.",
+      "href": "https://taodaily.io/pareton-sn10-tunes-engys-qwen3-8-for-faster-production-inference-on-bittensor/",
+      "sn": 10
+    },
+    {
+      "when": "Oct 2",
+      "title": "Bittensor’s Revenue-Generating Subnets Now Exceed $50 Million Annualized",
+      "body": "Subnet revenue has surpassed $50 million annualized, up more than 40% in a month as external demand grows and more subnets use revenue to fund alpha buybacks.",
+      "href": "https://taodaily.io/bittensors-revenue-generating-subnets-now-exceed-50-million-annualized/",
+      "sn": null
+    },
     {
       "when": "Oct 2",
       "title": "How OpenRoboto (SN80) Is Connecting Real-World Data, Model Training and Physical Robots",
@@ -22,27 +43,6 @@
       "body": "Jon Durbin showed how Chutes is approaching decentralized AI training, including an 8B model trained for roughly $6,500 that can run at nearly 60 tokens per…",
       "href": "https://taodaily.io/jon-durbin-shows-an-8b-model-trained-for-6500-running-at-60-tokens-per-second-on-a-phone/",
       "sn": null
-    },
-    {
-      "when": "Oct 2",
-      "title": "Gamma Gives Bittensor an x402-Style Way to Pay for Subnet Services",
-      "body": "Gamma could become Bittensor’s x402-style payment layer, letting users burn alpha for stable subnet credits used to pay for compute, inference, data, and…",
-      "href": "https://taodaily.io/gamma-gives-bittensor-an-x402-style-way-to-pay-for-subnet-services/",
-      "sn": null
-    },
-    {
-      "when": "Oct 1",
-      "title": "Two Days in Montreal Show Where Bittensor Is Heading Next",
-      "body": "Exploit Summit ’26 wrapped in Montreal with product demos, Pitchtensor, Gamma discussions, new subnet updates, and a stronger focus on Bittensor’s working…",
-      "href": "https://taodaily.io/two-days-in-montreal-show-where-bittensor-is-heading-next/",
-      "sn": null
-    },
-    {
-      "when": "Oct 1",
-      "title": "Synth (SN50) Adds Volatility to Its Crypto Forecasting Score",
-      "body": "Synth (SN50) has launched Volatility CRPS in its Crypto 1h competition, adding a new way to measure whether 1,000 simulated price paths capture not only…",
-      "href": "https://taodaily.io/synth-sn50-adds-volatility-to-its-crypto-forecasting-score/",
-      "sn": 50
     }
   ]
 }
