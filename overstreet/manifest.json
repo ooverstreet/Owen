@@ -1,0 +1,18 @@
+{
+  "name": "Overstreet Cleaning Solutions",
+  "short_name": "Overstreet",
+  "description": "Day, week, and house notes for Overstreet Cleaning Solutions.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0F2744",
+  "theme_color": "#0F2744",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
