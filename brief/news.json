@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-03T16:20:27Z",
+  "generated_at": "2026-10-03T22:10:08Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 3",
+      "title": "UMI Is Starting With Sign Language to Teach Machines What Human Movement Means",
+      "body": "UMI (SN78) is using Bittensor miners to build sign language intelligence, with smart glasses, healthcare deployments and a broader plan to help machines…",
+      "href": "https://taodaily.io/umi-is-starting-with-sign-language-to-teach-machines-what-human-movement-means/",
+      "sn": 78
+    },
     {
       "when": "Oct 3",
       "title": "Bittensor Gains 37% as Grayscale Highlights Growing AI Crypto Momentum",
@@ -35,13 +42,6 @@
       "title": "OMG, Connito Is Building Specialist AI Skills Without Messing With the Base Model",
       "body": "Connito is testing a new way to give AI models specialist skills in areas like math, code, medicine, law and finance without changing the base model itself.",
       "href": "https://taodaily.io/omg-connito-is-building-specialist-ai-skills-without-messing-with-the-base-model/",
-      "sn": null
-    },
-    {
-      "when": "Oct 2",
-      "title": "Jon Durbin Shows an 8B Model Trained for $6,500 Running at 60 Tokens Per Second on a Phone",
-      "body": "Jon Durbin showed how Chutes is approaching decentralized AI training, including an 8B model trained for roughly $6,500 that can run at nearly 60 tokens per…",
-      "href": "https://taodaily.io/jon-durbin-shows-an-8b-model-trained-for-6500-running-at-60-tokens-per-second-on-a-phone/",
       "sn": null
     }
   ]
