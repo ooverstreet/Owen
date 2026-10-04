@@ -1482,15 +1482,19 @@ function renderTake() {
   $('take').innerHTML = `<h3>For you</h3><p>${copy[state.role] || copy.curious}</p>`;
 }
 
-function utcDayStamp() {
-  return new Date().toISOString().slice(0, 10);
+function localDayStamp() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
 }
 
 function todayShop() {
   const rows = state.rows || [];
   const pool = HIGHLIGHT_IDS.map(id => rows.find(r => r.netuid === id)).filter(r => r && r.emission_enabled !== false);
   if (!pool.length) return null;
-  const [y, m, d] = utcDayStamp().split('-').map(Number);
+  const [y, m, d] = localDayStamp().split('-').map(Number);
   const n = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(2026, 0, 1)) / 86400000);
   const i = ((n % pool.length) + pool.length) % pool.length;
   return pool[i];
@@ -1603,8 +1607,8 @@ function renderToday() {
   if (!el) return;
   const r = todayShop();
   if (!r) { el.innerHTML = ''; return; }
-  const day = utcDayStamp();
-  const when = new Date(day + 'T12:00:00Z').toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+  const day = localDayStamp();
+  const when = new Date(day + 'T12:00:00').toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
   const apy = apyBlurb(state.yield[r.netuid]);
   const showApy = apy && (state.yield[r.netuid] || {}).apy > 0;
   el.innerHTML = `<div class="today">
