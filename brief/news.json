@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-03T22:10:08Z",
+  "generated_at": "2026-10-04T16:52:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 4",
+      "title": "Chutes (SN64)’ Kappa Matches Llama 3.2 1B on 94% Fewer Tokens",
+      "body": "Chutes (SN64) trained Kappa on Bittensor’s decentralized GPU network, matching Llama 3.2 1B across several benchmarks with roughly 94% fewer training tokens.",
+      "href": "https://taodaily.io/chutes-sn64-kappa-matches-llama-3-2-1b-on-94-fewer-tokens/",
+      "sn": 64
+    },
+    {
+      "when": "Oct 3",
+      "title": "NIOME Targets 100 Million Genomic Datasets as Its Research Network Expands",
+      "body": "NIOME (SN55) adds government-backed genomics to its growing commercial footprint through a Scottish partnership using AI, synthetic data and Bittensor compute.",
+      "href": "https://taodaily.io/niome-targets-100-million-genomic-datasets-as-its-research-network-expands/",
+      "sn": 55
+    },
     {
       "when": "Oct 3",
       "title": "UMI Is Starting With Sign Language to Teach Machines What Human Movement Means",
@@ -28,20 +42,6 @@
       "title": "Bittensor’s Revenue-Generating Subnets Now Exceed $50 Million Annualized",
       "body": "Subnet revenue has surpassed $50 million annualized, up more than 40% in a month as external demand grows and more subnets use revenue to fund alpha buybacks.",
       "href": "https://taodaily.io/bittensors-revenue-generating-subnets-now-exceed-50-million-annualized/",
-      "sn": null
-    },
-    {
-      "when": "Oct 2",
-      "title": "How OpenRoboto (SN80) Is Connecting Real-World Data, Model Training and Physical Robots",
-      "body": "OpenRoboto (SN80) is connecting real-world robot data, Bittensor model training, harder benchmarks and physical testing to build a full robotics learning loop.",
-      "href": "https://taodaily.io/how-openroboto-sn80-is-connecting-real-world-data-model-training-and-physical-robots/",
-      "sn": 80
-    },
-    {
-      "when": "Oct 2",
-      "title": "OMG, Connito Is Building Specialist AI Skills Without Messing With the Base Model",
-      "body": "Connito is testing a new way to give AI models specialist skills in areas like math, code, medicine, law and finance without changing the base model itself.",
-      "href": "https://taodaily.io/omg-connito-is-building-specialist-ai-skills-without-messing-with-the-base-model/",
       "sn": null
     }
   ]
