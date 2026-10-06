@@ -858,7 +858,7 @@ nav.tabs {
       </div>
       <div class="guide-card">
         <h3>What happens to your TAO</h3>
-        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, approve in Nova, then Refresh · live. When parked TAO crosses the next whole number — 19 to 20 — Your book marks it with a small +1. That is still staked, not free in Nova.</p>
+        <p>After you approve, TAO leaves your free balance and sits with a validator. Parked TAO stays TAO. On a shop it becomes that shop’s token. Gains stay inside the stake — they do not land as free TAO by themselves. To get TAO back, tap Unstake, approve in Nova, then Refresh · live. When parked TAO crosses the next whole number — 19 to 20 — Your book marks it with a small +1. That is still staked, not free in Nova. Lines under 1 τ show four decimals, so 0.19 can move to 0.1912 before it ever becomes 0.20.</p>
       </div>
       <div class="guide-card">
         <h3>How to pick a shop</h3>
@@ -1218,6 +1218,13 @@ function fmtTao(n, d=2) {
   if (n == null) return '—';
   if (Math.abs(n) >= 1000) return Math.round(n).toLocaleString() + ' τ';
   return n.toFixed(d) + ' τ';
+}
+function fmtBookTao(n) {
+  if (n == null || !Number.isFinite(Number(n))) return '—';
+  const x = Number(n);
+  if (Math.abs(x) >= 1000) return Math.round(x).toLocaleString() + ' τ';
+  if (Math.abs(x) >= 1) return x.toFixed(2) + ' τ';
+  return x.toFixed(4) + ' τ';
 }
 function fmtPct(n, d=2) {
   if (n == null) return '—';
@@ -2247,8 +2254,8 @@ function renderYouBook() {
     <div class="sleeve">
       <div class="book-head"><h3>Your book</h3><button type="button" data-refresh-book>${y.chain ? 'Refresh · live' : 'Refresh · snapshot'}</button></div>
       <div class="meta" style="margin:8px 0 4px">
-        <span><b>${fmtTao(free, 2)}</b> free</span>
-        <span><b>${fmtTao(total, 2)}</b> staked</span>
+        <span><b>${fmtBookTao(free)}</b> free</span>
+        <span><b>${fmtBookTao(total)}</b> staked</span>
       </div>
       ${notch ? `<button type="button" class="notch" data-dismiss-notch>
         <i class="tau">τ</i>
@@ -2265,7 +2272,7 @@ function renderYouBook() {
         const grew = notch && Number(p.netuid) === 0;
         return `<div class="pos${grew ? ' grew' : ''}">
           <b>${esc(name)}${pos && pos.pending ? '<small>on chain</small>' : ''}</b>
-          <i>${fmtTao(p.tao, 2)}${grew ? `<em class="notch-pill">+${notch.steps}</em>` : ''}</i>
+          <i>${fmtBookTao(p.tao)}${grew ? `<em class="notch-pill">+${notch.steps}</em>` : ''}</i>
           ${pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" data-rao="${pos.stake_rao != null ? pos.stake_rao : ''}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
       }).join('')}
@@ -2279,7 +2286,7 @@ function renderYouBook() {
   if (!rows.length && free < 0.01) {
     verdict = 'Nothing staked on this address, and almost no free TAO.';
   } else if (!rows.length) {
-    verdict = `This address has ${fmtTao(free, 2)} free and nothing on shops yet. Park it, or pick a shop.`;
+    verdict = `This address has ${fmtBookTao(free)} free and nothing on shops yet. Park it, or pick a shop.`;
   } else if (workPct >= 0.45) {
     verdict = `A large slice of this book (${(workPct*100).toFixed(0)}%) is already on live shops like Chutes, Lium, or Targon.`;
   } else if (rows.length >= 8) {
@@ -2293,8 +2300,8 @@ function renderYouBook() {
       <h3>Public book · ${esc(shortAddr(y.ss58))}</h3>
       <p class="why">${esc(verdict)}</p>
       <div class="meta" style="margin:8px 0 4px">
-        <span><b>${fmtTao(total, 1)}</b> in shops</span>
-        <span><b>${fmtTao(free, 2)}</b> free TAO</span>
+        <span><b>${fmtBookTao(total)}</b> in shops</span>
+        <span><b>${fmtBookTao(free)}</b> free TAO</span>
         <span><b>${rows.length}</b> shops</span>
         <span><b>${(workPct*100).toFixed(0)}%</b> on live shops</span>
       </div>
@@ -2308,7 +2315,7 @@ function renderYouBook() {
           <button data-sn="${p.netuid}" type="button" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:left">
             <span class="badge ${g}">${gradeLabel(g)}</span>
             <b>SN${p.netuid} ${esc(row.name || '')}</b>
-            <i>${fmtTao(p.tao, 1)} · ${pct.toFixed(1)}%</i>
+            <i>${fmtBookTao(p.tao)} · ${pct.toFixed(1)}%</i>
           </button>
           ${canSign && pos ? `<button class="btn-ghost" type="button" data-unstake="${p.netuid}" data-hotkey="${esc(pos.hotkey || '')}" data-amt="${p.tao}" data-rao="${pos.stake_rao != null ? pos.stake_rao : ''}" style="height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--line);font-size:12px">Unstake</button>` : ''}
         </div>`;
@@ -2683,12 +2690,12 @@ function renderAllocate() {
   el.innerHTML = `<div class="alloc-box">
     <h3>${isRoot ? 'Park TAO' : 'Stake on ' + destShort(a.netuid)}</h3>
     <p class="why">${esc(why)}</p>
-    ${have ? `<p class="have-line">You already have <b>${fmtTao(have.tao, 2)}</b> on ${esc(isRoot ? 'Root' : destShort(a.netuid))}. That sits with the validator — not in Brief, and not in Nova’s Staking list.</p>` : ''}
+    ${have ? `<p class="have-line">You already have <b>${fmtBookTao(have.tao)}</b> on ${esc(isRoot ? 'Root' : destShort(a.netuid))}. That sits with the validator — not in Brief, and not in Nova’s Staking list.</p>` : ''}
     ${w && !bookReady ? `<p class="hint">Loading the book for ${esc(shortAddr(w.address))}…</p>` : ''}
     ${!signing && w ? `<p class="warn-line">This browser can show the stake, but it cannot sign. Open Nova → Browser → this same link to approve.</p>` : ''}
     ${onPhone() && !w && !canSignHere() ? `<p class="warn-line">On a phone, open this site inside Nova’s Browser — Chrome can only look.</p>` : ''}
     <div class="alloc-fields">
-      <label>${free != null ? `How much · ${fmtTao(free, 2)} free` : 'How much'}</label>
+      <label>${free != null ? `How much · ${fmtBookTao(free)} free` : 'How much'}</label>
       <input id="alloc-amt" type="text" inputmode="decimal" placeholder="0.00" value="${esc(a.amount)}" aria-label="Amount in TAO">
       <div class="amt-presets dests">
         <button type="button" class="tippy" data-amt-preset="0.1" data-tip="A small first try. Good when you are just seeing if staking works.">0.1</button>
@@ -2701,7 +2708,7 @@ function renderAllocate() {
         ${dests.map(id => {
           const pill = destPill(id);
           const row = yOk ? bookHave(y, id) : null;
-          const sub = row ? fmtTao(row.tao, 2) + ' here' : pill.sub;
+          const sub = row ? fmtBookTao(row.tao) + ' here' : pill.sub;
           return `<button type="button" class="tippy ${Number(a.netuid)===Number(id)?'on':''}" data-dest="${id}" data-tip="${esc(destTip(id))}"><span>${esc(pill.title)}</span><small>${esc(sub)}</small></button>`;
         }).join('')}
       </div>
