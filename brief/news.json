@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-10-04T16:52:05Z",
+  "generated_at": "2026-10-06T18:26:20Z",
   "source": "https://taodaily.io/feed/",
   "items": [
     {
-      "when": "Oct 4",
-      "title": "Chutes (SN64)’ Kappa Matches Llama 3.2 1B on 94% Fewer Tokens",
-      "body": "Chutes (SN64) trained Kappa on Bittensor’s decentralized GPU network, matching Llama 3.2 1B across several benchmarks with roughly 94% fewer training tokens.",
-      "href": "https://taodaily.io/chutes-sn64-kappa-matches-llama-3-2-1b-on-94-fewer-tokens/",
-      "sn": 64
-    },
-    {
-      "when": "Oct 3",
-      "title": "NIOME Targets 100 Million Genomic Datasets as Its Research Network Expands",
-      "body": "NIOME (SN55) adds government-backed genomics to its growing commercial footprint through a Scottish partnership using AI, synthetic data and Bittensor compute.",
-      "href": "https://taodaily.io/niome-targets-100-million-genomic-datasets-as-its-research-network-expands/",
-      "sn": 55
-    },
-    {
-      "when": "Oct 3",
-      "title": "UMI Is Starting With Sign Language to Teach Machines What Human Movement Means",
-      "body": "UMI (SN78) is using Bittensor miners to build sign language intelligence, with smart glasses, healthcare deployments and a broader plan to help machines…",
-      "href": "https://taodaily.io/umi-is-starting-with-sign-language-to-teach-machines-what-human-movement-means/",
-      "sn": 78
-    },
-    {
-      "when": "Oct 3",
-      "title": "Bittensor Gains 37% as Grayscale Highlights Growing AI Crypto Momentum",
-      "body": "Bittensor gained 37% in September 2026 as Grayscale’s AI Crypto Sector rose 54%, highlighting growing interest in blockchain infrastructure for the emerging…",
-      "href": "https://taodaily.io/bittensor-gains-37-as-grayscale-highlights-growing-ai-crypto-momentum/",
+      "when": "Oct 6",
+      "title": "Grayscale Adds Coinbase Custody to Its Bittensor Trust Ahead of Potential ETF Approval",
+      "body": "Grayscale adds Coinbase as a second custodian for its Bittensor Trust, strengthening GTAO’s custody setup as its proposed spot ETF conversion remains under…",
+      "href": "https://taodaily.io/grayscale-adds-coinbase-custody-to-its-bittensor-trust-ahead-of-potential-etf-approval/",
       "sn": null
     },
     {
-      "when": "Oct 3",
-      "title": "Pareton (SN10) Tunes Engy’s Qwen3.8 for Faster Production Inference on Bittensor",
-      "body": "Pareton (SN10) and Engy (SN53) have launched a partnership that puts optimised Qwen3.8 into live traffic on Engy’s verified inference network.",
-      "href": "https://taodaily.io/pareton-sn10-tunes-engys-qwen3-8-for-faster-production-inference-on-bittensor/",
-      "sn": 10
+      "when": "Oct 6",
+      "title": "Siam Kidd on What Bittensor Still Needs to Reach Its Next Stage",
+      "body": "Siam Kidd says Bittensor needs more commercial revenue and greater economic stability to attract institutional capital, while remaining bullish on TAO’s…",
+      "href": "https://taodaily.io/siam-kidd-on-what-bittensor-still-needs-to-reach-its-next-stage/",
+      "sn": null
     },
     {
-      "when": "Oct 2",
-      "title": "Bittensor’s Revenue-Generating Subnets Now Exceed $50 Million Annualized",
-      "body": "Subnet revenue has surpassed $50 million annualized, up more than 40% in a month as external demand grows and more subnets use revenue to fund alpha buybacks.",
-      "href": "https://taodaily.io/bittensors-revenue-generating-subnets-now-exceed-50-million-annualized/",
+      "when": "Oct 6",
+      "title": "Subnet Summer and Medulla Labs Are Building Bittensor’s First Democratised Validator",
+      "body": "Subnet Summer and Medulla Labs discuss a democratised Bittensor validator, combining honest validation, community voting, education and on-chain transparency.",
+      "href": "https://taodaily.io/subnet-summer-and-medulla-labs-are-building-bittensors-first-democratised-validator/",
       "sn": null
+    },
+    {
+      "when": "Oct 6",
+      "title": "TPN v0.2 Changes How Optimized AI Models Are Scored on Bittensor",
+      "body": "TPN v0.2 introduces Fluid Bench on SN65, using secret dynamic benchmarks to measure intelligence loss in compressed AI models and make miner scoring more…",
+      "href": "https://taodaily.io/tpn-v0-2-changes-how-optimized-ai-models-are-scored-on-bittensor/",
+      "sn": 65
+    },
+    {
+      "when": "Oct 5",
+      "title": "This New Bittensor Update Is Cleaning Up Tiny Alpha Holdings in Your Wallet",
+      "body": "Bittensor’s latest update is automatically clearing tiny Alpha holdings, returning eligible balances as TAO and removing near-worthless wallet dust.",
+      "href": "https://taodaily.io/this-new-bittensor-update-is-cleaning-up-tiny-alpha-holdings-in-your-wallet/",
+      "sn": null
+    },
+    {
+      "when": "Oct 5",
+      "title": "SayGM (SN28) Shows Off New Dashboard With Multi-Model Chat, Private AI Routing and Custom Workflows",
+      "body": "SayGM (SN28) has unveiled a closer look at its latest dashboard, bringing multi-model chat, image generation, privacy guardrails, custom model workflows and…",
+      "href": "https://taodaily.io/saygm-sn28-shows-off-new-dashboard-with-multi-model-chat-private-ai-routing-and-custom-workflows/",
+      "sn": 28
     }
   ]
 }
