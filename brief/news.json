@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-10-06T18:26:20Z",
+  "generated_at": "2026-10-07T18:58:04Z",
   "source": "https://taodaily.io/feed/",
   "items": [
     {
-      "when": "Oct 6",
-      "title": "Grayscale Adds Coinbase Custody to Its Bittensor Trust Ahead of Potential ETF Approval",
-      "body": "Grayscale adds Coinbase as a second custodian for its Bittensor Trust, strengthening GTAO’s custody setup as its proposed spot ETF conversion remains under…",
-      "href": "https://taodaily.io/grayscale-adds-coinbase-custody-to-its-bittensor-trust-ahead-of-potential-etf-approval/",
+      "when": "Oct 7",
+      "title": "You Can Now Earn Alpha by Referring Developers to SayGM",
+      "body": "SayGM’s new affiliate program lets people earn Subnet 28 alpha by referring developers, with rewards of up to $1 in alpha for every $1 spent.",
+      "href": "https://taodaily.io/you-can-now-earn-alpha-by-referring-developers-to-saygm/",
       "sn": null
     },
     {
-      "when": "Oct 6",
-      "title": "Siam Kidd on What Bittensor Still Needs to Reach Its Next Stage",
-      "body": "Siam Kidd says Bittensor needs more commercial revenue and greater economic stability to attract institutional capital, while remaining bullish on TAO’s…",
-      "href": "https://taodaily.io/siam-kidd-on-what-bittensor-still-needs-to-reach-its-next-stage/",
+      "when": "Oct 7",
+      "title": "SEC Filing Reveals Manako’s Physical AI Is Now Live Across 124 French Fuel Stations",
+      "body": "SEC filing reveals Manako Labs has deployed its Physical AI system across 124 Avia Xpress fuel stations in France, marking a major commercial rollout for…",
+      "href": "https://taodaily.io/sec-filing-reveals-manakos-physical-ai-is-now-live-across-124-french-fuel-stations/",
       "sn": null
     },
     {
-      "when": "Oct 6",
-      "title": "Subnet Summer and Medulla Labs Are Building Bittensor’s First Democratised Validator",
-      "body": "Subnet Summer and Medulla Labs discuss a democratised Bittensor validator, combining honest validation, community voting, education and on-chain transparency.",
-      "href": "https://taodaily.io/subnet-summer-and-medulla-labs-are-building-bittensors-first-democratised-validator/",
-      "sn": null
+      "when": "Oct 7",
+      "title": "Lium vs. Green Compute: Which GPU Subnet Handles AI Agents Better?",
+      "body": "Lium (SN51) and Green Compute (SN110) face a real-world GPU rental test, comparing AI agent onboarding, RTX 4090 performance, availability and pricing on…",
+      "href": "https://taodaily.io/lium-vs-green-compute-which-gpu-subnet-handles-ai-agents-better/",
+      "sn": 51
+    },
+    {
+      "when": "Oct 7",
+      "title": "toks, Actual (SN95)’s Tokenizer, Is Up to 151x Faster Than Hugging Face",
+      "body": "Actual (SN95) launches toks, a new tokenizer up to 151x faster than Hugging Face, built for efficient AI workloads across everyday computing hardware.",
+      "href": "https://taodaily.io/toks-actual-sn95s-tokenizer-is-up-to-151x-faster-than-hugging-face/",
+      "sn": 95
+    },
+    {
+      "when": "Oct 7",
+      "title": "How Risky Are Bittensor Alpha Tokens? Endure Network (SN30) Wants to Find Out",
+      "body": "Endure Network (SN30) is now live on Bittensor, using competing forecasts to measure the risk of Alpha tokens and produce open, market-tested risk intelligence.",
+      "href": "https://taodaily.io/how-risky-are-bittensor-alpha-tokens-endure-network-sn30-wants-to-find-out/",
+      "sn": 30
     },
     {
       "when": "Oct 6",
-      "title": "TPN v0.2 Changes How Optimized AI Models Are Scored on Bittensor",
-      "body": "TPN v0.2 introduces Fluid Bench on SN65, using secret dynamic benchmarks to measure intelligence loss in compressed AI models and make miner scoring more…",
-      "href": "https://taodaily.io/tpn-v0-2-changes-how-optimized-ai-models-are-scored-on-bittensor/",
-      "sn": 65
-    },
-    {
-      "when": "Oct 5",
-      "title": "This New Bittensor Update Is Cleaning Up Tiny Alpha Holdings in Your Wallet",
-      "body": "Bittensor’s latest update is automatically clearing tiny Alpha holdings, returning eligible balances as TAO and removing near-worthless wallet dust.",
-      "href": "https://taodaily.io/this-new-bittensor-update-is-cleaning-up-tiny-alpha-holdings-in-your-wallet/",
+      "title": "Cameron Fairchild Explains What’s Really Going On With Ridges",
+      "body": "Cameron explains the thinking behind Ridges’ recent changes, its mixture-of-agents vision and how Ridges could eventually get used without users even…",
+      "href": "https://taodaily.io/cameron-fairchild-explains-whats-really-going-on-with-ridges/",
       "sn": null
-    },
-    {
-      "when": "Oct 5",
-      "title": "SayGM (SN28) Shows Off New Dashboard With Multi-Model Chat, Private AI Routing and Custom Workflows",
-      "body": "SayGM (SN28) has unveiled a closer look at its latest dashboard, bringing multi-model chat, image generation, privacy guardrails, custom model workflows and…",
-      "href": "https://taodaily.io/saygm-sn28-shows-off-new-dashboard-with-multi-model-chat-private-ai-routing-and-custom-workflows/",
-      "sn": 28
     }
   ]
 }
