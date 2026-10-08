@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-07T18:58:04Z",
+  "generated_at": "2026-10-08T18:52:38Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 8",
+      "title": "SN33 Eyes $100K Revenue as September Buybacks Surge 45%",
+      "body": "ReadyAI nears $100K in annualized revenue from its Jobs API as September token buybacks surge 45%, with new AI skills and Skill Store 33 set to drive…",
+      "href": "https://taodaily.io/sn33-eyes-100k-revenue-as-september-buybacks-surge-45/",
+      "sn": 33
+    },
+    {
+      "when": "Oct 8",
+      "title": "Your Team Can Manage Hippius Cloud Resources Without Sharing a Single Password",
+      "body": "Hippius (SN75) launches Shared Accounts, allowing teams to manage cloud infrastructure with individual logins, controlled permissions, and centralized…",
+      "href": "https://taodaily.io/your-team-can-manage-hippius-cloud-resources-without-sharing-a-single-password/",
+      "sn": 75
+    },
+    {
+      "when": "Oct 8",
+      "title": "ChipForge’s NPU Challenge for Open Edge AI Chip Design Goes Live",
+      "body": "ChipForge (SN108) has launched its NPU Challenge, inviting engineers to design and optimize edge AI chips through open competition on Bittensor, with a path…",
+      "href": "https://taodaily.io/chipforges-npu-challenge-for-open-edge-ai-chip-design-goes-live/",
+      "sn": 108
+    },
     {
       "when": "Oct 7",
       "title": "You Can Now Earn Alpha by Referring Developers to SayGM",
@@ -22,27 +43,6 @@
       "body": "Lium (SN51) and Green Compute (SN110) face a real-world GPU rental test, comparing AI agent onboarding, RTX 4090 performance, availability and pricing on…",
       "href": "https://taodaily.io/lium-vs-green-compute-which-gpu-subnet-handles-ai-agents-better/",
       "sn": 51
-    },
-    {
-      "when": "Oct 7",
-      "title": "toks, Actual (SN95)’s Tokenizer, Is Up to 151x Faster Than Hugging Face",
-      "body": "Actual (SN95) launches toks, a new tokenizer up to 151x faster than Hugging Face, built for efficient AI workloads across everyday computing hardware.",
-      "href": "https://taodaily.io/toks-actual-sn95s-tokenizer-is-up-to-151x-faster-than-hugging-face/",
-      "sn": 95
-    },
-    {
-      "when": "Oct 7",
-      "title": "How Risky Are Bittensor Alpha Tokens? Endure Network (SN30) Wants to Find Out",
-      "body": "Endure Network (SN30) is now live on Bittensor, using competing forecasts to measure the risk of Alpha tokens and produce open, market-tested risk intelligence.",
-      "href": "https://taodaily.io/how-risky-are-bittensor-alpha-tokens-endure-network-sn30-wants-to-find-out/",
-      "sn": 30
-    },
-    {
-      "when": "Oct 6",
-      "title": "Cameron Fairchild Explains What’s Really Going On With Ridges",
-      "body": "Cameron explains the thinking behind Ridges’ recent changes, its mixture-of-agents vision and how Ridges could eventually get used without users even…",
-      "href": "https://taodaily.io/cameron-fairchild-explains-whats-really-going-on-with-ridges/",
-      "sn": null
     }
   ]
 }
