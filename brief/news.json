@@ -1,10 +1,17 @@
 {
-  "generated_at": "2026-10-08T18:52:38Z",
+  "generated_at": "2026-10-08T23:45:39Z",
   "source": "https://taodaily.io/feed/",
   "items": [
     {
       "when": "Oct 8",
-      "title": "SN33 Eyes $100K Revenue as September Buybacks Surge 45%",
+      "title": "Desearch (SN22) MCP Comes to Gemini CLI, Bringing Real-Time Web and X Data to AI Agents",
+      "body": "Desearch (SN22) has launched its MCP server as a Gemini CLI extension, giving AI developers a simpler way to bring real-time web search, X data and page…",
+      "href": "https://taodaily.io/desearch-sn22-mcp-comes-to-gemini-cli-bringing-real-time-web-and-x-data-to-ai-agents/",
+      "sn": 22
+    },
+    {
+      "when": "Oct 8",
+      "title": "SN33 Eyes $100K+ Revenue as September Buybacks Surge 45%",
       "body": "ReadyAI nears $100K in annualized revenue from its Jobs API as September token buybacks surge 45%, with new AI skills and Skill Store 33 set to drive…",
       "href": "https://taodaily.io/sn33-eyes-100k-revenue-as-september-buybacks-surge-45/",
       "sn": 33
@@ -36,13 +43,6 @@
       "body": "SEC filing reveals Manako Labs has deployed its Physical AI system across 124 Avia Xpress fuel stations in France, marking a major commercial rollout for…",
       "href": "https://taodaily.io/sec-filing-reveals-manakos-physical-ai-is-now-live-across-124-french-fuel-stations/",
       "sn": null
-    },
-    {
-      "when": "Oct 7",
-      "title": "Lium vs. Green Compute: Which GPU Subnet Handles AI Agents Better?",
-      "body": "Lium (SN51) and Green Compute (SN110) face a real-world GPU rental test, comparing AI agent onboarding, RTX 4090 performance, availability and pricing on…",
-      "href": "https://taodaily.io/lium-vs-green-compute-which-gpu-subnet-handles-ai-agents-better/",
-      "sn": 51
     }
   ]
 }
