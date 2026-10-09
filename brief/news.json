@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-10-08T23:45:39Z",
+  "generated_at": "2026-10-09T18:23:12Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 9",
+      "title": "TAO.com and Forge Partner to Unlock Lending for Bittensor Alpha Holders",
+      "body": "Forge partners with TAO.com to bring alpha collateral lending to Bittensor mainnet, allowing holders to borrow TAO against subnet tokens without selling…",
+      "href": "https://taodaily.io/tao-com-and-forge-partner-to-unlock-lending-for-bittensor-alpha-holders/",
+      "sn": null
+    },
+    {
+      "when": "Oct 9",
+      "title": "Hermes Agent Can Now Move Data Across Clouds Using Beam (SN105)",
+      "body": "Beam (SN105) integrates Nous Research’s Hermes Agent, enabling autonomous AI agents to move and stream data across cloud platforms, private infrastructure,…",
+      "href": "https://taodaily.io/hermes-agent-can-now-move-data-across-clouds-using-beam-sn105/",
+      "sn": 105
+    },
+    {
+      "when": "Oct 9",
+      "title": "CookingTAO (SN122) Earns a Spot in Anthropic’s Claude Startups Program",
+      "body": "CookingTAO (SN122) joins Anthropic's Claude Startups Program, gaining AI tools and technical support to improve its Bittensor mining portal and make mining…",
+      "href": "https://taodaily.io/cookingtao-sn122-earns-a-spot-in-anthropics-claude-startups-program/",
+      "sn": 122
+    },
+    {
+      "when": "Oct 8",
+      "title": "Cascade (SN91) Outperforms Toto2. Here’s What the Founders Say About Where the Subnet Is Going",
+      "body": "Cascade (SN91) beats Datadog's Toto2 on key forecasting benchmarks with 85% less training data, as the subnet expands into AI forecasting APIs and trading…",
+      "href": "https://taodaily.io/cascade-sn91-outperforms-toto2-heres-what-the-founders-say-about-where-the-subnet-is-going/",
+      "sn": 91
+    },
     {
       "when": "Oct 8",
       "title": "Desearch (SN22) MCP Comes to Gemini CLI, Bringing Real-Time Web and X Data to AI Agents",
@@ -15,34 +43,6 @@
       "body": "ReadyAI nears $100K in annualized revenue from its Jobs API as September token buybacks surge 45%, with new AI skills and Skill Store 33 set to drive…",
       "href": "https://taodaily.io/sn33-eyes-100k-revenue-as-september-buybacks-surge-45/",
       "sn": 33
-    },
-    {
-      "when": "Oct 8",
-      "title": "Your Team Can Manage Hippius Cloud Resources Without Sharing a Single Password",
-      "body": "Hippius (SN75) launches Shared Accounts, allowing teams to manage cloud infrastructure with individual logins, controlled permissions, and centralized…",
-      "href": "https://taodaily.io/your-team-can-manage-hippius-cloud-resources-without-sharing-a-single-password/",
-      "sn": 75
-    },
-    {
-      "when": "Oct 8",
-      "title": "ChipForge’s NPU Challenge for Open Edge AI Chip Design Goes Live",
-      "body": "ChipForge (SN108) has launched its NPU Challenge, inviting engineers to design and optimize edge AI chips through open competition on Bittensor, with a path…",
-      "href": "https://taodaily.io/chipforges-npu-challenge-for-open-edge-ai-chip-design-goes-live/",
-      "sn": 108
-    },
-    {
-      "when": "Oct 7",
-      "title": "You Can Now Earn Alpha by Referring Developers to SayGM",
-      "body": "SayGM’s new affiliate program lets people earn Subnet 28 alpha by referring developers, with rewards of up to $1 in alpha for every $1 spent.",
-      "href": "https://taodaily.io/you-can-now-earn-alpha-by-referring-developers-to-saygm/",
-      "sn": null
-    },
-    {
-      "when": "Oct 7",
-      "title": "SEC Filing Reveals Manako’s Physical AI Is Now Live Across 124 French Fuel Stations",
-      "body": "SEC filing reveals Manako Labs has deployed its Physical AI system across 124 Avia Xpress fuel stations in France, marking a major commercial rollout for…",
-      "href": "https://taodaily.io/sec-filing-reveals-manakos-physical-ai-is-now-live-across-124-french-fuel-stations/",
-      "sn": null
     }
   ]
 }
