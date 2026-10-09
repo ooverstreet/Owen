@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-09T18:23:12Z",
+  "generated_at": "2026-10-09T23:17:51Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 9",
+      "title": "All You Need to Know About the Migration From $GENOME to $NIOME",
+      "body": "The long-awaited migration from $GENOME to $NIOME is set to begin on October 28, 2026, following an announcement by the NIOME team on October 9. The process…",
+      "href": "https://taodaily.io/all-you-need-to-know-about-the-migration-from-genome-to-niome/",
+      "sn": null
+    },
     {
       "when": "Oct 9",
       "title": "TAO.com and Forge Partner to Unlock Lending for Bittensor Alpha Holders",
@@ -36,13 +43,6 @@
       "body": "Desearch (SN22) has launched its MCP server as a Gemini CLI extension, giving AI developers a simpler way to bring real-time web search, X data and page…",
       "href": "https://taodaily.io/desearch-sn22-mcp-comes-to-gemini-cli-bringing-real-time-web-and-x-data-to-ai-agents/",
       "sn": 22
-    },
-    {
-      "when": "Oct 8",
-      "title": "SN33 Eyes $100K+ Revenue as September Buybacks Surge 45%",
-      "body": "ReadyAI nears $100K in annualized revenue from its Jobs API as September token buybacks surge 45%, with new AI skills and Skill Store 33 set to drive…",
-      "href": "https://taodaily.io/sn33-eyes-100k-revenue-as-september-buybacks-surge-45/",
-      "sn": 33
     }
   ]
 }
