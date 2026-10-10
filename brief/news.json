@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-09T23:17:51Z",
+  "generated_at": "2026-10-10T17:21:56Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 10",
+      "title": "TAO Is About To Go Parabolic?",
+      "body": "TAO has spent years absorbing heavy sell pressure while Bittensor quietly built real businesses, institutional access and stronger demand. The setup is…",
+      "href": "https://taodaily.io/tao-is-about-to-go-parabolic/",
+      "sn": null
+    },
+    {
+      "when": "Oct 10",
+      "title": "Hippius Confidential VMs Record 99.84% Success Rate in Eight-Day Security Test",
+      "body": "Hippius (SN75) confidential VMs recorded a 99.84% success rate in an eight-day independent security test, demonstrating data protection, reliable…",
+      "href": "https://taodaily.io/hippius-confidential-vms-record-99-84-success-rate-in-eight-day-security-test/",
+      "sn": 75
+    },
     {
       "when": "Oct 9",
       "title": "All You Need to Know About the Migration From $GENOME to $NIOME",
@@ -29,20 +43,6 @@
       "body": "CookingTAO (SN122) joins Anthropic's Claude Startups Program, gaining AI tools and technical support to improve its Bittensor mining portal and make mining…",
       "href": "https://taodaily.io/cookingtao-sn122-earns-a-spot-in-anthropics-claude-startups-program/",
       "sn": 122
-    },
-    {
-      "when": "Oct 8",
-      "title": "Cascade (SN91) Outperforms Toto2. Here’s What the Founders Say About Where the Subnet Is Going",
-      "body": "Cascade (SN91) beats Datadog's Toto2 on key forecasting benchmarks with 85% less training data, as the subnet expands into AI forecasting APIs and trading…",
-      "href": "https://taodaily.io/cascade-sn91-outperforms-toto2-heres-what-the-founders-say-about-where-the-subnet-is-going/",
-      "sn": 91
-    },
-    {
-      "when": "Oct 8",
-      "title": "Desearch (SN22) MCP Comes to Gemini CLI, Bringing Real-Time Web and X Data to AI Agents",
-      "body": "Desearch (SN22) has launched its MCP server as a Gemini CLI extension, giving AI developers a simpler way to bring real-time web search, X data and page…",
-      "href": "https://taodaily.io/desearch-sn22-mcp-comes-to-gemini-cli-bringing-real-time-web-and-x-data-to-ai-agents/",
-      "sn": 22
     }
   ]
 }
