@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-10T17:21:56Z",
+  "generated_at": "2026-10-10T22:36:13Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 10",
+      "title": "How Weight Copying Is Affecting Fair Rewards in Bittensor",
+      "body": "Weight copying in Bittensor lets validators earn rewards without evaluating miners, raising concerns about unfair payouts, staking incentives, and reliable…",
+      "href": "https://taodaily.io/how-weight-copying-is-affecting-fair-rewards-in-bittensor/",
+      "sn": null
+    },
+    {
+      "when": "Oct 10",
+      "title": "Ditto (SN118) Launches Partner Program to Expand Its Business Reach",
+      "body": "Ditto (SN118) launches a partner program offering setup fees and recurring commissions to partners who bring businesses onto its AI platform.",
+      "href": "https://taodaily.io/ditto-sn118-launches-partner-program-to-expand-its-business-reach/",
+      "sn": 118
+    },
     {
       "when": "Oct 10",
       "title": "TAO Is About To Go Parabolic?",
@@ -29,20 +43,6 @@
       "body": "Forge partners with TAO.com to bring alpha collateral lending to Bittensor mainnet, allowing holders to borrow TAO against subnet tokens without selling…",
       "href": "https://taodaily.io/tao-com-and-forge-partner-to-unlock-lending-for-bittensor-alpha-holders/",
       "sn": null
-    },
-    {
-      "when": "Oct 9",
-      "title": "Hermes Agent Can Now Move Data Across Clouds Using Beam (SN105)",
-      "body": "Beam (SN105) integrates Nous Research’s Hermes Agent, enabling autonomous AI agents to move and stream data across cloud platforms, private infrastructure,…",
-      "href": "https://taodaily.io/hermes-agent-can-now-move-data-across-clouds-using-beam-sn105/",
-      "sn": 105
-    },
-    {
-      "when": "Oct 9",
-      "title": "CookingTAO (SN122) Earns a Spot in Anthropic’s Claude Startups Program",
-      "body": "CookingTAO (SN122) joins Anthropic's Claude Startups Program, gaining AI tools and technical support to improve its Bittensor mining portal and make mining…",
-      "href": "https://taodaily.io/cookingtao-sn122-earns-a-spot-in-anthropics-claude-startups-program/",
-      "sn": 122
     }
   ]
 }
