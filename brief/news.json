@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-11T17:42:09Z",
+  "generated_at": "2026-10-11T22:57:06Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 11",
+      "title": "How to Place Public and Private Limit Orders on TaoSwap",
+      "body": "Learn how TaoSwap’s new public and private limit orders give Bittensor traders greater control over alpha token trades, pricing, and privacy.",
+      "href": "https://taodaily.io/how-to-place-public-and-private-limit-orders-on-taoswap/",
+      "sn": null
+    },
     {
       "when": "Oct 11",
       "title": "A Jevolution Is Coming to Bittensor",
@@ -36,13 +43,6 @@
       "body": "TAO has spent years absorbing heavy sell pressure while Bittensor quietly built real businesses, institutional access and stronger demand. The setup is…",
       "href": "https://taodaily.io/tao-is-about-to-go-parabolic/",
       "sn": null
-    },
-    {
-      "when": "Oct 10",
-      "title": "Hippius Confidential VMs Record 99.84% Success Rate in Eight-Day Security Test",
-      "body": "Hippius (SN75) confidential VMs recorded a 99.84% success rate in an eight-day independent security test, demonstrating data protection, reliable…",
-      "href": "https://taodaily.io/hippius-confidential-vms-record-99-84-success-rate-in-eight-day-security-test/",
-      "sn": 75
     }
   ]
 }
