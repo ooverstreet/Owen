@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-10T22:36:13Z",
+  "generated_at": "2026-10-11T17:42:09Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 11",
+      "title": "A Jevolution Is Coming to Bittensor",
+      "body": "Discover what Jev is, how its fast and low-cost AI decision-making works, and how Bittensor subnets are using it for robotics, compression, and more.",
+      "href": "https://taodaily.io/a-jevolution-is-coming-to-bittensor/",
+      "sn": null
+    },
+    {
+      "when": "Oct 10",
+      "title": "Affine (SN120)’s King Model Gets a 40.9% Throughput Boost From Cacheon (SN14)",
+      "body": "Cacheon (SN14) boosts Affine (SN120)'s King model inference throughput by 40.9% in two weeks, reaching 528.9 tokens per second as Affine becomes its first…",
+      "href": "https://taodaily.io/affine-sn120s-king-model-gets-a-40-9-throughput-boost-from-cacheon-sn14/",
+      "sn": 120
+    },
     {
       "when": "Oct 10",
       "title": "How Weight Copying Is Affecting Fair Rewards in Bittensor",
@@ -29,20 +43,6 @@
       "body": "Hippius (SN75) confidential VMs recorded a 99.84% success rate in an eight-day independent security test, demonstrating data protection, reliable…",
       "href": "https://taodaily.io/hippius-confidential-vms-record-99-84-success-rate-in-eight-day-security-test/",
       "sn": 75
-    },
-    {
-      "when": "Oct 9",
-      "title": "All You Need to Know About the Migration From $GENOME to $NIOME",
-      "body": "The long-awaited migration from $GENOME to $NIOME is set to begin on October 28, 2026, following an announcement by the NIOME team on October 9. The process…",
-      "href": "https://taodaily.io/all-you-need-to-know-about-the-migration-from-genome-to-niome/",
-      "sn": null
-    },
-    {
-      "when": "Oct 9",
-      "title": "TAO.com and Forge Partner to Unlock Lending for Bittensor Alpha Holders",
-      "body": "Forge partners with TAO.com to bring alpha collateral lending to Bittensor mainnet, allowing holders to borrow TAO against subnet tokens without selling…",
-      "href": "https://taodaily.io/tao-com-and-forge-partner-to-unlock-lending-for-bittensor-alpha-holders/",
-      "sn": null
     }
   ]
 }
