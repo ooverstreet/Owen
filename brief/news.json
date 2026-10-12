@@ -1,47 +1,47 @@
 {
-  "generated_at": "2026-10-11T22:57:06Z",
+  "generated_at": "2026-10-12T21:17:39Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 12",
+      "title": "TPN Just Made an AI Model 40% Smaller, and This Could Be a Big Deal",
+      "body": "TPN (SN65) unveils TPN005, its first production-ready AI model, 40% smaller than Ministral-3-8B while preserving its 32K context window through Bittensor…",
+      "href": "https://taodaily.io/tpn-just-made-an-ai-model-40-smaller-and-this-could-be-a-big-deal/",
+      "sn": 65
+    },
+    {
+      "when": "Oct 12",
+      "title": "Three AI Models Achieve Near-Perfect Design Scores With ReadyAI (SN33) Skill",
+      "body": "Three AI models achieved near-perfect design scores using ReadyAI (SN33)'s social-carousel skill, highlighting how specialized AI skills improve design…",
+      "href": "https://taodaily.io/three-ai-models-achieve-near-perfect-design-scores-with-readyai-sn33-skill/",
+      "sn": 33
+    },
+    {
+      "when": "Oct 12",
+      "title": "Yanez’s US Banking Partnership Opens the Door to Multiple Fintech Clients",
+      "body": "Yanez (SN54) partners with a US sponsor bank to expand its reach across fintech companies, securing its first paying client and opening new opportunities…",
+      "href": "https://taodaily.io/yanezs-us-banking-partnership-opens-the-door-to-multiple-fintech-clients/",
+      "sn": 54
+    },
+    {
+      "when": "Oct 12",
+      "title": "The Race for Faster AI Inference Is Heating Up on Bittensor (SN14 vs SN46)",
+      "body": "Cacheon (SN14) and Instant (SN46) compete to make AI inference faster on Bittensor. Explore their latest speed test results.",
+      "href": "https://taodaily.io/the-race-for-faster-ai-inference-is-heating-up-on-bittensor-sn14-vs-sn46/",
+      "sn": 14
+    },
+    {
+      "when": "Oct 12",
+      "title": "You Can Now Earn 10% in Referral Commissions on Engy (SN53)",
+      "body": "Engy (SN53) launches a referral program offering 10% of referred customers’ API spending for 12 months, with earnings payable in USDC or API credits.",
+      "href": "https://taodaily.io/you-can-now-earn-10-in-referral-commissions-on-engy-sn53/",
+      "sn": 53
+    },
     {
       "when": "Oct 11",
       "title": "How to Place Public and Private Limit Orders on TaoSwap",
       "body": "Learn how TaoSwap’s new public and private limit orders give Bittensor traders greater control over alpha token trades, pricing, and privacy.",
       "href": "https://taodaily.io/how-to-place-public-and-private-limit-orders-on-taoswap/",
-      "sn": null
-    },
-    {
-      "when": "Oct 11",
-      "title": "A Jevolution Is Coming to Bittensor",
-      "body": "Discover what Jev is, how its fast and low-cost AI decision-making works, and how Bittensor subnets are using it for robotics, compression, and more.",
-      "href": "https://taodaily.io/a-jevolution-is-coming-to-bittensor/",
-      "sn": null
-    },
-    {
-      "when": "Oct 10",
-      "title": "Affine (SN120)’s King Model Gets a 40.9% Throughput Boost From Cacheon (SN14)",
-      "body": "Cacheon (SN14) boosts Affine (SN120)'s King model inference throughput by 40.9% in two weeks, reaching 528.9 tokens per second as Affine becomes its first…",
-      "href": "https://taodaily.io/affine-sn120s-king-model-gets-a-40-9-throughput-boost-from-cacheon-sn14/",
-      "sn": 120
-    },
-    {
-      "when": "Oct 10",
-      "title": "How Weight Copying Is Affecting Fair Rewards in Bittensor",
-      "body": "Weight copying in Bittensor lets validators earn rewards without evaluating miners, raising concerns about unfair payouts, staking incentives, and reliable…",
-      "href": "https://taodaily.io/how-weight-copying-is-affecting-fair-rewards-in-bittensor/",
-      "sn": null
-    },
-    {
-      "when": "Oct 10",
-      "title": "Ditto (SN118) Launches Partner Program to Expand Its Business Reach",
-      "body": "Ditto (SN118) launches a partner program offering setup fees and recurring commissions to partners who bring businesses onto its AI platform.",
-      "href": "https://taodaily.io/ditto-sn118-launches-partner-program-to-expand-its-business-reach/",
-      "sn": 118
-    },
-    {
-      "when": "Oct 10",
-      "title": "TAO Is About To Go Parabolic?",
-      "body": "TAO has spent years absorbing heavy sell pressure while Bittensor quietly built real businesses, institutional access and stronger demand. The setup is…",
-      "href": "https://taodaily.io/tao-is-about-to-go-parabolic/",
       "sn": null
     }
   ]
