@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-12T21:17:39Z",
+  "generated_at": "2026-10-13T19:19:44Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 13",
+      "title": "Beam Extends Data Transfers to “Box” for AI Agents",
+      "body": "Beam expands its data transfer capabilities to Box, enabling AI agents to move files across cloud storage platforms and automate enterprise workflows.",
+      "href": "https://taodaily.io/beam-extends-data-transfers-to-box-for-ai-agents/",
+      "sn": null
+    },
+    {
+      "when": "Oct 13",
+      "title": "TAO May Have Too Much Liquidity and Yuma’s ASMR Wants to Fix It",
+      "body": "Yuma's ASMR proposal aims to fix excess liquidity in Bittensor subnet markets, improve alpha price discovery, and make prices more responsive to real…",
+      "href": "https://taodaily.io/tao-may-have-too-much-liquidity-and-yumas-asmr-wants-to-fix-it/",
+      "sn": null
+    },
+    {
+      "when": "Oct 13",
+      "title": "Why Are All These Billionaires Investing in TAO?",
+      "body": "Some of tech and crypto’s most experienced investors are putting money around Bittensor. The interesting question is what they see coming.",
+      "href": "https://taodaily.io/why-are-all-these-billionaires-investing-in-tao/",
+      "sn": null
+    },
     {
       "when": "Oct 12",
       "title": "TPN Just Made an AI Model 40% Smaller, and This Could Be a Big Deal",
@@ -22,27 +43,6 @@
       "body": "Yanez (SN54) partners with a US sponsor bank to expand its reach across fintech companies, securing its first paying client and opening new opportunities…",
       "href": "https://taodaily.io/yanezs-us-banking-partnership-opens-the-door-to-multiple-fintech-clients/",
       "sn": 54
-    },
-    {
-      "when": "Oct 12",
-      "title": "The Race for Faster AI Inference Is Heating Up on Bittensor (SN14 vs SN46)",
-      "body": "Cacheon (SN14) and Instant (SN46) compete to make AI inference faster on Bittensor. Explore their latest speed test results.",
-      "href": "https://taodaily.io/the-race-for-faster-ai-inference-is-heating-up-on-bittensor-sn14-vs-sn46/",
-      "sn": 14
-    },
-    {
-      "when": "Oct 12",
-      "title": "You Can Now Earn 10% in Referral Commissions on Engy (SN53)",
-      "body": "Engy (SN53) launches a referral program offering 10% of referred customers’ API spending for 12 months, with earnings payable in USDC or API credits.",
-      "href": "https://taodaily.io/you-can-now-earn-10-in-referral-commissions-on-engy-sn53/",
-      "sn": 53
-    },
-    {
-      "when": "Oct 11",
-      "title": "How to Place Public and Private Limit Orders on TaoSwap",
-      "body": "Learn how TaoSwap’s new public and private limit orders give Bittensor traders greater control over alpha token trades, pricing, and privacy.",
-      "href": "https://taodaily.io/how-to-place-public-and-private-limit-orders-on-taoswap/",
-      "sn": null
     }
   ]
 }
