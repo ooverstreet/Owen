@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-13T19:19:44Z",
+  "generated_at": "2026-10-13T23:19:42Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 13",
+      "title": "Perturb Whitepaper 3.0 Outlines Plans for a Decentralized AI Security Marketplace",
+      "body": "Perturb (SN26) unveils Whitepaper 3.0, outlining a decentralized AI security marketplace that rewards vulnerability discovery, model training, and…",
+      "href": "https://taodaily.io/perturb-whitepaper-3-0-outlines-plans-for-a-decentralized-ai-security-marketplace/",
+      "sn": 26
+    },
     {
       "when": "Oct 13",
       "title": "Beam Extends Data Transfers to “Box” for AI Agents",
@@ -36,13 +43,6 @@
       "body": "Three AI models achieved near-perfect design scores using ReadyAI (SN33)'s social-carousel skill, highlighting how specialized AI skills improve design…",
       "href": "https://taodaily.io/three-ai-models-achieve-near-perfect-design-scores-with-readyai-sn33-skill/",
       "sn": 33
-    },
-    {
-      "when": "Oct 12",
-      "title": "Yanez’s US Banking Partnership Opens the Door to Multiple Fintech Clients",
-      "body": "Yanez (SN54) partners with a US sponsor bank to expand its reach across fintech companies, securing its first paying client and opening new opportunities…",
-      "href": "https://taodaily.io/yanezs-us-banking-partnership-opens-the-door-to-multiple-fintech-clients/",
-      "sn": 54
     }
   ]
 }
