@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-14T17:15:29Z",
+  "generated_at": "2026-10-14T23:21:44Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 14",
+      "title": "From NASA to Biotech, Meet the Miners Competing on NOVA (SN68)",
+      "body": "Meet the miners behind NOVA (SN68), where a former NASA data scientist, a biotech researcher, and a math competitor use Bittensor to advance drug discovery…",
+      "href": "https://taodaily.io/from-nasa-to-biotech-meet-the-miners-competing-on-nova-sn68/",
+      "sn": 68
+    },
+    {
+      "when": "Oct 14",
+      "title": "THOR (SN112)’s Ambition to Become the Hugging Face of Robotics",
+      "body": "THOR (SN112) aims to become the Hugging Face of robotics, using Bittensor to build a decentralized marketplace for verified training data, AI models, and…",
+      "href": "https://taodaily.io/thor-sn112s-ambition-to-become-the-hugging-face-of-robotics/",
+      "sn": 112
+    },
+    {
+      "when": "Oct 14",
+      "title": "Bittensor’s $50M Revenue Story and How TAO Compares to Crypto and AI Giants",
+      "body": "Bittensor subnets now generate over $50 million in annualized revenue. See how TAO compares with major cryptocurrencies, decentralized AI networks, and AI…",
+      "href": "https://taodaily.io/bittensors-50m-revenue-story-and-how-tao-compares-to-crypto-and-ai-giants/",
+      "sn": null
+    },
     {
       "when": "Oct 14",
       "title": "Bittensor’s SayGM Named Provider of the Year by TokenGauge",
@@ -21,27 +42,6 @@
       "title": "Taostats Introduces a $9 Pro Power Plan With Tax Reports, Batch Transfers and More API Access",
       "body": "Taostats has launched a $9 monthly pro Power plan with 24 months of tax data, grouped accounts, batch transfers and increased API access for Bittensor users.",
       "href": "https://taodaily.io/taostats-introduces-a-9-pro-power-plan-with-tax-reports-batch-transfers-and-more-api-access/",
-      "sn": null
-    },
-    {
-      "when": "Oct 13",
-      "title": "Perturb Whitepaper 3.0 Outlines Plans for a Decentralized AI Security Marketplace",
-      "body": "Perturb (SN26) unveils Whitepaper 3.0, outlining a decentralized AI security marketplace that rewards vulnerability discovery, model training, and…",
-      "href": "https://taodaily.io/perturb-whitepaper-3-0-outlines-plans-for-a-decentralized-ai-security-marketplace/",
-      "sn": 26
-    },
-    {
-      "when": "Oct 13",
-      "title": "Beam Extends Data Transfers to “Box” for AI Agents",
-      "body": "Beam expands its data transfer capabilities to Box, enabling AI agents to move files across cloud storage platforms and automate enterprise workflows.",
-      "href": "https://taodaily.io/beam-extends-data-transfers-to-box-for-ai-agents/",
-      "sn": null
-    },
-    {
-      "when": "Oct 13",
-      "title": "TAO May Have Too Much Liquidity and Yuma’s ASMR Wants to Fix It",
-      "body": "Yuma's ASMR proposal aims to fix excess liquidity in Bittensor subnet markets, improve alpha price discovery, and make prices more responsive to real…",
-      "href": "https://taodaily.io/tao-may-have-too-much-liquidity-and-yumas-asmr-wants-to-fix-it/",
       "sn": null
     }
   ]
