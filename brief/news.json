@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-13T23:19:42Z",
+  "generated_at": "2026-10-14T17:15:29Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 14",
+      "title": "Bittensor’s SayGM Named Provider of the Year by TokenGauge",
+      "body": "SayGM (SN28) has been named TokenGauge’s 2026 Provider of the Year, offering the lowest real-time prices on 17 of 21 AI models compared.",
+      "href": "https://taodaily.io/bittensors-saygm-named-provider-of-the-year-by-tokengauge/",
+      "sn": 28
+    },
+    {
+      "when": "Oct 14",
+      "title": "Newly Registered Bittensor Subnets’ Immunity Period Now Down to 60 Days, From 120",
+      "body": "Bittensor cuts subnet immunity from 120 to 60 days and halves registration lock-cost decay from 16 to 8 days, easing entry for new projects while increasing…",
+      "href": "https://taodaily.io/newly-registered-bittensor-subnets-immunity-period-now-down-to-60-days-from-120/",
+      "sn": null
+    },
+    {
+      "when": "Oct 14",
+      "title": "Taostats Introduces a $9 Pro Power Plan With Tax Reports, Batch Transfers and More API Access",
+      "body": "Taostats has launched a $9 monthly pro Power plan with 24 months of tax data, grouped accounts, batch transfers and increased API access for Bittensor users.",
+      "href": "https://taodaily.io/taostats-introduces-a-9-pro-power-plan-with-tax-reports-batch-transfers-and-more-api-access/",
+      "sn": null
+    },
     {
       "when": "Oct 13",
       "title": "Perturb Whitepaper 3.0 Outlines Plans for a Decentralized AI Security Marketplace",
@@ -22,27 +43,6 @@
       "body": "Yuma's ASMR proposal aims to fix excess liquidity in Bittensor subnet markets, improve alpha price discovery, and make prices more responsive to real…",
       "href": "https://taodaily.io/tao-may-have-too-much-liquidity-and-yumas-asmr-wants-to-fix-it/",
       "sn": null
-    },
-    {
-      "when": "Oct 13",
-      "title": "Why Are All These Billionaires Investing in TAO?",
-      "body": "Some of tech and crypto’s most experienced investors are putting money around Bittensor. The interesting question is what they see coming.",
-      "href": "https://taodaily.io/why-are-all-these-billionaires-investing-in-tao/",
-      "sn": null
-    },
-    {
-      "when": "Oct 12",
-      "title": "TPN Just Made an AI Model 40% Smaller, and This Could Be a Big Deal",
-      "body": "TPN (SN65) unveils TPN005, its first production-ready AI model, 40% smaller than Ministral-3-8B while preserving its 32K context window through Bittensor…",
-      "href": "https://taodaily.io/tpn-just-made-an-ai-model-40-smaller-and-this-could-be-a-big-deal/",
-      "sn": 65
-    },
-    {
-      "when": "Oct 12",
-      "title": "Three AI Models Achieve Near-Perfect Design Scores With ReadyAI (SN33) Skill",
-      "body": "Three AI models achieved near-perfect design scores using ReadyAI (SN33)'s social-carousel skill, highlighting how specialized AI skills improve design…",
-      "href": "https://taodaily.io/three-ai-models-achieve-near-perfect-design-scores-with-readyai-sn33-skill/",
-      "sn": 33
     }
   ]
 }
