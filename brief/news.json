@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-15T17:05:06Z",
+  "generated_at": "2026-10-15T22:22:56Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 15",
+      "title": "How Decision Models’ Faster and Cheaper AI Decisions Are Powered by REAX (SN92)",
+      "body": "Learn how DecisionModels delivers fast, affordable AI decisions and how REAX (SN92) plans to power decentralized inference on Bittensor.",
+      "href": "https://taodaily.io/how-decision-models-faster-and-cheaper-ai-decisions-are-powered-by-reax-sn92/",
+      "sn": 92
+    },
     {
       "when": "Oct 15",
       "title": "Hippius Drive Now Lets Users Record Screens Without Compromising Privacy",
@@ -36,13 +43,6 @@
       "body": "Bittensor subnets now generate over $50 million in annualized revenue. See how TAO compares with major cryptocurrencies, decentralized AI networks, and AI…",
       "href": "https://taodaily.io/bittensors-50m-revenue-story-and-how-tao-compares-to-crypto-and-ai-giants/",
       "sn": null
-    },
-    {
-      "when": "Oct 14",
-      "title": "Bittensor’s SayGM Named Provider of the Year by TokenGauge",
-      "body": "SayGM (SN28) has been named TokenGauge’s 2026 Provider of the Year, offering the lowest real-time prices on 17 of 21 AI models compared.",
-      "href": "https://taodaily.io/bittensors-saygm-named-provider-of-the-year-by-tokengauge/",
-      "sn": 28
     }
   ]
 }
