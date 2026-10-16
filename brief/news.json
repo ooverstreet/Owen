@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-16T16:42:50Z",
+  "generated_at": "2026-10-16T22:06:30Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 16",
+      "title": "How Engy (SN53) Processed ~50 Billion Tokens in 24 Hours",
+      "body": "Engy processed over 50 billion AI tokens in 24 hours, marking fivefold monthly growth as it powers affordable, verifiable inference for open-weight AI models.",
+      "href": "https://taodaily.io/how-engy-sn53-processed-50-billion-tokens-in-24-hours/",
+      "sn": 53
+    },
+    {
+      "when": "Oct 16",
+      "title": "UR (SN25) Brings 100,000+ Network Providers to Bittensor",
+      "body": "UR (SN25) has taken its decentralised privacy network live on Bittensor mainnet, bringing over 100,000 network providers and introducing a reserve for…",
+      "href": "https://taodaily.io/ur-sn25-brings-100000-network-providers-to-bittensor/",
+      "sn": 25
+    },
     {
       "when": "Oct 16",
       "title": "TPN-005 Reduced Model Size by 57%, TPN-006 Pushes For Tighter Memory Limits",
@@ -29,20 +43,6 @@
       "body": "Learn how DecisionModels delivers fast, affordable AI decisions and how REAX (SN92) plans to power decentralized inference on Bittensor.",
       "href": "https://taodaily.io/how-decision-models-faster-and-cheaper-ai-decisions-are-powered-by-reax-sn92/",
       "sn": 92
-    },
-    {
-      "when": "Oct 15",
-      "title": "Hippius Drive Now Lets Users Record Screens Without Compromising Privacy",
-      "body": "Hippius (SN75) launches encrypted 4K screen recording, letting users capture, store, and share videos securely with zero-knowledge encryption across web and…",
-      "href": "https://taodaily.io/hippius-drive-now-lets-users-record-screens-without-compromising-privacy/",
-      "sn": 75
-    },
-    {
-      "when": "Oct 15",
-      "title": "Leo Chan on Almanac’s (SN41) Pivot, Building Through Noise, and Opening Mining to Everyone",
-      "body": "Leo discusses Almanac’s move from sports predictions to prediction markets, building through difficult periods, and making mining accessible through AI agents.",
-      "href": "https://taodaily.io/leo-chan-on-almanacs-sn41-pivot-building-through-noise-and-opening-mining-to-everyone/",
-      "sn": 41
     }
   ]
 }
