@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-15T22:22:56Z",
+  "generated_at": "2026-10-16T16:42:50Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 16",
+      "title": "TPN-005 Reduced Model Size by 57%, TPN-006 Pushes For Tighter Memory Limits",
+      "body": "TPN (SN65) cuts an 8B AI model's size by 57% while improving its knowledge score in TPN-005, then launches TPN-006 with a tighter 8GiB memory limit for AI…",
+      "href": "https://taodaily.io/tpn-005-reduced-model-size-by-57-tpn-006-pushes-for-tighter-memory-limits/",
+      "sn": 65
+    },
+    {
+      "when": "Oct 15",
+      "title": "OpenRoboto (SN80) Gives Robotics Data Collectors Solana Identities and Wallets Through peaq",
+      "body": "OpenRoboto (SN80) integrates peaqOS Pro, giving 30 robotics data collectors Solana identities and wallets, with plans to introduce machine financing.",
+      "href": "https://taodaily.io/openroboto-sn80-gives-robotics-data-collectors-solana-identities-and-wallets-through-peaq/",
+      "sn": 80
+    },
+    {
+      "when": "Oct 15",
+      "title": "Bittensor Introduces Null Consensus, Allowing Up to 2,500 Miners Per Subnet",
+      "body": "Bittensor introduces Null Consensus, allowing up to 2,500 participants per subnet, expanding miner capacity and offering a new way to distribute rewards.",
+      "href": "https://taodaily.io/bittensor-introduces-null-consensus-allowing-up-to-2500-miners-per-subnet/",
+      "sn": null
+    },
     {
       "when": "Oct 15",
       "title": "How Decision Models’ Faster and Cheaper AI Decisions Are Powered by REAX (SN92)",
@@ -22,27 +43,6 @@
       "body": "Leo discusses Almanac’s move from sports predictions to prediction markets, building through difficult periods, and making mining accessible through AI agents.",
       "href": "https://taodaily.io/leo-chan-on-almanacs-sn41-pivot-building-through-noise-and-opening-mining-to-everyone/",
       "sn": 41
-    },
-    {
-      "when": "Oct 14",
-      "title": "From NASA to Biotech, Meet the Miners Competing on NOVA (SN68)",
-      "body": "Meet the miners behind NOVA (SN68), where a former NASA data scientist, a biotech researcher, and a math competitor use Bittensor to advance drug discovery…",
-      "href": "https://taodaily.io/from-nasa-to-biotech-meet-the-miners-competing-on-nova-sn68/",
-      "sn": 68
-    },
-    {
-      "when": "Oct 14",
-      "title": "THOR (SN112)’s Ambition to Become the Hugging Face of Robotics",
-      "body": "THOR (SN112) aims to become the Hugging Face of robotics, using Bittensor to build a decentralized marketplace for verified training data, AI models, and…",
-      "href": "https://taodaily.io/thor-sn112s-ambition-to-become-the-hugging-face-of-robotics/",
-      "sn": 112
-    },
-    {
-      "when": "Oct 14",
-      "title": "Bittensor’s $50M Revenue Story and How TAO Compares to Crypto and AI Giants",
-      "body": "Bittensor subnets now generate over $50 million in annualized revenue. See how TAO compares with major cryptocurrencies, decentralized AI networks, and AI…",
-      "href": "https://taodaily.io/bittensors-50m-revenue-story-and-how-tao-compares-to-crypto-and-ai-giants/",
-      "sn": null
     }
   ]
 }
