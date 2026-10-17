@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-17T15:39:13Z",
+  "generated_at": "2026-10-17T21:29:24Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 17",
+      "title": "‘Talking Targon’ Ep. 01 With Const on eTAO and Subnet Economics",
+      "body": "Talking Targon debuts with Const explaining how eTAO gives subnet owners flexible emissions and could help Targon (SN4) expand computing capacity.",
+      "href": "https://taodaily.io/talking-targon-ep-01-with-const-on-etao-and-subnet-economics/",
+      "sn": 4
+    },
+    {
+      "when": "Oct 17",
+      "title": "Backprop Finance Brings Bittensor Alpha Trading to Telegram",
+      "body": "Backprop Finance lets Bittensor traders buy and sell subnet alpha tokens through Telegram, making dTAO trading easier to access.",
+      "href": "https://taodaily.io/backprop-finance-brings-bittensor-alpha-trading-to-telegram/",
+      "sn": null
+    },
     {
       "when": "Oct 17",
       "title": "Florian Explains Why Decision Models Could Be Much Bigger Than Chatbots",
@@ -29,20 +43,6 @@
       "body": "UR (SN25) has taken its decentralised privacy network live on Bittensor mainnet, bringing over 100,000 network providers and introducing a reserve for…",
       "href": "https://taodaily.io/ur-sn25-brings-100000-network-providers-to-bittensor/",
       "sn": 25
-    },
-    {
-      "when": "Oct 16",
-      "title": "TPN-005 Reduced Model Size by 57%, TPN-006 Pushes For Tighter Memory Limits",
-      "body": "TPN (SN65) cuts an 8B AI model's size by 57% while improving its knowledge score in TPN-005, then launches TPN-006 with a tighter 8GiB memory limit for AI…",
-      "href": "https://taodaily.io/tpn-005-reduced-model-size-by-57-tpn-006-pushes-for-tighter-memory-limits/",
-      "sn": 65
-    },
-    {
-      "when": "Oct 15",
-      "title": "OpenRoboto (SN80) Gives Robotics Data Collectors Solana Identities and Wallets Through peaq",
-      "body": "OpenRoboto (SN80) integrates peaqOS Pro, giving 30 robotics data collectors Solana identities and wallets, with plans to introduce machine financing.",
-      "href": "https://taodaily.io/openroboto-sn80-gives-robotics-data-collectors-solana-identities-and-wallets-through-peaq/",
-      "sn": 80
     }
   ]
 }
