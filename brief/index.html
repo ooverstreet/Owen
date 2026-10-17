@@ -1318,7 +1318,8 @@ async function load() {
   state.rows = merge(catalog, economics);
   state.summary = (eco && eco.data && eco.data.summary) || (snap && snap.summary) || null;
   state.taoUsd = (eco && eco.data && eco.data.tao_usd) || null;
-  state.priceLive = !!(state.taoUsd && state.taoUsd.usd_per_tao != null);
+  const livePx = num(state.taoUsd && state.taoUsd.usd_per_tao);
+  state.priceLive = livePx != null && livePx > 0;
   state.generatedAt = (eco && (eco.data.generated_at || eco.meta && eco.meta.published_at)) || (snap && snap.generated_at) || null;
   state.live = !!eco;
   render();
@@ -1440,8 +1441,9 @@ function showStatTip(id) {
 function taoPrice() {
   const t = state.taoUsd;
   const px = num(t && t.usd_per_tao);
-  if (px == null) return null;
-  if (state.priceLive || state.live) return px;
+  if (px == null || px <= 0) return null;
+  if (state.priceLive) return px;
+  if (state.live) return null;
   const when = Date.parse(t.observed_at || '');
   const age = Number.isFinite(when) ? Date.now() - when : Infinity;
   if (age > 12 * 3600e3) return null;
@@ -1460,7 +1462,7 @@ function renderStats() {
   const tips = {
     shops: 'How many AI shops (subnets) are on the network right now.',
     price: px == null
-      ? 'Dollar price is not in yet. We use a public chain feed, not Coinbase. Open when the live pill is on.'
+      ? 'The public dollar feed is stale. This tile is the network’s about-price for TAO — not your book. TAO is not zero. We hide the number until a real quote is back. Shop counts and parked % still come from the chain.'
       : 'About $' + px.toFixed(2) + ' from a public chain average, not Coinbase. Their number can be a few dollars different. It moves. Not a quote you can trade.',
     parked: pctPark + '% of all staked TAO is still parked on the main chain. It stays TAO. This is the whole network — not your book.',
     alpha: pctShop + '% of all staked TAO has been put on a shop and is now that shop’s token. Price can move. This is the whole network — not your book.'
