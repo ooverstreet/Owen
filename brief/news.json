@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-16T22:06:30Z",
+  "generated_at": "2026-10-17T15:39:13Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 17",
+      "title": "Florian Explains Why Decision Models Could Be Much Bigger Than Chatbots",
+      "body": "REAX founder Florian joined Mark Jeffrey to explain why decision models could become a major part of AI software and why Bittensor is well suited to build them.",
+      "href": "https://taodaily.io/florian-explains-why-decision-models-could-be-much-bigger-than-chatbots/",
+      "sn": null
+    },
+    {
+      "when": "Oct 16",
+      "title": "eTAO Gives Subnets More Control Over Emissions as Gamma Development Advances",
+      "body": "eTAO lets subnets customize miner, validator, and owner rewards, while Gamma aims to enable cross-subnet purchases of compute, storage, and other AI services.",
+      "href": "https://taodaily.io/etao-gives-subnets-more-control-over-emissions-as-gamma-development-advances/",
+      "sn": null
+    },
     {
       "when": "Oct 16",
       "title": "How Engy (SN53) Processed ~50 Billion Tokens in 24 Hours",
@@ -29,20 +43,6 @@
       "body": "OpenRoboto (SN80) integrates peaqOS Pro, giving 30 robotics data collectors Solana identities and wallets, with plans to introduce machine financing.",
       "href": "https://taodaily.io/openroboto-sn80-gives-robotics-data-collectors-solana-identities-and-wallets-through-peaq/",
       "sn": 80
-    },
-    {
-      "when": "Oct 15",
-      "title": "Bittensor Introduces Null Consensus, Allowing Up to 2,500 Miners Per Subnet",
-      "body": "Bittensor introduces Null Consensus, allowing up to 2,500 participants per subnet, expanding miner capacity and offering a new way to distribute rewards.",
-      "href": "https://taodaily.io/bittensor-introduces-null-consensus-allowing-up-to-2500-miners-per-subnet/",
-      "sn": null
-    },
-    {
-      "when": "Oct 15",
-      "title": "How Decision Models’ Faster and Cheaper AI Decisions Are Powered by REAX (SN92)",
-      "body": "Learn how DecisionModels delivers fast, affordable AI decisions and how REAX (SN92) plans to power decentralized inference on Bittensor.",
-      "href": "https://taodaily.io/how-decision-models-faster-and-cheaper-ai-decisions-are-powered-by-reax-sn92/",
-      "sn": 92
     }
   ]
 }
