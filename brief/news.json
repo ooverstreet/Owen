@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-17T21:29:24Z",
+  "generated_at": "2026-10-18T15:54:54Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 18",
+      "title": "Apex (SN1) and Bitstarter Partner to Help Teams Test Ideas Before Launch",
+      "body": "Apex and Bitstarter partner to help Bittensor teams test incentive mechanisms with real miners, reduce launch costs, and improve projects before launching…",
+      "href": "https://taodaily.io/apex-sn1-and-bitstarter-partner-to-help-teams-test-ideas-before-launch/",
+      "sn": 1
+    },
+    {
+      "when": "Oct 17",
+      "title": "DaniLabs Takes Over DSperse (SN2) With Plans for Faster, Cheaper AI Inference",
+      "body": "DaniLabs takes over DSperse from Inference Labs, with plans to build a privacy-focused AI inference network offering faster responses and lower costs for…",
+      "href": "https://taodaily.io/danilabs-takes-over-dsperse-sn2-with-plans-for-faster-cheaper-ai-inference/",
+      "sn": 2
+    },
     {
       "when": "Oct 17",
       "title": "‘Talking Targon’ Ep. 01 With Const on eTAO and Subnet Economics",
@@ -29,20 +43,6 @@
       "body": "eTAO lets subnets customize miner, validator, and owner rewards, while Gamma aims to enable cross-subnet purchases of compute, storage, and other AI services.",
       "href": "https://taodaily.io/etao-gives-subnets-more-control-over-emissions-as-gamma-development-advances/",
       "sn": null
-    },
-    {
-      "when": "Oct 16",
-      "title": "How Engy (SN53) Processed ~50 Billion Tokens in 24 Hours",
-      "body": "Engy processed over 50 billion AI tokens in 24 hours, marking fivefold monthly growth as it powers affordable, verifiable inference for open-weight AI models.",
-      "href": "https://taodaily.io/how-engy-sn53-processed-50-billion-tokens-in-24-hours/",
-      "sn": 53
-    },
-    {
-      "when": "Oct 16",
-      "title": "UR (SN25) Brings 100,000+ Network Providers to Bittensor",
-      "body": "UR (SN25) has taken its decentralised privacy network live on Bittensor mainnet, bringing over 100,000 network providers and introducing a reserve for…",
-      "href": "https://taodaily.io/ur-sn25-brings-100000-network-providers-to-bittensor/",
-      "sn": 25
     }
   ]
 }
