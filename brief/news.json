@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-18T15:54:54Z",
+  "generated_at": "2026-10-18T21:31:54Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 18",
+      "title": "Sentios ‘Proof of Spend’ Badges Bring Continuous AI Security Reviews Into Projects",
+      "body": "Bitsec (SN60) launches Sentios badges, allowing projects to publicly verify continuous AI-powered security reviews and build trust with users and investors.",
+      "href": "https://taodaily.io/sentios-proof-of-spend-badges-bring-continuous-ai-security-reviews-into-projects/",
+      "sn": 60
+    },
     {
       "when": "Oct 18",
       "title": "Apex (SN1) and Bitstarter Partner to Help Teams Test Ideas Before Launch",
@@ -35,13 +42,6 @@
       "title": "Florian Explains Why Decision Models Could Be Much Bigger Than Chatbots",
       "body": "REAX founder Florian joined Mark Jeffrey to explain why decision models could become a major part of AI software and why Bittensor is well suited to build them.",
       "href": "https://taodaily.io/florian-explains-why-decision-models-could-be-much-bigger-than-chatbots/",
-      "sn": null
-    },
-    {
-      "when": "Oct 16",
-      "title": "eTAO Gives Subnets More Control Over Emissions as Gamma Development Advances",
-      "body": "eTAO lets subnets customize miner, validator, and owner rewards, while Gamma aims to enable cross-subnet purchases of compute, storage, and other AI services.",
-      "href": "https://taodaily.io/etao-gives-subnets-more-control-over-emissions-as-gamma-development-advances/",
       "sn": null
     }
   ]
