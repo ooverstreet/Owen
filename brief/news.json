@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-18T21:31:54Z",
+  "generated_at": "2026-10-19T18:44:07Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 19",
+      "title": "Why Barry Silbert Chose Bittensor",
+      "body": "Evan explains why Barry Silbert and DCG chose Bittensor and why the network’s real test is whether subnets can become mainstream businesses.",
+      "href": "https://taodaily.io/why-barry-silbert-chose-bittensor/",
+      "sn": null
+    },
+    {
+      "when": "Oct 19",
+      "title": "How to Mine Lium (SN51): Get Paid for Renting Out GPUs",
+      "body": "Learn how to earn on Lium by renting out idle GPUs, collecting 95% of rental fees, earning idle rewards, and accessing incentives with eligible hardware.",
+      "href": "https://taodaily.io/how-to-mine-lium-sn51-get-paid-for-renting-out-gpus/",
+      "sn": 51
+    },
+    {
+      "when": "Oct 19",
+      "title": "Quantum Computing Is No Longer a Distant Future With Bittensor’s SN48 and SN63 at Work",
+      "body": "SN48 makes real quantum computing more accessible, while SN63 rewards research into cryptography and quantum breakthroughs through decentralized incentives.",
+      "href": "https://taodaily.io/quantum-computing-is-no-longer-a-distant-future-with-bittensors-sn48-and-sn63-at-work/",
+      "sn": 48
+    },
     {
       "when": "Oct 18",
       "title": "Sentios ‘Proof of Spend’ Badges Bring Continuous AI Security Reviews Into Projects",
@@ -22,27 +43,6 @@
       "body": "DaniLabs takes over DSperse from Inference Labs, with plans to build a privacy-focused AI inference network offering faster responses and lower costs for…",
       "href": "https://taodaily.io/danilabs-takes-over-dsperse-sn2-with-plans-for-faster-cheaper-ai-inference/",
       "sn": 2
-    },
-    {
-      "when": "Oct 17",
-      "title": "‘Talking Targon’ Ep. 01 With Const on eTAO and Subnet Economics",
-      "body": "Talking Targon debuts with Const explaining how eTAO gives subnet owners flexible emissions and could help Targon (SN4) expand computing capacity.",
-      "href": "https://taodaily.io/talking-targon-ep-01-with-const-on-etao-and-subnet-economics/",
-      "sn": 4
-    },
-    {
-      "when": "Oct 17",
-      "title": "Backprop Finance Brings Bittensor Alpha Trading to Telegram",
-      "body": "Backprop Finance lets Bittensor traders buy and sell subnet alpha tokens through Telegram, making dTAO trading easier to access.",
-      "href": "https://taodaily.io/backprop-finance-brings-bittensor-alpha-trading-to-telegram/",
-      "sn": null
-    },
-    {
-      "when": "Oct 17",
-      "title": "Florian Explains Why Decision Models Could Be Much Bigger Than Chatbots",
-      "body": "REAX founder Florian joined Mark Jeffrey to explain why decision models could become a major part of AI software and why Bittensor is well suited to build them.",
-      "href": "https://taodaily.io/florian-explains-why-decision-models-could-be-much-bigger-than-chatbots/",
-      "sn": null
     }
   ]
 }
