@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-19T18:44:07Z",
+  "generated_at": "2026-10-19T22:55:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 19",
+      "title": "eTAO Goes Live as Bittensor Subnets Make Their First Moves on Emissions",
+      "body": "eTAO upgrade is live, and subnets are already changing how they distribute rewards. Some are increasing miner allocations, while others are claiming the…",
+      "href": "https://taodaily.io/etao-goes-live-as-bittensor-subnets-make-their-first-moves-on-emissions/",
+      "sn": null
+    },
+    {
+      "when": "Oct 19",
+      "title": "One Year In, SWARM (SN124) Secures Two Customers and Opens Its Robotics Lab",
+      "body": "In one year, SWARM (SN124) signs its first two autonomous drone contracts for solar security in Greece and avalanche control in Andorra, raises €370K, and…",
+      "href": "https://taodaily.io/one-year-in-swarm-sn124-secures-two-customers-and-opens-its-robotics-lab/",
+      "sn": 124
+    },
     {
       "when": "Oct 19",
       "title": "Why Barry Silbert Chose Bittensor",
@@ -29,20 +43,6 @@
       "body": "Bitsec (SN60) launches Sentios badges, allowing projects to publicly verify continuous AI-powered security reviews and build trust with users and investors.",
       "href": "https://taodaily.io/sentios-proof-of-spend-badges-bring-continuous-ai-security-reviews-into-projects/",
       "sn": 60
-    },
-    {
-      "when": "Oct 18",
-      "title": "Apex (SN1) and Bitstarter Partner to Help Teams Test Ideas Before Launch",
-      "body": "Apex and Bitstarter partner to help Bittensor teams test incentive mechanisms with real miners, reduce launch costs, and improve projects before launching…",
-      "href": "https://taodaily.io/apex-sn1-and-bitstarter-partner-to-help-teams-test-ideas-before-launch/",
-      "sn": 1
-    },
-    {
-      "when": "Oct 17",
-      "title": "DaniLabs Takes Over DSperse (SN2) With Plans for Faster, Cheaper AI Inference",
-      "body": "DaniLabs takes over DSperse from Inference Labs, with plans to build a privacy-focused AI inference network offering faster responses and lower costs for…",
-      "href": "https://taodaily.io/danilabs-takes-over-dsperse-sn2-with-plans-for-faster-cheaper-ai-inference/",
-      "sn": 2
     }
   ]
 }
