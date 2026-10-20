@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-20T17:13:10Z",
+  "generated_at": "2026-10-20T22:19:45Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 20",
+      "title": "SayGM (SN28) Adds MiniMax H3 for Text-to-Video and Image Animation",
+      "body": "SayGM has integrated MiniMax H3 through KubeTEEAI (SN90), allowing users to generate videos from text prompts, animate photos and connect two images into a…",
+      "href": "https://taodaily.io/saygm-sn28-adds-minimax-h3-for-text-to-video-and-image-animation/",
+      "sn": 28
+    },
     {
       "when": "Oct 20",
       "title": "With Hippius (SN75)’s Confidential Computing Service, Even Server Operators Cannot See Your Data",
@@ -36,13 +43,6 @@
       "body": "Evan explains why Barry Silbert and DCG chose Bittensor and why the network’s real test is whether subnets can become mainstream businesses.",
       "href": "https://taodaily.io/why-barry-silbert-chose-bittensor/",
       "sn": null
-    },
-    {
-      "when": "Oct 19",
-      "title": "How to Mine Lium (SN51): Get Paid for Renting Out GPUs",
-      "body": "Learn how to earn on Lium by renting out idle GPUs, collecting 95% of rental fees, earning idle rewards, and accessing incentives with eligible hardware.",
-      "href": "https://taodaily.io/how-to-mine-lium-sn51-get-paid-for-renting-out-gpus/",
-      "sn": 51
     }
   ]
 }
