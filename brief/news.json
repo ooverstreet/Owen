@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-19T22:55:05Z",
+  "generated_at": "2026-10-20T17:13:10Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 20",
+      "title": "With Hippius (SN75)’s Confidential Computing Service, Even Server Operators Cannot See Your Data",
+      "body": "Hippius (SN75) launches Confidential Compute, using hardware encryption to protect sensitive data during processing, even from server operators, across…",
+      "href": "https://taodaily.io/with-hippius-sn75s-confidential-computing-service-even-server-operators-cannot-see-your-data/",
+      "sn": 75
+    },
+    {
+      "when": "Oct 20",
+      "title": "Shrinking AI Models Just Got Easier With TPN (SN65)’s New Toolkit",
+      "body": "TPN (SN65) launches a Model Quantization Toolkit, helping developers shrink AI models, reduce memory needs, and lower deployment costs without complex setup.",
+      "href": "https://taodaily.io/shrinking-ai-models-just-got-easier-with-tpn-sn65s-new-toolkit/",
+      "sn": 65
+    },
     {
       "when": "Oct 19",
       "title": "eTAO Goes Live as Bittensor Subnets Make Their First Moves on Emissions",
@@ -29,20 +43,6 @@
       "body": "Learn how to earn on Lium by renting out idle GPUs, collecting 95% of rental fees, earning idle rewards, and accessing incentives with eligible hardware.",
       "href": "https://taodaily.io/how-to-mine-lium-sn51-get-paid-for-renting-out-gpus/",
       "sn": 51
-    },
-    {
-      "when": "Oct 19",
-      "title": "Quantum Computing Is No Longer a Distant Future With Bittensor’s SN48 and SN63 at Work",
-      "body": "SN48 makes real quantum computing more accessible, while SN63 rewards research into cryptography and quantum breakthroughs through decentralized incentives.",
-      "href": "https://taodaily.io/quantum-computing-is-no-longer-a-distant-future-with-bittensors-sn48-and-sn63-at-work/",
-      "sn": 48
-    },
-    {
-      "when": "Oct 18",
-      "title": "Sentios ‘Proof of Spend’ Badges Bring Continuous AI Security Reviews Into Projects",
-      "body": "Bitsec (SN60) launches Sentios badges, allowing projects to publicly verify continuous AI-powered security reviews and build trust with users and investors.",
-      "href": "https://taodaily.io/sentios-proof-of-spend-badges-bring-continuous-ai-security-reviews-into-projects/",
-      "sn": 60
     }
   ]
 }
