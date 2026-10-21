@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-21T17:16:01Z",
+  "generated_at": "2026-10-21T22:23:32Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 21",
+      "title": "Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs",
+      "body": "Affine launched a MiniMax-H3 AI video studio and sparse-attention mining competition on Bittensor, aiming to reduce video generation costs while preserving…",
+      "href": "https://taodaily.io/affine-launches-ai-video-studio-and-mining-competition-to-reduce-video-generation-costs/",
+      "sn": null
+    },
     {
       "when": "Oct 21",
       "title": "Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats",
@@ -36,13 +43,6 @@
       "body": "Forbes contributor Tor Constantino (MBA) explored how decentralized AI could challenge Big Tech, highlighting Bittensor's potential.",
       "href": "https://taodaily.io/nearly-two-years-later-forbes-argument-for-bittensor-is-worth-revisiting/",
       "sn": null
-    },
-    {
-      "when": "Oct 20",
-      "title": "SayGM (SN28) Adds MiniMax H3 for Text-to-Video and Image Animation",
-      "body": "SayGM has integrated MiniMax H3 through KubeTEEAI (SN90), allowing users to generate videos from text prompts, animate photos and connect two images into a…",
-      "href": "https://taodaily.io/saygm-sn28-adds-minimax-h3-for-text-to-video-and-image-animation/",
-      "sn": 28
     }
   ]
 }
