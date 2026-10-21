@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-10-20T22:19:45Z",
+  "generated_at": "2026-10-21T17:16:01Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 21",
+      "title": "Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats",
+      "body": "Bittensor is testing quantum-resistant ML-DSA wallets to future-proof its network security. The experimental upgrade supports key rotation but is not yet…",
+      "href": "https://taodaily.io/bittensor-future-proofs-its-wallet-infrastructure-against-quantum-threats/",
+      "sn": null
+    },
+    {
+      "when": "Oct 21",
+      "title": "Taostats Actions Puts Every btcli Transaction Into Simple Browser Forms",
+      "body": "Taostats Actions turns common Bittensor btcli transactions into clear browser forms for staking, multisig, key swaps, and subnet settings.",
+      "href": "https://taodaily.io/taostats-actions-puts-every-btcli-transaction-into-simple-browser-forms/",
+      "sn": null
+    },
+    {
+      "when": "Oct 21",
+      "title": "This eTAO Simulator Shows How Emission Splits Under eTAO Affect Your Rewards",
+      "body": "Explore how Bittensor's eTAO simulator shows the impact of emission split decisions on subnet owners, miners, validators, and alpha stakers.",
+      "href": "https://taodaily.io/this-etao-simulator-shows-how-emission-splits-under-etao-affect-your-rewards/",
+      "sn": null
+    },
+    {
+      "when": "Oct 20",
+      "title": "Leadpoet (SN71) Launches AI Sales Agent That Finds Buyers and Automates Outreach",
+      "body": "Bittensor's Leadpoet (SN71) launches an AI sales agent, combining buying signals, personalized outreach, and automated follow-ups.",
+      "href": "https://taodaily.io/leadpoet-sn71-launches-ai-sales-agent-that-finds-buyers-and-automates-outreach/",
+      "sn": 71
+    },
+    {
+      "when": "Oct 20",
+      "title": "Nearly Two Years Later, Forbes’ Argument for Bittensor Is Worth Revisiting",
+      "body": "Forbes contributor Tor Constantino (MBA) explored how decentralized AI could challenge Big Tech, highlighting Bittensor's potential.",
+      "href": "https://taodaily.io/nearly-two-years-later-forbes-argument-for-bittensor-is-worth-revisiting/",
+      "sn": null
+    },
     {
       "when": "Oct 20",
       "title": "SayGM (SN28) Adds MiniMax H3 for Text-to-Video and Image Animation",
       "body": "SayGM has integrated MiniMax H3 through KubeTEEAI (SN90), allowing users to generate videos from text prompts, animate photos and connect two images into a…",
       "href": "https://taodaily.io/saygm-sn28-adds-minimax-h3-for-text-to-video-and-image-animation/",
       "sn": 28
-    },
-    {
-      "when": "Oct 20",
-      "title": "With Hippius (SN75)’s Confidential Computing Service, Even Server Operators Cannot See Your Data",
-      "body": "Hippius (SN75) launches Confidential Compute, using hardware encryption to protect sensitive data during processing, even from server operators, across…",
-      "href": "https://taodaily.io/with-hippius-sn75s-confidential-computing-service-even-server-operators-cannot-see-your-data/",
-      "sn": 75
-    },
-    {
-      "when": "Oct 20",
-      "title": "Shrinking AI Models Just Got Easier With TPN (SN65)’s New Toolkit",
-      "body": "TPN (SN65) launches a Model Quantization Toolkit, helping developers shrink AI models, reduce memory needs, and lower deployment costs without complex setup.",
-      "href": "https://taodaily.io/shrinking-ai-models-just-got-easier-with-tpn-sn65s-new-toolkit/",
-      "sn": 65
-    },
-    {
-      "when": "Oct 19",
-      "title": "eTAO Goes Live as Bittensor Subnets Make Their First Moves on Emissions",
-      "body": "eTAO upgrade is live, and subnets are already changing how they distribute rewards. Some are increasing miner allocations, while others are claiming the…",
-      "href": "https://taodaily.io/etao-goes-live-as-bittensor-subnets-make-their-first-moves-on-emissions/",
-      "sn": null
-    },
-    {
-      "when": "Oct 19",
-      "title": "One Year In, SWARM (SN124) Secures Two Customers and Opens Its Robotics Lab",
-      "body": "In one year, SWARM (SN124) signs its first two autonomous drone contracts for solar security in Greece and avalanche control in Andorra, raises €370K, and…",
-      "href": "https://taodaily.io/one-year-in-swarm-sn124-secures-two-customers-and-opens-its-robotics-lab/",
-      "sn": 124
-    },
-    {
-      "when": "Oct 19",
-      "title": "Why Barry Silbert Chose Bittensor",
-      "body": "Evan explains why Barry Silbert and DCG chose Bittensor and why the network’s real test is whether subnets can become mainstream businesses.",
-      "href": "https://taodaily.io/why-barry-silbert-chose-bittensor/",
-      "sn": null
     }
   ]
 }
