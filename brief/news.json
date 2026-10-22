@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-22T17:14:07Z",
+  "generated_at": "2026-10-22T22:22:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 22",
+      "title": "Why TAO Could Reach $1 Million Before 2040",
+      "body": "Tao Templar predicts Bittensor's TAO could reach $1 million before 2040, citing token scarcity, subnet revenue, alpha buybacks, and growing demand across…",
+      "href": "https://taodaily.io/why-tao-could-reach-1-million-before-2040/",
+      "sn": null
+    },
     {
       "when": "Oct 22",
       "title": "How Bittensor Is Building Confidential AI Compute With KubeTEE AI (SN90)",
@@ -35,13 +42,6 @@
       "title": "Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats",
       "body": "Bittensor is testing quantum-resistant ML-DSA wallets to future-proof its network security. The experimental upgrade supports key rotation but is not yet…",
       "href": "https://taodaily.io/bittensor-future-proofs-its-wallet-infrastructure-against-quantum-threats/",
-      "sn": null
-    },
-    {
-      "when": "Oct 21",
-      "title": "Taostats Actions Puts Every btcli Transaction Into Simple Browser Forms",
-      "body": "Taostats Actions turns common Bittensor btcli transactions into clear browser forms for staking, multisig, key swaps, and subnet settings.",
-      "href": "https://taodaily.io/taostats-actions-puts-every-btcli-transaction-into-simple-browser-forms/",
       "sn": null
     }
   ]
