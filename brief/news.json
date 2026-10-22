@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-21T22:23:32Z",
+  "generated_at": "2026-10-22T17:14:07Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 22",
+      "title": "How Bittensor Is Building Confidential AI Compute With KubeTEE AI (SN90)",
+      "body": "KubeTEE is providing confidential AI compute through hardware-secured environments that protect data and models while running decentralized GPU workloads.",
+      "href": "https://taodaily.io/how-bittensor-is-building-confidential-ai-compute-with-kubetee-ai-sn90/",
+      "sn": 90
+    },
+    {
+      "when": "Oct 22",
+      "title": "Carbon (SN116) on Building Physics AI, Commercial Adoption, and Alpha Buybacks",
+      "body": "An interview with the Carbon team on using Bittensor to develop reliable engineering AI, its commercial ambitions, and plans for Alpha buybacks.",
+      "href": "https://taodaily.io/carbon-sn116-on-building-physics-ai-commercial-adoption-and-alpha-buybacks/",
+      "sn": 116
+    },
+    {
+      "when": "Oct 21",
+      "title": "JPMorgan’s First Bitcoin Forecast Projects 10% Annual Returns, Ahead of Stocks and Gold",
+      "body": "JPMorgan Asset Management's first long-term Bitcoin forecast projects 10% annual returns, outperforming stocks and gold, but warns of significant volatility.",
+      "href": "https://taodaily.io/jpmorgans-first-bitcoin-forecast-projects-10-annual-returns-ahead-of-stocks-and-gold/",
+      "sn": null
+    },
     {
       "when": "Oct 21",
       "title": "Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs",
@@ -21,27 +42,6 @@
       "title": "Taostats Actions Puts Every btcli Transaction Into Simple Browser Forms",
       "body": "Taostats Actions turns common Bittensor btcli transactions into clear browser forms for staking, multisig, key swaps, and subnet settings.",
       "href": "https://taodaily.io/taostats-actions-puts-every-btcli-transaction-into-simple-browser-forms/",
-      "sn": null
-    },
-    {
-      "when": "Oct 21",
-      "title": "This eTAO Simulator Shows How Emission Splits Under eTAO Affect Your Rewards",
-      "body": "Explore how Bittensor's eTAO simulator shows the impact of emission split decisions on subnet owners, miners, validators, and alpha stakers.",
-      "href": "https://taodaily.io/this-etao-simulator-shows-how-emission-splits-under-etao-affect-your-rewards/",
-      "sn": null
-    },
-    {
-      "when": "Oct 20",
-      "title": "Leadpoet (SN71) Launches AI Sales Agent That Finds Buyers and Automates Outreach",
-      "body": "Bittensor's Leadpoet (SN71) launches an AI sales agent, combining buying signals, personalized outreach, and automated follow-ups.",
-      "href": "https://taodaily.io/leadpoet-sn71-launches-ai-sales-agent-that-finds-buyers-and-automates-outreach/",
-      "sn": 71
-    },
-    {
-      "when": "Oct 20",
-      "title": "Nearly Two Years Later, Forbes’ Argument for Bittensor Is Worth Revisiting",
-      "body": "Forbes contributor Tor Constantino (MBA) explored how decentralized AI could challenge Big Tech, highlighting Bittensor's potential.",
-      "href": "https://taodaily.io/nearly-two-years-later-forbes-argument-for-bittensor-is-worth-revisiting/",
       "sn": null
     }
   ]
