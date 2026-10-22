@@ -14,6 +14,7 @@ from xml.etree import ElementTree as ET
 FEED = "https://taodaily.io/feed/"
 OUT = Path(__file__).resolve().parents[2] / "brief" / "news.json"
 NS = {"content": "http://purl.org/rss/1.0/modules/content/"}
+KEEP = re.compile(r"\b(bittensor|subnet|sn\s*\d{1,3}|dtao|etao|\btao\b)", re.I)
 
 
 def text(el) -> str:
@@ -56,12 +57,14 @@ def sn_from(title: str, body: str):
 def parse(xml: bytes) -> list[dict]:
     root = ET.fromstring(xml)
     items = []
-    for it in root.findall("./channel/item")[:6]:
+    for it in root.findall("./channel/item"):
         title = strip_html(text(it.find("title")))
         link = text(it.find("link"))
         raw = text(it.find("description")) or text(it.find("content:encoded", NS))
         body = clean_body(raw)
         if not title or not link:
+            continue
+        if not KEEP.search(f"{title} {body}"):
             continue
         items.append({
             "when": fmt_when(text(it.find("pubDate"))),
@@ -70,6 +73,8 @@ def parse(xml: bytes) -> list[dict]:
             "href": link,
             "sn": sn_from(title, body),
         })
+        if len(items) >= 6:
+            break
     return items
 
 

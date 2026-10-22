@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh https://api.rss2json.com wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh https://api.rss2json.com https://taodaily.io https://api.coingecko.com https://api.coinpaprika.com wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
 <meta name="description" content="Learn to stake TAO in plain English. Park it, or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Stake TAO in plain English</title>
@@ -1153,23 +1153,24 @@ const NEWS_FEED = 'https://taodaily.io/feed/';
 const NEWS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(NEWS_FEED);
 const NEWS = [
   {
-    when: 'Sep 29',
-    title: 'Const spoke at Exploit Summit',
-    body: 'The Montréal keynote is about incentive computing and an open network outside the usual labs. This week — not last season.',
-    href: 'https://taodaily.io/consts-keynote-at-exploit-summit-harness-the-exploit-build-a-mind-outside-the-state/'
+    when: 'Oct 22',
+    title: 'Carbon (SN116) on Building Physics AI, Commercial Adoption, and Alpha Buybacks',
+    body: 'An interview with the Carbon team on using Bittensor to develop reliable engineering AI, its commercial ambitions, and plans for Alpha buybacks.',
+    href: 'https://taodaily.io/carbon-sn116-on-building-physics-ai-commercial-adoption-and-alpha-buybacks/',
+    sn: 116
   },
   {
-    when: 'Sep 29',
-    title: 'Cathedral is an RL shop on SN94',
-    body: 'CPU sandboxes for agents and evaluation on Bittensor. A new shop note, not a recap of 2025.',
-    href: 'https://taodaily.io/cathedral-explained-the-execution-layer-for-reinforcement-learning-on-bittensor/',
-    sn: 94
+    when: 'Oct 21',
+    title: 'Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs',
+    body: 'Affine launched a MiniMax-H3 AI video studio and sparse-attention mining competition on Bittensor, aiming to reduce video generation costs while preserving quality.',
+    href: 'https://taodaily.io/affine-launches-ai-video-studio-and-mining-competition-to-reduce-video-generation-costs/',
+    sn: 120
   },
   {
-    when: 'Sep 28',
-    title: 'Gamma tokens: shops paying shops',
-    body: 'Const floated usage credits so one subnet could buy compute or inference from another. Still a plan, not a product.',
-    href: 'https://taodaily.io/gamma-tokens-could-turn-subnets-into-customers-of-each-other/'
+    when: 'Oct 21',
+    title: 'Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats',
+    body: 'Bittensor is testing quantum-resistant ML-DSA wallets to future-proof its network security. The experimental upgrade supports key rotation but is not yet live.',
+    href: 'https://taodaily.io/bittensor-future-proofs-its-wallet-infrastructure-against-quantum-threats/'
   },
   {
     when: 'Still true',
@@ -1199,7 +1200,9 @@ const state = {
   notch: null,
   statTip: '',
   priceLive: false,
+  priceSrc: '',
   news: null,
+  newsAt: '',
   newsMode: 'wait'
 };
 
@@ -1308,17 +1311,48 @@ async function fetchJson(url, ms) {
   }
 }
 
+async function marketTaoUsd() {
+  const gecko = fetchJson('https://api.coingecko.com/api/v3/simple/price?ids=bittensor&vs_currencies=usd', 8000)
+    .then(j => {
+      const px = num(j && j.bittensor && j.bittensor.usd);
+      return px != null && px > 0 ? { usd_per_tao: px, price_basis: 'coingecko' } : null;
+    })
+    .catch(() => null);
+  const paprika = fetchJson('https://api.coinpaprika.com/v1/tickers/tao-bittensor', 8000)
+    .then(j => {
+      const px = num(j && j.quotes && j.quotes.USD && j.quotes.USD.price);
+      return px != null && px > 0 ? { usd_per_tao: px, price_basis: 'coinpaprika' } : null;
+    })
+    .catch(() => null);
+  const [g, p] = await Promise.all([gecko, paprika]);
+  return g || p;
+}
+
 async function load() {
   const snapP = fetch('./snapshot.json', { cache: 'no-store' }).then(r => r.json()).catch(() => null);
   const ecoP = fetchJson(API + '/economics', 15000).catch(() => null);
   const catP = fetchJson(API + '/subnets?limit=130', 15000).catch(() => null);
-  const [eco, cat, snap] = await Promise.all([ecoP, catP, snapP]);
+  const mktP = marketTaoUsd();
+  const [eco, cat, snap, mkt] = await Promise.all([ecoP, catP, snapP, mktP]);
   const catalog = (cat && cat.data && cat.data.subnets) || (snap && snap.catalog) || [];
   const economics = (eco && eco.data && eco.data.subnets) || (snap && snap.economics) || [];
   state.rows = merge(catalog, economics);
   state.summary = (eco && eco.data && eco.data.summary) || (snap && snap.summary) || null;
-  state.taoUsd = (eco && eco.data && eco.data.tao_usd) || null;
-  state.priceLive = !!(state.taoUsd && state.taoUsd.usd_per_tao != null);
+  const chain = eco && eco.data && eco.data.tao_usd;
+  const chainPx = num(chain && chain.usd_per_tao);
+  if (chainPx != null && chainPx > 0) {
+    state.taoUsd = chain;
+    state.priceLive = true;
+    state.priceSrc = 'chain';
+  } else if (mkt) {
+    state.taoUsd = mkt;
+    state.priceLive = true;
+    state.priceSrc = mkt.price_basis || 'market';
+  } else {
+    state.taoUsd = null;
+    state.priceLive = false;
+    state.priceSrc = '';
+  }
   state.generatedAt = (eco && (eco.data.generated_at || eco.meta && eco.meta.published_at)) || (snap && snap.generated_at) || null;
   state.live = !!eco;
   render();
@@ -1440,8 +1474,9 @@ function showStatTip(id) {
 function taoPrice() {
   const t = state.taoUsd;
   const px = num(t && t.usd_per_tao);
-  if (px == null) return null;
-  if (state.priceLive || state.live) return px;
+  if (px == null || px <= 0) return null;
+  if (state.priceLive) return px;
+  if (state.live) return null;
   const when = Date.parse(t.observed_at || '');
   const age = Number.isFinite(when) ? Date.now() - when : Infinity;
   if (age > 12 * 3600e3) return null;
@@ -1460,8 +1495,10 @@ function renderStats() {
   const tips = {
     shops: 'How many AI shops (subnets) are on the network right now.',
     price: px == null
-      ? 'Dollar price is not in yet. We use a public chain feed, not Coinbase. Open when the live pill is on.'
-      : 'About $' + px.toFixed(2) + ' from a public chain average, not Coinbase. Their number can be a few dollars different. It moves. Not a quote you can trade.',
+      ? 'The public dollar feed is stale, and the backup quote did not land. This tile is the network’s about-price for TAO — not your book. TAO is not zero.'
+      : state.priceSrc === 'chain'
+      ? 'About $' + px.toFixed(2) + ' from a public chain average, not Coinbase. Their number can be a few dollars different. It moves. Not a quote you can trade.'
+      : 'About $' + px.toFixed(2) + ' from ' + (state.priceSrc === 'coinpaprika' ? 'CoinPaprika' : 'CoinGecko') + ' while the chain dollar feed is stale. Their number can be a few dollars different. Not a quote you can trade.',
     parked: pctPark + '% of all staked TAO is still parked on the main chain. It stays TAO. This is the whole network — not your book.',
     alpha: pctShop + '% of all staked TAO has been put on a shop and is now that shop’s token. Price can move. This is the whole network — not your book.'
   };
@@ -1521,6 +1558,12 @@ function newsCard(n) {
 function newsNote(mode) {
   if (mode === 'live') return 'Today’s Bittensor notes, from TAO Daily. Tap a line to read it. Not financial advice.';
   if (mode === 'wait') return 'Looking for today’s notes. Not financial advice.';
+  if (mode === 'file') {
+    const when = state.newsAt ? newsWhen(state.newsAt) : '';
+    return when
+      ? 'TAO Daily notes saved here on ' + when + '. Tap a line to read it. Not financial advice.'
+      : 'TAO Daily notes saved on this site. Tap a line to read it. Not financial advice.';
+  }
   return 'Live notes did not load. These stay until the next visit. Not financial advice.';
 }
 
@@ -1561,20 +1604,50 @@ function cleanNewsBody(s) {
   return t;
 }
 
+function isNetworkNote(title, body) {
+  return /\b(bittensor|subnet|sn\s*\d{1,3}|dtao|etao|\btao\b)/i.test(String(title || '') + ' ' + String(body || ''));
+}
+
+function newsFresh(js) {
+  const t = Date.parse(js && js.generated_at || '');
+  return Number.isFinite(t) && (Date.now() - t) < 36 * 3600e3;
+}
+
 function itemsFromRss(js) {
   if (!js || js.status !== 'ok' || !Array.isArray(js.items)) return [];
-  return js.items.slice(0, 6).map(it => ({
+  return js.items.map(it => ({
     when: newsWhen(it.pubDate),
     title: stripNewsHtml(it.title || ''),
     body: cleanNewsBody(it.description || it.content || ''),
     href: it.link || '',
     sn: null
-  })).filter(n => n.title && n.href);
+  })).filter(n => n.title && n.href && isNetworkNote(n.title, n.body)).slice(0, 6);
+}
+
+function xmlText(el) {
+  return el ? String(el.textContent || '').trim() : '';
+}
+
+function itemsFromRssXml(xml) {
+  if (!xml || typeof DOMParser === 'undefined') return [];
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  if (doc.querySelector('parsererror')) return [];
+  return [...doc.querySelectorAll('channel > item')].map(it => {
+    const title = stripNewsHtml(xmlText(it.querySelector('title')));
+    const body = cleanNewsBody(xmlText(it.querySelector('description')));
+    return {
+      when: newsWhen(xmlText(it.querySelector('pubDate'))),
+      title,
+      body,
+      href: xmlText(it.querySelector('link')),
+      sn: null
+    };
+  }).filter(n => n.title && n.href && isNetworkNote(n.title, n.body)).slice(0, 6);
 }
 
 function itemsFromFile(js) {
   if (!js || !Array.isArray(js.items)) return [];
-  return js.items.filter(n => n && n.title).slice(0, 6);
+  return js.items.filter(n => n && n.title && isNetworkNote(n.title, n.body)).slice(0, 6);
 }
 
 async function fetchJson(url, ms) {
@@ -1582,8 +1655,20 @@ async function fetchJson(url, ms) {
   const t = setTimeout(() => { try { ctrl && ctrl.abort(); } catch {} }, ms);
   try {
     const res = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
-    if (!res.ok) throw new Error('news ' + res.status);
+    if (!res.ok) throw new Error('http ' + res.status);
     return await res.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function fetchText(url, ms) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = setTimeout(() => { try { ctrl && ctrl.abort(); } catch {} }, ms);
+  try {
+    const res = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+    if (!res.ok) throw new Error('http ' + res.status);
+    return await res.text();
   } finally {
     clearTimeout(t);
   }
@@ -1599,14 +1684,22 @@ async function loadNews() {
   newsLoading = true;
   renderNews(NEWS, 'wait');
   try {
-    const live = itemsFromRss(await fetchJson(NEWS_PROXY, 8000));
+    const fileJs = await fetchJson('./news.json', 8000);
+    const file = itemsFromFile(fileJs);
+    if (file.length) {
+      state.newsAt = fileJs.generated_at || '';
+      renderNews(file, newsFresh(fileJs) ? 'live' : 'file');
+    }
+  } catch {}
+  try {
+    const live = itemsFromRssXml(await fetchText(NEWS_FEED, 8000));
     if (live.length) { renderNews(live, 'live'); return; }
   } catch {}
   try {
-    const file = itemsFromFile(await fetchJson('./news.json', 8000));
-    if (file.length) { renderNews(file, 'live'); return; }
+    const live = itemsFromRss(await fetchJson(NEWS_PROXY, 6000));
+    if (live.length) { renderNews(live, 'live'); return; }
   } catch {}
-  renderNews(NEWS, 'fallback');
+  if (!(state.news && state.news.length)) renderNews(NEWS, 'fallback');
 }
 
 function renderToday() {

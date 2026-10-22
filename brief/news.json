@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-21T22:23:32Z",
+  "generated_at": "2026-10-22T13:54:34Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 22",
+      "title": "Carbon (SN116) on Building Physics AI, Commercial Adoption, and Alpha Buybacks",
+      "body": "An interview with the Carbon team on using Bittensor to develop reliable engineering AI, its commercial ambitions, and plans for Alpha buybacks.",
+      "href": "https://taodaily.io/carbon-sn116-on-building-physics-ai-commercial-adoption-and-alpha-buybacks/",
+      "sn": 116
+    },
     {
       "when": "Oct 21",
       "title": "Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs",
@@ -36,13 +43,6 @@
       "body": "Bittensor's Leadpoet (SN71) launches an AI sales agent, combining buying signals, personalized outreach, and automated follow-ups.",
       "href": "https://taodaily.io/leadpoet-sn71-launches-ai-sales-agent-that-finds-buyers-and-automates-outreach/",
       "sn": 71
-    },
-    {
-      "when": "Oct 20",
-      "title": "Nearly Two Years Later, Forbes’ Argument for Bittensor Is Worth Revisiting",
-      "body": "Forbes contributor Tor Constantino (MBA) explored how decentralized AI could challenge Big Tech, highlighting Bittensor's potential.",
-      "href": "https://taodaily.io/nearly-two-years-later-forbes-argument-for-bittensor-is-worth-revisiting/",
-      "sn": null
     }
   ]
 }
