@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-23T17:12:18Z",
+  "generated_at": "2026-10-23T22:14:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 23",
+      "title": "Trishool (SN23) Expanded Into Commercial AI Safety With Astroware",
+      "body": "Trishool introduced Astroware, an AI safety platform offering enterprise security tools, with product revenue set to support subnet alpha buybacks and token…",
+      "href": "https://taodaily.io/trishool-sn23-expanded-into-commercial-ai-safety-with-astroware/",
+      "sn": 23
+    },
     {
       "when": "Oct 23",
       "title": "Lium (SN51) Crosses $30 Million in Hardware With 225 B300 GPUs and 91% Utilization",
@@ -36,13 +43,6 @@
       "body": "Tao Templar predicts Bittensor's TAO could reach $1 million before 2040, citing token scarcity, subnet revenue, alpha buybacks, and growing demand across…",
       "href": "https://taodaily.io/why-tao-could-reach-1-million-before-2040/",
       "sn": null
-    },
-    {
-      "when": "Oct 22",
-      "title": "How Bittensor Is Building Confidential AI Compute With KubeTEE AI (SN90)",
-      "body": "KubeTEE is providing confidential AI compute through hardware-secured environments that protect data and models while running decentralized GPU workloads.",
-      "href": "https://taodaily.io/how-bittensor-is-building-confidential-ai-compute-with-kubetee-ai-sn90/",
-      "sn": 90
     }
   ]
 }
