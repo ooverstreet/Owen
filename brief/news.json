@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-10-22T22:22:05Z",
+  "generated_at": "2026-10-23T17:12:18Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 23",
+      "title": "Lium (SN51) Crosses $30 Million in Hardware With 225 B300 GPUs and 91% Utilization",
+      "body": "Lium (SN51) says it now hosts over $30 million in GPU hardware, including 225 NVIDIA B300s, with 91% rented, highlighting the demand for high-end AI compute.",
+      "href": "https://taodaily.io/lium-sn51-crosses-30-million-in-hardware-with-225-b300-gpus-and-91-utilization/",
+      "sn": 51
+    },
+    {
+      "when": "Oct 23",
+      "title": "SayGM (SN28) vs. OpenRouter: Can Bittensor’s AI Gateway Beat a Bigger Rival?",
+      "body": "SayGM scores 4–2 against OpenRouter in a six-round comparison, highlighting lower fees, hardware-verifiable privacy, native APIs, and confidential AI access.",
+      "href": "https://taodaily.io/saygm-sn28-vs-openrouter-can-bittensors-ai-gateway-beat-a-bigger-rival/",
+      "sn": 28
+    },
+    {
+      "when": "Oct 22",
+      "title": "How Mentat Is Simplifying TAO Investments Across Bittensor Subnets",
+      "body": "Explore how Mentat simplifies TAO investing with subnet indexes, custom allocations, automated staking, portfolio rebalancing, and flexible DCA or direct…",
+      "href": "https://taodaily.io/how-mentat-is-simplifying-tao-investments-across-bittensor-subnets/",
+      "sn": null
+    },
+    {
+      "when": "Oct 22",
+      "title": "BitMind Introduced Yugos to Automatically Choose the Right AI Model for Every Task",
+      "body": "Discover Yugos, an AI routing platform on SN34, which automatically selects AI models based on answer quality, cost, and speed using competitive decision…",
+      "href": "https://taodaily.io/bitmind-introduced-yugos-to-automatically-choose-the-right-ai-model-for-every-task/",
+      "sn": 34
+    },
     {
       "when": "Oct 22",
       "title": "Why TAO Could Reach $1 Million Before 2040",
@@ -15,34 +43,6 @@
       "body": "KubeTEE is providing confidential AI compute through hardware-secured environments that protect data and models while running decentralized GPU workloads.",
       "href": "https://taodaily.io/how-bittensor-is-building-confidential-ai-compute-with-kubetee-ai-sn90/",
       "sn": 90
-    },
-    {
-      "when": "Oct 22",
-      "title": "Carbon (SN116) on Building Physics AI, Commercial Adoption, and Alpha Buybacks",
-      "body": "An interview with the Carbon team on using Bittensor to develop reliable engineering AI, its commercial ambitions, and plans for Alpha buybacks.",
-      "href": "https://taodaily.io/carbon-sn116-on-building-physics-ai-commercial-adoption-and-alpha-buybacks/",
-      "sn": 116
-    },
-    {
-      "when": "Oct 21",
-      "title": "JPMorgan’s First Bitcoin Forecast Projects 10% Annual Returns, Ahead of Stocks and Gold",
-      "body": "JPMorgan Asset Management's first long-term Bitcoin forecast projects 10% annual returns, outperforming stocks and gold, but warns of significant volatility.",
-      "href": "https://taodaily.io/jpmorgans-first-bitcoin-forecast-projects-10-annual-returns-ahead-of-stocks-and-gold/",
-      "sn": null
-    },
-    {
-      "when": "Oct 21",
-      "title": "Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs",
-      "body": "Affine launched a MiniMax-H3 AI video studio and sparse-attention mining competition on Bittensor, aiming to reduce video generation costs while preserving…",
-      "href": "https://taodaily.io/affine-launches-ai-video-studio-and-mining-competition-to-reduce-video-generation-costs/",
-      "sn": null
-    },
-    {
-      "when": "Oct 21",
-      "title": "Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats",
-      "body": "Bittensor is testing quantum-resistant ML-DSA wallets to future-proof its network security. The experimental upgrade supports key rotation but is not yet…",
-      "href": "https://taodaily.io/bittensor-future-proofs-its-wallet-infrastructure-against-quantum-threats/",
-      "sn": null
     }
   ]
 }
