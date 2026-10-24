@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-24T15:59:47Z",
+  "generated_at": "2026-10-24T21:38:15Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 24",
+      "title": "Crucible Wallet Brings Full Chrome Features to Mobile, Expands iOS Access to 3 More Countries",
+      "body": "Crucible Wallet now offers its full Chrome feature set on iOS and Android, with Argentina, Japan and Brazil added to its iOS rollout.",
+      "href": "https://taodaily.io/crucible-wallet-brings-full-chrome-features-to-mobile-expands-ios-access-to-3-more-countries/",
+      "sn": null
+    },
     {
       "when": "Oct 24",
       "title": "TPN Bench Expanded Its Toolkit to Preserve AI Performance During Compression",
@@ -36,13 +43,6 @@
       "body": "Trishool introduced Astroware, an AI safety platform offering enterprise security tools, with product revenue set to support subnet alpha buybacks and token…",
       "href": "https://taodaily.io/trishool-sn23-expanded-into-commercial-ai-safety-with-astroware/",
       "sn": 23
-    },
-    {
-      "when": "Oct 23",
-      "title": "Lium (SN51) Crosses $30 Million in Hardware With 225 B300 GPUs and 91% Utilization",
-      "body": "Lium (SN51) says it now hosts over $30 million in GPU hardware, including 225 NVIDIA B300s, with 91% rented, highlighting the demand for high-end AI compute.",
-      "href": "https://taodaily.io/lium-sn51-crosses-30-million-in-hardware-with-225-b300-gpus-and-91-utilization/",
-      "sn": 51
     }
   ]
 }
