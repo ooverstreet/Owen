@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-24T21:38:15Z",
+  "generated_at": "2026-10-25T16:27:28Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 25",
+      "title": "Ryan Bequette Explains What Carbon Is Building Next",
+      "body": "Ryan Bequette joined DSV Fund to explain how SN116 plans to turn its first physics AI competitions into customer-ready products, land engineering clients…",
+      "href": "https://taodaily.io/ryan-bequette-explains-what-carbon-is-building-next/",
+      "sn": 116
+    },
+    {
+      "when": "Oct 24",
+      "title": "How Metanova Is Connecting Decentralized AI With Pharmaceutical Research",
+      "body": "NOVA (SN68) is turning Bittensor miner submissions into drug candidates tested in real laboratories, bringing decentralized AI closer to pharmaceutical…",
+      "href": "https://taodaily.io/how-metanova-is-connecting-decentralized-ai-with-pharmaceutical-research/",
+      "sn": 68
+    },
     {
       "when": "Oct 24",
       "title": "Crucible Wallet Brings Full Chrome Features to Mobile, Expands iOS Access to 3 More Countries",
@@ -29,20 +43,6 @@
       "body": "Novelty Search E092 explored Bittensor's evolving protocol, from subnet liquidity and permissionless lending to Null Consensus, eTAO, Gamma, and efforts to…",
       "href": "https://taodaily.io/bittensor-community-discussed-etao-gamma-null-consensus-and-lending-at-novetly-search-here-are-the-key-takeaways/",
       "sn": null
-    },
-    {
-      "when": "Oct 24",
-      "title": "Cascade-MoE Targets a Billion-Parameter Time-Series Forecasting Scale",
-      "body": "SN91 introduced Cascade-MoE, targeting over 1 billion parameters for time-series forecasting with a mixture-of-experts architecture and Bittensor…",
-      "href": "https://taodaily.io/cascade-moe-targets-a-billion-parameter-time-series-forecasting-scale/",
-      "sn": 91
-    },
-    {
-      "when": "Oct 23",
-      "title": "Trishool (SN23) Expanded Into Commercial AI Safety With Astroware",
-      "body": "Trishool introduced Astroware, an AI safety platform offering enterprise security tools, with product revenue set to support subnet alpha buybacks and token…",
-      "href": "https://taodaily.io/trishool-sn23-expanded-into-commercial-ai-safety-with-astroware/",
-      "sn": 23
     }
   ]
 }
