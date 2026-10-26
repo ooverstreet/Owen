@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-10-25T16:27:28Z",
+  "generated_at": "2026-10-26T18:42:39Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 26",
+      "title": "MANTIS to Retire ETHHITFIRST Challenge, Redistribute Emissions",
+      "body": "MANTIS (SN123) is retiring its ‘ETHHITFIRST’ Ethereum prediction challenge and redistributing its 5% emission share across remaining tasks to refocus miner…",
+      "href": "https://taodaily.io/mantis-to-retire-ethhitfirst-challenge-redistribute-emissions/",
+      "sn": 123
+    },
+    {
+      "when": "Oct 26",
+      "title": "Desearch’s ‘Arxiv Chatter Digest’ Helps Researchers Find Papers Getting Attention",
+      "body": "Desearch built Arxiv Chatter Digest to help researchers discover recent AI papers, read abstracts, and track discussions on X using Bittensor-powered search…",
+      "href": "https://taodaily.io/desearchs-arxiv-chatter-digest-helps-researchers-find-papers-getting-attention/",
+      "sn": null
+    },
+    {
+      "when": "Oct 26",
+      "title": "You Could Earn $18,877 by Referring a B300 GPU Node to Lium (SN51)",
+      "body": "Lium's new provider referral program pays 4% of a referred GPU's rental billing for 12 months, in USDT. No GPU, node or alpha required.",
+      "href": "https://taodaily.io/you-could-earn-18877-by-referring-a-b300-gpu-node-to-lium-sn51/",
+      "sn": 51
+    },
+    {
+      "when": "Oct 26",
+      "title": "Bittensor’s Gamma Tokens – Applied Interdependence",
+      "body": "Full article by Kai Morris. Bittensor’s proposed upgrade is set to build more connective tissue.",
+      "href": "https://taodaily.io/bittensors-gamma-tokens-applied-interdependence/",
+      "sn": null
+    },
+    {
+      "when": "Oct 25",
+      "title": "Grayscale Submitted Another Bittensor ETF Filing to the SEC",
+      "body": "Grayscale filed a new amendment with the SEC, updating its plans to convert the Bittensor Trust into an ETF, including listing, custody, and staking details.",
+      "href": "https://taodaily.io/grayscale-submitted-another-bittensor-etf-filing-to-the-sec/",
+      "sn": null
+    },
     {
       "when": "Oct 25",
       "title": "Ryan Bequette Explains What Carbon Is Building Next",
       "body": "Ryan Bequette joined DSV Fund to explain how SN116 plans to turn its first physics AI competitions into customer-ready products, land engineering clients…",
       "href": "https://taodaily.io/ryan-bequette-explains-what-carbon-is-building-next/",
       "sn": 116
-    },
-    {
-      "when": "Oct 24",
-      "title": "How Metanova Is Connecting Decentralized AI With Pharmaceutical Research",
-      "body": "NOVA (SN68) is turning Bittensor miner submissions into drug candidates tested in real laboratories, bringing decentralized AI closer to pharmaceutical…",
-      "href": "https://taodaily.io/how-metanova-is-connecting-decentralized-ai-with-pharmaceutical-research/",
-      "sn": 68
-    },
-    {
-      "when": "Oct 24",
-      "title": "Crucible Wallet Brings Full Chrome Features to Mobile, Expands iOS Access to 3 More Countries",
-      "body": "Crucible Wallet now offers its full Chrome feature set on iOS and Android, with Argentina, Japan and Brazil added to its iOS rollout.",
-      "href": "https://taodaily.io/crucible-wallet-brings-full-chrome-features-to-mobile-expands-ios-access-to-3-more-countries/",
-      "sn": null
-    },
-    {
-      "when": "Oct 24",
-      "title": "TPN Bench Expanded Its Toolkit to Preserve AI Performance During Compression",
-      "body": "TPN added Quantization Aware Distillation to TPN Bench, helping developers compress large AI models, preserve performance, and reduce hardware and computing…",
-      "href": "https://taodaily.io/tpn-bench-expanded-its-toolkit-to-preserve-ai-performance-during-compression/",
-      "sn": null
-    },
-    {
-      "when": "Oct 24",
-      "title": "This Subnet Is Using Bittensor to Power an Alternative to Slack and Discord",
-      "body": "Discover how Komms uses SN27 to power a decentralized alternative to Slack and Discord, with private messaging, secure file sharing, and flat-rate pricing…",
-      "href": "https://taodaily.io/this-subnet-is-using-bittensor-to-power-an-alternative-to-slack-and-discord/",
-      "sn": 27
-    },
-    {
-      "when": "Oct 24",
-      "title": "Bittensor Community Discussed eTAO, Gamma, Null Consensus, and Lending at Novetly Search",
-      "body": "Novelty Search E092 explored Bittensor's evolving protocol, from subnet liquidity and permissionless lending to Null Consensus, eTAO, Gamma, and efforts to…",
-      "href": "https://taodaily.io/bittensor-community-discussed-etao-gamma-null-consensus-and-lending-at-novetly-search-here-are-the-key-takeaways/",
-      "sn": null
     }
   ]
 }
