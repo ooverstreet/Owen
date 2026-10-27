@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-27T16:05:39Z",
+  "generated_at": "2026-10-27T18:02:35Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 27",
+      "title": "Beam (SN105) Brings Data Delivery Receipts Onchain With Bittensor EVM Integration",
+      "body": "Beam now allows developers to record data delivery receipts onchain and connect successful transfers to payments, smart contracts and AI workflows.",
+      "href": "https://taodaily.io/beam-sn105-brings-data-delivery-receipts-onchain-with-bittensor-evm-integration/",
+      "sn": 105
+    },
     {
       "when": "Oct 27",
       "title": "Yanez (SN54) Addressed Token Holder Concerns, Buybacks, and Business Sustainability",
@@ -36,13 +43,6 @@
       "body": "Desearch built Arxiv Chatter Digest to help researchers discover recent AI papers, read abstracts, and track discussions on X using Bittensor-powered search…",
       "href": "https://taodaily.io/desearchs-arxiv-chatter-digest-helps-researchers-find-papers-getting-attention/",
       "sn": null
-    },
-    {
-      "when": "Oct 26",
-      "title": "You Could Earn $18,877 by Referring a B300 GPU Node to Lium (SN51)",
-      "body": "Lium's new provider referral program pays 4% of a referred GPU's rental billing for 12 months, in USDT. No GPU, node or alpha required.",
-      "href": "https://taodaily.io/you-could-earn-18877-by-referring-a-b300-gpu-node-to-lium-sn51/",
-      "sn": 51
     }
   ]
 }
