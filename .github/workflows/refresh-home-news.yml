@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: home-news
@@ -35,3 +36,8 @@ jobs:
           fi
           git commit -m "Refresh Home news from TAO Daily"
           git push
+
+      - name: Ship Home to the live site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run "Deploy to GitHub Pages" --ref main

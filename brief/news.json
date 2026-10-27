@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-10-26T18:42:39Z",
+  "generated_at": "2026-10-27T16:05:39Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 27",
+      "title": "Yanez (SN54) Addressed Token Holder Concerns, Buybacks, and Business Sustainability",
+      "body": "Yanez discussed its 12–15 enterprise customers, $25K–$30K in alpha buybacks, token holder concerns, mining incentives, and plans for financial sustainability.",
+      "href": "https://taodaily.io/yanez-sn54-addressed-token-holder-concerns-buybacks-and-business-sustainability/",
+      "sn": 54
+    },
+    {
+      "when": "Oct 27",
+      "title": "It’s AI (SN32) Recorded Near-Perfect AI Detection Accuracy Across Four Languages",
+      "body": "SN32 reported 99.8% AI-generated text detection accuracy across four languages, with false-positive rates below 1% on authentic student writing datasets.",
+      "href": "https://taodaily.io/its-ai-sn32-recorded-near-perfect-ai-detection-accuracy-across-four-languages/",
+      "sn": 32
+    },
+    {
+      "when": "Oct 27",
+      "title": "Ditto AI (SN118) Uses Cascade (SN91) to Forecast AI Credit Usage and Recommend Plans",
+      "body": "Ditto (SN118) now forecasts credit usage with Cascade’s Ephemeris API, powered by Bittensor Subnet 91, helping users estimate future costs and choose…",
+      "href": "https://taodaily.io/ditto-ai-sn118-uses-cascade-sn91-to-forecast-ai-credit-usage-and-recommend-plans/",
+      "sn": 118
+    },
     {
       "when": "Oct 26",
       "title": "MANTIS to Retire ETHHITFIRST Challenge, Redistribute Emissions",
@@ -22,27 +43,6 @@
       "body": "Lium's new provider referral program pays 4% of a referred GPU's rental billing for 12 months, in USDT. No GPU, node or alpha required.",
       "href": "https://taodaily.io/you-could-earn-18877-by-referring-a-b300-gpu-node-to-lium-sn51/",
       "sn": 51
-    },
-    {
-      "when": "Oct 26",
-      "title": "Bittensor’s Gamma Tokens – Applied Interdependence",
-      "body": "Full article by Kai Morris. Bittensor’s proposed upgrade is set to build more connective tissue.",
-      "href": "https://taodaily.io/bittensors-gamma-tokens-applied-interdependence/",
-      "sn": null
-    },
-    {
-      "when": "Oct 25",
-      "title": "Grayscale Submitted Another Bittensor ETF Filing to the SEC",
-      "body": "Grayscale filed a new amendment with the SEC, updating its plans to convert the Bittensor Trust into an ETF, including listing, custody, and staking details.",
-      "href": "https://taodaily.io/grayscale-submitted-another-bittensor-etf-filing-to-the-sec/",
-      "sn": null
-    },
-    {
-      "when": "Oct 25",
-      "title": "Ryan Bequette Explains What Carbon Is Building Next",
-      "body": "Ryan Bequette joined DSV Fund to explain how SN116 plans to turn its first physics AI competitions into customer-ready products, land engineering clients…",
-      "href": "https://taodaily.io/ryan-bequette-explains-what-carbon-is-building-next/",
-      "sn": 116
     }
   ]
 }

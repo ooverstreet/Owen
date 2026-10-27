@@ -1,4 +1,4 @@
-const CACHE = 'subnet-brief-v60';
+const CACHE = 'subnet-brief-v63';
 const URLS = [
   './', './index.html', './manifest.json', './chain.js',
   './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
@@ -27,6 +27,8 @@ self.addEventListener('fetch', e => {
   const url = e.request.url;
   if (url.includes('metagraph.sh') || url.includes('googleapis') || url.includes('gstatic')) return;
   if (url.includes('rss2json.com') || url.includes('taodaily.io')) return;
+  if (url.includes('coingecko.com') || url.includes('coinpaprika.com')) return;
+  if (url.includes('githubusercontent.com')) return;
   if (url.startsWith('wss:') || url.includes('opentensor.ai') || url.includes('latent.to') || url.includes('onfinality.io')) return;
   if (isAppShell(url) || url.includes('chain.js') || url.includes('snapshot.json') || url.includes('news.json')) {
     e.respondWith(
