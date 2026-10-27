@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Overstreet">
+  <rect width="128" height="128" rx="28" fill="#0F2744"/>
+  <path d="M20 64 L64 24 L108 64 V106 H78 V74 H50 V106 H20 Z" fill="#F4F1EA"/>
+  <rect x="58" y="82" width="12" height="24" fill="#0F2744"/>
+  <path d="M64 24 L108 64 H96 L64 35 L32 64 H20 Z" fill="#C4A265"/>
+</svg>
