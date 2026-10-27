@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Subnet Brief">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh https://api.rss2json.com https://taodaily.io https://api.coingecko.com https://api.coinpaprika.com wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.metagraph.sh https://api.rss2json.com https://taodaily.io https://api.coingecko.com https://api.coinpaprika.com https://raw.githubusercontent.com wss://entrypoint-finney.opentensor.ai:443 https://entrypoint-finney.opentensor.ai wss://lite.sub.latent.to:443 https://lite.sub.latent.to wss://lite.chain.opentensor.ai:443 https://lite.chain.opentensor.ai wss://bittensor-finney.api.onfinality.io https://bittensor-finney.api.onfinality.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';">
 <meta name="description" content="Learn to stake TAO in plain English. Park it, or put it on an AI shop. Your wallet signs. We never ask for a seed.">
 <meta name="format-detection" content="telephone=no">
 <title>Subnet Brief — Stake TAO in plain English</title>
@@ -1151,26 +1151,28 @@ const BRIEFS = {
 const HIGHLIGHT_IDS = [64, 51, 4, 120, 56, 62, 34, 44, 68, 3, 9, 8, 19, 107, 93, 75, 1];
 const NEWS_FEED = 'https://taodaily.io/feed/';
 const NEWS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(NEWS_FEED);
+const NEWS_GIT = 'https://raw.githubusercontent.com/ooverstreet/Owen/main/brief/news.json';
 const NEWS = [
   {
-    when: 'Oct 22',
-    title: 'Carbon (SN116) on Building Physics AI, Commercial Adoption, and Alpha Buybacks',
-    body: 'An interview with the Carbon team on using Bittensor to develop reliable engineering AI, its commercial ambitions, and plans for Alpha buybacks.',
-    href: 'https://taodaily.io/carbon-sn116-on-building-physics-ai-commercial-adoption-and-alpha-buybacks/',
-    sn: 116
+    when: 'Oct 27',
+    title: 'Yanez (SN54) Addressed Token Holder Concerns, Buybacks, and Business Sustainability',
+    body: 'Yanez discussed enterprise customers, token holder concerns, mining incentives, and plans for financial sustainability.',
+    href: 'https://taodaily.io/yanez-sn54-addressed-token-holder-concerns-buybacks-and-business-sustainability/',
+    sn: 54
   },
   {
-    when: 'Oct 21',
-    title: 'Affine Launches AI Video Studio and Mining Competition to Reduce Video Generation Costs',
-    body: 'Affine launched a MiniMax-H3 AI video studio and sparse-attention mining competition on Bittensor, aiming to reduce video generation costs while preserving quality.',
-    href: 'https://taodaily.io/affine-launches-ai-video-studio-and-mining-competition-to-reduce-video-generation-costs/',
-    sn: 120
+    when: 'Oct 27',
+    title: 'It’s AI (SN32) Recorded Near-Perfect AI Detection Accuracy Across Four Languages',
+    body: 'SN32 reported high AI-generated text detection accuracy across four languages on student writing datasets.',
+    href: 'https://taodaily.io/its-ai-sn32-recorded-near-perfect-ai-detection-accuracy-across-four-languages/',
+    sn: 32
   },
   {
-    when: 'Oct 21',
-    title: 'Bittensor Future-Proofs Its Wallet Infrastructure Against Quantum Threats',
-    body: 'Bittensor is testing quantum-resistant ML-DSA wallets to future-proof its network security. The experimental upgrade supports key rotation but is not yet live.',
-    href: 'https://taodaily.io/bittensor-future-proofs-its-wallet-infrastructure-against-quantum-threats/'
+    when: 'Oct 27',
+    title: 'Ditto AI (SN118) Uses Cascade (SN91) to Forecast AI Credit Usage and Recommend Plans',
+    body: 'Ditto now forecasts credit usage with Cascade’s API, powered by Bittensor Subnet 91.',
+    href: 'https://taodaily.io/ditto-ai-sn118-uses-cascade-sn91-to-forecast-ai-credit-usage-and-recommend-plans/',
+    sn: 118
   },
   {
     when: 'Still true',
@@ -1683,14 +1685,23 @@ async function loadNews() {
   if (newsLoading) { renderNews(); return; }
   newsLoading = true;
   renderNews(NEWS, 'wait');
-  try {
-    const fileJs = await fetchJson('./news.json', 8000);
-    const file = itemsFromFile(fileJs);
-    if (file.length) {
-      state.newsAt = fileJs.generated_at || '';
-      renderNews(file, newsFresh(fileJs) ? 'live' : 'file');
-    }
-  } catch {}
+  const picks = [];
+  const addFile = js => {
+    const items = itemsFromFile(js);
+    if (!items.length) return;
+    picks.push({
+      items,
+      at: js.generated_at || '',
+      mode: newsFresh(js) ? 'live' : 'file'
+    });
+  };
+  try { addFile(await fetchJson(NEWS_GIT, 8000)); } catch {}
+  try { addFile(await fetchJson('./news.json', 8000)); } catch {}
+  if (picks.length) {
+    picks.sort((a, b) => (Date.parse(b.at || '') || 0) - (Date.parse(a.at || '') || 0));
+    state.newsAt = picks[0].at;
+    renderNews(picks[0].items, picks[0].mode);
+  }
   try {
     const live = itemsFromRssXml(await fetchText(NEWS_FEED, 8000));
     if (live.length) { renderNews(live, 'live'); return; }
