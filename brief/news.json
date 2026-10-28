@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-28T18:22:09Z",
+  "generated_at": "2026-10-28T23:14:53Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 28",
+      "title": "Synthdata Open-Sources AutoQuant to Test Frontier AI Agents Against Bittensor Quant Miners",
+      "body": "Synthdata open-sourced AutoQuant, a benchmark testing frontier AI agents against SN50 quant miners across crypto, commodity, and equity forecasts. Miners…",
+      "href": "https://taodaily.io/synthdata-open-sources-autoquant-to-test-frontier-ai-agents-against-bittensor-quant-miners/",
+      "sn": 50
+    },
     {
       "when": "Oct 28",
       "title": "xTAO Investor Deck Highlighted 63,000+ TAO Holdings, $321K Quarterly Revenue, and Competitive Positioning",
@@ -36,13 +43,6 @@
       "body": "Beam now allows developers to record data delivery receipts onchain and connect successful transfers to payments, smart contracts and AI workflows.",
       "href": "https://taodaily.io/beam-sn105-brings-data-delivery-receipts-onchain-with-bittensor-evm-integration/",
       "sn": 105
-    },
-    {
-      "when": "Oct 27",
-      "title": "Yanez (SN54) Addressed Token Holder Concerns, Buybacks, and Business Sustainability",
-      "body": "Yanez discussed its 12–15 enterprise customers, $25K–$30K in alpha buybacks, token holder concerns, mining incentives, and plans for financial sustainability.",
-      "href": "https://taodaily.io/yanez-sn54-addressed-token-holder-concerns-buybacks-and-business-sustainability/",
-      "sn": 54
     }
   ]
 }
