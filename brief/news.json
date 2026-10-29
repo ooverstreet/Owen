@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-28T23:14:53Z",
+  "generated_at": "2026-10-29T18:29:59Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 29",
+      "title": "NOVA (SN68) Developed Drug Optimization Agent with Chutes’ Security and Onepot’s Chemistry",
+      "body": "NOVA (SN68) developed a drug optimization agent with Chutes (SN64) and Onepot AI, bringing algorithms into confidential research to refine promising…",
+      "href": "https://taodaily.io/nova-sn68-developed-drug-optimization-agent-with-chutes-security-and-onepots-chemistry/",
+      "sn": 68
+    },
+    {
+      "when": "Oct 29",
+      "title": "Five Questions to Ask Before Investing in a Bittensor Subnet",
+      "body": "Before investing in Bittensor subnet tokens, discover five key questions to assess product demand, competitive edge, team execution, token flows, and…",
+      "href": "https://taodaily.io/five-questions-to-ask-before-investing-in-a-bittensor-subnet/",
+      "sn": null
+    },
     {
       "when": "Oct 28",
       "title": "Synthdata Open-Sources AutoQuant to Test Frontier AI Agents Against Bittensor Quant Miners",
@@ -29,20 +43,6 @@
       "body": "Hippius just launched an S3-compatible CDN with global edge delivery, pay-as-you-go pricing from $0.01/GB, custom domains, and spending caps for developers…",
       "href": "https://taodaily.io/hippius-sn75s-global-content-delivery-is-live-with-pay-as-you-go-pricing-schedule/",
       "sn": 75
-    },
-    {
-      "when": "Oct 28",
-      "title": "TaoDX Built Root Autopilot to Automate Root Reward Claims Only When It’s Worth It",
-      "body": "TaoDX developed Root Autopilot to automate Bittensor Root reward claims, helping stakers avoid excessive transaction fees.",
-      "href": "https://taodaily.io/taodx-built-root-autopilot-to-automate-root-reward-claims-only-when-its-worth-it/",
-      "sn": null
-    },
-    {
-      "when": "Oct 27",
-      "title": "Beam (SN105) Brings Data Delivery Receipts Onchain With Bittensor EVM Integration",
-      "body": "Beam now allows developers to record data delivery receipts onchain and connect successful transfers to payments, smart contracts and AI workflows.",
-      "href": "https://taodaily.io/beam-sn105-brings-data-delivery-receipts-onchain-with-bittensor-evm-integration/",
-      "sn": 105
     }
   ]
 }
