@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-29T18:29:59Z",
+  "generated_at": "2026-10-29T23:19:20Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 29",
+      "title": "Targon (SN4) Leads Bittensor’s Weekly Alpha Burns with Revenue from Compute Sales",
+      "body": "Targon used compute revenue to buy back and burn $2.1 million worth of alpha tokens, accounting for over 91% of Bittensor’s reported weekly manual alpha…",
+      "href": "https://taodaily.io/targon-sn4-leads-bittensors-weekly-alpha-burns-with-revenue-from-compute-sales/",
+      "sn": 4
+    },
+    {
+      "when": "Oct 29",
+      "title": "Beam (SN105) Brought Bittensor-Powered Data Transfers to Hugging Face",
+      "body": "Beam connects Bittensor’s decentralized data-transfer network to Hugging Face, helping AI teams move large datasets between the platform, cloud storage, and…",
+      "href": "https://taodaily.io/beam-sn105-brought-bittensor-powered-data-transfers-to-hugging-face/",
+      "sn": 105
+    },
     {
       "when": "Oct 29",
       "title": "NOVA (SN68) Developed Drug Optimization Agent with Chutes’ Security and Onepot’s Chemistry",
@@ -29,20 +43,6 @@
       "body": "xTAO's Winter 2026 investor deck details 63,242 TAO holdings, $321K quarterly revenue, validator operations, share buybacks, and comparisons with other TAO…",
       "href": "https://taodaily.io/xtao-investor-deck-highlighted-63000-tao-holdings-321k-quarterly-revenue-and-competitive-positioning/",
       "sn": null
-    },
-    {
-      "when": "Oct 28",
-      "title": "Ingot (SN97) Is Making Powerful AI Models Small Enough to Run on Laptops",
-      "body": "How Ingot subnet turns AI compression into a public competition, producing free models small enough to run offline on a MacBook.",
-      "href": "https://taodaily.io/ingot-sn97-is-making-powerful-ai-models-small-enough-to-run-on-laptops/",
-      "sn": 97
-    },
-    {
-      "when": "Oct 28",
-      "title": "Hippius (SN75)’s Global Content Delivery Is Live With Pay-As-You-Go Pricing Schedule",
-      "body": "Hippius just launched an S3-compatible CDN with global edge delivery, pay-as-you-go pricing from $0.01/GB, custom domains, and spending caps for developers…",
-      "href": "https://taodaily.io/hippius-sn75s-global-content-delivery-is-live-with-pay-as-you-go-pricing-schedule/",
-      "sn": 75
     }
   ]
 }
