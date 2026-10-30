@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-29T23:19:20Z",
+  "generated_at": "2026-10-30T18:02:25Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 30",
+      "title": "Find the People Behind Posts with Desearch (SN22) People Search",
+      "body": "Find creators and professionals with Desearch (SN22) People Search across X, YouTube, LinkedIn and TikTok, using plain-language requests, fit scores and…",
+      "href": "https://taodaily.io/find-the-people-behind-posts-with-desearch-sn22-people-search/",
+      "sn": 22
+    },
+    {
+      "when": "Oct 30",
+      "title": "UR (SN25) Opens Its Routing Algorithms to Competition on Apex (SN1)",
+      "body": "UR has opened its routing and provider-matching algorithms to researchers on Apex, with six rounds of competition and successful improvements eligible for…",
+      "href": "https://taodaily.io/ur-sn25-opens-its-routing-algorithms-to-competition-on-apex-sn1/",
+      "sn": 25
+    },
     {
       "when": "Oct 29",
       "title": "Targon (SN4) Leads Bittensor’s Weekly Alpha Burns with Revenue from Compute Sales",
@@ -28,20 +42,6 @@
       "title": "Five Questions to Ask Before Investing in a Bittensor Subnet",
       "body": "Before investing in Bittensor subnet tokens, discover five key questions to assess product demand, competitive edge, team execution, token flows, and…",
       "href": "https://taodaily.io/five-questions-to-ask-before-investing-in-a-bittensor-subnet/",
-      "sn": null
-    },
-    {
-      "when": "Oct 28",
-      "title": "Synthdata Open-Sources AutoQuant to Test Frontier AI Agents Against Bittensor Quant Miners",
-      "body": "Synthdata open-sourced AutoQuant, a benchmark testing frontier AI agents against SN50 quant miners across crypto, commodity, and equity forecasts. Miners…",
-      "href": "https://taodaily.io/synthdata-open-sources-autoquant-to-test-frontier-ai-agents-against-bittensor-quant-miners/",
-      "sn": 50
-    },
-    {
-      "when": "Oct 28",
-      "title": "xTAO Investor Deck Highlighted 63,000+ TAO Holdings, $321K Quarterly Revenue, and Competitive Positioning",
-      "body": "xTAO's Winter 2026 investor deck details 63,242 TAO holdings, $321K quarterly revenue, validator operations, share buybacks, and comparisons with other TAO…",
-      "href": "https://taodaily.io/xtao-investor-deck-highlighted-63000-tao-holdings-321k-quarterly-revenue-and-competitive-positioning/",
       "sn": null
     }
   ]
