@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-30T18:02:25Z",
+  "generated_at": "2026-10-30T23:00:24Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 30",
+      "title": "Bittensor’s Security Roadmap Toward a Quantum-Resistant Future",
+      "body": "Explore Bittensor’s roadmap to quantum-resistant wallet security, Bitcoin’s complementary role, and how inference subnets could drive revenue and…",
+      "href": "https://taodaily.io/bittensors-security-roadmap-toward-a-quantum-resistant-future/",
+      "sn": null
+    },
+    {
+      "when": "Oct 30",
+      "title": "TPN (SN65)’s Bet on Making AI Models Fit the Hardware Users Have",
+      "body": "Explore how TPN (SN65) pivoted from a profitable VPN to AI model compression on Bittensor, helping language models fit users’ hardware while preserving…",
+      "href": "https://taodaily.io/tpn-sn65s-bet-on-making-ai-models-fit-the-hardware-users-have/",
+      "sn": 65
+    },
     {
       "when": "Oct 30",
       "title": "Find the People Behind Posts with Desearch (SN22) People Search",
@@ -29,20 +43,6 @@
       "body": "Beam connects Bittensor’s decentralized data-transfer network to Hugging Face, helping AI teams move large datasets between the platform, cloud storage, and…",
       "href": "https://taodaily.io/beam-sn105-brought-bittensor-powered-data-transfers-to-hugging-face/",
       "sn": 105
-    },
-    {
-      "when": "Oct 29",
-      "title": "NOVA (SN68) Developed Drug Optimization Agent with Chutes’ Security and Onepot’s Chemistry",
-      "body": "NOVA (SN68) developed a drug optimization agent with Chutes (SN64) and Onepot AI, bringing algorithms into confidential research to refine promising…",
-      "href": "https://taodaily.io/nova-sn68-developed-drug-optimization-agent-with-chutes-security-and-onepots-chemistry/",
-      "sn": 68
-    },
-    {
-      "when": "Oct 29",
-      "title": "Five Questions to Ask Before Investing in a Bittensor Subnet",
-      "body": "Before investing in Bittensor subnet tokens, discover five key questions to assess product demand, competitive edge, team execution, token flows, and…",
-      "href": "https://taodaily.io/five-questions-to-ask-before-investing-in-a-bittensor-subnet/",
-      "sn": null
     }
   ]
 }
