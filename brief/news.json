@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-30T23:00:24Z",
+  "generated_at": "2026-10-31T17:15:49Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 31",
+      "title": "The First Post-Halving Year: What It Revealed About TAO’s Path to 2027",
+      "body": "Bittensor’s first post-halving year revealed rising subnet revenue, TAO buybacks, and an urgent need to turn AI inference advantages into sustained customer…",
+      "href": "https://taodaily.io/the-first-post-halving-year-what-it-revealed-about-taos-path-to-2027/",
+      "sn": null
+    },
     {
       "when": "Oct 30",
       "title": "Bittensor’s Security Roadmap Toward a Quantum-Resistant Future",
@@ -36,13 +43,6 @@
       "body": "Targon used compute revenue to buy back and burn $2.1 million worth of alpha tokens, accounting for over 91% of Bittensor’s reported weekly manual alpha…",
       "href": "https://taodaily.io/targon-sn4-leads-bittensors-weekly-alpha-burns-with-revenue-from-compute-sales/",
       "sn": 4
-    },
-    {
-      "when": "Oct 29",
-      "title": "Beam (SN105) Brought Bittensor-Powered Data Transfers to Hugging Face",
-      "body": "Beam connects Bittensor’s decentralized data-transfer network to Hugging Face, helping AI teams move large datasets between the platform, cloud storage, and…",
-      "href": "https://taodaily.io/beam-sn105-brought-bittensor-powered-data-transfers-to-hugging-face/",
-      "sn": 105
     }
   ]
 }
