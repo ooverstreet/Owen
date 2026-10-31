@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-10-31T17:15:49Z",
+  "generated_at": "2026-10-31T22:31:07Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Oct 31",
+      "title": "Terza Inference (SN103), the New Inference Player on the Block",
+      "body": "Terza Inference brings competing miners to Bittensor’s AI inference market with one API key, competitive model pricing, verified usage, and delivery-based…",
+      "href": "https://taodaily.io/terza-inference-sn103-the-new-inference-player-on-the-block/",
+      "sn": 103
+    },
+    {
+      "when": "Oct 31",
+      "title": "Yanez (SN54) Secured Major Social Media Deal as Revenue Hit $550,000",
+      "body": "Yanez (SN54) secured a major social media deal and reached $550,000 in annual recurring revenue, with new enterprise clients and Pulse integrations…",
+      "href": "https://taodaily.io/yanez-sn54-secured-major-social-media-deal-as-revenue-hit-550000/",
+      "sn": 54
+    },
     {
       "when": "Oct 31",
       "title": "The First Post-Halving Year: What It Revealed About TAO’s Path to 2027",
@@ -29,20 +43,6 @@
       "body": "Find creators and professionals with Desearch (SN22) People Search across X, YouTube, LinkedIn and TikTok, using plain-language requests, fit scores and…",
       "href": "https://taodaily.io/find-the-people-behind-posts-with-desearch-sn22-people-search/",
       "sn": 22
-    },
-    {
-      "when": "Oct 30",
-      "title": "UR (SN25) Opens Its Routing Algorithms to Competition on Apex (SN1)",
-      "body": "UR has opened its routing and provider-matching algorithms to researchers on Apex, with six rounds of competition and successful improvements eligible for…",
-      "href": "https://taodaily.io/ur-sn25-opens-its-routing-algorithms-to-competition-on-apex-sn1/",
-      "sn": 25
-    },
-    {
-      "when": "Oct 29",
-      "title": "Targon (SN4) Leads Bittensor’s Weekly Alpha Burns with Revenue from Compute Sales",
-      "body": "Targon used compute revenue to buy back and burn $2.1 million worth of alpha tokens, accounting for over 91% of Bittensor’s reported weekly manual alpha…",
-      "href": "https://taodaily.io/targon-sn4-leads-bittensors-weekly-alpha-burns-with-revenue-from-compute-sales/",
-      "sn": 4
     }
   ]
 }
