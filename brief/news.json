@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-11-01T17:56:33Z",
+  "generated_at": "2026-11-01T22:51:47Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 1",
+      "title": "EveryFrame (SN117) Wants to Bring the Entire AI Filmmaking Process Into One Studio",
+      "body": "EveryFrame is building an all-in-one AI filmmaking studio combining video, image, audio, and editing tools with competitive miner-based serving.",
+      "href": "https://taodaily.io/everyframe-sn117-wants-to-bring-the-entire-ai-filmmaking-process-into-one-studio/",
+      "sn": 117
+    },
     {
       "when": "Nov 1",
       "title": "KR1 plc Puts 5,000 TAO to Work With Bittensor Staking",
@@ -36,13 +43,6 @@
       "body": "Explore Bittensor’s roadmap to quantum-resistant wallet security, Bitcoin’s complementary role, and how inference subnets could drive revenue and…",
       "href": "https://taodaily.io/bittensors-security-roadmap-toward-a-quantum-resistant-future/",
       "sn": null
-    },
-    {
-      "when": "Oct 30",
-      "title": "TPN (SN65)’s Bet on Making AI Models Fit the Hardware Users Have",
-      "body": "Explore how TPN (SN65) pivoted from a profitable VPN to AI model compression on Bittensor, helping language models fit users’ hardware while preserving…",
-      "href": "https://taodaily.io/tpn-sn65s-bet-on-making-ai-models-fit-the-hardware-users-have/",
-      "sn": 65
     }
   ]
 }
