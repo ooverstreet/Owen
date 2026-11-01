@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-31T22:31:07Z",
+  "generated_at": "2026-11-01T17:56:33Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 1",
+      "title": "KR1 plc Puts 5,000 TAO to Work With Bittensor Staking",
+      "body": "KR1 plc has acquired around 5,000 TAO and launched Bittensor staking operations, targeting infrastructure income and long-term growth from the network.",
+      "href": "https://taodaily.io/kr1-plc-puts-5000-tao-to-work-with-bittensor-staking/",
+      "sn": null
+    },
     {
       "when": "Oct 31",
       "title": "Terza Inference (SN103), the New Inference Player on the Block",
@@ -36,13 +43,6 @@
       "body": "Explore how TPN (SN65) pivoted from a profitable VPN to AI model compression on Bittensor, helping language models fit users’ hardware while preserving…",
       "href": "https://taodaily.io/tpn-sn65s-bet-on-making-ai-models-fit-the-hardware-users-have/",
       "sn": 65
-    },
-    {
-      "when": "Oct 30",
-      "title": "Find the People Behind Posts with Desearch (SN22) People Search",
-      "body": "Find creators and professionals with Desearch (SN22) People Search across X, YouTube, LinkedIn and TikTok, using plain-language requests, fit scores and…",
-      "href": "https://taodaily.io/find-the-people-behind-posts-with-desearch-sn22-people-search/",
-      "sn": 22
     }
   ]
 }
