@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-01T22:51:47Z",
+  "generated_at": "2026-11-02T21:43:47Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 2",
+      "title": "How to Mine Hippius (SN75): Get Paid for Providing Storage Space",
+      "body": "Learn how to mine Hippius and earn rewards by providing storage space. Get the hardware requirements, setup steps, and tools to monitor your storage mining…",
+      "href": "https://taodaily.io/how-to-mine-hippius-sn75-get-paid-for-providing-storage-space/",
+      "sn": 75
+    },
+    {
+      "when": "Nov 2",
+      "title": "Could AI Agent Skills Make Some Bittensor Subnets Obsolete?",
+      "body": "AI agent skills could challenge Bittensor subnets by making services easier to replicate, pushing alpha investors to assess lasting value, infrastructure,…",
+      "href": "https://taodaily.io/could-ai-agent-skills-make-some-bittensor-subnets-obsolete/",
+      "sn": null
+    },
     {
       "when": "Nov 1",
       "title": "EveryFrame (SN117) Wants to Bring the Entire AI Filmmaking Process Into One Studio",
@@ -29,20 +43,6 @@
       "body": "Yanez (SN54) secured a major social media deal and reached $550,000 in annual recurring revenue, with new enterprise clients and Pulse integrations…",
       "href": "https://taodaily.io/yanez-sn54-secured-major-social-media-deal-as-revenue-hit-550000/",
       "sn": 54
-    },
-    {
-      "when": "Oct 31",
-      "title": "The First Post-Halving Year: What It Revealed About TAO’s Path to 2027",
-      "body": "Bittensor’s first post-halving year revealed rising subnet revenue, TAO buybacks, and an urgent need to turn AI inference advantages into sustained customer…",
-      "href": "https://taodaily.io/the-first-post-halving-year-what-it-revealed-about-taos-path-to-2027/",
-      "sn": null
-    },
-    {
-      "when": "Oct 30",
-      "title": "Bittensor’s Security Roadmap Toward a Quantum-Resistant Future",
-      "body": "Explore Bittensor’s roadmap to quantum-resistant wallet security, Bitcoin’s complementary role, and how inference subnets could drive revenue and…",
-      "href": "https://taodaily.io/bittensors-security-roadmap-toward-a-quantum-resistant-future/",
-      "sn": null
     }
   ]
 }
