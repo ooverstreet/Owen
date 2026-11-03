@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-02T21:43:47Z",
+  "generated_at": "2026-11-03T19:31:17Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 3",
+      "title": "Beam (SN105) Transfers 1 TB in 2 Minutes 42 Seconds, With More Integrity Checks",
+      "body": "Beam reports a new data-transfer benchmark, moving 1 TB in 2 minutes 42 seconds while improving speed by 20% and increasing security and integrity checks by…",
+      "href": "https://taodaily.io/beam-sn105-transfers-1-tb-in-2-minutes-42-seconds-with-more-integrity-checks/",
+      "sn": 105
+    },
+    {
+      "when": "Nov 3",
+      "title": "Cascade (SN91) Pairs Forecasting with REAX (SN92)-Powered Decisions in Crypto Trading Test",
+      "body": "Cascade (SN91) pairs Ephemeris forecasts with REAX (SN92)-powered Decision Models to test crypto trading filters and risk management, improving backtest…",
+      "href": "https://taodaily.io/cascade-sn91-pairs-forecasting-with-reax-sn92-powered-decisions-in-crypto-trading-test/",
+      "sn": 91
+    },
+    {
+      "when": "Nov 3",
+      "title": "TPN (SN65) Launches Gratis to Run Models Privately on Your Own Device",
+      "body": "TPN launches Gratis AI, a free app for running AI models privately on your own device, with offline access, local data storage, and no accounts or…",
+      "href": "https://taodaily.io/tpn-sn65-launches-gratis-to-run-models-privately-on-your-own-device/",
+      "sn": 65
+    },
     {
       "when": "Nov 2",
       "title": "How to Mine Hippius (SN75): Get Paid for Providing Storage Space",
@@ -22,27 +43,6 @@
       "body": "EveryFrame is building an all-in-one AI filmmaking studio combining video, image, audio, and editing tools with competitive miner-based serving.",
       "href": "https://taodaily.io/everyframe-sn117-wants-to-bring-the-entire-ai-filmmaking-process-into-one-studio/",
       "sn": 117
-    },
-    {
-      "when": "Nov 1",
-      "title": "KR1 plc Puts 5,000 TAO to Work With Bittensor Staking",
-      "body": "KR1 plc has acquired around 5,000 TAO and launched Bittensor staking operations, targeting infrastructure income and long-term growth from the network.",
-      "href": "https://taodaily.io/kr1-plc-puts-5000-tao-to-work-with-bittensor-staking/",
-      "sn": null
-    },
-    {
-      "when": "Oct 31",
-      "title": "Terza Inference (SN103), the New Inference Player on the Block",
-      "body": "Terza Inference brings competing miners to Bittensor’s AI inference market with one API key, competitive model pricing, verified usage, and delivery-based…",
-      "href": "https://taodaily.io/terza-inference-sn103-the-new-inference-player-on-the-block/",
-      "sn": 103
-    },
-    {
-      "when": "Oct 31",
-      "title": "Yanez (SN54) Secured Major Social Media Deal as Revenue Hit $550,000",
-      "body": "Yanez (SN54) secured a major social media deal and reached $550,000 in annual recurring revenue, with new enterprise clients and Pulse integrations…",
-      "href": "https://taodaily.io/yanez-sn54-secured-major-social-media-deal-as-revenue-hit-550000/",
-      "sn": 54
     }
   ]
 }
