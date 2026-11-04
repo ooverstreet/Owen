@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-03T19:31:17Z",
+  "generated_at": "2026-11-04T19:49:17Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 4",
+      "title": "Vanta (SN8) Introduces Glitch, an AI Agent Platform That Builds and Tests Trading Strategies",
+      "body": "Vanta launches Glitch, an AI trading platform that builds and backtests strategies, with Builder subscribers receiving a $1M Vanta Pro account evaluation.",
+      "href": "https://taodaily.io/vanta-sn8-introduces-glitch-an-ai-agent-platform-that-builds-and-tests-trading-strategies/",
+      "sn": 8
+    },
+    {
+      "when": "Nov 3",
+      "title": "ReadyAI (SN33)’s Skill Store 33 Goes Live With 61,000+ Skills for AI Agents",
+      "body": "ReadyAI’s Skill Store 33 goes live with 61,000+ searchable AI agent skills, verification labels and MCP integration to help agents complete specialised…",
+      "href": "https://taodaily.io/readyai-sn33s-skill-store-33-goes-live-with-61000-skills-for-ai-agents/",
+      "sn": 33
+    },
     {
       "when": "Nov 3",
       "title": "Beam (SN105) Transfers 1 TB in 2 Minutes 42 Seconds, With More Integrity Checks",
@@ -29,20 +43,6 @@
       "body": "Learn how to mine Hippius and earn rewards by providing storage space. Get the hardware requirements, setup steps, and tools to monitor your storage mining…",
       "href": "https://taodaily.io/how-to-mine-hippius-sn75-get-paid-for-providing-storage-space/",
       "sn": 75
-    },
-    {
-      "when": "Nov 2",
-      "title": "Could AI Agent Skills Make Some Bittensor Subnets Obsolete?",
-      "body": "AI agent skills could challenge Bittensor subnets by making services easier to replicate, pushing alpha investors to assess lasting value, infrastructure,…",
-      "href": "https://taodaily.io/could-ai-agent-skills-make-some-bittensor-subnets-obsolete/",
-      "sn": null
-    },
-    {
-      "when": "Nov 1",
-      "title": "EveryFrame (SN117) Wants to Bring the Entire AI Filmmaking Process Into One Studio",
-      "body": "EveryFrame is building an all-in-one AI filmmaking studio combining video, image, audio, and editing tools with competitive miner-based serving.",
-      "href": "https://taodaily.io/everyframe-sn117-wants-to-bring-the-entire-ai-filmmaking-process-into-one-studio/",
-      "sn": 117
     }
   ]
 }
