@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Mealpath — hunger help you can follow. Give, find food, or volunteer in Jacksonville with a clear trail of impact." />
+  <meta name="theme-color" content="#13241c" />
+  <title>Mealpath — Hunger help you can follow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #13241c;
+      --ink-soft: #3a4f44;
+      --paper: #f3f6f1;
+      --mist: #dce6de;
+      --leaf: #2f6b4f;
+      --leaf-deep: #1a3d2e;
+      --gold: #b8892d;
+      --gold-soft: #e6c978;
+      --line: rgba(19, 36, 28, 0.12);
+      --hero-overlay: linear-gradient(105deg, rgba(12, 28, 20, 0.88) 18%, rgba(12, 28, 20, 0.55) 55%, rgba(12, 28, 20, 0.25) 100%);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Figtree", sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #e7efdf 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #e4ecf0 0%, transparent 45%),
+        var(--paper);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    .wrap {
+      width: min(1120px, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    /* —— Hero (full-bleed) —— */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      color: #f7faf6;
+      overflow: hidden;
+      display: grid;
+      align-items: end;
+    }
+    .hero__media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      transform: scale(1.06);
+      animation: drift 18s var(--ease) infinite alternate;
+    }
+    .hero__media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+      filter: saturate(0.92) contrast(1.05);
+    }
+    .hero__shade {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: var(--hero-overlay);
+    }
+    .hero__inner {
+      position: relative;
+      z-index: 2;
+      padding: clamp(4.5rem, 12vh, 7rem) 0 clamp(2.75rem, 7vh, 4rem);
+      animation: rise 0.9s var(--ease) both;
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.6rem, 7vw, 4.4rem);
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+      margin-bottom: 1.1rem;
+    }
+    .brand span {
+      color: var(--gold-soft);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(1.35rem, 3.2vw, 2rem);
+      max-width: 16ch;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
+    }
+    .hero p {
+      max-width: 34ch;
+      font-size: 1.05rem;
+      color: rgba(247, 250, 246, 0.86);
+      margin-bottom: 1.6rem;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.98rem;
+      padding: 0.85rem 1.2rem;
+      border-radius: 4px;
+      transition: transform 0.25s var(--ease), background 0.25s ease, color 0.25s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary {
+      background: var(--gold-soft);
+      color: var(--ink);
+    }
+    .btn-primary:hover { background: #f0d792; }
+    .btn-ghost {
+      background: transparent;
+      color: #f7faf6;
+      box-shadow: inset 0 0 0 1.5px rgba(247, 250, 246, 0.55);
+    }
+    .btn-ghost:hover { background: rgba(247, 250, 246, 0.08); }
+    .btn-leaf {
+      background: var(--leaf);
+      color: #f7faf6;
+    }
+    .btn-leaf:hover { background: #37825e; }
+
+    /* —— Sections —— */
+    section {
+      padding: clamp(3.5rem, 8vh, 5.5rem) 0;
+    }
+    .section-kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--leaf);
+      margin-bottom: 0.7rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      max-width: 16ch;
+      margin-bottom: 0.75rem;
+    }
+    .section-copy {
+      color: var(--ink-soft);
+      max-width: 42ch;
+      font-size: 1.05rem;
+      margin-bottom: 2rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .reveal.is-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* —— Split —— */
+    .split-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .split-item {
+      background: rgba(255, 255, 255, 0.55);
+      padding: 1.4rem 1.1rem;
+    }
+    .split-item strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.7rem);
+      color: var(--leaf-deep);
+      line-height: 1;
+      margin-bottom: 0.45rem;
+    }
+    .split-item span {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+    }
+
+    /* —— Action list (not hero cards) —— */
+    .action-list {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+    .action {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--line);
+      text-decoration: none;
+      transition: background 0.25s ease, padding-left 0.25s var(--ease);
+    }
+    .action:hover {
+      background: rgba(47, 107, 79, 0.06);
+      padding-left: 0.4rem;
+    }
+    .action h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .action p {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      max-width: 52ch;
+    }
+    .action em {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--leaf-deep);
+      white-space: nowrap;
+    }
+
+    /* —— Ledger —— */
+    .ledger {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.98rem;
+    }
+    .ledger th,
+    .ledger td {
+      text-align: left;
+      padding: 0.9rem 0.4rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .ledger th {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+    .ledger td.amt {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--leaf-deep);
+      white-space: nowrap;
+    }
+    .note {
+      margin-top: 1rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      max-width: 60ch;
+    }
+
+    /* —— Help strip —— */
+    .help {
+      background: linear-gradient(135deg, var(--leaf-deep), #245640 55%, #1e4a38);
+      color: #f4f8f3;
+      border-radius: 6px;
+      padding: clamp(1.5rem, 4vw, 2.2rem);
+    }
+    .help h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 0.5rem;
+    }
+    .help p {
+      max-width: 46ch;
+      color: rgba(244, 248, 243, 0.88);
+      margin-bottom: 1.1rem;
+    }
+    .help .btn-primary { color: var(--ink); }
+
+    footer {
+      padding: 2.5rem 0 3rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      border-top: 1px solid var(--line);
+    }
+    footer strong {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+    footer .later {
+      margin-top: 0.75rem;
+      max-width: 52ch;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes drift {
+      from { transform: scale(1.06) translate3d(0, 0, 0); }
+      to { transform: scale(1.12) translate3d(-1.5%, -1%, 0); }
+    }
+
+    @media (max-width: 720px) {
+      .split-grid { grid-template-columns: 1fr; }
+      .action {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+      }
+      .hero p { max-width: 34ch; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .hero__media,
+      .hero__inner,
+      .reveal { animation: none !important; transition: none !important; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__media" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=2000&q=80"
+        alt=""
+        width="2000"
+        height="1333"
+      />
+    </div>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <div class="wrap hero__inner">
+      <div class="brand">Meal<span>path</span></div>
+      <h1>Hunger help you can follow.</h1>
+      <p>Give, find food, or volunteer in Jacksonville — with a clear trail from intention to meals.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#give">Give today</a>
+        <a class="btn btn-ghost" href="#help">Need food?</a>
+        <a class="btn btn-ghost" href="#give">Volunteer</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="split" class="wrap reveal">
+      <p class="section-kicker">Honest split</p>
+      <h2 class="section-title">Where support goes</h2>
+      <p class="section-copy">
+        When Mealpath collects giving on-platform, every dollar is split in public. Until then, we send you straight to trusted local partners so help is not waiting on us.
+      </p>
+      <div class="split-grid" role="list">
+        <div class="split-item" role="listitem">
+          <strong>80%</strong>
+          <span>Verified hunger-relief partners</span>
+        </div>
+        <div class="split-item" role="listitem">
+          <strong>15%</strong>
+          <span>Ops &amp; product so this stays alive</span>
+        </div>
+        <div class="split-item" role="listitem">
+          <strong>5%</strong>
+          <span>Reserve for shortfalls and emergencies</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="give" class="wrap reveal">
+      <p class="section-kicker">Jacksonville action</p>
+      <h2 class="section-title">Do something real today</h2>
+      <p class="section-copy">
+        Software is the starting point. These links go to established North Florida hunger organizations — no new coin, no mystery wallet.
+      </p>
+      <div class="action-list">
+        <a class="action" href="https://www.wenourishhope.org" target="_blank" rel="noopener noreferrer">
+          <div>
+            <h3>Donate via Second Harvest North Florida</h3>
+            <p>Food bank serving 17 counties from Jacksonville. Official site: We Nourish Hope.</p>
+          </div>
+          <em>Donate →</em>
+        </a>
+        <a class="action" href="https://www.feedingnefl.org" target="_blank" rel="noopener noreferrer">
+          <div>
+            <h3>Support Feeding Northeast Florida</h3>
+            <p>Regional hunger-relief network for Northeast Florida communities.</p>
+          </div>
+          <em>Visit →</em>
+        </a>
+        <a class="action" href="https://www.wenourishhope.org" target="_blank" rel="noopener noreferrer">
+          <div>
+            <h3>Volunteer packing &amp; distribution</h3>
+            <p>Call (904) 353-3663 or use their site to ask about volunteer shifts.</p>
+          </div>
+          <em>Volunteer →</em>
+        </a>
+      </div>
+    </section>
+
+    <section class="wrap reveal">
+      <div class="help" id="help">
+        <h2>Need food in Jacksonville?</h2>
+        <p>
+          Dial <strong>211</strong> or use Northeast Florida 211 to find nearby pantries and assistance. You do not need to explain everything — just ask for food help.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="tel:211">Call 211</a>
+          <a class="btn btn-ghost" href="https://www.nefl211.org" target="_blank" rel="noopener noreferrer">Open 211 site</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="ledger" class="wrap reveal">
+      <p class="section-kicker">Public ledger</p>
+      <h2 class="section-title">A trail you can see</h2>
+      <p class="section-copy">
+        Sample entries for the product shape. Live donations will post here with partner, amount, and date — no screenshots, no vibes-only impact.
+      </p>
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Partner</th>
+            <th>Note</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-body">
+          <tr>
+            <td>2026-07-01</td>
+            <td>Second Harvest North Florida</td>
+            <td>Seed example — platform giving not live yet</td>
+            <td class="amt">$0.00</td>
+          </tr>
+          <tr>
+            <td>2026-07-15</td>
+            <td>Feeding Northeast Florida</td>
+            <td>Seed example — awaiting first real transfer</td>
+            <td class="amt">$0.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        Honesty rule: until the first real dollar moves through Mealpath, the ledger stays at zero. Direct gifts through partner sites still help today.
+      </p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <strong>Mealpath</strong>
+    <p>Built to reduce hunger with clarity — starting in Jacksonville.</p>
+    <p class="later">
+      Oceans and forests matter too. Those paths can open later under the same rule: real partners, public trail, no charity-coin theater.
+    </p>
+  </footer>
+
+  <script>
+    const reveals = document.querySelectorAll(".reveal");
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-in");
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      reveals.forEach((el) => io.observe(el));
+    } else {
+      reveals.forEach((el) => el.classList.add("is-in"));
+    }
+  </script>
+</body>
+</html>
