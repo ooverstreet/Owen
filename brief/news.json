@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-04T19:49:17Z",
+  "generated_at": "2026-11-05T19:59:40Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 5",
+      "title": "Bittensor Gets Another Decision-Model Subnet With Zils (SN127). Here’s What It Does",
+      "body": "Zils builds small, customizable decision models that can handle routing, classification and scoring tasks without sending every request to a large language…",
+      "href": "https://taodaily.io/bittensor-gets-another-decision-model-subnet-with-zils-sn127-heres-what-it-does/",
+      "sn": 127
+    },
+    {
+      "when": "Nov 5",
+      "title": "Ken Miyachi and Dylan Uys Explain How Yugos (SN34) Makes AI Inference Smarter, Cheaper, and Easier to Use",
+      "body": "Dylan Uys and Ken Miyachi sit down with Ventura Labs to explain the pivot to Yugos, why routing decisions belong to a competitive system, and how teams can…",
+      "href": "https://taodaily.io/ken-miyachi-and-dylan-uys-explain-how-yugos-sn34-makes-ai-inference-smarter-cheaper-and-easier-to-use/",
+      "sn": 34
+    },
+    {
+      "when": "Nov 5",
+      "title": "Fugal (SN70) Wants to Lower AI Costs by Choosing the Right Model for Each Question",
+      "body": "Fugal uses Bittensor to improve AI model routing, selecting models for each question based on predicted accuracy and cost to help users and developers…",
+      "href": "https://taodaily.io/fugal-sn70-wants-to-lower-ai-costs-by-choosing-the-right-model-for-each-question/",
+      "sn": 70
+    },
+    {
+      "when": "Nov 4",
+      "title": "The Products Already Running on Bittensor",
+      "body": "TAO Templar highlights some of Bittensor’s top subnets and the real products they are already building across compute, AI inference, storage, robotics and…",
+      "href": "https://taodaily.io/the-products-already-running-on-bittensor/",
+      "sn": null
+    },
     {
       "when": "Nov 4",
       "title": "Vanta (SN8) Introduces Glitch, an AI Agent Platform That Builds and Tests Trading Strategies",
@@ -15,34 +43,6 @@
       "body": "ReadyAI’s Skill Store 33 goes live with 61,000+ searchable AI agent skills, verification labels and MCP integration to help agents complete specialised…",
       "href": "https://taodaily.io/readyai-sn33s-skill-store-33-goes-live-with-61000-skills-for-ai-agents/",
       "sn": 33
-    },
-    {
-      "when": "Nov 3",
-      "title": "Beam (SN105) Transfers 1 TB in 2 Minutes 42 Seconds, With More Integrity Checks",
-      "body": "Beam reports a new data-transfer benchmark, moving 1 TB in 2 minutes 42 seconds while improving speed by 20% and increasing security and integrity checks by…",
-      "href": "https://taodaily.io/beam-sn105-transfers-1-tb-in-2-minutes-42-seconds-with-more-integrity-checks/",
-      "sn": 105
-    },
-    {
-      "when": "Nov 3",
-      "title": "Cascade (SN91) Pairs Forecasting with REAX (SN92)-Powered Decisions in Crypto Trading Test",
-      "body": "Cascade (SN91) pairs Ephemeris forecasts with REAX (SN92)-powered Decision Models to test crypto trading filters and risk management, improving backtest…",
-      "href": "https://taodaily.io/cascade-sn91-pairs-forecasting-with-reax-sn92-powered-decisions-in-crypto-trading-test/",
-      "sn": 91
-    },
-    {
-      "when": "Nov 3",
-      "title": "TPN (SN65) Launches Gratis to Run Models Privately on Your Own Device",
-      "body": "TPN launches Gratis AI, a free app for running AI models privately on your own device, with offline access, local data storage, and no accounts or…",
-      "href": "https://taodaily.io/tpn-sn65-launches-gratis-to-run-models-privately-on-your-own-device/",
-      "sn": 65
-    },
-    {
-      "when": "Nov 2",
-      "title": "How to Mine Hippius (SN75): Get Paid for Providing Storage Space",
-      "body": "Learn how to mine Hippius and earn rewards by providing storage space. Get the hardware requirements, setup steps, and tools to monitor your storage mining…",
-      "href": "https://taodaily.io/how-to-mine-hippius-sn75-get-paid-for-providing-storage-space/",
-      "sn": 75
     }
   ]
 }
