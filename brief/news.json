@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-05T19:59:40Z",
+  "generated_at": "2026-11-06T19:27:19Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 6",
+      "title": "An Interview With Claims (SN111) on Scaling Scientific Data, Miner Competition, and Commercial Revenue",
+      "body": "Claims (SN111) CEO Philipp Koellinger discusses its new mining competition, 10–100x scaling plans, Zils partnership, enterprise pricing, and 2027 revenue…",
+      "href": "https://taodaily.io/an-interview-with-claims-sn111-on-scaling-scientific-data-miner-competition-and-commercial-revenue/",
+      "sn": 111
+    },
+    {
+      "when": "Nov 6",
+      "title": "How Bittensor Subnets Can Undercut Centralized AI Providers",
+      "body": "How Bittensor subnets use global competition to deliver cheaper AI services, bringing together the best talent, hardware, and resources worldwide.",
+      "href": "https://taodaily.io/how-bittensor-subnets-can-undercut-centralized-ai-providers/",
+      "sn": null
+    },
+    {
+      "when": "Nov 6",
+      "title": "How Zeus Pro Uses Bittensor to Find the Best AI Weather Forecasts",
+      "body": "See how Zeus Pro uses Zeus (SN18) to rank AI weather forecasts against ERA5 and deliver top-performing predictions to energy traders in about 90 minutes.",
+      "href": "https://taodaily.io/how-zeus-pro-uses-bittensor-to-find-the-best-ai-weather-forecasts/",
+      "sn": 18
+    },
     {
       "when": "Nov 5",
       "title": "Bittensor Gets Another Decision-Model Subnet With Zils (SN127). Here’s What It Does",
@@ -22,27 +43,6 @@
       "body": "Fugal uses Bittensor to improve AI model routing, selecting models for each question based on predicted accuracy and cost to help users and developers…",
       "href": "https://taodaily.io/fugal-sn70-wants-to-lower-ai-costs-by-choosing-the-right-model-for-each-question/",
       "sn": 70
-    },
-    {
-      "when": "Nov 4",
-      "title": "The Products Already Running on Bittensor",
-      "body": "TAO Templar highlights some of Bittensor’s top subnets and the real products they are already building across compute, AI inference, storage, robotics and…",
-      "href": "https://taodaily.io/the-products-already-running-on-bittensor/",
-      "sn": null
-    },
-    {
-      "when": "Nov 4",
-      "title": "Vanta (SN8) Introduces Glitch, an AI Agent Platform That Builds and Tests Trading Strategies",
-      "body": "Vanta launches Glitch, an AI trading platform that builds and backtests strategies, with Builder subscribers receiving a $1M Vanta Pro account evaluation.",
-      "href": "https://taodaily.io/vanta-sn8-introduces-glitch-an-ai-agent-platform-that-builds-and-tests-trading-strategies/",
-      "sn": 8
-    },
-    {
-      "when": "Nov 3",
-      "title": "ReadyAI (SN33)’s Skill Store 33 Goes Live With 61,000+ Skills for AI Agents",
-      "body": "ReadyAI’s Skill Store 33 goes live with 61,000+ searchable AI agent skills, verification labels and MCP integration to help agents complete specialised…",
-      "href": "https://taodaily.io/readyai-sn33s-skill-store-33-goes-live-with-61000-skills-for-ai-agents/",
-      "sn": 33
     }
   ]
 }
