@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-11-07T17:45:27Z",
+  "generated_at": "2026-11-07T22:46:46Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 7",
+      "title": "While Crypto Markets Crash, Bittensor Teams Push Ahead With New AI Systems",
+      "body": "As crypto markets dump generally, Bittensor teams advance decentralized AI with new models, distributed training, faster inference, and research systems…",
+      "href": "https://taodaily.io/while-crypto-markets-crash-bittensor-teams-push-ahead-with-new-ai-systems/",
+      "sn": null
+    },
     {
       "when": "Nov 7",
       "title": "Bittensor’s Quantum-Resistant Wallets Are Now in Code",
@@ -36,13 +43,6 @@
       "body": "How Bittensor subnets use global competition to deliver cheaper AI services, bringing together the best talent, hardware, and resources worldwide.",
       "href": "https://taodaily.io/how-bittensor-subnets-can-undercut-centralized-ai-providers/",
       "sn": null
-    },
-    {
-      "when": "Nov 6",
-      "title": "How Zeus Pro Uses Bittensor to Find the Best AI Weather Forecasts",
-      "body": "See how Zeus Pro uses Zeus (SN18) to rank AI weather forecasts against ERA5 and deliver top-performing predictions to energy traders in about 90 minutes.",
-      "href": "https://taodaily.io/how-zeus-pro-uses-bittensor-to-find-the-best-ai-weather-forecasts/",
-      "sn": 18
     }
   ]
 }
