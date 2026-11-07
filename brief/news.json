@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-06T19:27:19Z",
+  "generated_at": "2026-11-07T17:45:27Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 7",
+      "title": "Bittensor’s Quantum-Resistant Wallets Are Now in Code",
+      "body": "Bittensor’s quantum-resistant wallets are now in code, with three post-quantum signature options and optional automatic key rotation to protect TAO…",
+      "href": "https://taodaily.io/bittensors-quantum-resistant-wallets-are-now-in-code/",
+      "sn": null
+    },
+    {
+      "when": "Nov 7",
+      "title": "Bittensor Produces the World’s Top-Ranked Decision Model With REAX 1.3",
+      "body": "REAX produced the world's top-ranked decision model in weeks, using open miner competition and model blending to achieve a score of 74.0.",
+      "href": "https://taodaily.io/bittensor-produces-the-worlds-top-ranked-decision-model-with-reax-1-3/",
+      "sn": null
+    },
+    {
+      "when": "Nov 7",
+      "title": "Reliquary (SN81) Post-Trained a 9B Model That Beats Qwen3.5-9B on Five Benchmarks",
+      "body": "Reliquary post-trained Teutonic-I-Reliquary with 161 miners. The 9B model beat Qwen3.5-9B on five of eight benchmarks and scored 43.6% on SWE-bench Verified.",
+      "href": "https://taodaily.io/reliquary-sn81-post-trained-a-9b-model-that-beats-qwen3-5-9b-on-five-benchmarks/",
+      "sn": 81
+    },
     {
       "when": "Nov 6",
       "title": "An Interview With Claims (SN111) on Scaling Scientific Data, Miner Competition, and Commercial Revenue",
@@ -22,27 +43,6 @@
       "body": "See how Zeus Pro uses Zeus (SN18) to rank AI weather forecasts against ERA5 and deliver top-performing predictions to energy traders in about 90 minutes.",
       "href": "https://taodaily.io/how-zeus-pro-uses-bittensor-to-find-the-best-ai-weather-forecasts/",
       "sn": 18
-    },
-    {
-      "when": "Nov 5",
-      "title": "Bittensor Gets Another Decision-Model Subnet With Zils (SN127). Here’s What It Does",
-      "body": "Zils builds small, customizable decision models that can handle routing, classification and scoring tasks without sending every request to a large language…",
-      "href": "https://taodaily.io/bittensor-gets-another-decision-model-subnet-with-zils-sn127-heres-what-it-does/",
-      "sn": 127
-    },
-    {
-      "when": "Nov 5",
-      "title": "Ken Miyachi and Dylan Uys Explain How Yugos (SN34) Makes AI Inference Smarter, Cheaper, and Easier to Use",
-      "body": "Dylan Uys and Ken Miyachi sit down with Ventura Labs to explain the pivot to Yugos, why routing decisions belong to a competitive system, and how teams can…",
-      "href": "https://taodaily.io/ken-miyachi-and-dylan-uys-explain-how-yugos-sn34-makes-ai-inference-smarter-cheaper-and-easier-to-use/",
-      "sn": 34
-    },
-    {
-      "when": "Nov 5",
-      "title": "Fugal (SN70) Wants to Lower AI Costs by Choosing the Right Model for Each Question",
-      "body": "Fugal uses Bittensor to improve AI model routing, selecting models for each question based on predicted accuracy and cost to help users and developers…",
-      "href": "https://taodaily.io/fugal-sn70-wants-to-lower-ai-costs-by-choosing-the-right-model-for-each-question/",
-      "sn": 70
     }
   ]
 }
