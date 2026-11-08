@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-07T22:46:46Z",
+  "generated_at": "2026-11-08T17:56:58Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 8",
+      "title": "Desearch (SN22) Builds Open-Source Tool to Track Customer Complaints on X",
+      "body": "Desearch introduces Open Complaint Radar, a low-cost tool built on Bittensor that tracks customer complaints on X and identifies recurring issues.",
+      "href": "https://taodaily.io/desearch-sn22-builds-open-source-tool-to-track-customer-complaints-on-x/",
+      "sn": 22
+    },
+    {
+      "when": "Nov 8",
+      "title": "Chutes (SN64) Becomes Launch Partner for Tencent’s New Hy4 AI Model",
+      "body": "Chutes partners with Tencent Cloud to launch Hy4 on Bittensor, bringing advanced vision, computer-use capabilities, and competitively priced AI inference.",
+      "href": "https://taodaily.io/chutes-sn64-becomes-launch-partner-for-tencents-new-hy4-ai-model/",
+      "sn": 64
+    },
     {
       "when": "Nov 7",
       "title": "While Crypto Markets Crash, Bittensor Teams Push Ahead With New AI Systems",
@@ -29,20 +43,6 @@
       "body": "Reliquary post-trained Teutonic-I-Reliquary with 161 miners. The 9B model beat Qwen3.5-9B on five of eight benchmarks and scored 43.6% on SWE-bench Verified.",
       "href": "https://taodaily.io/reliquary-sn81-post-trained-a-9b-model-that-beats-qwen3-5-9b-on-five-benchmarks/",
       "sn": 81
-    },
-    {
-      "when": "Nov 6",
-      "title": "An Interview With Claims (SN111) on Scaling Scientific Data, Miner Competition, and Commercial Revenue",
-      "body": "Claims (SN111) CEO Philipp Koellinger discusses its new mining competition, 10–100x scaling plans, Zils partnership, enterprise pricing, and 2027 revenue…",
-      "href": "https://taodaily.io/an-interview-with-claims-sn111-on-scaling-scientific-data-miner-competition-and-commercial-revenue/",
-      "sn": 111
-    },
-    {
-      "when": "Nov 6",
-      "title": "How Bittensor Subnets Can Undercut Centralized AI Providers",
-      "body": "How Bittensor subnets use global competition to deliver cheaper AI services, bringing together the best talent, hardware, and resources worldwide.",
-      "href": "https://taodaily.io/how-bittensor-subnets-can-undercut-centralized-ai-providers/",
-      "sn": null
     }
   ]
 }
