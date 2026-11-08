@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-11-08T17:56:58Z",
+  "generated_at": "2026-11-08T22:54:59Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 8",
+      "title": "ORO Handed the World’s Best AI Models a Small Business to Run. Most of Them Lost Money",
+      "body": "ORO (SN15) has built SMB Bench, a test that asks a different question about AI: not \"can it finish a task?\" but \"can it run a business and learn from its…",
+      "href": "https://taodaily.io/oro-handed-the-worlds-best-ai-models-a-small-business-to-run-most-of-them-lost-money/",
+      "sn": 15
+    },
     {
       "when": "Nov 8",
       "title": "Desearch (SN22) Builds Open-Source Tool to Track Customer Complaints on X",
@@ -36,13 +43,6 @@
       "body": "REAX produced the world's top-ranked decision model in weeks, using open miner competition and model blending to achieve a score of 74.0.",
       "href": "https://taodaily.io/bittensor-produces-the-worlds-top-ranked-decision-model-with-reax-1-3/",
       "sn": null
-    },
-    {
-      "when": "Nov 7",
-      "title": "Reliquary (SN81) Post-Trained a 9B Model That Beats Qwen3.5-9B on Five Benchmarks",
-      "body": "Reliquary post-trained Teutonic-I-Reliquary with 161 miners. The 9B model beat Qwen3.5-9B on five of eight benchmarks and scored 43.6% on SWE-bench Verified.",
-      "href": "https://taodaily.io/reliquary-sn81-post-trained-a-9b-model-that-beats-qwen3-5-9b-on-five-benchmarks/",
-      "sn": 81
     }
   ]
 }
