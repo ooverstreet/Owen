@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-08T22:54:59Z",
+  "generated_at": "2026-11-09T22:25:16Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 9",
+      "title": "Bittensor’s Bullish Case Holds as Bitcoin Sets the Pace for Alt Season",
+      "body": "TAO retains its bullish outlook as Bitcoin shapes alt season prospects. Explore key support, breakout levels, and potential gains of 445–900% if resistance…",
+      "href": "https://taodaily.io/bittensors-bullish-case-holds-as-bitcoin-sets-the-pace-for-alt-season/",
+      "sn": null
+    },
+    {
+      "when": "Nov 9",
+      "title": "Bittensor Joins Injective’s 10-Day AI Hacker House in Bangkok",
+      "body": "Bittensor joins Injective's 10-day AI Hacker House in Bangkok, offering developers mentorship, funding opportunities, and resources to build AI applications.",
+      "href": "https://taodaily.io/bittensor-joins-injectives-10-day-ai-hacker-house-in-bangkok/",
+      "sn": null
+    },
+    {
+      "when": "Nov 9",
+      "title": "The Creator of Taostats Has Stopped Checking TAO Price Every Morning. Here’s What He Watches Instead",
+      "body": "Taostats creator, Mog, explains why Bittensor’s progress depends on real demand, reliable AI products and sustainable subnet businesses, beyond token prices…",
+      "href": "https://taodaily.io/the-creator-of-taostats-has-stopped-checking-tao-price-every-morning-heres-what-he-watches-instead/",
+      "sn": null
+    },
+    {
+      "when": "Nov 8",
+      "title": "Lium’s October GPU Billings Hit $2.32 Million, Up 74%",
+      "body": "Bittensor's top subnet, Lium, billed $2.32M in October and is already running at $2.57M over the latest 30 days, roughly six times its spring run-rate.",
+      "href": "https://taodaily.io/liums-october-gpu-billings-hit-2-32-million-up-74/",
+      "sn": null
+    },
     {
       "when": "Nov 8",
       "title": "ORO Handed the World’s Best AI Models a Small Business to Run. Most of Them Lost Money",
@@ -15,34 +43,6 @@
       "body": "Desearch introduces Open Complaint Radar, a low-cost tool built on Bittensor that tracks customer complaints on X and identifies recurring issues.",
       "href": "https://taodaily.io/desearch-sn22-builds-open-source-tool-to-track-customer-complaints-on-x/",
       "sn": 22
-    },
-    {
-      "when": "Nov 8",
-      "title": "Chutes (SN64) Becomes Launch Partner for Tencent’s New Hy4 AI Model",
-      "body": "Chutes partners with Tencent Cloud to launch Hy4 on Bittensor, bringing advanced vision, computer-use capabilities, and competitively priced AI inference.",
-      "href": "https://taodaily.io/chutes-sn64-becomes-launch-partner-for-tencents-new-hy4-ai-model/",
-      "sn": 64
-    },
-    {
-      "when": "Nov 7",
-      "title": "While Crypto Markets Crash, Bittensor Teams Push Ahead With New AI Systems",
-      "body": "As crypto markets dump generally, Bittensor teams advance decentralized AI with new models, distributed training, faster inference, and research systems…",
-      "href": "https://taodaily.io/while-crypto-markets-crash-bittensor-teams-push-ahead-with-new-ai-systems/",
-      "sn": null
-    },
-    {
-      "when": "Nov 7",
-      "title": "Bittensor’s Quantum-Resistant Wallets Are Now in Code",
-      "body": "Bittensor’s quantum-resistant wallets are now in code, with three post-quantum signature options and optional automatic key rotation to protect TAO…",
-      "href": "https://taodaily.io/bittensors-quantum-resistant-wallets-are-now-in-code/",
-      "sn": null
-    },
-    {
-      "when": "Nov 7",
-      "title": "Bittensor Produces the World’s Top-Ranked Decision Model With REAX 1.3",
-      "body": "REAX produced the world's top-ranked decision model in weeks, using open miner competition and model blending to achieve a score of 74.0.",
-      "href": "https://taodaily.io/bittensor-produces-the-worlds-top-ranked-decision-model-with-reax-1-3/",
-      "sn": null
     }
   ]
 }
