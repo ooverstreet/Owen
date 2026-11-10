@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-09T22:25:16Z",
+  "generated_at": "2026-11-10T19:46:33Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 10",
+      "title": "TAO.com Arena Is Paying $4,000 to the Best Subnet Traders. Here’s How to Get In",
+      "body": "TAO.com launches Arena, a free subnet trading competition where traders can win a share of $4,000 in TAO on top of their trading profits.",
+      "href": "https://taodaily.io/tao-com-arena-is-paying-4000-to-the-best-subnet-traders-heres-how-to-get-in/",
+      "sn": null
+    },
+    {
+      "when": "Nov 10",
+      "title": "TAO’s Price Didn’t Move. The Network Did This Year.",
+      "body": "What a flat year for TAO hides, and what to watch going into 2027.",
+      "href": "https://taodaily.io/taos-price-didnt-move-the-network-did-this-year/",
+      "sn": null
+    },
+    {
+      "when": "Nov 10",
+      "title": "Almanac Crosses $100,000 in Monthly Fees, Puts All Into Buybacks and Burns",
+      "body": "Almanac generated $109,440 in October fees, using 100% to buy and burn TAO and alpha tokens as prediction market trading volume rose 32% and average trade…",
+      "href": "https://taodaily.io/almanac-crosses-100000-in-monthly-fees-puts-all-into-buybacks-and-burns/",
+      "sn": null
+    },
     {
       "when": "Nov 9",
       "title": "Bittensor’s Bullish Case Holds as Bitcoin Sets the Pace for Alt Season",
@@ -22,27 +43,6 @@
       "body": "Taostats creator, Mog, explains why Bittensor’s progress depends on real demand, reliable AI products and sustainable subnet businesses, beyond token prices…",
       "href": "https://taodaily.io/the-creator-of-taostats-has-stopped-checking-tao-price-every-morning-heres-what-he-watches-instead/",
       "sn": null
-    },
-    {
-      "when": "Nov 8",
-      "title": "Lium’s October GPU Billings Hit $2.32 Million, Up 74%",
-      "body": "Bittensor's top subnet, Lium, billed $2.32M in October and is already running at $2.57M over the latest 30 days, roughly six times its spring run-rate.",
-      "href": "https://taodaily.io/liums-october-gpu-billings-hit-2-32-million-up-74/",
-      "sn": null
-    },
-    {
-      "when": "Nov 8",
-      "title": "ORO Handed the World’s Best AI Models a Small Business to Run. Most of Them Lost Money",
-      "body": "ORO (SN15) has built SMB Bench, a test that asks a different question about AI: not \"can it finish a task?\" but \"can it run a business and learn from its…",
-      "href": "https://taodaily.io/oro-handed-the-worlds-best-ai-models-a-small-business-to-run-most-of-them-lost-money/",
-      "sn": 15
-    },
-    {
-      "when": "Nov 8",
-      "title": "Desearch (SN22) Builds Open-Source Tool to Track Customer Complaints on X",
-      "body": "Desearch introduces Open Complaint Radar, a low-cost tool built on Bittensor that tracks customer complaints on X and identifies recurring issues.",
-      "href": "https://taodaily.io/desearch-sn22-builds-open-source-tool-to-track-customer-complaints-on-x/",
-      "sn": 22
     }
   ]
 }
