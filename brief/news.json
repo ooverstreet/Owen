@@ -1,47 +1,47 @@
 {
-  "generated_at": "2026-11-10T19:46:33Z",
+  "generated_at": "2026-11-11T19:38:52Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 11",
+      "title": "Inside InfiniteQuant (SN89): How Bittensor’s AI Trading Subnet Rewards Proven Edge",
+      "body": "InfiniteQuant combines competitive trading signals with AI agent strategies, rewarding proven performance through Bittensor emissions, live trading books,…",
+      "href": "https://taodaily.io/inside-infinitequant-sn89-how-bittensors-ai-trading-subnet-rewards-proven-edge/",
+      "sn": 89
+    },
+    {
+      "when": "Nov 11",
+      "title": "How To Grow Your TAO Holdings Without Committing Cash",
+      "body": "Explore five ways to grow your TAO balance on Bittensor without adding cash, from root and subnet staking to mining, liquidity provision and alpha trading.",
+      "href": "https://taodaily.io/how-you-can-grow-your-tao-holdings-without-committing-cash/",
+      "sn": null
+    },
+    {
+      "when": "Nov 11",
+      "title": "UR (SN25) Opens Live Dashboard as Encrypted Traffic Hits 7 GB per Minute",
+      "body": "UR launches a live dashboard tracking Bittensor’s privacy network, with 82,000 daily users, providers across 108 countries and 7 GB of encrypted traffic per…",
+      "href": "https://taodaily.io/ur-sn25-opens-live-dashboard-as-encrypted-traffic-hits-7-gb-per-minute/",
+      "sn": 25
+    },
+    {
+      "when": "Nov 11",
+      "title": "Gamma Tokens Go Live, Bringing Native Payments to Bittensor’s AI Economy",
+      "body": "Gamma Tokens are now live on Bittensor, enabling wallet-based payments for AI services, alpha burns and a connected economy across subnets.",
+      "href": "https://taodaily.io/gamma-tokens-go-live-bringing-native-payments-to-bittensors-ai-economy/",
+      "sn": null
+    },
+    {
+      "when": "Nov 10",
+      "title": "As AI Gets Cheaper, Stillcore Sees a Bigger Opportunity in Bittensor",
+      "body": "Stillcore Capital sees TAO capturing value as AI gets cheaper, with competitive open models, growing subnet revenue, and a connected marketplace for…",
+      "href": "https://taodaily.io/as-ai-gets-cheaper-stillcore-sees-a-bigger-opportunity-in-bittensor/",
+      "sn": null
+    },
     {
       "when": "Nov 10",
       "title": "TAO.com Arena Is Paying $4,000 to the Best Subnet Traders. Here’s How to Get In",
       "body": "TAO.com launches Arena, a free subnet trading competition where traders can win a share of $4,000 in TAO on top of their trading profits.",
       "href": "https://taodaily.io/tao-com-arena-is-paying-4000-to-the-best-subnet-traders-heres-how-to-get-in/",
-      "sn": null
-    },
-    {
-      "when": "Nov 10",
-      "title": "TAO’s Price Didn’t Move. The Network Did This Year.",
-      "body": "What a flat year for TAO hides, and what to watch going into 2027.",
-      "href": "https://taodaily.io/taos-price-didnt-move-the-network-did-this-year/",
-      "sn": null
-    },
-    {
-      "when": "Nov 10",
-      "title": "Almanac Crosses $100,000 in Monthly Fees, Puts All Into Buybacks and Burns",
-      "body": "Almanac generated $109,440 in October fees, using 100% to buy and burn TAO and alpha tokens as prediction market trading volume rose 32% and average trade…",
-      "href": "https://taodaily.io/almanac-crosses-100000-in-monthly-fees-puts-all-into-buybacks-and-burns/",
-      "sn": null
-    },
-    {
-      "when": "Nov 9",
-      "title": "Bittensor’s Bullish Case Holds as Bitcoin Sets the Pace for Alt Season",
-      "body": "TAO retains its bullish outlook as Bitcoin shapes alt season prospects. Explore key support, breakout levels, and potential gains of 445–900% if resistance…",
-      "href": "https://taodaily.io/bittensors-bullish-case-holds-as-bitcoin-sets-the-pace-for-alt-season/",
-      "sn": null
-    },
-    {
-      "when": "Nov 9",
-      "title": "Bittensor Joins Injective’s 10-Day AI Hacker House in Bangkok",
-      "body": "Bittensor joins Injective's 10-day AI Hacker House in Bangkok, offering developers mentorship, funding opportunities, and resources to build AI applications.",
-      "href": "https://taodaily.io/bittensor-joins-injectives-10-day-ai-hacker-house-in-bangkok/",
-      "sn": null
-    },
-    {
-      "when": "Nov 9",
-      "title": "The Creator of Taostats Has Stopped Checking TAO Price Every Morning. Here’s What He Watches Instead",
-      "body": "Taostats creator, Mog, explains why Bittensor’s progress depends on real demand, reliable AI products and sustainable subnet businesses, beyond token prices…",
-      "href": "https://taodaily.io/the-creator-of-taostats-has-stopped-checking-tao-price-every-morning-heres-what-he-watches-instead/",
       "sn": null
     }
   ]
