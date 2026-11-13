@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-12T19:58:38Z",
+  "generated_at": "2026-11-13T19:46:18Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 13",
+      "title": "Can CADmind (SN42) Get a Custom Part Right on the First Print?",
+      "body": "CADmind uses AI on Bittensor to turn written briefs into custom 3D-printable parts, with CAD files, parts lists, assembly instructions, and design checks…",
+      "href": "https://taodaily.io/can-cadmind-sn42-get-a-custom-part-right-on-the-first-print/",
+      "sn": 42
+    },
+    {
+      "when": "Nov 12",
+      "title": "Vanta (SN8) Takes Cues From MetaTrader and Crypto Exchanges in Desk Redesign",
+      "body": "Vanta redesigns its Trading Desk with trader feedback and cues from MetaTrader, bringing charts, order execution and position tracking into one customisable…",
+      "href": "https://taodaily.io/vanta-sn8-takes-cues-from-metatrader-and-crypto-exchanges-in-desk-redesign/",
+      "sn": 8
+    },
+    {
+      "when": "Nov 12",
+      "title": "Your Keys, Your Responsibility: What Every TAO Holder Should Do After the SN3 Drain",
+      "body": "Learn how to protect your TAO and alpha holdings on Bittensor with multisig wallets, proxies, and offline storage following the SN3 key compromise.",
+      "href": "https://taodaily.io/your-keys-your-responsibility-what-every-tao-holder-should-do-after-the-sn3-drain/",
+      "sn": 3
+    },
     {
       "when": "Nov 12",
       "title": "Chutes Pushes Single-GPU Inference to Nearly 18,000 Tokens per Second",
@@ -22,27 +43,6 @@
       "body": "MANTIS (SN123) will launch LOOP on November 14, a challenge that rewards builders for using frontier AI to automate research, test signals and develop…",
       "href": "https://taodaily.io/mantis-sn123-sets-launch-date-for-loop-its-ai-trading-research-challenge/",
       "sn": 123
-    },
-    {
-      "when": "Nov 11",
-      "title": "What Would It Take for Bittensor’s TAO to Reach $1 Million?",
-      "body": "Could TAO reach $1 million by 2040? Explore what the valuation would require and how demand for subnet services could translate into demand for the TAO token.",
-      "href": "https://taodaily.io/what-would-it-take-for-bittensors-tao-to-reach-1-million/",
-      "sn": null
-    },
-    {
-      "when": "Nov 11",
-      "title": "Inside InfiniteQuant (SN89): How Bittensor’s AI Trading Subnet Rewards Proven Edge",
-      "body": "InfiniteQuant combines competitive trading signals with AI agent strategies, rewarding proven performance through Bittensor emissions, live trading books,…",
-      "href": "https://taodaily.io/inside-infinitequant-sn89-how-bittensors-ai-trading-subnet-rewards-proven-edge/",
-      "sn": 89
-    },
-    {
-      "when": "Nov 11",
-      "title": "How To Grow Your TAO Holdings Without Committing Cash",
-      "body": "Explore five ways to grow your TAO balance on Bittensor without adding cash, from root and subnet staking to mining, liquidity provision and alpha trading.",
-      "href": "https://taodaily.io/how-you-can-grow-your-tao-holdings-without-committing-cash/",
-      "sn": null
     }
   ]
 }
