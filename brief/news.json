@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-13T19:46:18Z",
+  "generated_at": "2026-11-14T18:09:44Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 14",
+      "title": "TPN (SN65) Is Shrinking AI Models for Browsers and Phones",
+      "body": "TPN uses miners to compress AI models for phones and browsers while preserving their capabilities. Its ‘Gratis AI’ lets users try the models locally in a…",
+      "href": "https://taodaily.io/tpn-sn65-is-shrinking-ai-models-for-browsers-and-phones/",
+      "sn": 65
+    },
+    {
+      "when": "Nov 13",
+      "title": "Finding High-Intent Sales Leads in Hermes Agent With Leadpoet (SN71)",
+      "body": "Use the Leadpoet plugin for Hermes Agent to find high-intent sales leads from buying signals, draft personalized outreach emails, and approve them in bulk…",
+      "href": "https://taodaily.io/finding-high-intent-sales-leads-in-hermes-agent-with-leadpoet-sn71/",
+      "sn": 71
+    },
+    {
+      "when": "Nov 13",
+      "title": "Taopill Brings Bittensor’s Economic Activity Into One Dashboard",
+      "body": "Taopill gives Bittensor users a clear view of network economics, tracking subnet revenue, on-chain buybacks, TAO issuance and capital flows across subnets.",
+      "href": "https://taodaily.io/taopill-brings-bittensors-economic-activity-into-one-dashboard/",
+      "sn": null
+    },
+    {
+      "when": "Nov 13",
+      "title": "How Yanez (SN54) Moved From Doubled Sales to an Estimated $500,000+ in ARR",
+      "body": "Yanez doubled sales, $500,000 in estimated ARR and signed a major social network while developing proof of humanhood for AI agent authorization.",
+      "href": "https://taodaily.io/how-yanez-sn54-moved-from-doubled-sales-to-an-estimated-500000-in-arr/",
+      "sn": 54
+    },
     {
       "when": "Nov 13",
       "title": "Can CADmind (SN42) Get a Custom Part Right on the First Print?",
@@ -15,34 +43,6 @@
       "body": "Vanta redesigns its Trading Desk with trader feedback and cues from MetaTrader, bringing charts, order execution and position tracking into one customisable…",
       "href": "https://taodaily.io/vanta-sn8-takes-cues-from-metatrader-and-crypto-exchanges-in-desk-redesign/",
       "sn": 8
-    },
-    {
-      "when": "Nov 12",
-      "title": "Your Keys, Your Responsibility: What Every TAO Holder Should Do After the SN3 Drain",
-      "body": "Learn how to protect your TAO and alpha holdings on Bittensor with multisig wallets, proxies, and offline storage following the SN3 key compromise.",
-      "href": "https://taodaily.io/your-keys-your-responsibility-what-every-tao-holder-should-do-after-the-sn3-drain/",
-      "sn": 3
-    },
-    {
-      "when": "Nov 12",
-      "title": "Chutes Pushes Single-GPU Inference to Nearly 18,000 Tokens per Second",
-      "body": "In an early inference test, Chutes (SN64) ran its Parallax AI model on a single Nvidia RTX 5090, generating nearly 18,000 tokens per second across 256…",
-      "href": "https://taodaily.io/chutes-pushes-single-gpu-inference-to-nearly-18000-tokens-per-second/",
-      "sn": 64
-    },
-    {
-      "when": "Nov 12",
-      "title": "Inside DaniLabs (SN2): The Bittensor Subnet Focused on Speed, Cost Goals, and Privacy",
-      "body": "DaniLabs (SN2) is building a distributed AI inference network on Bittensor focused on faster responses, lower costs, and privacy-conscious AI services.",
-      "href": "https://taodaily.io/inside-danilabs-sn2-the-bittensor-subnet-focused-on-speed-cost-goals-and-privacy/",
-      "sn": 2
-    },
-    {
-      "when": "Nov 11",
-      "title": "MANTIS (SN123) Sets Launch Date for LOOP, Its AI Trading Research Challenge",
-      "body": "MANTIS (SN123) will launch LOOP on November 14, a challenge that rewards builders for using frontier AI to automate research, test signals and develop…",
-      "href": "https://taodaily.io/mantis-sn123-sets-launch-date-for-loop-its-ai-trading-research-challenge/",
-      "sn": 123
     }
   ]
 }
