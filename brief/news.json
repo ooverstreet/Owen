@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-14T18:09:44Z",
+  "generated_at": "2026-11-14T22:59:57Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 14",
+      "title": "Can TAO, Alpha, and Gamma Turn Bittensor Into an AI Economy?",
+      "body": "Explore how TAO, alpha tokens, and Gamma could power Bittensor’s AI economy, and why repeat purchases from independent customers are the real test of demand.",
+      "href": "https://taodaily.io/can-tao-alpha-and-gamma-turn-bittensor-into-an-ai-economy/",
+      "sn": null
+    },
+    {
+      "when": "Nov 14",
+      "title": "How OpenRoboto (SN80) Will Test Frontier AI in Simulated Robotics Tasks",
+      "body": "OpenRoboto will use miners to build simulated robotics tasks and run verified evaluations of how frontier AI models control robots in its Agentic Robotics…",
+      "href": "https://taodaily.io/how-openroboto-sn80-will-test-frontier-ai-in-simulated-robotics-tasks/",
+      "sn": 80
+    },
     {
       "when": "Nov 14",
       "title": "TPN (SN65) Is Shrinking AI Models for Browsers and Phones",
@@ -29,20 +43,6 @@
       "body": "Yanez doubled sales, $500,000 in estimated ARR and signed a major social network while developing proof of humanhood for AI agent authorization.",
       "href": "https://taodaily.io/how-yanez-sn54-moved-from-doubled-sales-to-an-estimated-500000-in-arr/",
       "sn": 54
-    },
-    {
-      "when": "Nov 13",
-      "title": "Can CADmind (SN42) Get a Custom Part Right on the First Print?",
-      "body": "CADmind uses AI on Bittensor to turn written briefs into custom 3D-printable parts, with CAD files, parts lists, assembly instructions, and design checks…",
-      "href": "https://taodaily.io/can-cadmind-sn42-get-a-custom-part-right-on-the-first-print/",
-      "sn": 42
-    },
-    {
-      "when": "Nov 12",
-      "title": "Vanta (SN8) Takes Cues From MetaTrader and Crypto Exchanges in Desk Redesign",
-      "body": "Vanta redesigns its Trading Desk with trader feedback and cues from MetaTrader, bringing charts, order execution and position tracking into one customisable…",
-      "href": "https://taodaily.io/vanta-sn8-takes-cues-from-metatrader-and-crypto-exchanges-in-desk-redesign/",
-      "sn": 8
     }
   ]
 }
