@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-14T22:59:57Z",
+  "generated_at": "2026-11-15T18:54:08Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 15",
+      "title": "Beam (SN105) Plugs Into Chainlink CRE. Here’s What Changed and Why It Matters",
+      "body": "Beam has integrated Chainlink CRE, so smart contracts can now act on verified records of data transfers. We explain the integration, its limits and why…",
+      "href": "https://taodaily.io/beam-sn105-plugs-into-chainlink-cre-heres-what-changed-and-why-it-matters/",
+      "sn": 105
+    },
+    {
+      "when": "Nov 15",
+      "title": "Carbon (SN116) Goes Live on Bittensor Mainnet With First Physics AI Challenge",
+      "body": "Carbon is live on Bittensor mainnet with its first physics AI challenge in motor design, rewarding validated surrogate models built for engineers.",
+      "href": "https://taodaily.io/carbon-sn116-goes-live-on-bittensor-mainnet-with-first-physics-ai-challenge/",
+      "sn": 116
+    },
     {
       "when": "Nov 14",
       "title": "Can TAO, Alpha, and Gamma Turn Bittensor Into an AI Economy?",
@@ -29,20 +43,6 @@
       "body": "Use the Leadpoet plugin for Hermes Agent to find high-intent sales leads from buying signals, draft personalized outreach emails, and approve them in bulk…",
       "href": "https://taodaily.io/finding-high-intent-sales-leads-in-hermes-agent-with-leadpoet-sn71/",
       "sn": 71
-    },
-    {
-      "when": "Nov 13",
-      "title": "Taopill Brings Bittensor’s Economic Activity Into One Dashboard",
-      "body": "Taopill gives Bittensor users a clear view of network economics, tracking subnet revenue, on-chain buybacks, TAO issuance and capital flows across subnets.",
-      "href": "https://taodaily.io/taopill-brings-bittensors-economic-activity-into-one-dashboard/",
-      "sn": null
-    },
-    {
-      "when": "Nov 13",
-      "title": "How Yanez (SN54) Moved From Doubled Sales to an Estimated $500,000+ in ARR",
-      "body": "Yanez doubled sales, $500,000 in estimated ARR and signed a major social network while developing proof of humanhood for AI agent authorization.",
-      "href": "https://taodaily.io/how-yanez-sn54-moved-from-doubled-sales-to-an-estimated-500000-in-arr/",
-      "sn": 54
     }
   ]
 }
