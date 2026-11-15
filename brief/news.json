@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-11-15T18:54:08Z",
+  "generated_at": "2026-11-15T23:23:44Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 15",
+      "title": "The Future of AI Can’t Hang on One Man or One Board",
+      "body": "Jensen Huang’s NVIDIA crisis exposes the risks of centralized AI. Can Bittensor build a future where intelligence is no longer controlled by one man or board?",
+      "href": "https://taodaily.io/the-future-of-ai-cant-hang-on-one-man-or-one-board/",
+      "sn": null
+    },
     {
       "when": "Nov 15",
       "title": "Beam (SN105) Plugs Into Chainlink CRE. Here’s What Changed and Why It Matters",
@@ -36,13 +43,6 @@
       "body": "TPN uses miners to compress AI models for phones and browsers while preserving their capabilities. Its ‘Gratis AI’ lets users try the models locally in a…",
       "href": "https://taodaily.io/tpn-sn65-is-shrinking-ai-models-for-browsers-and-phones/",
       "sn": 65
-    },
-    {
-      "when": "Nov 13",
-      "title": "Finding High-Intent Sales Leads in Hermes Agent With Leadpoet (SN71)",
-      "body": "Use the Leadpoet plugin for Hermes Agent to find high-intent sales leads from buying signals, draft personalized outreach emails, and approve them in bulk…",
-      "href": "https://taodaily.io/finding-high-intent-sales-leads-in-hermes-agent-with-leadpoet-sn71/",
-      "sn": 71
     }
   ]
 }
