@@ -1,7 +1,21 @@
 {
-  "generated_at": "2026-11-15T23:23:44Z",
+  "generated_at": "2026-11-16T22:09:58Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 16",
+      "title": "How Bittensor Miners Helped Build One of AI’s Best Decision Models",
+      "body": "A month-old Bittensor subnet built one of the top AI decision models out of miner submissions. Here’s what REAX did and why the big labs should care.",
+      "href": "https://taodaily.io/how-bittensor-miners-helped-build-one-of-ais-best-decision-models/",
+      "sn": null
+    },
+    {
+      "when": "Nov 16",
+      "title": "Engy (SN53) Handles More AI Tokens Than Venice Despite 28× Valuation Gap",
+      "body": "Engy (SN53) processed over 3 trillion inference tokens in 30 days, surpassing Venice on reported volume despite a market cap nearly 28 times smaller.",
+      "href": "https://taodaily.io/engy-sn53-handles-more-ai-tokens-than-venice-despite-28x-valuation-gap/",
+      "sn": 53
+    },
     {
       "when": "Nov 15",
       "title": "The Future of AI Can’t Hang on One Man or One Board",
@@ -29,20 +43,6 @@
       "body": "Explore how TAO, alpha tokens, and Gamma could power Bittensor’s AI economy, and why repeat purchases from independent customers are the real test of demand.",
       "href": "https://taodaily.io/can-tao-alpha-and-gamma-turn-bittensor-into-an-ai-economy/",
       "sn": null
-    },
-    {
-      "when": "Nov 14",
-      "title": "How OpenRoboto (SN80) Will Test Frontier AI in Simulated Robotics Tasks",
-      "body": "OpenRoboto will use miners to build simulated robotics tasks and run verified evaluations of how frontier AI models control robots in its Agentic Robotics…",
-      "href": "https://taodaily.io/how-openroboto-sn80-will-test-frontier-ai-in-simulated-robotics-tasks/",
-      "sn": 80
-    },
-    {
-      "when": "Nov 14",
-      "title": "TPN (SN65) Is Shrinking AI Models for Browsers and Phones",
-      "body": "TPN uses miners to compress AI models for phones and browsers while preserving their capabilities. Its ‘Gratis AI’ lets users try the models locally in a…",
-      "href": "https://taodaily.io/tpn-sn65-is-shrinking-ai-models-for-browsers-and-phones/",
-      "sn": 65
     }
   ]
 }
