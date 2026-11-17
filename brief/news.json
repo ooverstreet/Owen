@@ -1,47 +1,47 @@
 {
-  "generated_at": "2026-11-16T22:09:58Z",
+  "generated_at": "2026-11-17T20:59:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 17",
+      "title": "Subnets Bleed as TAO Investors Retreat to Root",
+      "body": "Bittensor’s subnet market extends its losses as investors shift capital to Root, while Engy defies the downturn with a 31.88% weekly rally.",
+      "href": "https://taodaily.io/subnets-bleed-as-tao-investors-retreat-to-root/",
+      "sn": null
+    },
+    {
+      "when": "Nov 17",
+      "title": "Chutes (SN64) Partners With Global Giant Alibaba Cloud",
+      "body": "Chutes partners with Alibaba Cloud to bring Qwen3.8 Max, GLM-5.3 and DeepSeek V4.1 Flash to its platform, with 35% off until Nov 23.",
+      "href": "https://taodaily.io/chutes-sn64-partners-with-global-giant-alibaba-cloud/",
+      "sn": 64
+    },
+    {
+      "when": "Nov 17",
+      "title": "Taostats Launches Cross-Chain Swaps Between Ethereum and Bittensor",
+      "body": "Learn how to use Taostats to swap ETH or USDC on Ethereum for TAO or Bittensor subnet tokens, and back again, without a separate bridge or exchange account.",
+      "href": "https://taodaily.io/taostats-launches-cross-chain-swaps-between-ethereum-and-bittensor/",
+      "sn": null
+    },
+    {
+      "when": "Nov 17",
+      "title": "Former CircuitHub Executive Oliver Williamson to Lead Growth at It’s AI (SN32)",
+      "body": "It’s AI hires former CircuitHub executive Oliver Williamson as Head of Growth to grow sales and win new customers for its AI detector.",
+      "href": "https://taodaily.io/former-circuithub-executive-oliver-williamson-to-lead-growth-at-its-ai-sn32/",
+      "sn": 32
+    },
+    {
+      "when": "Nov 17",
+      "title": "Lium Is a Monster Subnet, and It Will Not Stop Dominating",
+      "body": "Lium continues to dominate Bittensor with $50 million in hosted GPU hardware, $2.93 million in monthly billings and 83% utilisation.",
+      "href": "https://taodaily.io/lium-is-a-monster-subnet-and-it-will-not-stop-dominating/",
+      "sn": null
+    },
     {
       "when": "Nov 16",
       "title": "How Bittensor Miners Helped Build One of AI’s Best Decision Models",
       "body": "A month-old Bittensor subnet built one of the top AI decision models out of miner submissions. Here’s what REAX did and why the big labs should care.",
       "href": "https://taodaily.io/how-bittensor-miners-helped-build-one-of-ais-best-decision-models/",
-      "sn": null
-    },
-    {
-      "when": "Nov 16",
-      "title": "Engy (SN53) Handles More AI Tokens Than Venice Despite 28× Valuation Gap",
-      "body": "Engy (SN53) processed over 3 trillion inference tokens in 30 days, surpassing Venice on reported volume despite a market cap nearly 28 times smaller.",
-      "href": "https://taodaily.io/engy-sn53-handles-more-ai-tokens-than-venice-despite-28x-valuation-gap/",
-      "sn": 53
-    },
-    {
-      "when": "Nov 15",
-      "title": "The Future of AI Can’t Hang on One Man or One Board",
-      "body": "Jensen Huang’s NVIDIA crisis exposes the risks of centralized AI. Can Bittensor build a future where intelligence is no longer controlled by one man or board?",
-      "href": "https://taodaily.io/the-future-of-ai-cant-hang-on-one-man-or-one-board/",
-      "sn": null
-    },
-    {
-      "when": "Nov 15",
-      "title": "Beam (SN105) Plugs Into Chainlink CRE. Here’s What Changed and Why It Matters",
-      "body": "Beam has integrated Chainlink CRE, so smart contracts can now act on verified records of data transfers. We explain the integration, its limits and why…",
-      "href": "https://taodaily.io/beam-sn105-plugs-into-chainlink-cre-heres-what-changed-and-why-it-matters/",
-      "sn": 105
-    },
-    {
-      "when": "Nov 15",
-      "title": "Carbon (SN116) Goes Live on Bittensor Mainnet With First Physics AI Challenge",
-      "body": "Carbon is live on Bittensor mainnet with its first physics AI challenge in motor design, rewarding validated surrogate models built for engineers.",
-      "href": "https://taodaily.io/carbon-sn116-goes-live-on-bittensor-mainnet-with-first-physics-ai-challenge/",
-      "sn": 116
-    },
-    {
-      "when": "Nov 14",
-      "title": "Can TAO, Alpha, and Gamma Turn Bittensor Into an AI Economy?",
-      "body": "Explore how TAO, alpha tokens, and Gamma could power Bittensor’s AI economy, and why repeat purchases from independent customers are the real test of demand.",
-      "href": "https://taodaily.io/can-tao-alpha-and-gamma-turn-bittensor-into-an-ai-economy/",
       "sn": null
     }
   ]
