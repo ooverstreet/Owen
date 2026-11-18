@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-17T20:59:05Z",
+  "generated_at": "2026-11-18T20:36:42Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 18",
+      "title": "Cascade (SN91) Just Beat Salesforce’s AI Forecasting Model. It Took 19 Days.",
+      "body": "Cascade beat Salesforce’s Moirai 2.0 on GIFT-Eval CRPS just 19 days into its competition. Here’s how it stacks up against Mistral and Google.",
+      "href": "https://taodaily.io/cascade-sn91-just-beatsalesforces-ai-forecasting-model-it-took-19-days/",
+      "sn": 91
+    },
+    {
+      "when": "Nov 18",
+      "title": "What Attune (SN58) Does, and How Robotensor Gave Gamma Its First Practical Use Case",
+      "body": "Robotensor’s Attune tests one-shot robot learning in Vector, crowdsources training data through Horizon, and gives Gamma its first use case through data sales.",
+      "href": "https://taodaily.io/what-attune-sn58-does-and-how-robotensor-gave-gamma-its-first-practical-use-case/",
+      "sn": 58
+    },
+    {
+      "when": "Nov 18",
+      "title": "Trishool (SN23) to Build Cyber AI Lab, Commit 100% of Profits to Token Buybacks",
+      "body": "Trishool plans a cyber AI lab, combining paid inference and security model training while committing 100% of profits to token buybacks.",
+      "href": "https://taodaily.io/trishool-sn23-to-build-cyber-ai-lab-commit-100-of-profits-to-token-buybacks/",
+      "sn": 23
+    },
+    {
+      "when": "Nov 18",
+      "title": "Cascade (SN91)’s Road From Miner Competition to Commercial AI Forecasting",
+      "body": "Explore how Cascade turns miner competitions into AI forecasting models, with Ephemeris bringing financial, retail, and energy forecasts to businesses.",
+      "href": "https://taodaily.io/cascade-sn91s-road-from-miner-competition-to-commercial-ai-forecasting/",
+      "sn": 91
+    },
     {
       "when": "Nov 17",
       "title": "Subnets Bleed as TAO Investors Retreat to Root",
@@ -15,34 +43,6 @@
       "body": "Chutes partners with Alibaba Cloud to bring Qwen3.8 Max, GLM-5.3 and DeepSeek V4.1 Flash to its platform, with 35% off until Nov 23.",
       "href": "https://taodaily.io/chutes-sn64-partners-with-global-giant-alibaba-cloud/",
       "sn": 64
-    },
-    {
-      "when": "Nov 17",
-      "title": "Taostats Launches Cross-Chain Swaps Between Ethereum and Bittensor",
-      "body": "Learn how to use Taostats to swap ETH or USDC on Ethereum for TAO or Bittensor subnet tokens, and back again, without a separate bridge or exchange account.",
-      "href": "https://taodaily.io/taostats-launches-cross-chain-swaps-between-ethereum-and-bittensor/",
-      "sn": null
-    },
-    {
-      "when": "Nov 17",
-      "title": "Former CircuitHub Executive Oliver Williamson to Lead Growth at It’s AI (SN32)",
-      "body": "It’s AI hires former CircuitHub executive Oliver Williamson as Head of Growth to grow sales and win new customers for its AI detector.",
-      "href": "https://taodaily.io/former-circuithub-executive-oliver-williamson-to-lead-growth-at-its-ai-sn32/",
-      "sn": 32
-    },
-    {
-      "when": "Nov 17",
-      "title": "Lium Is a Monster Subnet, and It Will Not Stop Dominating",
-      "body": "Lium continues to dominate Bittensor with $50 million in hosted GPU hardware, $2.93 million in monthly billings and 83% utilisation.",
-      "href": "https://taodaily.io/lium-is-a-monster-subnet-and-it-will-not-stop-dominating/",
-      "sn": null
-    },
-    {
-      "when": "Nov 16",
-      "title": "How Bittensor Miners Helped Build One of AI’s Best Decision Models",
-      "body": "A month-old Bittensor subnet built one of the top AI decision models out of miner submissions. Here’s what REAX did and why the big labs should care.",
-      "href": "https://taodaily.io/how-bittensor-miners-helped-build-one-of-ais-best-decision-models/",
-      "sn": null
     }
   ]
 }
