@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-18T20:36:42Z",
+  "generated_at": "2026-11-19T20:41:31Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 19",
+      "title": "Bitsec (SN60) Is Earning $7k a Month From Audits. Can Bug Bounties Fund Alpha Buybacks?",
+      "body": "Bitsec generates $7K monthly from security audits as it explores using bug bounty proceeds and customer revenue to fund TAO alpha buybacks.",
+      "href": "https://taodaily.io/bitsec-sn60-is-earning-7k-a-month-from-audits-can-bug-bounties-fund-alpha-buybacks/",
+      "sn": 60
+    },
+    {
+      "when": "Nov 19",
+      "title": "Proba by Aurelius (SN37) to Flag Fine-Tuning Side Effects Before You Train",
+      "body": "Proba by Aurelius (SN37) predicts how fine-tuning data could change open-weight AI models, helping engineers and agents compare datasets and flag risks…",
+      "href": "https://taodaily.io/proba-by-aurelius-sn37-to-flag-fine-tuning-side-effects-before-you-train/",
+      "sn": 37
+    },
+    {
+      "when": "Nov 19",
+      "title": "Grant El-Deir on How Allways (SN7) Aims To Unify Crypto Across Chains",
+      "body": "Allways is building a native-asset exchange across crypto, connecting wallets and blockchains while preparing for a future driven by AI agents.",
+      "href": "https://taodaily.io/grant-el-deir-on-how-allways-sn7-aims-to-unify-crypto-across-chains/",
+      "sn": 7
+    },
+    {
+      "when": "Nov 18",
+      "title": "Fugal (SN70) Beats OpenRouter’s Auto Router on Quality and Cost in Early Tests",
+      "body": "Fugal beats OpenRouter’s Auto Router on answer quality and cost in early tests. Learn how Bittensor miners improve AI model routing and how staking could…",
+      "href": "https://taodaily.io/fugal-sn70-beats-openrouters-auto-router-on-quality-and-cost-in-early-tests/",
+      "sn": 70
+    },
     {
       "when": "Nov 18",
       "title": "Cascade (SN91) Just Beat Salesforce’s AI Forecasting Model. It Took 19 Days.",
@@ -15,34 +43,6 @@
       "body": "Robotensor’s Attune tests one-shot robot learning in Vector, crowdsources training data through Horizon, and gives Gamma its first use case through data sales.",
       "href": "https://taodaily.io/what-attune-sn58-does-and-how-robotensor-gave-gamma-its-first-practical-use-case/",
       "sn": 58
-    },
-    {
-      "when": "Nov 18",
-      "title": "Trishool (SN23) to Build Cyber AI Lab, Commit 100% of Profits to Token Buybacks",
-      "body": "Trishool plans a cyber AI lab, combining paid inference and security model training while committing 100% of profits to token buybacks.",
-      "href": "https://taodaily.io/trishool-sn23-to-build-cyber-ai-lab-commit-100-of-profits-to-token-buybacks/",
-      "sn": 23
-    },
-    {
-      "when": "Nov 18",
-      "title": "Cascade (SN91)’s Road From Miner Competition to Commercial AI Forecasting",
-      "body": "Explore how Cascade turns miner competitions into AI forecasting models, with Ephemeris bringing financial, retail, and energy forecasts to businesses.",
-      "href": "https://taodaily.io/cascade-sn91s-road-from-miner-competition-to-commercial-ai-forecasting/",
-      "sn": 91
-    },
-    {
-      "when": "Nov 17",
-      "title": "Subnets Bleed as TAO Investors Retreat to Root",
-      "body": "Bittensor’s subnet market extends its losses as investors shift capital to Root, while Engy defies the downturn with a 31.88% weekly rally.",
-      "href": "https://taodaily.io/subnets-bleed-as-tao-investors-retreat-to-root/",
-      "sn": null
-    },
-    {
-      "when": "Nov 17",
-      "title": "Chutes (SN64) Partners With Global Giant Alibaba Cloud",
-      "body": "Chutes partners with Alibaba Cloud to bring Qwen3.8 Max, GLM-5.3 and DeepSeek V4.1 Flash to its platform, with 35% off until Nov 23.",
-      "href": "https://taodaily.io/chutes-sn64-partners-with-global-giant-alibaba-cloud/",
-      "sn": 64
     }
   ]
 }
