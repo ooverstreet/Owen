@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-19T20:41:31Z",
+  "generated_at": "2026-11-20T20:25:57Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 20",
+      "title": "Why Does Bittensor Need Quantum-Resistant Wallets?",
+      "body": "Learn why Bittensor needs quantum-resistant wallets, how future quantum computers could compromise TAO and validator keys, and what Runtime 488 adds to…",
+      "href": "https://taodaily.io/why-does-bittensor-need-quantum-resistant-wallets/",
+      "sn": null
+    },
+    {
+      "when": "Nov 20",
+      "title": "How Cathedral (SN94) and Zils (SN127) Solve Two Costly AI Problems for Teams",
+      "body": "See how Cathedral cuts cloud costs with verifiable private workspaces and Zils automates routine decisions with small AI models that update in minutes.",
+      "href": "https://taodaily.io/how-cathedral-sn94-and-zils-sn127-solve-two-costly-ai-problems-for-teams/",
+      "sn": 94
+    },
+    {
+      "when": "Nov 20",
+      "title": "Your Next Customer Might Ask ChatGPT Instead of Google. Optia AI (SN47) Helps You Compete",
+      "body": "Optia AI offers a website scan service to track brand mentions in ChatGPT, Claude, Perplexity, and DeepSeek, compare competitors, and find ways to improve…",
+      "href": "https://taodaily.io/your-next-customer-might-ask-chatgpt-instead-of-google-optia-ai-sn47-helps-you-compete/",
+      "sn": 47
+    },
+    {
+      "when": "Nov 20",
+      "title": "Have a Blurry Video or a File Too Big to Share? Vidaio (SN85) Can Help Fix Both",
+      "body": "Blurry clips, huge files, expensive software. Vidaio’s new Studio, API and AI assistant connector make pro-grade video fixing something anyone can do.",
+      "href": "https://taodaily.io/have-a-blurry-video-or-a-file-too-big-to-share-vidaio-sn85-can-help-fix-both/",
+      "sn": 85
+    },
     {
       "when": "Nov 19",
       "title": "Bitsec (SN60) Is Earning $7k a Month From Audits. Can Bug Bounties Fund Alpha Buybacks?",
@@ -15,34 +43,6 @@
       "body": "Proba by Aurelius (SN37) predicts how fine-tuning data could change open-weight AI models, helping engineers and agents compare datasets and flag risks…",
       "href": "https://taodaily.io/proba-by-aurelius-sn37-to-flag-fine-tuning-side-effects-before-you-train/",
       "sn": 37
-    },
-    {
-      "when": "Nov 19",
-      "title": "Grant El-Deir on How Allways (SN7) Aims To Unify Crypto Across Chains",
-      "body": "Allways is building a native-asset exchange across crypto, connecting wallets and blockchains while preparing for a future driven by AI agents.",
-      "href": "https://taodaily.io/grant-el-deir-on-how-allways-sn7-aims-to-unify-crypto-across-chains/",
-      "sn": 7
-    },
-    {
-      "when": "Nov 18",
-      "title": "Fugal (SN70) Beats OpenRouter’s Auto Router on Quality and Cost in Early Tests",
-      "body": "Fugal beats OpenRouter’s Auto Router on answer quality and cost in early tests. Learn how Bittensor miners improve AI model routing and how staking could…",
-      "href": "https://taodaily.io/fugal-sn70-beats-openrouters-auto-router-on-quality-and-cost-in-early-tests/",
-      "sn": 70
-    },
-    {
-      "when": "Nov 18",
-      "title": "Cascade (SN91) Just Beat Salesforce’s AI Forecasting Model. It Took 19 Days.",
-      "body": "Cascade beat Salesforce’s Moirai 2.0 on GIFT-Eval CRPS just 19 days into its competition. Here’s how it stacks up against Mistral and Google.",
-      "href": "https://taodaily.io/cascade-sn91-just-beatsalesforces-ai-forecasting-model-it-took-19-days/",
-      "sn": 91
-    },
-    {
-      "when": "Nov 18",
-      "title": "What Attune (SN58) Does, and How Robotensor Gave Gamma Its First Practical Use Case",
-      "body": "Robotensor’s Attune tests one-shot robot learning in Vector, crowdsources training data through Horizon, and gives Gamma its first use case through data sales.",
-      "href": "https://taodaily.io/what-attune-sn58-does-and-how-robotensor-gave-gamma-its-first-practical-use-case/",
-      "sn": 58
     }
   ]
 }
