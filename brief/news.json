@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-20T20:25:57Z",
+  "generated_at": "2026-11-21T19:20:34Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 21",
+      "title": "Eight Weeks of Red Put TAO’s Long-Term Case in Focus",
+      "body": "After eight weeks of TAO declines, explore Bittensor’s long-term outlook, how the halving cut issuance, and what DCA, subnet mining, and alpha trading mean…",
+      "href": "https://taodaily.io/eight-weeks-of-red-put-taos-long-term-case-in-focus/",
+      "sn": null
+    },
+    {
+      "when": "Nov 21",
+      "title": "You Can Now Host a Website on Bittensor for Free. Here’s What ms.computer (SN24) Offers",
+      "body": "ms.computer now hosts websites for free. Here’s what you can build, how to get started, and the limits you should know about first.",
+      "href": "https://taodaily.io/you-can-now-host-a-website-on-bittensor-for-free-heres-what-ms-computer-sn24-offers/",
+      "sn": 24
+    },
+    {
+      "when": "Nov 21",
+      "title": "Bittensor Is Now Using Bittensor to Build Bittensor",
+      "body": "Bittensor is using its own network to build its blockchain. Co-founder Const uses Engy (SN53) to power Arbos AI coding agents that contribute code to…",
+      "href": "https://taodaily.io/bittensor-is-now-using-bittensor-to-build-bittensor/",
+      "sn": 53
+    },
+    {
+      "when": "Nov 20",
+      "title": "Inside Attelier (SN126): How It Is Building Decentralized AI Video Generation on Bittensor",
+      "body": "Attelier combines open video model optimization, decentralized GPU inference and creator tools to make AI video generation faster, cheaper and more accessible.",
+      "href": "https://taodaily.io/inside-attelier-sn126-how-it-is-building-decentralized-ai-video-generation-on-bittensor/",
+      "sn": 126
+    },
     {
       "when": "Nov 20",
       "title": "Why Does Bittensor Need Quantum-Resistant Wallets?",
@@ -15,34 +43,6 @@
       "body": "See how Cathedral cuts cloud costs with verifiable private workspaces and Zils automates routine decisions with small AI models that update in minutes.",
       "href": "https://taodaily.io/how-cathedral-sn94-and-zils-sn127-solve-two-costly-ai-problems-for-teams/",
       "sn": 94
-    },
-    {
-      "when": "Nov 20",
-      "title": "Your Next Customer Might Ask ChatGPT Instead of Google. Optia AI (SN47) Helps You Compete",
-      "body": "Optia AI offers a website scan service to track brand mentions in ChatGPT, Claude, Perplexity, and DeepSeek, compare competitors, and find ways to improve…",
-      "href": "https://taodaily.io/your-next-customer-might-ask-chatgpt-instead-of-google-optia-ai-sn47-helps-you-compete/",
-      "sn": 47
-    },
-    {
-      "when": "Nov 20",
-      "title": "Have a Blurry Video or a File Too Big to Share? Vidaio (SN85) Can Help Fix Both",
-      "body": "Blurry clips, huge files, expensive software. Vidaio’s new Studio, API and AI assistant connector make pro-grade video fixing something anyone can do.",
-      "href": "https://taodaily.io/have-a-blurry-video-or-a-file-too-big-to-share-vidaio-sn85-can-help-fix-both/",
-      "sn": 85
-    },
-    {
-      "when": "Nov 19",
-      "title": "Bitsec (SN60) Is Earning $7k a Month From Audits. Can Bug Bounties Fund Alpha Buybacks?",
-      "body": "Bitsec generates $7K monthly from security audits as it explores using bug bounty proceeds and customer revenue to fund TAO alpha buybacks.",
-      "href": "https://taodaily.io/bitsec-sn60-is-earning-7k-a-month-from-audits-can-bug-bounties-fund-alpha-buybacks/",
-      "sn": 60
-    },
-    {
-      "when": "Nov 19",
-      "title": "Proba by Aurelius (SN37) to Flag Fine-Tuning Side Effects Before You Train",
-      "body": "Proba by Aurelius (SN37) predicts how fine-tuning data could change open-weight AI models, helping engineers and agents compare datasets and flag risks…",
-      "href": "https://taodaily.io/proba-by-aurelius-sn37-to-flag-fine-tuning-side-effects-before-you-train/",
-      "sn": 37
     }
   ]
 }
