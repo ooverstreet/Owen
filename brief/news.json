@@ -1,7 +1,28 @@
 {
-  "generated_at": "2026-11-21T19:20:34Z",
+  "generated_at": "2026-11-22T19:44:30Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 22",
+      "title": "How to Mine Attune (SN58): Get Paid for Teaching Robots With Your Phone",
+      "body": "Learn how to mine Attune and earn alpha tokens with your phone by controlling a simulated robot arm or recording everyday tasks through the Horizon app.",
+      "href": "https://taodaily.io/how-to-mine-attune-sn58-get-paid-for-teaching-robots-with-your-phone/",
+      "sn": 58
+    },
+    {
+      "when": "Nov 22",
+      "title": "How Weir (SN36) Powers On-Demand GPU Rentals on Bittensor",
+      "body": "Explore how Weir (SN36) powers on-demand GPU rentals on Bittensor, offering full virtual machines with root access and rewarding independent GPU providers…",
+      "href": "https://taodaily.io/how-weir-sn36-powers-on-demand-gpu-rentals-on-bittensor/",
+      "sn": 36
+    },
+    {
+      "when": "Nov 21",
+      "title": "SN62’s Ridgeline to Clear Your GitHub Bug Backlog for ~$1 a Fix",
+      "body": "Ridgeline by Ridges (SN62) turns GitHub issues into pull requests for about $1 per coding job. Autonomous AI agents write and test fixes before devs review…",
+      "href": "https://taodaily.io/sn62s-ridgeline-to-clear-your-github-bug-backlog-for-1-a-fix/",
+      "sn": 62
+    },
     {
       "when": "Nov 21",
       "title": "Eight Weeks of Red Put TAO’s Long-Term Case in Focus",
@@ -22,27 +43,6 @@
       "body": "Bittensor is using its own network to build its blockchain. Co-founder Const uses Engy (SN53) to power Arbos AI coding agents that contribute code to…",
       "href": "https://taodaily.io/bittensor-is-now-using-bittensor-to-build-bittensor/",
       "sn": 53
-    },
-    {
-      "when": "Nov 20",
-      "title": "Inside Attelier (SN126): How It Is Building Decentralized AI Video Generation on Bittensor",
-      "body": "Attelier combines open video model optimization, decentralized GPU inference and creator tools to make AI video generation faster, cheaper and more accessible.",
-      "href": "https://taodaily.io/inside-attelier-sn126-how-it-is-building-decentralized-ai-video-generation-on-bittensor/",
-      "sn": 126
-    },
-    {
-      "when": "Nov 20",
-      "title": "Why Does Bittensor Need Quantum-Resistant Wallets?",
-      "body": "Learn why Bittensor needs quantum-resistant wallets, how future quantum computers could compromise TAO and validator keys, and what Runtime 488 adds to…",
-      "href": "https://taodaily.io/why-does-bittensor-need-quantum-resistant-wallets/",
-      "sn": null
-    },
-    {
-      "when": "Nov 20",
-      "title": "How Cathedral (SN94) and Zils (SN127) Solve Two Costly AI Problems for Teams",
-      "body": "See how Cathedral cuts cloud costs with verifiable private workspaces and Zils automates routine decisions with small AI models that update in minutes.",
-      "href": "https://taodaily.io/how-cathedral-sn94-and-zils-sn127-solve-two-costly-ai-problems-for-teams/",
-      "sn": 94
     }
   ]
 }
