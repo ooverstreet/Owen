@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-11-22T19:44:30Z",
+  "generated_at": "2026-11-23T23:57:09Z",
   "source": "https://taodaily.io/feed/",
   "items": [
     {
-      "when": "Nov 22",
-      "title": "How to Mine Attune (SN58): Get Paid for Teaching Robots With Your Phone",
-      "body": "Learn how to mine Attune and earn alpha tokens with your phone by controlling a simulated robot arm or recording everyday tasks through the Horizon app.",
-      "href": "https://taodaily.io/how-to-mine-attune-sn58-get-paid-for-teaching-robots-with-your-phone/",
-      "sn": 58
+      "when": "Nov 23",
+      "title": "Genomes.io Taps Bittensor’s NIOME (SN55) to Speed Up Gene Therapy Discovery",
+      "body": "Genomes.io uses NIOME (SN55) to model genetic variation with synthetic genomic data and predict who could benefit from gene therapies before testing in the lab.",
+      "href": "https://taodaily.io/genomes-io-taps-bittensors-niome-sn55-to-speed-up-gene-therapy-discovery/",
+      "sn": 55
     },
     {
-      "when": "Nov 22",
-      "title": "How Weir (SN36) Powers On-Demand GPU Rentals on Bittensor",
-      "body": "Explore how Weir (SN36) powers on-demand GPU rentals on Bittensor, offering full virtual machines with root access and rewarding independent GPU providers…",
-      "href": "https://taodaily.io/how-weir-sn36-powers-on-demand-gpu-rentals-on-bittensor/",
-      "sn": 36
-    },
-    {
-      "when": "Nov 21",
-      "title": "SN62’s Ridgeline to Clear Your GitHub Bug Backlog for ~$1 a Fix",
-      "body": "Ridgeline by Ridges (SN62) turns GitHub issues into pull requests for about $1 per coding job. Autonomous AI agents write and test fixes before devs review…",
-      "href": "https://taodaily.io/sn62s-ridgeline-to-clear-your-github-bug-backlog-for-1-a-fix/",
-      "sn": 62
-    },
-    {
-      "when": "Nov 21",
-      "title": "Eight Weeks of Red Put TAO’s Long-Term Case in Focus",
-      "body": "After eight weeks of TAO declines, explore Bittensor’s long-term outlook, how the halving cut issuance, and what DCA, subnet mining, and alpha trading mean…",
-      "href": "https://taodaily.io/eight-weeks-of-red-put-taos-long-term-case-in-focus/",
+      "when": "Nov 23",
+      "title": "Bittensor Expands Subnet Limit to 160, Opening the Door for More AI Builders",
+      "body": "Bittensor raises its subnet limit from 128 to 160. Here's what the 32 new slots mean for builders, emissions and TAO demand, plus James Altucher's take.",
+      "href": "https://taodaily.io/bittensor-expands-subnet-limit-to-160-opening-the-door-for-more-ai-builders/",
       "sn": null
     },
     {
-      "when": "Nov 21",
-      "title": "You Can Now Host a Website on Bittensor for Free. Here’s What ms.computer (SN24) Offers",
-      "body": "ms.computer now hosts websites for free. Here’s what you can build, how to get started, and the limits you should know about first.",
-      "href": "https://taodaily.io/you-can-now-host-a-website-on-bittensor-for-free-heres-what-ms-computer-sn24-offers/",
-      "sn": 24
+      "when": "Nov 23",
+      "title": "TPN-009 Wants to Make Google’s Gemma 4 Small Enough for Home Computers",
+      "body": "TPN-009 challenges Bittensor miners to compress Google’s Gemma 4 26B A4B IT to under 14 GiB while meeting performance benchmarks to make it easier to run on…",
+      "href": "https://taodaily.io/tpn-009-wants-to-make-googles-gemma-4-small-enough-for-home-computers/",
+      "sn": null
     },
     {
-      "when": "Nov 21",
-      "title": "Bittensor Is Now Using Bittensor to Build Bittensor",
-      "body": "Bittensor is using its own network to build its blockchain. Co-founder Const uses Engy (SN53) to power Arbos AI coding agents that contribute code to…",
-      "href": "https://taodaily.io/bittensor-is-now-using-bittensor-to-build-bittensor/",
-      "sn": 53
+      "when": "Nov 23",
+      "title": "Which Bittensor Subnets Turn Customer Revenue Into Alpha Buybacks?",
+      "body": "See which subnets turn customer revenue into alpha buybacks, how Lium, Targon, and Almanac compare, and how much of their buybacks absorb emissions.",
+      "href": "https://taodaily.io/which-bittensor-subnets-turn-customer-revenue-into-alpha-buybacks/",
+      "sn": null
+    },
+    {
+      "when": "Nov 23",
+      "title": "AI Agents Keep Missing Cheaper, High-Quality Options Until Optia (SN47) Showed Up",
+      "body": "Optia helps brands track AI recommendations across ChatGPT, Claude and Perplexity, see which competitors get mentioned, and improve their visibility.",
+      "href": "https://taodaily.io/ai-agents-keep-missing-cheaper-high-quality-options-until-optia-sn47-shows-up/",
+      "sn": 47
+    },
+    {
+      "when": "Nov 22",
+      "title": "What the Chain Says About Gamma: $47.7K Spent, but Bittensor’s New Economy Is Just Getting Started",
+      "body": "On-chain data reveals how Gamma is taking shape on Bittensor, with $47.7K in spending and a new model for inter-subnet payments.",
+      "href": "https://taodaily.io/what-the-chain-says-about-gamma-47-7k-spent-but-bittensors-new-economy-is-just-getting-started/",
+      "sn": null
     }
   ]
 }
