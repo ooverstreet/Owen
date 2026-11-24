@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-23T23:57:09Z",
+  "generated_at": "2026-11-24T22:29:47Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 24",
+      "title": "OpenTensor Launches Federation to Build Bittensor’s Next Generation of Builders",
+      "body": "OpenTensor launches Federation, a network of national hubs designed to bring new developers, students and engineers into Bittensor through local events,…",
+      "href": "https://taodaily.io/opentensor-launches-federation-to-build-bittensors-next-generation-of-builders/",
+      "sn": null
+    },
+    {
+      "when": "Nov 24",
+      "title": "MVTRX (SN79) Is Giving AI Traders a View Beyond the Charts",
+      "body": "MVTRX (SN79) uses Level 3 Market-by-Order data to help AI trading agents see individual orders, track liquidity, understand market behavior and make better…",
+      "href": "https://taodaily.io/mvtrx-sn79-is-giving-ai-traders-a-view-beyond-the-charts/",
+      "sn": 79
+    },
+    {
+      "when": "Nov 24",
+      "title": "Bittensor Widens Emission Gate to Rank 48, Giving More Subnets Access to TAO Rewards",
+      "body": "Bittensor expands its emission gate from rank 32 to 48, giving more subnets access to TAO rewards as network capacity increases to 160 slots.",
+      "href": "https://taodaily.io/bittensor-widens-emission-gate-to-rank-48-giving-more-subnets-access-to-tao-rewards/",
+      "sn": null
+    },
+    {
+      "when": "Nov 24",
+      "title": "SN66’s TorchLean Winner Cuts Inference Time 137-Fold, Proves Results Match Bit for Bit",
+      "body": "Conjectures (SN66) crowned a TorchLean winner that ran AI inference 137 times faster on x86, with a Lean proof that outputs match the specification bit for…",
+      "href": "https://taodaily.io/sn66s-torchlean-winner-cuts-inference-time-137-fold-proves-results-match-bit-for-bit/",
+      "sn": 66
+    },
     {
       "when": "Nov 23",
       "title": "Genomes.io Taps Bittensor’s NIOME (SN55) to Speed Up Gene Therapy Discovery",
@@ -14,34 +42,6 @@
       "title": "Bittensor Expands Subnet Limit to 160, Opening the Door for More AI Builders",
       "body": "Bittensor raises its subnet limit from 128 to 160. Here's what the 32 new slots mean for builders, emissions and TAO demand, plus James Altucher's take.",
       "href": "https://taodaily.io/bittensor-expands-subnet-limit-to-160-opening-the-door-for-more-ai-builders/",
-      "sn": null
-    },
-    {
-      "when": "Nov 23",
-      "title": "TPN-009 Wants to Make Google’s Gemma 4 Small Enough for Home Computers",
-      "body": "TPN-009 challenges Bittensor miners to compress Google’s Gemma 4 26B A4B IT to under 14 GiB while meeting performance benchmarks to make it easier to run on…",
-      "href": "https://taodaily.io/tpn-009-wants-to-make-googles-gemma-4-small-enough-for-home-computers/",
-      "sn": null
-    },
-    {
-      "when": "Nov 23",
-      "title": "Which Bittensor Subnets Turn Customer Revenue Into Alpha Buybacks?",
-      "body": "See which subnets turn customer revenue into alpha buybacks, how Lium, Targon, and Almanac compare, and how much of their buybacks absorb emissions.",
-      "href": "https://taodaily.io/which-bittensor-subnets-turn-customer-revenue-into-alpha-buybacks/",
-      "sn": null
-    },
-    {
-      "when": "Nov 23",
-      "title": "AI Agents Keep Missing Cheaper, High-Quality Options Until Optia (SN47) Showed Up",
-      "body": "Optia helps brands track AI recommendations across ChatGPT, Claude and Perplexity, see which competitors get mentioned, and improve their visibility.",
-      "href": "https://taodaily.io/ai-agents-keep-missing-cheaper-high-quality-options-until-optia-sn47-shows-up/",
-      "sn": 47
-    },
-    {
-      "when": "Nov 22",
-      "title": "What the Chain Says About Gamma: $47.7K Spent, but Bittensor’s New Economy Is Just Getting Started",
-      "body": "On-chain data reveals how Gamma is taking shape on Bittensor, with $47.7K in spending and a new model for inter-subnet payments.",
-      "href": "https://taodaily.io/what-the-chain-says-about-gamma-47-7k-spent-but-bittensors-new-economy-is-just-getting-started/",
       "sn": null
     }
   ]
