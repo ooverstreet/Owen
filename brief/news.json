@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-24T22:29:47Z",
+  "generated_at": "2026-11-25T21:45:13Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 25",
+      "title": "How Reliquary (SN81) Kept AI Training Stable Across Independent GPUs With Gumbel Substitution",
+      "body": "Reliquary used Gumbel substitution to keep reinforcement learning stable across independent GPUs, processing 15.75 billion tokens in 11 days on its live…",
+      "href": "https://taodaily.io/how-reliquary-sn81-kept-ai-training-stable-across-independent-gpus-with-gumbel-substitution/",
+      "sn": 81
+    },
+    {
+      "when": "Nov 25",
+      "title": "OpenRoboto (SN80) Secures 50,000-Hour Robotics Data Deal, Begins Gamma Buybacks",
+      "body": "OpenRoboto secures a 50,000-hour robotics data deal and completes its first Gamma buyback and burn, bringing monthly token burns above $19,000.",
+      "href": "https://taodaily.io/openroboto-sn80-secures-50000-hour-robotics-data-deal-begins-gamma-buybacks/",
+      "sn": 80
+    },
+    {
+      "when": "Nov 25",
+      "title": "Meet Sundae, the AI Assistant That Gets Things Done Over Text",
+      "body": "Sundae is a personal AI assistant you just text. Built by sundae_bar (SN121), it books, compares, tracks and gets everyday tasks done for you.",
+      "href": "https://taodaily.io/meet-sundae-the-ai-assistant-that-gets-things-done-over-text/",
+      "sn": 121
+    },
+    {
+      "when": "Nov 25",
+      "title": "URnetwork (SN25), TPN (SN65), Axonry (SN99) and Zils (SN127) Deliver Major Milestones on Bittensor",
+      "body": "URnetwork passes 1 million weekly users, TPN's Gratis tops 3 million requests, and Axonry and Zils post strong benchmark results.",
+      "href": "https://taodaily.io/urnetwork-sn25-tpn-sn65-axonry-sn99-and-zils-sn127-deliver-major-milestones-on-bittensor/",
+      "sn": 25
+    },
     {
       "when": "Nov 24",
       "title": "OpenTensor Launches Federation to Build Bittensor’s Next Generation of Builders",
@@ -15,34 +43,6 @@
       "body": "MVTRX (SN79) uses Level 3 Market-by-Order data to help AI trading agents see individual orders, track liquidity, understand market behavior and make better…",
       "href": "https://taodaily.io/mvtrx-sn79-is-giving-ai-traders-a-view-beyond-the-charts/",
       "sn": 79
-    },
-    {
-      "when": "Nov 24",
-      "title": "Bittensor Widens Emission Gate to Rank 48, Giving More Subnets Access to TAO Rewards",
-      "body": "Bittensor expands its emission gate from rank 32 to 48, giving more subnets access to TAO rewards as network capacity increases to 160 slots.",
-      "href": "https://taodaily.io/bittensor-widens-emission-gate-to-rank-48-giving-more-subnets-access-to-tao-rewards/",
-      "sn": null
-    },
-    {
-      "when": "Nov 24",
-      "title": "SN66’s TorchLean Winner Cuts Inference Time 137-Fold, Proves Results Match Bit for Bit",
-      "body": "Conjectures (SN66) crowned a TorchLean winner that ran AI inference 137 times faster on x86, with a Lean proof that outputs match the specification bit for…",
-      "href": "https://taodaily.io/sn66s-torchlean-winner-cuts-inference-time-137-fold-proves-results-match-bit-for-bit/",
-      "sn": 66
-    },
-    {
-      "when": "Nov 23",
-      "title": "Genomes.io Taps Bittensor’s NIOME (SN55) to Speed Up Gene Therapy Discovery",
-      "body": "Genomes.io uses NIOME (SN55) to model genetic variation with synthetic genomic data and predict who could benefit from gene therapies before testing in the lab.",
-      "href": "https://taodaily.io/genomes-io-taps-bittensors-niome-sn55-to-speed-up-gene-therapy-discovery/",
-      "sn": 55
-    },
-    {
-      "when": "Nov 23",
-      "title": "Bittensor Expands Subnet Limit to 160, Opening the Door for More AI Builders",
-      "body": "Bittensor raises its subnet limit from 128 to 160. Here's what the 32 new slots mean for builders, emissions and TAO demand, plus James Altucher's take.",
-      "href": "https://taodaily.io/bittensor-expands-subnet-limit-to-160-opening-the-door-for-more-ai-builders/",
-      "sn": null
     }
   ]
 }
