@@ -1,7 +1,35 @@
 {
-  "generated_at": "2026-11-25T21:45:13Z",
+  "generated_at": "2026-11-26T21:37:55Z",
   "source": "https://taodaily.io/feed/",
   "items": [
+    {
+      "when": "Nov 26",
+      "title": "Const Takes Over Synth (SN50), Ties Miner Rewards Directly to Live Trading Profits",
+      "body": "Const takes over Synth, tying miner rewards to profits from live trades based on their price forecasts. Trading revenue will flow back into the subnet.",
+      "href": "https://taodaily.io/const-takes-over-synth-sn50-ties-miner-rewards-directly-to-live-trading-profits/",
+      "sn": 50
+    },
+    {
+      "when": "Nov 26",
+      "title": "Score (SN44) Launches yuBot, an AI Assistant Powered by Bittensor Subnets",
+      "body": "Score launches yuBot, an open-source AI assistant that brings specialised Bittensor subnet services together through one interface for everyday users.",
+      "href": "https://taodaily.io/score-sn44-launches-yubot-an-ai-assistant-powered-by-bittensor-subnets/",
+      "sn": 44
+    },
+    {
+      "when": "Nov 26",
+      "title": "It’s AI (SN32) Launches a Dual Competition for AI Detection and Humanisation",
+      "body": "It’s AI (SN32) splits emissions 50/50 between AI detection and humanisation, turning the battle to identify and rewrite AI text into a dual miner competition.",
+      "href": "https://taodaily.io/its-ai-sn32-launches-a-dual-competition-for-ai-detection-and-humanisation/",
+      "sn": 32
+    },
+    {
+      "when": "Nov 26",
+      "title": "Yuma’s Two-Part Research Detailed How ASMR Would Right-Size Bittensor Pools",
+      "body": "Yuma’s two-part ASMR research explores how Bittensor can right-size subnet liquidity, reduce excess reserves, improve price discovery, and optimize TAO…",
+      "href": "https://taodaily.io/yumas-two-part-research-detailed-how-asmr-would-right-size-bittensor-pools/",
+      "sn": null
+    },
     {
       "when": "Nov 25",
       "title": "How Reliquary (SN81) Kept AI Training Stable Across Independent GPUs With Gumbel Substitution",
@@ -15,34 +43,6 @@
       "body": "OpenRoboto secures a 50,000-hour robotics data deal and completes its first Gamma buyback and burn, bringing monthly token burns above $19,000.",
       "href": "https://taodaily.io/openroboto-sn80-secures-50000-hour-robotics-data-deal-begins-gamma-buybacks/",
       "sn": 80
-    },
-    {
-      "when": "Nov 25",
-      "title": "Meet Sundae, the AI Assistant That Gets Things Done Over Text",
-      "body": "Sundae is a personal AI assistant you just text. Built by sundae_bar (SN121), it books, compares, tracks and gets everyday tasks done for you.",
-      "href": "https://taodaily.io/meet-sundae-the-ai-assistant-that-gets-things-done-over-text/",
-      "sn": 121
-    },
-    {
-      "when": "Nov 25",
-      "title": "URnetwork (SN25), TPN (SN65), Axonry (SN99) and Zils (SN127) Deliver Major Milestones on Bittensor",
-      "body": "URnetwork passes 1 million weekly users, TPN's Gratis tops 3 million requests, and Axonry and Zils post strong benchmark results.",
-      "href": "https://taodaily.io/urnetwork-sn25-tpn-sn65-axonry-sn99-and-zils-sn127-deliver-major-milestones-on-bittensor/",
-      "sn": 25
-    },
-    {
-      "when": "Nov 24",
-      "title": "OpenTensor Launches Federation to Build Bittensor’s Next Generation of Builders",
-      "body": "OpenTensor launches Federation, a network of national hubs designed to bring new developers, students and engineers into Bittensor through local events,…",
-      "href": "https://taodaily.io/opentensor-launches-federation-to-build-bittensors-next-generation-of-builders/",
-      "sn": null
-    },
-    {
-      "when": "Nov 24",
-      "title": "MVTRX (SN79) Is Giving AI Traders a View Beyond the Charts",
-      "body": "MVTRX (SN79) uses Level 3 Market-by-Order data to help AI trading agents see individual orders, track liquidity, understand market behavior and make better…",
-      "href": "https://taodaily.io/mvtrx-sn79-is-giving-ai-traders-a-view-beyond-the-charts/",
-      "sn": 79
     }
   ]
 }
