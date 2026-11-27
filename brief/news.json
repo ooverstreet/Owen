@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-11-26T21:37:55Z",
+  "generated_at": "2026-11-27T21:22:05Z",
   "source": "https://taodaily.io/feed/",
   "items": [
     {
-      "when": "Nov 26",
-      "title": "Const Takes Over Synth (SN50), Ties Miner Rewards Directly to Live Trading Profits",
-      "body": "Const takes over Synth, tying miner rewards to profits from live trades based on their price forecasts. Trading revenue will flow back into the subnet.",
-      "href": "https://taodaily.io/const-takes-over-synth-sn50-ties-miner-rewards-directly-to-live-trading-profits/",
-      "sn": 50
+      "when": "Nov 27",
+      "title": "Carbon (SN116) to Redirect Burned Emissions Into Miner Retention Bonuses",
+      "body": "Carbon will redirect miner emissions once earmarked for burn to reward Challenge winners who hold their earned Alpha and fund a community-governed treasury.",
+      "href": "https://taodaily.io/carbon-sn116-to-redirect-burned-emissions-into-miner-retention-bonuses/",
+      "sn": 116
     },
     {
-      "when": "Nov 26",
-      "title": "Score (SN44) Launches yuBot, an AI Assistant Powered by Bittensor Subnets",
-      "body": "Score launches yuBot, an open-source AI assistant that brings specialised Bittensor subnet services together through one interface for everyday users.",
-      "href": "https://taodaily.io/score-sn44-launches-yubot-an-ai-assistant-powered-by-bittensor-subnets/",
-      "sn": 44
+      "when": "Nov 27",
+      "title": "Axonry (SN99) Turns AI Model Improvement Into an Open Competition",
+      "body": "Axonry brings AI agents into open competition to improve model weights through targeted edits, public benchmarks, and an evolving champion.",
+      "href": "https://taodaily.io/axonry-sn99-turns-ai-model-improvement-into-an-open-competition/",
+      "sn": 99
     },
     {
-      "when": "Nov 26",
-      "title": "It’s AI (SN32) Launches a Dual Competition for AI Detection and Humanisation",
-      "body": "It’s AI (SN32) splits emissions 50/50 between AI detection and humanisation, turning the battle to identify and rewrite AI text into a dual miner competition.",
-      "href": "https://taodaily.io/its-ai-sn32-launches-a-dual-competition-for-ai-detection-and-humanisation/",
-      "sn": 32
-    },
-    {
-      "when": "Nov 26",
-      "title": "Yuma’s Two-Part Research Detailed How ASMR Would Right-Size Bittensor Pools",
-      "body": "Yuma’s two-part ASMR research explores how Bittensor can right-size subnet liquidity, reduce excess reserves, improve price discovery, and optimize TAO…",
-      "href": "https://taodaily.io/yumas-two-part-research-detailed-how-asmr-would-right-size-bittensor-pools/",
+      "when": "Nov 27",
+      "title": "A Complete Guide to SubConnect’s Bittensor Revenue Index Dashboard",
+      "body": "Learn how to use SubConnect’s Bittensor Revenue Index to track subnet buybacks, network revenue, and Gamma spending.",
+      "href": "https://taodaily.io/a-complete-guide-to-subconnects-bittensor-revenue-index-dashboard/",
       "sn": null
     },
     {
-      "when": "Nov 25",
-      "title": "How Reliquary (SN81) Kept AI Training Stable Across Independent GPUs With Gumbel Substitution",
-      "body": "Reliquary used Gumbel substitution to keep reinforcement learning stable across independent GPUs, processing 15.75 billion tokens in 11 days on its live…",
-      "href": "https://taodaily.io/how-reliquary-sn81-kept-ai-training-stable-across-independent-gpus-with-gumbel-substitution/",
-      "sn": 81
+      "when": "Nov 27",
+      "title": "Following Isomorphic Labs’ $5B Raise, NIOME (SN55) Enters the AI Drug Development Race",
+      "body": "NIOME is expanding from synthetic genomics into AI drug development with a platform to help biotech and pharma teams design and evaluate treatments for…",
+      "href": "https://taodaily.io/following-isomorphic-labs-5b-raise-niome-sn55-enters-the-ai-drug-development-race/",
+      "sn": 55
     },
     {
-      "when": "Nov 25",
-      "title": "OpenRoboto (SN80) Secures 50,000-Hour Robotics Data Deal, Begins Gamma Buybacks",
-      "body": "OpenRoboto secures a 50,000-hour robotics data deal and completes its first Gamma buyback and burn, bringing monthly token burns above $19,000.",
-      "href": "https://taodaily.io/openroboto-sn80-secures-50000-hour-robotics-data-deal-begins-gamma-buybacks/",
-      "sn": 80
+      "when": "Nov 26",
+      "title": "SN41 Token Holders Just Gained a Formal Say in Almanac’s Future",
+      "body": "Almanac launches Subnet Governance, giving token holders an advisory on-chain vote.",
+      "href": "https://taodaily.io/sn41-token-holders-just-gained-a-formal-say-in-almanacs-future/",
+      "sn": 41
+    },
+    {
+      "when": "Nov 26",
+      "title": "EveryFrame (SN117) Gives AI Agents a Way to Pay for Video Generation With Gamma",
+      "body": "EveryFrame lets AI agents generate videos and pay autonomously with Gamma, removing the need for accounts, email sign-ups, credit cards or API keys.",
+      "href": "https://taodaily.io/everyframe-sn117-gives-ai-agents-a-way-to-pay-for-video-generation-with-gamma/",
+      "sn": 117
     }
   ]
 }
